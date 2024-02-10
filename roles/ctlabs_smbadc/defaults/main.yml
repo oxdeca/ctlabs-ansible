@@ -1,0 +1,45 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_smbadc/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_smbadc:
+  defaults:
+    pkgs:
+      - name : samba
+      - name : winbind
+      - name : ldap-account-manager
+      - name : krb5-config
+      - name : krb5-user
+      - name : ldap-utils
+      - name : libnss-winbind
+      - name : libpam-krb5
+      - name : libpam-winbind
+    config:
+      dir        : /etc/samba/
+      krb5_realm : CTLABS.LOCAL
+      ad_domain  : CTLABS
+      dns_domain : ctlabs.local
+      dns        :
+        - "{{ ansible_default_ipv4.address }}"
+        - 127.0.0.11
+      user       : samba
+      group      : samba
+
+      smb:
+        file     : /etc/samba/smb.conf
+        template : smb.conf.j2
+      resolv:
+        file     : /etc/resolv.conf
+        template : resolv.conf.j2
+      krb5:
+        src : /var/lib/samba/private/krb5.conf
+        dst : /etc/krb5.conf
+    service:
+      name : samba-ad-dc.service
+      disable:
+        - winbind
+  os:
+    - debian11

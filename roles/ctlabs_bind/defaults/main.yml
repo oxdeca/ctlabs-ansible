@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_bind/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_bind:
+  defaults:
+    pkgs:
+      - name : bind
+      - name : bind-utils
+    config:
+      file           : /etc/named.conf
+      dir            : /var/named
+      dump_file      : /var/named/data/cache_dump.db
+      stats_file     : /var/named/data/named_stats.txt
+      memstats_file  : /var/named/data/named_mem_stats.txt
+      secroots_file  : /var/named/data/named.secroots
+      recursing_file : /var/named/data/named.recursing
+
+      zones:
+        - ctlabs.local
+        - sub1.ctlabs.local
+
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9
+

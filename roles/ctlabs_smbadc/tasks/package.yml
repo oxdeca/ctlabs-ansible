@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/package.yml
+# Description : main ctlabs_smbadc tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_smbadc.defaults.pkgs }}"

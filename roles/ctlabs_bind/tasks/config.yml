@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_bind/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_bind.tasks.config.master
+  when: ansible_local.ctlabs_bind.type == 'master'
+  block:
+    - name: ctlabs_bind.tasks.config.named
+      template:
+        src  : master.named.conf.j2
+        dest : "{{ ctlabs_bind.defaults.config.file }}"

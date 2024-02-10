@@ -1,0 +1,13 @@
+---
+
+# -----------------------------------------------------------------------------
+# File        : ctlabs-ansible/inventories/group_vars/all.yml
+# Description : Variables used for all hosts
+# -----------------------------------------------------------------------------
+
+# os           : "{{ ansible_os_family|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
+virt_type    : "{{ ansible_virtualization_type | lower }}"
+os           : "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
+date         : "{{ ansible_date_time.date }}"
+systemd_dir  : "/etc/systemd/system"
+todaysdate   : "{{ lookup('pipe', '/usr/bin/date +%Y%m%d') }}"

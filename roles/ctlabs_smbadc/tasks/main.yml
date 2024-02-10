@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_smbadc
+    - ctlabs_smbadc.precheck
+    - ctlabs_smbadc.package
+    - ctlabs_smbadc.config
+    - ctlabs_smbadc.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_smbadc
+    - ctlabs_smbadc.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_smbadc
+    - ctlabs_smbadc.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_smbadc
+    - ctlabs_smbadc.service

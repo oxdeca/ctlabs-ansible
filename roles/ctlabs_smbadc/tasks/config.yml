@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/tlabs_smbadc/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.config.smb
+  template:
+    src  : "{{ ctlabs_smbadc.defaults.config.smb.template }}"
+    dest : "{{ ctlabs_smbadc.defaults.config.smb.file     }}"
+  notify: ctlabs_smbadc.handlers.service.restart
+
+- name: ctlabs_smbadc.tasks.config.domain
+  command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm}}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="secret!23"
+
+# - name: ctlabs_smbadc.tasks.config.resolver
+#  template:
+#    src  : "{{ ctlabs_smbadc.defaults.config.resolv.template }}"
+#    dest : "{{ ctlabs_smbadc.defaults.config.resolv.file     }}"
+
+- name: ctlabs_smbadc.tasks.config.krb5
+  copy:
+    src        : "{{ ctlabs_smbadc.defaults.config.krb5.src }}"
+    dest       : "{{ ctlabs_smbadc.defaults.config.krb5.dst }}"
+    remote_src : true

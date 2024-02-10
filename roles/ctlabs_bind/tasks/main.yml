@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_bind/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_bind
+    - ctlabs_bind.precheck
+    - ctlabs_bind.package
+    - ctlabs_bind.config
+    - ctlabs_bind.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_bind
+    - ctlabs_bind.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_bind
+    - ctlabs_bind.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_bind
+    - ctlabs_bind.service

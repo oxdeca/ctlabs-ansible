@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_smbadc.os
+    fail_msg : "OS[{{os}}] is not supported!"

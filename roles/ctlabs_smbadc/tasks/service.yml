@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.service.disabled
+  service:
+    name : "{{ item }}"
+  loop: "{{ ctlabs_smbadc.defaults.service.disable }}"
+
+- name: ctlabs_smbadc.tasks.service.installed
+  systemd:
+    name    : "{{ ctlabs_smbadc.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started
