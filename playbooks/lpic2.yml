@@ -1,0 +1,50 @@
+---
+
+# -----------------------------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/playbooks/lpic.yml
+# Description : setup lpic2 environment
+# -----------------------------------------------------------------------------------------------------------
+
+- name  : ctlabs.playbooks.lpic2.bind
+  hosts :
+  	- ns1
+  	- ns2
+  tags  : setup
+
+  tasks:
+  	- name: ctlabs.playbooks.lpic2.bind.local_facts.dir
+  	  file:
+  	  	path : /etc/ansible/facts.d
+  	  	state: direcctory
+
+  	- name: ctlabs.playbooks.lpic2.bind.master.local_facts
+      when: ansible_hostname == 'ns1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_bind.fact
+        content: |
+          {
+            "type"   : "master",
+            "zones"  : [ "ctlabs.local" ],
+            "slaves" : [ "ns2" ]
+          }
+
+    - name: ctlabs.playbooks.lpic2.bind.slave.local_facts
+      when: ansible_hostname == 'ns2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_bind.fact
+        content: |
+          {
+            "type"    : "slave",
+            "zones"   : [ "ctlabs.local" ],
+            "masters" : [ "ns1" ]
+          }
+
+
+- name  : ctlabs.playbooks.bind
+  hosts :
+    - ns1
+    - ns2
+  tags  : bind
+
+  roles :
+    - roles/ctlabs_bind
