@@ -1,0 +1,33 @@
+zone_ctlabs_local:
+  - name  : ; define name server
+  - name  : '@'
+    type  : NS
+    value : ns1.ctlabs.local.
+
+  - name  : '@'
+    type  : NS
+    value : ns1.ctlabs.local.
+
+  - name  : ns1
+    type  : A
+    value : 192.168.10.11
+
+  - name  : ns2
+    type  : A
+    value : 192.168.10.12
+
+# TXT records
+  - name : some_secret_key
+    type : TXT
+    value: cn=wer,ou=user,dc=me,dc=local
+
+# Other Records
+
+  - name  : www
+    type  : A
+    value : 192.168.10.12
+
+  - name  : www2
+    type  : CNAME
+    value : www.ctlabs.local.
+

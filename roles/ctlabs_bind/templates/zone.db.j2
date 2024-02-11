@@ -1,6 +1,6 @@
-{# --------------------------------------------------------------- #}
-{# File: ctlabs-ansible/roles/ctlabs_bind/templates/zone_xxx.db.j2 #}
-{# --------------------------------------------------------------- #}
+{# ---------------------------------------------------------------  #}
+{# File: ctlabs-ansible/roles/ctlabs_bind/templates/zone_xxx.db.j2  #}
+{# --------------------------------------------------------------- -#}
 
 ; /var/named/data/{{ zone }}/zone.db
 
@@ -8,23 +8,21 @@ $ORIGIN {{ zone }}.
 $TTL    3600
 
 {{ zone }}.   IN    SOA     ns1.{{ zone }}. root.{{ zone }}. (
-	                            2024012601   ; serial
-	                            3600         ; refresh
-	                            600          ; retry
-	                            86400        ; expire
-	                            600          ; negative cache TTL
+                                    2024012601   ; serial
+                                    3600         ; refresh
+                                    600          ; retry
+                                    86400        ; expire
+                                    600          ; negative cache TTL
 );
 
-; define name servers
-@               IN    NS      ns1.{{ zone }}.
-@               IN    NS      ns2.{{ zone }}.
+{#% set zone_data = vars['zone_' + zone.replace('.', '_')] #}
+{% for record in zone_data -%}
+{%   if record.type == 'COMMENT'  %}
 
-; name servers need to have an A-record
-ns1             IN    A       192.168.10.11
-ns2             IN    A       192.168.20.11
-
-; all other records
-www             IN    A       192.168.10.12
-www2            IN    CNAME   www.{{ zone }}.
-
-some_secret_key IN    TXT     some_secret_value
+; {{ record.value }}
+{%   elif record.type == 'TXT' %}
+{{ record.name.ljust(32) }}  IN  {{ record.type.ljust(6) }} {{ record.value | tojson }}
+{%   else %}
+{{ record.name.ljust(32) }}  IN  {{ record.type.ljust(6) }} {{ record.value }}
+{%   endif %}
+{% endfor -%}

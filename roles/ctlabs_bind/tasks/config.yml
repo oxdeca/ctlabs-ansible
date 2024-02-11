@@ -20,3 +20,5 @@
       loop: "{{ ctlabs_bind.defaults.config.zones }}"
       loop_control:
         loop_var: zone
+      vars:
+        zone_data: "{{ lookup('vars', 'zone_' + zone.replace('.', '_')) }}"
