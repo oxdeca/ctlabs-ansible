@@ -7,17 +7,17 @@
 
 - name  : ctlabs.playbooks.lpic2.bind
   hosts :
-  	- ns1
-  	- ns2
+    - ns1
+    - ns2
   tags  : setup
 
   tasks:
-  	- name: ctlabs.playbooks.lpic2.bind.local_facts.dir
-  	  file:
-  	  	path : /etc/ansible/facts.d
-  	  	state: direcctory
+    - name: ctlabs.playbooks.lpic2.bind.local_facts.dir
+      file:
+        path : /etc/ansible/facts.d
+        state: direcctory
 
-  	- name: ctlabs.playbooks.lpic2.bind.master.local_facts
+    - name: ctlabs.playbooks.lpic2.bind.master.local_facts
       when: ansible_hostname == 'ns1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
