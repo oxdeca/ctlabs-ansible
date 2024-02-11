@@ -12,3 +12,11 @@
       template:
         src  : master.named.conf.j2
         dest : "{{ ctlabs_bind.defaults.config.file }}"
+
+    - name: ctlabs_bind.tasks.config.zones
+      template:
+        src  : zone.db.j2
+        dest : "{{ ctlabs_bind.defaults.config.dir }}/data/{{ zone }}.db"
+      loop: "{{ ctlabs_bind.defaults.config.zones }}"
+      loop_control:
+        loop_var: zone

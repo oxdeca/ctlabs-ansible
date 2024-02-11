@@ -40,7 +40,7 @@ zone "." IN {
 {% for zone in ansible_local.ctlabs_bind.zones %}
 zone "{{ zone }}" IN {
   type   master;
-  file   "data/{{ zone }}/zone.db";
+  file   "data/{{ zone }}.db";
 };
 
 {%  endfor %}

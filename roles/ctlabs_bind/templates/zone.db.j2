@@ -7,13 +7,13 @@
 $ORIGIN {{ zone }}.
 $TTL    3600
 
-{{ zone }}.   IN    SOA     ns1.{{ zone }}. root.{{ zone }}. {
+{{ zone }}.   IN    SOA     ns1.{{ zone }}. root.{{ zone }}. (
 	                            2024012601   ; serial
 	                            3600         ; refresh
 	                            600          ; retry
 	                            86400        ; expire
 	                            600          ; negative cache TTL
-};
+);
 
 ; define name servers
 @               IN    NS      ns1.{{ zone }}.

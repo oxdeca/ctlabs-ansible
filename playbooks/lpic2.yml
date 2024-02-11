@@ -15,7 +15,7 @@
     - name: ctlabs.playbooks.lpic2.bind.local_facts.dir
       file:
         path : /etc/ansible/facts.d
-        state: direcctory
+        state: directory
 
     - name: ctlabs.playbooks.lpic2.bind.master.local_facts
       when: ansible_hostname == 'ns1'

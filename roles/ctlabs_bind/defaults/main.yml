@@ -10,6 +10,8 @@ ctlabs_bind:
     pkgs:
       - name : bind
       - name : bind-utils
+    service:
+      name : named.service
     config:
       file           : /etc/named.conf
       dir            : /var/named

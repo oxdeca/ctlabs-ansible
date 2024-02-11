@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chrony.handlers.main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_bind.handlers.named.service.restart
+  service:
+    name  : "{{ ctlabs_bind.defaults.service.name }}"
+    state : restarted
