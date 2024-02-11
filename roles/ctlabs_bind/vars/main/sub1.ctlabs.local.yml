@@ -1,5 +1,10 @@
 zone_sub1_ctlabs_local:
-  - name  : ; define name server
+# -----------------------------------------------------------------------------
+# name server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : define name server
+
   - name  : '@'
     type  : NS
     value : ns1.sub1.ctlabs.local.
@@ -7,6 +12,9 @@ zone_sub1_ctlabs_local:
   - name  : '@'
     type  : NS
     value : ns1.sub1.ctlabs.local.
+
+  - type  : COMMENT
+    value : nameservers need an A-record
 
   - name  : ns1
     type  : A
@@ -16,12 +24,11 @@ zone_sub1_ctlabs_local:
     type  : A
     value : 192.168.10.12
 
-# TXT records
-  - name : some_secret_key
-    type : TXT
-    value: cn=wer,ou=user,dc=me,dc=local
-
+# -----------------------------------------------------------------------------
 # Other Records
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : Other Records
 
   - name  : www
     type  : A
@@ -30,4 +37,14 @@ zone_sub1_ctlabs_local:
   - name  : www2
     type  : CNAME
     value : www.ctlabs.local.
+
+# -----------------------------------------------------------------------------
+# TXT records
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : TXT Records
+
+  - name : some_secret_key
+    type : TXT
+    value: cn=wer,ou=user,dc=me,dc=local
 

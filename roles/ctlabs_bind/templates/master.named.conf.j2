@@ -13,7 +13,7 @@ options {
   secroots-file           "/var/named/data/named.secroots";
   recursing-file          "/var/named/data/named.recursing";
 
-  allow-query             { localhost; 192.168.10.0/24; };
+  allow-query             { localhost; 192.168.0.0/16; };
   recursion               no;
 
   dnssec-validation       yes;

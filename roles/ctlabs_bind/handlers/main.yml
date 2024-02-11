@@ -5,7 +5,7 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_bind.handlers.named.service.restart
+- name: ctlabs_bind.handlers.named.service.reload
   service:
     name  : "{{ ctlabs_bind.defaults.service.name }}"
-    state : restarted
+    state : reloaded
