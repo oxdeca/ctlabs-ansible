@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/defaults/main.yml
+# Description : ctlabs_slapd defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_slapd:
+  defaults:
+    pkgs:
+      - name : slapd
+      - name : ldap-utils
+    service:
+      name : slapd.service
+    config:
+      file : /etc/ldap/slapd.conf
+      dir  : /etc/ldap/slapd.d/
+
+  os:
+    - debian11
+    - debian12
+

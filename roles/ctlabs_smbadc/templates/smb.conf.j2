@@ -1,0 +1,23 @@
+# ------------------------------------------------------------------------------
+# File        : /etc/samba/smb.conf
+# Template    : ctlabs_ansible/roles/ctlabs_smbadc/templates/smb.conf.j2
+# Description : samba ad-dc configuration
+# ------------------------------------------------------------------------------
+
+# Global parameters
+[global]
+        ldap server require strong auth = no
+        dns forwarder                   = {{ ansible_dns.nameservers[0] }}
+        netbios name                    = DC1
+        realm                           = CTLABS.LOCAL
+        server role                     = active directory domain controller
+        workgroup                       = CTLABS
+        idmap_ldb:use rfc2307           = yes
+
+[sysvol]
+        path      = /var/lib/samba/sysvol
+        read only = No
+
+[netlogon]
+        path      = /var/lib/samba/sysvol/ctlabs.local/scripts
+        read only = No

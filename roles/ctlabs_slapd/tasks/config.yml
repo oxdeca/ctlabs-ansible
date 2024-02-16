@@ -1,0 +1,24 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_slapd.tasks.config.slapd
+  when: ansible_local.ctlabs_slapd.type == 'proxy'
+  block:
+    - name: ctlabs_slapd.tasks.config.slapd
+      template:
+        src  : master.named.conf.j2
+        dest : "{{ ctlabs_slapd.defaults.config.file }}"
+
+    - name: ctlabs_slapd.tasks.config.zones
+      template:
+        src  : zone.db.j2
+        dest : "{{ ctlabs_slapd.defaults.config.dir }}/data/{{ zone }}.db"
+      loop: "{{ ctlabs_slapd.defaults.config.zones }}"
+      loop_control:
+        loop_var: zone
+      vars:
+        zone_data: "{{ lookup('vars', 'zone_' + zone.replace('.', '_')) }}"

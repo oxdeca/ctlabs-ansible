@@ -39,6 +39,16 @@
             "masters" : [ "ns1" ]
           }
 
+    - name: ctlabs.playbooks.lpic2.smbadc.local_facts
+      when: ansible_hostname in [ 'dc01', 'dc02' ]
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
+        content: |
+          {
+            "type"   : "master",
+            "domain" : "ctlabs.local"
+          }
+    
 
 - name  : ctlabs.playbooks.bind
   hosts :
@@ -48,3 +58,12 @@
 
   roles :
     - roles/ctlabs_bind
+
+- name  : ctlabs.playbooks.smbadc
+  hosts :
+    - dc01
+    - dc02
+  tags  : smbadc
+
+  roles :
+    - roles/ctlabs_smbadc
