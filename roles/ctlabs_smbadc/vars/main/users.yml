@@ -1,0 +1,47 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_ansible/roles/ctlabs_smbadc/vars/main/users.yml
+# Description : domain user list
+# ------------------------------------------------------------------------------
+
+
+domain_users:
+
+	# ---------------------------------------------------------------------------
+	# Domain User
+	# ---------------------------------------------------------------------------
+  - firstname : Scott
+    lastname  : Smith
+    uid       : 5001
+    ou        : ou=users
+
+  - firstname : Andrew
+    lastname  : Brown
+    uid       : 5002
+    ou        : ou=users
+
+  - firstname : Michael
+    lastname  : Jones
+    uid       : 5003
+    ou        : ou=users
+
+domain_services:
+
+	# ---------------------------------------------------------------------------
+	# Service User
+	# ---------------------------------------------------------------------------
+  - username : haproxy
+    uid      : 4001
+    gid      : 4001
+    ou       : ou=services
+
+  - username : sshd
+    uid      : 4002
+    gid      : 4002
+    ou       : ou=services
+
+  - username : openldap
+    uid      : 4003
+    gid      : 4003
+    ou       : ou=services

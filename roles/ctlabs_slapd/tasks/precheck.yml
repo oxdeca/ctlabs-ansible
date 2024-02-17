@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_slapd.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_slapd.os
+    fail_msg : "OS[{{os}}] is not supported!"

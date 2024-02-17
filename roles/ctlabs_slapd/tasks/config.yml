@@ -5,20 +5,15 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_slapd.tasks.config.slapd
-  when: ansible_local.ctlabs_slapd.type == 'proxy'
-  block:
-    - name: ctlabs_slapd.tasks.config.slapd
-      template:
-        src  : master.named.conf.j2
-        dest : "{{ ctlabs_slapd.defaults.config.file }}"
+- name: ctlabs_slapd.tasks.config.dir.slapd.moved
+  command: mv "{{ ctlabs_slapd.defaults.config.dir }}" "{{ ctlabs_slapd.defaults.config.dir }}.bak"
+  ignore_errors: true
+    #src : "{{ ctlabs_slapd.defaults.config.dir }}"
+    #dest: "{{ ctlabs_slapd.defaults.config.dir }}.bak"
 
-    - name: ctlabs_slapd.tasks.config.zones
-      template:
-        src  : zone.db.j2
-        dest : "{{ ctlabs_slapd.defaults.config.dir }}/data/{{ zone }}.db"
-      loop: "{{ ctlabs_slapd.defaults.config.zones }}"
-      loop_control:
-        loop_var: zone
-      vars:
-        zone_data: "{{ lookup('vars', 'zone_' + zone.replace('.', '_')) }}"
+
+- name: ctlabs_slapd.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_slapd.defaults.config.template }}"
+    dest : "{{ ctlabs_slapd.defaults.config.file     }}"
+  notify: ctlabs_slapd.handlers.service.restart

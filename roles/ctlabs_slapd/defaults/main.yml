@@ -13,8 +13,9 @@ ctlabs_slapd:
     service:
       name : slapd.service
     config:
-      file : /etc/ldap/slapd.conf
-      dir  : /etc/ldap/slapd.d/
+      template : slapd.conf.j2
+      file     : /etc/ldap/slapd.conf
+      dir      : /etc/ldap/slapd.d
 
   os:
     - debian11

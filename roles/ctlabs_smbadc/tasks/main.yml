@@ -12,6 +12,7 @@
     - ctlabs_smbadc.package
     - ctlabs_smbadc.config
     - ctlabs_smbadc.service
+    - ctlabs_smbadc.iam
 
 - import_tasks: package.yml
   tags:
@@ -27,3 +28,8 @@
   tags:
     - ctlabs_smbadc
     - ctlabs_smbadc.service
+
+- import_tasks: iam.yml
+  tags:
+    - ctlabs_smbadc
+    - ctlabs_smbadc.iam

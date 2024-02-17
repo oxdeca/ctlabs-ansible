@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/tasks/package.yml
+# Description : main ctlabs_slapd tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_slapd.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_slapd.defaults.pkgs }}"

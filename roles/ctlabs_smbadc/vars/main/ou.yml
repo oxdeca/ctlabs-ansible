@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_ansible/roles/ctlabs_smbadc/vars/main/ou.yml
+# Description : ou structure
+# ------------------------------------------------------------------------------
+
+
+domain_ou:
+  - name : users
+    path : dc=ctlabs,dc=local
+
+  - name : services
+    path : dc=ctlabs,dc=local
+
+  - name : slapd
+    path : ou=services,dc=ctlabs,dc=local

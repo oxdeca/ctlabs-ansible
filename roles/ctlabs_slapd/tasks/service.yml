@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+#- name: ctlabs_slapd.tasks.service.disabled
+#  service:
+#    name : "{{ item }}"
+#  loop: "{{ ctlabs_slapd.defaults.service.disable }}"
+
+- name: ctlabs_slapd.tasks.service.installed
+  systemd:
+    name    : "{{ ctlabs_slapd.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

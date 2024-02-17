@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/iam.yml
+# Description : iam
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.config.domain.ou.created
+  command: /usr/bin/samba-tool ou create ou={{ item.name }},{{ item.path}}
+  loop: "{{ domain_ou }}"
+  ignore_errors: true
+
+- name: ctlabs_smbadc.tasks.config.domain.groups.created
+  command: /usr/bin/samba-tool group add {{ item.name }} --groupou={{ item.path}}
+  loop: "{{ domain_groups }}"
+  ignore_errors: true
+
+- name: ctlabs_smbadc.tasks.config.domain.users.created
+  when: item.firstname and item.lastname
+  command: /usr/bin/samba-tool user create {{ item.lastname[0:5] + item.firstname[0:2] | lower }} --userou={{ item.name }},{{ item.path}} --random-password
+  loop: "{{ domain_users }}"
+  ignore_errors: true
+
+- name: ctlabs_smbadc.tasks.config.domain.service.users.created
+  when: item.username
+  command: /usr/bin/samba-tool user create {{ item.username }} --userou={{ item.ou }} --random-password
+  loop: "{{ domain_services }}"
+  ignore_errors: true
