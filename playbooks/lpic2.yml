@@ -72,7 +72,7 @@
   hosts :
     - slapd01
     - slapd02
-  tags  : smbadc
+  tags  : slapd
 
   roles :
     - roles/ctlabs_slapd
