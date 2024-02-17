@@ -67,3 +67,12 @@
 
   roles :
     - roles/ctlabs_smbadc
+
+- name  : ctlabs.playbooks.slapd
+  hosts :
+    - slapd01
+    - slapd02
+  tags  : smbadc
+
+  roles :
+    - roles/ctlabs_slapd
