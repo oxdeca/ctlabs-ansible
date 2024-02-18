@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_haproxy/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_haproxy
+    - ctlabs_haproxy.precheck
+    - ctlabs_haproxy.package
+    - ctlabs_haproxy.config
+    - ctlabs_haproxy.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_haproxy
+    - ctlabs_haproxy.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_haproxy
+    - ctlabs_haproxy.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_haproxy
+    - ctlabs_haproxy.service

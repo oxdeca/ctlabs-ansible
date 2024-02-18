@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_haproxy/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_haproxy.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_haproxy.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_haproxy.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_haproxy.defaults.service.name }}"
+    state : reloaded

@@ -1,3 +1,4 @@
+root@slapd01:/etc/ldap# cat slapd.conf 
 ### Schema includes ###########################################################
 include                 /etc/ldap/schema/core.schema
 include                 /etc/ldap/schema/cosine.schema
@@ -9,34 +10,38 @@ include                 /etc/ldap/schema/nis.schema
 ## Module paths ##############################################################
 modulepath              /usr/lib/ldap/
 moduleload              back_ldap
+moduleload              back_meta
 moduleload              rwm
 
 # Main settings ###############################################################
 pidfile                 /var/run/ldap/slapd.pid
 argsfile                /var/run/ldap/slapd.args
-#TLSCACertificateFile   /etc/ldap/certs/ca.ctlabs.local.crt
-#TLSCertificateFile     /etc/ldap/certs/ctlabs.local.crt
-#TLSCertificateKeyFile  /etc/ldap/certs/ctlabs.local.key
+#TLSCACertificateFile    /etc/ldap/certs/ca.ctlabs.local.crt
+#TLSCertificateFile      /etc/ldap/certs/ctlabs.local.crt
+#TLSCertificateKeyFile   /etc/ldap/certs/ctlabs.local.key
 TLSVerifyClient         never
 sizelimit               10000
 
 ### Database definition (Proxy to AD) #########################################
-database                 ldap
-suffix                   "DC=ctlabs,DC=local"
-uri                      ldap://127.0.0.1:635
-#uri                      ldaps://192.168.10.11
+database                meta
+suffix                  "dc=ctlabs,dc=local"
+#uri                     ldap://127.0.0.1:635
+uri                     "ldaps://192.168.10.11/dc=ctlabs,dc=local" "ldaps://192.168.10.12/"
+#uri                     ldaps://192.168.10.11
 rebind-as-user
-idassert-bind            bindmethod=simple
-                         binddn=cn=openldapro,ou=users,dc=ctlabs,dc=local
-                         credentials="secret123!"
-                         mode=none
-                         starttls=no
-                         tls_cacertdir=/etc/pki/tls/certs
-                         tls_reqcert=never
-idassert-authzFrom "*"
+idassert-bind           bindmethod=simple
+                        binddn=cn=openldapro,ou=services,dc=ctlabs,dc=local
+                        credentials="secret123!"
+                        flags=override
+                        mode=none
+                        starttls=no
+                        tls_cacertdir=/etc/pki/tls/certs
+                        tls_reqcert=never
+#idassert-authzFrom      "*"
 overlay                 rwm
 rwm-map                 attribute       uid             sAMAccountName
 rwm-map                 objectClass     posixAccount    person
+
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
 

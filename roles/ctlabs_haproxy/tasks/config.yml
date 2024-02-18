@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_haproxy/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_haproxy.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_haproxy.defaults.config.template }}"
+    dest : "{{ ctlabs_haproxy.defaults.config.file     }}"
+  notify: ctlabs_haproxy.handlers.service.restart

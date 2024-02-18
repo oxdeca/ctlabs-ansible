@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_haproxy/tasks/package.yml
+# Description : main ctlabs_haproxy tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_haproxy.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_haproxy.defaults.pkgs }}"
