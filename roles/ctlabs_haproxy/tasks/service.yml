@@ -5,10 +5,10 @@
 # Description : service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_haproxy.tasks.service.disabled
-  service:
-    name : "{{ item }}"
-  loop: "{{ ctlabs_haproxy.defaults.service.disable }}"
+#- name: ctlabs_haproxy.tasks.service.disabled
+#  service:
+#    name : "{{ item }}"
+#  loop: "{{ ctlabs_haproxy.defaults.service.disable }}"
 
 - name: ctlabs_haproxy.tasks.service.installed
   systemd:

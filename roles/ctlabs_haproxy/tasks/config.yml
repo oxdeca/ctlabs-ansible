@@ -8,5 +8,5 @@
 - name: ctlabs_haproxy.tasks.config.installed
   template:
     src  : "{{ ctlabs_haproxy.defaults.config.template }}"
-    dest : "{{ ctlabs_haproxy.defaults.config.file     }}"
+    dest : "{{ ctlabs_haproxy.defaults.config.dir }}{{ ctlabs_haproxy.defaults.config.file }}"
   notify: ctlabs_haproxy.handlers.service.restart

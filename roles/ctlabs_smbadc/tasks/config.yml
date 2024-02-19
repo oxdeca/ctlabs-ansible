@@ -16,7 +16,7 @@
   register: service_states
 
 - name: ctlabs_smbadc.tasks.config.domain
-  when: not ansible_facts.services['samba-ad-dc']
+  when: ansible_facts.services['samba-ad-dc'].state != 'running'
   command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm}}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="secret!23"
 
 # - name: ctlabs_smbadc.tasks.config.resolver

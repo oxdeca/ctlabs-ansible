@@ -76,3 +76,4 @@
 
   roles :
     - roles/ctlabs_slapd
+    - roles/ctlabs_haproxy
