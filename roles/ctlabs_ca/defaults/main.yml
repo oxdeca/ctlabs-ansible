@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ca/defaults/main.yml
+# Description : ctlabs_ca defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_ca:
+  defaults:
+    pkgs:
+      - name : openssl
+    service:
+      name : slapd.service
+    certs:
+      server: 
+        encrypt_key : false
+        bits        : 4096
+        template    : server.cnf.j2
+      file     : /etc/ldap/slapd.conf
+      dir      : /etc/ldap/slapd.d
+  os:
+    - centos7
+    - centos8
+    - centos9
+    - redhat7
+    - redhat8
+    - redhat9
+    - debian11
+    - debian12
+

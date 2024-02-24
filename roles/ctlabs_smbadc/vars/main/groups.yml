@@ -14,7 +14,8 @@ domain_groups:
   - name: admins
     ou: ou=groups
 
-  - name: users
+  - name: ssh_admins
     ou: ou=groups
 
-  
+  - name: ssh_users
+    ou: ou=groups

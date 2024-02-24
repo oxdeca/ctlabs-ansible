@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ca/tasks/config.yml
+# Description : create new certs
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ca.tasks.certs.tmpdir.exists
+  file:
+    name : "/tmp/ctlabs_ca"
+    state: directory
+
+
+- name: ctlabs_ca.tasks.certs.config.prepare
+  template:
+    src  : server.cnf.j2
+    dest : "/tmp/{{ item.cn }}.cnf"
+
+- name: ctlabs_ca.tasks.certs.create
+  command: "files/create_ctlabs_ca.sh /tmp/{{ item.cn }}.cnf"
+  register: "{{ item.cn }}_output"
+  delegate_to: localhost

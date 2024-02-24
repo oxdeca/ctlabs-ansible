@@ -77,3 +77,11 @@
   roles :
     - roles/ctlabs_slapd
     - roles/ctlabs_haproxy
+
+- name  : ctlabs.playbooks.ca
+  hosts :
+    - all
+  tags  : ca
+
+  roles :
+    - roles/ctlabs_ca
