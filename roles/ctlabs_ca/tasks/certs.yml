@@ -22,3 +22,15 @@
     cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf"
     chdir : "{{ ctlabs_ca.defaults.config.dir }}"
   register: "cert_create_output"
+
+- name: ctlabs_ca.tasks.certs.copy
+  when : inventory_hostname != 'localhost'
+  copy: 
+    src : "{{ item }}"
+    dest: /tmp/
+  loop:
+    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt"
+    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key"
+    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv"
+
