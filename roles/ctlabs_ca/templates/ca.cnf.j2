@@ -1,0 +1,16 @@
+#
+# openssl config CA-ctlabs.local
+#
+
+[ req ]
+default_bits       = {{  ctlabs_ca.defaults.config.ca.bits }}
+distinguished_name = req_ca_ctlabs_local
+encrypt_key        = {{ ctlabs_ca.defaults.config.ca.encrypt_key }}
+prompt             = no
+
+[ req_ca_ctlabs_local ]
+CN                 = CTLABS_CA
+C                  = CA
+ST                 = Ontario
+L                  = Toronto
+O                  = CTLABS_CA

@@ -9,21 +9,15 @@
   tags:
     - ctlabs_ca
     - ctlabs_ca.precheck
-    - ctlabs_ca.package
-    - ctlabs_ca.config
-    - ctlabs_ca.service
+    - ctlabs_ca.ca
+    - ctlabs_ca.certs
 
-- import_tasks: package.yml
+- import_tasks: ca.yml
   tags:
     - ctlabs_ca
-    - ctlabs_ca.package
+    - ctlabs_ca.ca
 
-- import_tasks: config.yml
+- import_tasks: certs.yml
   tags:
     - ctlabs_ca
-    - ctlabs_ca.config
-
-- import_tasks: service.yml
-  tags:
-    - ctlabs_ca
-    - ctlabs_ca.service
+    - ctlabs_ca.certs

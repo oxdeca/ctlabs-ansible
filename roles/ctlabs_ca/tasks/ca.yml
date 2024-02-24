@@ -1,0 +1,33 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ca/tasks/ca.yml
+# Description : create new ca
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ca.tasks.certs.tmpdir.exists
+  delegate_to : localhost
+  run_once    : true
+  file        :
+    name : "{{ ctlabs_ca.defaults.config.dir }}"
+    state: directory
+
+#
+# CA
+#
+- name: ctlabs_ca.tasks.ca.config.prepare
+  delegate_to : localhost
+  connection  : local
+  run_once    : true
+  template    :
+    src  : ca.cnf.j2
+    dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.cnf"
+
+- name: ctlabs_ca.tasks.ca.create
+  delegate_to : localhost
+  connection  : local
+  run_once    : true
+  script      : 
+    cmd   : "files/create_ctlabs_ca.sh {{ ctlabs_ca.defaults.config.ca.name }}.cnf"
+    chdir : "{{ ctlabs_ca.defaults.config.dir }}"
+  register: "ca_create_output"

@@ -9,15 +9,20 @@ ctlabs_ca:
   defaults:
     pkgs:
       - name : openssl
+    config:
+      dir    : /tmp/CTLABS_CA
+      domain : ctlabs.local
+      ca     :
+        name        : CTLABS_CA
+        template    : ca.cnf.j2
+        bits        : 4096
+        encrypt_key : false
+      certs  :
+        template    : certs.cnf.j2
+        bits        : 4096
+        encrypt_key : false
     service:
       name : slapd.service
-    certs:
-      server: 
-        encrypt_key : false
-        bits        : 4096
-        template    : server.cnf.j2
-      file     : /etc/ldap/slapd.conf
-      dir      : /etc/ldap/slapd.d
   os:
     - centos7
     - centos8

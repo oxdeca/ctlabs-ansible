@@ -1,22 +1,24 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_ca/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_ca/tasks/certs.yml
 # Description : create new certs
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ca.tasks.certs.tmpdir.exists
-  file:
-    name : "/tmp/ctlabs_ca"
-    state: directory
-
-
+# 
+# Certificates
+#
 - name: ctlabs_ca.tasks.certs.config.prepare
-  template:
-    src  : server.cnf.j2
-    dest : "/tmp/{{ item.cn }}.cnf"
+  when        : inventory_hostname != 'localhost'
+  delegate_to : localhost
+  template    :
+    src  : "{{ ctlabs_ca.defaults.config.certs.template }}"
+    dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf"
 
 - name: ctlabs_ca.tasks.certs.create
-  command: "files/create_ctlabs_ca.sh /tmp/{{ item.cn }}.cnf"
-  register: "{{ item.cn }}_output"
-  delegate_to: localhost
+  when        : inventory_hostname != 'localhost'
+  delegate_to : localhost
+  script      : 
+    cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf"
+    chdir : "{{ ctlabs_ca.defaults.config.dir }}"
+  register: "cert_create_output"
