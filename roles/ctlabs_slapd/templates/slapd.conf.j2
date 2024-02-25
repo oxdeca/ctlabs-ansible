@@ -6,7 +6,7 @@ argsfile                /var/run/ldap/slapd.args
 
 TLSCACertificateFile    {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.ca  }}
 TLSCertificateFile      {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.crt }}
-TLSCertificateKeyFile   {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.key }}
+TLSCertificateKeyFile   {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.prv }}
 #TLSVerifyClient         never
 
 sizelimit               10000
@@ -43,7 +43,6 @@ idassert-bind            bindmethod=simple
                          binddn=cn=openldapro,ou=services,dc=ctlabs,dc=local
                          credentials="secret123!"
                          mode=none
-                         norefs=yes
                          tls_cacert=/etc/ssl/certs/ca-certificates.crt
 idassert-authzFrom       "*"
 

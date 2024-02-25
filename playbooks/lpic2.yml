@@ -49,6 +49,13 @@
             "domain" : "ctlabs.local"
           }
     
+- name  : ctlabs.playbooks.ca
+  hosts :
+    - all
+  tags  : ca
+
+  roles :
+    - roles/ctlabs_ca
 
 - name  : ctlabs.playbooks.bind
   hosts :
@@ -78,10 +85,3 @@
     - roles/ctlabs_slapd
     - roles/ctlabs_haproxy
 
-- name  : ctlabs.playbooks.ca
-  hosts :
-    - all
-  tags  : ca
-
-  roles :
-    - roles/ctlabs_ca

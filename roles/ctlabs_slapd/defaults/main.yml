@@ -12,6 +12,8 @@ ctlabs_slapd:
       - name : ldap-utils
     service:
       name : slapd.service
+    user : openldap
+    group: openldap
     config:
       template : slapd.conf.j2
       file     : /etc/ldap/slapd.conf
@@ -20,9 +22,9 @@ ctlabs_slapd:
         certdir: /tmp/CTLABS_CA/
       tls:
         dir : /etc/ldap/certs
-        crt : {{ inventory_hostname }}.ctlabs.local.crt
-        key : {{ inventory_hostname }}.ctlabs.local.key
-        prv : {{ inventory_hostname }}.ctlabs.local.prv
+        crt : "{{ inventory_hostname }}.ctlabs.local.crt"
+        key : "{{ inventory_hostname }}.ctlabs.local.key"
+        prv : "{{ inventory_hostname }}.ctlabs.local.prv"
         ca  : CTLABS_CA.crt
 
   os:
