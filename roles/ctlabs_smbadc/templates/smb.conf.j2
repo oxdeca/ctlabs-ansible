@@ -14,6 +14,12 @@
         workgroup                       = CTLABS
         idmap_ldb:use rfc2307           = yes
 
+        tls enabled                     = yes
+        tls certfile                    = {{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ ctlabs_smbadc.defaults.config.tls.crt }}
+        tls keyfile                     = {{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ ctlabs_smbadc.defaults.config.tls.prv }}
+        tls cafile                      = {{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ ctlabs_smbadc.defaults.config.tls.ca  }}
+        tls priority                    = {{ ctlabs_smbadc.defaults.config.tls.proto }} 
+
 [sysvol]
         path      = /var/lib/samba/sysvol
         read only = No

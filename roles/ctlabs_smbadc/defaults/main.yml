@@ -17,7 +17,11 @@ ctlabs_smbadc:
       - name : libnss-winbind
       - name : libpam-krb5
       - name : libpam-winbind
+    user  : samba
+    group : samba
     config:
+      ca_ctlabs:
+        certdir : /tmp/CTLABS_CA/
       dir        : /etc/samba/
       krb5_realm : CTLABS.LOCAL
       ad_domain  : CTLABS
@@ -25,15 +29,16 @@ ctlabs_smbadc:
       dns        :
         - "{{ ansible_default_ipv4.address }}"
         - 127.0.0.11
-      user       : samba
-      group      : samba
-
+      tls:
+        dir  : /etc/samba/tls
+        crt  : "{{ inventory_hostname }}.ctlabs.local.crt"
+        key  : "{{ inventory_hostname }}.ctlabs.local.key"
+        prv  : "{{ inventory_hostname }}.ctlabs.local.prv"
+        ca   : CTLABS_CA.crt
+        proto: NORMAL:-VERS-TLS1.0:-VERS-TLS1.1
       smb:
         file     : /etc/samba/smb.conf
         template : smb.conf.j2
-      resolv:
-        file     : /etc/resolv.conf
-        template : resolv.conf.j2
       krb5:
         src : /var/lib/samba/private/krb5.conf
         dst : /etc/krb5.conf

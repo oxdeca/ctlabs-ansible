@@ -1,4 +1,21 @@
-### Schema includes ###########################################################
+# -----------------------------------------------------------------------------
+# Global Configuration
+# -----------------------------------------------------------------------------
+pidfile                 /var/run/ldap/slapd.pid
+argsfile                /var/run/ldap/slapd.args
+
+TLSCACertificateFile    {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.ca  }}
+TLSCertificateFile      {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.crt }}
+TLSCertificateKeyFile   {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.key }}
+#TLSVerifyClient         never
+
+sizelimit               10000
+logfile                 /var/log/slapd/slapd.log
+loglevel                256
+
+# -----------------------------------------------------------------------------
+# Schemas
+# -----------------------------------------------------------------------------
 include                 /etc/ldap/schema/core.schema
 include                 /etc/ldap/schema/cosine.schema
 include                 /etc/ldap/schema/inetorgperson.schema
@@ -6,40 +23,36 @@ include                 /etc/ldap/schema/misc.schema
 include                 /etc/ldap/schema/nis.schema
 #include                 /etc/ldap/schema/ad.schema
 
-## Module paths ##############################################################
+# -----------------------------------------------------------------------------
+# Modules
+# -----------------------------------------------------------------------------
 modulepath              /usr/lib/ldap/
 moduleload              back_ldap
 moduleload              rwm
 
-# Main settings ###############################################################
-pidfile                 /var/run/ldap/slapd.pid
-argsfile                /var/run/ldap/slapd.args
-#TLSCACertificateFile   /etc/ldap/certs/ca.ctlabs.local.crt
-#TLSCertificateFile     /etc/ldap/certs/ctlabs.local.crt
-#TLSCertificateKeyFile  /etc/ldap/certs/ctlabs.local.key
-TLSVerifyClient         never
-sizelimit               10000
-
-### Database definition (Proxy to AD) #########################################
+# -----------------------------------------------------------------------------
+# Databases
+# -----------------------------------------------------------------------------
 database                 ldap
 suffix                   "dc=ctlabs,dc=local"
 #uri                      ldap://127.0.0.1:635
 uri                      "ldaps://dc1.ctlabs.local/ ldaps://dc2.ctlabs.local/"
-rebind-as-user
+norefs                   yes
+rebind-as-user           yes
 idassert-bind            bindmethod=simple
                          binddn=cn=openldapro,ou=services,dc=ctlabs,dc=local
                          credentials="secret123!"
                          mode=none
-                         #starttls=no
-                         #tls_cacertdir=/etc/pki/tls/certs
-                         #tls_reqcert=never
+                         norefs=yes
+                         tls_cacert=/etc/ssl/certs/ca-certificates.crt
 idassert-authzFrom       "*"
+
+# -----------------------------------------------------------------------------
+# Overlays
+# -----------------------------------------------------------------------------
 overlay                  rwm
 rwm-map                  attribute       uid             sAMAccountName
 rwm-map                  objectClass     posixAccount    person
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
 
-### Logging ###################################################################
-logfile                 /var/log/slapd/slapd.log
-loglevel                256

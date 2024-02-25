@@ -16,6 +16,14 @@ ctlabs_slapd:
       template : slapd.conf.j2
       file     : /etc/ldap/slapd.conf
       dir      : /etc/ldap/slapd.d
+      ca_ctlabs:
+        certdir: /tmp/CTLABS_CA/
+      tls:
+        dir : /etc/ldap/certs
+        crt : {{ inventory_hostname }}.ctlabs.local.crt
+        key : {{ inventory_hostname }}.ctlabs.local.key
+        prv : {{ inventory_hostname }}.ctlabs.local.prv
+        ca  : CTLABS_CA.crt
 
   os:
     - debian11

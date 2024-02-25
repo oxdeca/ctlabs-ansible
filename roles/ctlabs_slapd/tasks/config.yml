@@ -5,6 +5,17 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_slapd.tasls.config.tls.prepare
+  copy:
+    src  : "{{ ctlabs_slapd.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
+    dest : "{{ ctlabs_slapd.defaults.config.tls.dir }}/{{ item.name }}"
+    mode : "{{ item.mode }}"
+  loop:
+    - { name: "{{ ctlabs_slapd.defaults.config.tls.crt }}", mode: '0640' }
+    - { name: "{{ ctlabs_slapd.defaults.config.tls.key }}", mode: '0600' }
+    - { name: "{{ ctlabs_slapd.defaults.config.tls.prv }}", mode: '0600' }
+    - { name: "{{ ctlabs_slapd.defaults.config.tls.ca  }}", mode: '0640' }
+
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
   command: mv "{{ ctlabs_slapd.defaults.config.dir }}" "{{ ctlabs_slapd.defaults.config.dir }}.bak"
   ignore_errors: true

@@ -5,6 +5,17 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_smbadc.tasls.config.tls.prepare
+  copy:
+    src  : "{{ ctlabs_smbadc.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
+    dest : "{{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ item.name }}"
+    mode : "{{ item.mode }}"
+  loop:
+    - { name: "{{ ctlabs_smbadc.defaults.config.tls.crt }}", mode: '0640' }
+    - { name: "{{ ctlabs_smbadc.defaults.config.tls.key }}", mode: '0600' }
+    - { name: "{{ ctlabs_smbadc.defaults.config.tls.prv }}", mode: '0600' }
+    - { name: "{{ ctlabs_smbadc.defaults.config.tls.ca  }}", mode: '0640' }
+
 - name: ctlabs_smbadc.tasks.config.smb
   template:
     src  : "{{ ctlabs_smbadc.defaults.config.smb.template }}"
