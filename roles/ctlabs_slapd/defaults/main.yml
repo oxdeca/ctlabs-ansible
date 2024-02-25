@@ -20,6 +20,9 @@ ctlabs_slapd:
       dir      : /etc/ldap/slapd.d
       ca_ctlabs:
         certdir: /tmp/CTLABS_CA/
+      ca_system: 
+        certfile: /etc/ssl/certs/ca-certificates.crt
+
       tls:
         dir : /etc/ldap/certs
         crt : "{{ inventory_hostname }}.ctlabs.local.crt"

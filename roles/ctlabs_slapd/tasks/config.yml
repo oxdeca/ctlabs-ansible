@@ -15,13 +15,19 @@
     src  : "{{ ctlabs_slapd.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
     dest : "{{ ctlabs_slapd.defaults.config.tls.dir }}/{{ item.name }}"
     mode : "{{ item.mode }}"
-    user : "{{ ctlabs_slapd.defaults.user }}"
+    owner: "{{ ctlabs_slapd.defaults.user }}"
     group: "{{ ctlabs_slapd.defaults.group }}"
   loop:
     - { name: "{{ ctlabs_slapd.defaults.config.tls.crt }}", mode: '0640' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.key }}", mode: '0600' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.prv }}", mode: '0600' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.ca  }}", mode: '0640' }
+
+- name: ctlabs_slapd.tasks.config.system.ca.added
+  blockinfile:
+    path: "{{ ctlabs_slapd.defaults.config.ca_system.certfile }}"
+    block: "{{ lookup('file', ctlabs_slapd.defaults.config.ca_ctlabs.certdir + '/' + ctlabs_slapd.defaults.config.tls.ca ) }}"
+
 
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
   command: mv "{{ ctlabs_slapd.defaults.config.dir }}" "{{ ctlabs_slapd.defaults.config.dir }}.bak"
