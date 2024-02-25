@@ -22,7 +22,7 @@ zone_ctlabs_local:
 
   - name  : ns2
     type  : A
-    value : 192.168.10.12
+    value : 192.168.20.11
 
 # -----------------------------------------------------------------------------
 # Other Records
@@ -37,6 +37,14 @@ zone_ctlabs_local:
   - name  : www2
     type  : CNAME
     value : www.ctlabs.local.
+
+  - name  : h1
+    type  : A
+    value : 192.168.10.12
+
+  - name  : h2
+    type  : A
+    value : 192.168.20.12
 
 # -----------------------------------------------------------------------------
 # TXT records
@@ -56,9 +64,23 @@ zone_ctlabs_local:
 
   - name  : dc1
     type  : A
-    value : 192.168.20.13
+    value : 192.168.10.14
 
-  - name  : smbadc1
-    type  : CNAME
-    value : dc1.ctlabs.local.
+  - name  : dc2
+    type  : A
+    value : 192.168.20.14
+
+# -----------------------------------------------------------------------------
+# slapd Server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : slapd server
+
+  - name  : slapd1
+    type  : A
+    value : 192.168.10.13
+
+  - name  : slapd2
+    type  : A
+    value : 192.168.20.13
 

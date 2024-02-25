@@ -19,7 +19,7 @@
   when        : inventory_hostname != 'localhost'
   delegate_to : localhost
   script      : 
-    cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf"
+    cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf {{ ctlabs_ca.defaults.config.ca.name }}"
     chdir : "{{ ctlabs_ca.defaults.config.dir }}"
   register: "cert_create_output"
 

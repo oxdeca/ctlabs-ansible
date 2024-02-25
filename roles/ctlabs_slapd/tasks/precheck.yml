@@ -9,3 +9,6 @@
   assert:
     that     : os is in ctlabs_slapd.os
     fail_msg : "OS[{{os}}] is not supported!"
+
+# TODO
+#   - check which config format we should install slapd.conf or OLC
