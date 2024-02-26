@@ -34,4 +34,5 @@ ctlabs_ca:
     - redhat9
     - debian11
     - debian12
+    - kali2024
 

@@ -23,22 +23,17 @@
     - { name: "{{ ctlabs_slapd.defaults.config.tls.prv }}", mode: '0600' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.ca  }}", mode: '0640' }
 
-- name: ctlabs_slapd.tasks.config.ca_system.update
-  blockinfile:
-    path: "{{ ctlabs_slapd.defaults.config.ca_system.certfile }}"
-    block: "{{ lookup('file', ctlabs_slapd.defaults.config.ca_ctlabs.certdir + '/' + ctlabs_slapd.defaults.config.tls.ca ) }}"
-
 - name: ctlabs_slapd.tasks.config.tls.enable
   template:
-    src  : "{{ }}"
-    dest : "{{ }}"
+    src  : "{{ ctlabs_slapd.defaults.config.default.template }}"
+    dest : "{{ ctlabs_slapd.defaults.config.default.file     }}"
+  notify: ctlabs_slapd.handlers.service.restart
 
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
   command: mv "{{ ctlabs_slapd.defaults.config.dir }}" "{{ ctlabs_slapd.defaults.config.dir }}.bak"
   ignore_errors: true
     #src : "{{ ctlabs_slapd.defaults.config.dir }}"
     #dest: "{{ ctlabs_slapd.defaults.config.dir }}.bak"
-
 
 - name: ctlabs_slapd.tasks.config.installed
   template:

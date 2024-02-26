@@ -26,11 +26,12 @@
 - name: ctlabs_ca.tasks.certs.copy
   when : inventory_hostname != 'localhost'
   copy: 
-    src : "{{ item }}"
-    dest: /tmp/
+    src : "{{ item.name }}"
+    dest: "{{ ctlabs_ca.defaults.config.dir }}"
+    mode: "{{ item.mode }}"
   loop:
-    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
-    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt"
-    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key"
-    -  "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv"
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt", mode: '0640' }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt", mode: '0640' }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key", mode: '0600' }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv", mode: '0600' }
 

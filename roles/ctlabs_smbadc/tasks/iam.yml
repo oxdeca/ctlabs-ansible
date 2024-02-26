@@ -17,7 +17,13 @@
 
 - name: ctlabs_smbadc.tasks.config.domain.users.created
   when: item.firstname and item.lastname
-  command: /usr/bin/samba-tool user create {{ item.lastname[0:5] + item.firstname[0:2] | lower }} --userou={{ item.ou }} --random-password
+  command: /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --userou={{ item.ou }} --random-password
+  loop: "{{ domain_users }}"
+  ignore_errors: true
+
+- name: ctlabs_smbadc.tasks.config.domain.users.pass.set
+  when: item.firstname and item.lastname and item.pass
+  command: /usr/bin/samba-tool user setpassword {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --newpassword="{{ item.pass }}"
   loop: "{{ domain_users }}"
   ignore_errors: true
 

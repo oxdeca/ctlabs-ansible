@@ -19,16 +19,25 @@ ctlabs_slapd:
       file     : /etc/ldap/slapd.conf
       dir      : /etc/ldap/slapd.d
       ca_ctlabs:
-        certdir: /tmp/CTLABS_CA/
-      ca_system: 
-        certfile: /etc/ssl/certs/ca-certificates.crt
+        certdir: /etc/ca-ctlabs
+      default:
+        template: slapd.default.j2
+        file    : /etc/default/slapd
+      dbs:
+        ldap:
+          suffix: dc=ctlabs,dc=local
+          uri   : ldaps://dc1.ctlabs.local ldaps://dc2.ctlabs.local
+          bind  : 
+            method: simple
+            user  : cn=slapd,ou=services,dc=ctlabs,dc=local
+            pass  : secret123!
 
       tls:
         dir : /etc/ldap/certs
         crt : "{{ inventory_hostname }}.ctlabs.local.crt"
         key : "{{ inventory_hostname }}.ctlabs.local.key"
         prv : "{{ inventory_hostname }}.ctlabs.local.prv"
-        ca  : CTLABS_CA.crt
+        ca  : ca-ctlabs.crt
 
   os:
     - debian11

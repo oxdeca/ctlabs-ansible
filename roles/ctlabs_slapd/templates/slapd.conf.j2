@@ -34,14 +34,13 @@ moduleload              rwm
 # Databases
 # -----------------------------------------------------------------------------
 database                 ldap
-suffix                   "dc=ctlabs,dc=local"
-#uri                      ldap://127.0.0.1:635
-uri                      "ldaps://dc1.ctlabs.local/ ldaps://dc2.ctlabs.local/"
+suffix                   "{{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }}"
+uri                      "{{ ctlabs_slapd.defaults.config.dbs.ldap.uri }}"
 norefs                   yes
 rebind-as-user           yes
-idassert-bind            bindmethod=simple
-                         binddn=cn=openldapro,ou=services,dc=ctlabs,dc=local
-                         credentials="secret123!"
+idassert-bind            bindmethod={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.method }}
+                         binddn={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.user }}
+                         credentials={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.pass }}
                          mode=none
                          tls_cacert=/etc/ssl/certs/ca-certificates.crt
 idassert-authzFrom       "*"

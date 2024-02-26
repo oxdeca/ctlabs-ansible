@@ -41,7 +41,8 @@ domain_services:
     gid  : 4002
     ou   : ou=services
 
-  - name : openldapro
+  - name : slapd
     uid  : 4003
     gid  : 4003
     ou   : ou=services
+    pass : secret123!

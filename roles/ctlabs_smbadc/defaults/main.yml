@@ -21,7 +21,7 @@ ctlabs_smbadc:
     group : samba
     config:
       ca_ctlabs:
-        certdir : /tmp/CTLABS_CA/
+        certdir : /etc/ca-ctlabs/
       dir        : /etc/samba/
       krb5_realm : CTLABS.LOCAL
       ad_domain  : CTLABS
@@ -34,7 +34,7 @@ ctlabs_smbadc:
         crt  : "{{ inventory_hostname }}.ctlabs.local.crt"
         key  : "{{ inventory_hostname }}.ctlabs.local.key"
         prv  : "{{ inventory_hostname }}.ctlabs.local.prv"
-        ca   : CTLABS_CA.crt
+        ca   : ca-ctlabs.crt
         proto: NORMAL:-VERS-TLS1.0:-VERS-TLS1.1
       smb:
         file     : /etc/samba/smb.conf
