@@ -5,9 +5,9 @@
 # Description : create new ca
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ca.tasks.certs.tmpdir.exists
-  delegate_to : localhost
-  run_once    : true
+- name: ctlabs_ca.tasks.certs.cadir.exists
+  #delegate_to : localhost
+  #run_once    : true
   file        :
     name : "{{ ctlabs_ca.defaults.config.dir }}"
     state: directory
@@ -23,7 +23,7 @@
     src  : ca.cnf.j2
     dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.cnf"
 
-- name: ctlabs_ca.tasks.ca.create
+- name: ctlabs_ca.tasks.ca.root.create
   delegate_to : localhost
   connection  : local
   run_once    : true
@@ -31,3 +31,16 @@
     cmd   : "files/create_ctlabs_ca.sh {{ ctlabs_ca.defaults.config.ca.name }}.cnf"
     chdir : "{{ ctlabs_ca.defaults.config.dir }}"
   register: "ca_create_output"
+
+
+- name: ctlabs_ca.tasks.ca.install
+  when: ansible_os_family == "debian"
+  blockinfile:
+    path : "{{ ctlabs_ca.defaults.config.ca_deb }}"
+    block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"
+
+- name: ctlabs_ca.tasks.ca.install
+  when: ansible_os_family == "redhat"
+  blockinfile:
+    path : "{{ ctlabs_ca.defaults.config.ca_rhel }}"
+    block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"

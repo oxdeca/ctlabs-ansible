@@ -10,10 +10,10 @@ ctlabs_ca:
     pkgs:
       - name : openssl
     config:
-      dir    : /tmp/CTLABS_CA
+      dir    : /etc/ca-ctlabs
       domain : ctlabs.local
       ca     :
-        name        : CTLABS_CA
+        name        : ca-ctlabs
         template    : ca.cnf.j2
         bits        : 4096
         encrypt_key : false
@@ -21,6 +21,8 @@ ctlabs_ca:
         template    : certs.cnf.j2
         bits        : 4096
         encrypt_key : false
+      ca_deb : /etc/ssl/certs/ca-certificates.crt
+      ca_rhel: /etc/pki/tls/cert.pem
     service:
       name : slapd.service
   os:
