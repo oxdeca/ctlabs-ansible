@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_httpd/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_httpd.tasks.config.httpd
+  template:
+    src  : master.named.conf.j2
+    dest : "{{ ctlabs_httpd.defaults.config.file }}"

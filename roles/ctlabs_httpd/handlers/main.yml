@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_httpd.handlers.main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_httpd.handlers.named.service.reload
+  service:
+    name  : "{{ ctlabs_httpd.defaults.service.name }}"
+    state : reloaded

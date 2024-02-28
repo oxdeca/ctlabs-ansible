@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_httpd/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_httpd:
+  defaults:
+    pkgs:
+      - name : httpd
+    service:
+      name : httpd
+    config:
+      file : /etc/httpd/conf/httpd.conf
+      dir  : /var/httpd/conf.d
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9

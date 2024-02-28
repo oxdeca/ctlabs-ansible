@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_httpd/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_httpd.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_httpd.defaults.pkgs }}"

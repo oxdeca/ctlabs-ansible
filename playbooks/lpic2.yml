@@ -5,19 +5,17 @@
 # Description : setup lpic2 environment
 # -----------------------------------------------------------------------------------------------------------
 
-- name  : ctlabs.playbooks.lpic2.bind
-  hosts :
-    - ns1
-    - ns2
+- name  : ctlabs.playbooks.lpic2.setup
+  hosts : all
   tags  : setup
 
   tasks:
-    - name: ctlabs.playbooks.lpic2.bind.local_facts.dir
+    - name: ctlabs.playbooks.lpic2.setup.local_facts.dir
       file:
         path : /etc/ansible/facts.d
         state: directory
 
-    - name: ctlabs.playbooks.lpic2.bind.master.local_facts
+    - name: ctlabs.playbooks.lpic2.setup.bind.master.local_facts
       when: ansible_hostname == 'ns1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
@@ -28,7 +26,7 @@
             "slaves" : [ "ns2" ]
           }
 
-    - name: ctlabs.playbooks.lpic2.bind.slave.local_facts
+    - name: ctlabs.playbooks.lpic2.setup.bind.slave.local_facts
       when: ansible_hostname == 'ns2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
@@ -40,7 +38,7 @@
           }
 
     - name: ctlabs.playbooks.lpic2.smbadc.local_facts
-      when: ansible_hostname in [ 'dc01', 'dc02' ]
+      when: ansible_hostname in [ 'dc1', 'dc2' ]
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
         content: |
@@ -49,7 +47,7 @@
             "domain" : "ctlabs.local"
           }
     
-- name  : ctlabs.playbooks.ca
+- name  : ctlabs.playbooks.lpic2.ca
   hosts :
     - all
   tags  : ca
@@ -57,7 +55,7 @@
   roles :
     - roles/ctlabs_ca
 
-- name  : ctlabs.playbooks.bind
+- name  : ctlabs.playbooks.lpic2.bind
   hosts :
     - ns1
     - ns2
@@ -66,7 +64,7 @@
   roles :
     - roles/ctlabs_bind
 
-- name  : ctlabs.playbooks.smbadc
+- name  : ctlabs.playbooks.lpic2.smbadc
   hosts :
     - dc1
     - dc2
@@ -75,7 +73,7 @@
   roles :
     - roles/ctlabs_smbadc
 
-- name  : ctlabs.playbooks.slapd
+- name  : ctlabs.playbooks.lpic2.slapd
   hosts :
     - slapd1
     - slapd2
@@ -85,3 +83,4 @@
     - roles/ctlabs_slapd
     - roles/ctlabs_haproxy
 
+- name  : ctlabs.playbooks.lpic2.httpd
