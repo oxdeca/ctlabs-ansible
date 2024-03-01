@@ -34,10 +34,6 @@ zone_ctlabs_local:
     type  : CNAME
     value : www1.ctlabs.local.
 
-  - name  : www
-    type  : CNAME
-    value : www2.ctlabs.local.
-
   - name  : www1
     type  : A
     value : 192.168.10.13

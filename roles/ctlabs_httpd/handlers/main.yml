@@ -5,7 +5,7 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_httpd.handlers.named.service.reload
+- name: ctlabs_httpd.handlers.httpd.service.reload
   service:
     name  : "{{ ctlabs_httpd.defaults.service.name }}"
     state : reloaded

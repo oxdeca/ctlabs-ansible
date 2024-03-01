@@ -9,3 +9,4 @@
   template:
     src  : "{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].template }}"
     dest : "{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].file     }}"
+  notify: ctlabs_httpd.handlers.httpd.service.reload
