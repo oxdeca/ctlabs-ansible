@@ -18,7 +18,7 @@ ctlabs_httpd:
       group: apache
     config:
       admin      : webadm@ctlabs.local
-      servername :
+      servername : "{{ ansible_hostname }}.ctlabs.local"
       listen     : 80
       debian:
         root_dir   : /etc/apache2
@@ -42,4 +42,5 @@ ctlabs_httpd:
           access: access.log
           level : warn
   os:
+    - centos9
     - debian11

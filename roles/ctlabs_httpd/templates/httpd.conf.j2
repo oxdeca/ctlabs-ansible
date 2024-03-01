@@ -3,17 +3,17 @@
 {# Description : main httpd.conf                                            #}
 {# ------------------------------------------------------------------------ #}
 
-ServerRoot   {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].root_dir   }} # /etc/httpd
-DocumentRoot {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].data_dir   }} # /var/www/html
-User         {{ ctlabs_httpd.defaults.service.user      }} # apache 
-Group        {{ ctlabs_httpd.defaults.service.group     }} # apache
+ServerRoot   {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].root_dir   }}
+DocumentRoot {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].data_dir   }}
+User         {{ ctlabs_httpd.defaults.service.user      }}
+Group        {{ ctlabs_httpd.defaults.service.group     }}
 
-ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}  # root@localhost
-ServerName   {{ ctlabs_httpd.defaults.config.servername }}  # www.example.com:80
+ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}
+ServerName   {{ ctlabs_httpd.defaults.config.servername }}
 Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 
-ErrorLog     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.dir }}/{{ ctlabs_httpd.defaults.config.log.error }}  # logs/error_log
-LogLevel     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.level }}  # gwarn
+ErrorLog     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.dir }}/{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.error }}
+LogLevel     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.level }}
 Include      conf.modules.d/*.conf
 
 

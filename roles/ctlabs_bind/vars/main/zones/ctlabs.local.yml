@@ -25,18 +25,26 @@ zone_ctlabs_local:
     value : 192.168.20.11
 
 # -----------------------------------------------------------------------------
-# Other Records
+# Records
 # -----------------------------------------------------------------------------
   - type  : COMMENT
     value : Other Records
 
   - name  : www
+    type  : CNAME
+    value : www1.ctlabs.local.
+
+  - name  : www
+    type  : CNAME
+    value : www2.ctlabs.local.
+
+  - name  : www1
     type  : A
-    value : 192.168.10.12
+    value : 192.168.10.13
 
   - name  : www2
-    type  : CNAME
-    value : www.ctlabs.local.
+    type  : A
+    value : 192.168.20.13
 
   - name  : h1
     type  : A
