@@ -99,8 +99,8 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.httpd
   hosts :
-    - slapd1
-    - slapd1
+    - www1
+    - www2
   tags  : httpd
   roles :
     - roles/ctlabs_httpd

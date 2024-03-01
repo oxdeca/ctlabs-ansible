@@ -13,8 +13,8 @@ options {
   secroots-file           "/var/named/data/named.secroots";
   recursing-file          "/var/named/data/named.recursing";
 
-  allow-query             { localhost; 192.168.0.0/16; };
-  recursion               no;
+  allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ')}} };
+  recursion               {{ ctlabs_bind.defaults.config.recursive }};
 
   dnssec-validation       yes;
 
