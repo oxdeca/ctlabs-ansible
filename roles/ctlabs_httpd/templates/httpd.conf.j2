@@ -1,28 +1,30 @@
-# --------------------------------------------------------------
-# File        : 
-# Description : 
-# --------------------------------------------------------------
+{# -------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_httpd/templates/httpd.conf.j2  #}
+{# Description : main httpd.conf                                            #}
+{# ------------------------------------------------------------------------ #}
 
-ServerRoot  /etc/httpd
-Listen      80
-Include     conf.modules.d/*.conf
+ServerRoot   {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].root_dir   }} # /etc/httpd
+DocumentRoot {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].data_dir   }} # /var/www/html
+User         {{ ctlabs_httpd.defaults.service.user      }} # apache 
+Group        {{ ctlabs_httpd.defaults.service.group     }} # apache
 
-User        apache 
-Group       apache
+ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}  # root@localhost
+ServerName   {{ ctlabs_httpd.defaults.config.servername }}  # www.example.com:80
+Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 
-ServerAdmin root@localhost
-ServerName  www.example.com:80
+ErrorLog     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.dir }}/{{ ctlabs_httpd.defaults.config.log.error }}  # logs/error_log
+LogLevel     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.level }}  # gwarn
+Include      conf.modules.d/*.conf
+
 
 <Directory />
-  AllowOverride none
-  Require       all denied
+  AllowOverride  None
+  Require        all denied
 </Directory>
 
-DocumentRoot /var/www/html
-
 <Directory /var/www>
-  AllowOverride None
-  Require       all granted
+  AllowOverride  None
+  Require        all granted
 </Directory>
 
 <Directory /var/www/html>
@@ -31,16 +33,14 @@ DocumentRoot /var/www/html
   Require        all granted
 </Directory>
 
-<IfModule dir_module>
-  DirectoryIndex index.html
-</IfModule>
-
 <Files .ht*>
   Require all denied
 </Files>
 
-ErrorLog logs/error_log
-LogLevel warn
+<IfModule dir_module>
+  DirectoryIndex index.html
+</IfModule>
+
 
 <IfModule log_config_module>
   LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" combined
@@ -80,8 +80,6 @@ AddDefaultCharset  UTF-8
 </IfModule>
 
 #ErrorDocument 500 "The server made a boo boo"
-
 EnableSendfile on
 
 IncludeOptional conf.d/*.conf
-

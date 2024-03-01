@@ -8,14 +8,38 @@
 ctlabs_httpd:
   defaults:
     pkgs:
-      - name : httpd
+      debian:
+        - name : apache2
+      redhat:
+        - name : httpd
     service:
       name : httpd
+      user : apache
+      group: apache
     config:
-      file : /etc/httpd/conf/httpd.conf
-      dir  : /var/httpd/conf.d
+      admin      : webadm@ctlabs.local
+      servername :
+      listen     : 80
+      debian:
+        root_dir   : /etc/apache2
+        data_dir   : /var/www/html
+        template   : httpd.conf.j2
+        file       : /etc/apache2/apache2.conf
+        log        :
+          dir    : /var/log/apache2
+          error  : error.log
+          access : access.log
+          level  : warn
+      redhat:
+        root_dir   : /etc/httpd
+        data_dir   : /var/www/html
+        template   : httpd.conf.j2
+        file       : /etc/httpd/conf/httpd.conf
+        dir        : /var/httpd/conf.d
+        log        :
+          dir   : /var/log/httpd/
+          error : error.log
+          access: access.log
+          level : warn
   os:
-    - redhat8
-    - redhat9
-    - centos8
-    - centos9
+    - debian11

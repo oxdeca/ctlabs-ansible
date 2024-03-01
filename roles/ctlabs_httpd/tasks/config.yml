@@ -7,5 +7,5 @@
 
 - name: ctlabs_httpd.tasks.config.httpd
   template:
-    src  : master.named.conf.j2
-    dest : "{{ ctlabs_httpd.defaults.config.file }}"
+    src  : "{{ ctlabs_httpd.defaults.config[ansible_os_family].template }}"
+    dest : "{{ ctlabs_httpd.defaults.config[ansible_os_family].file     }}"

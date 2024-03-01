@@ -5,11 +5,13 @@
 # Description : setup lpic2 environment
 # -----------------------------------------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# ctlabs setup
+# -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.setup
   hosts : all
   tags  : setup
-
-  tasks:
+  tasks :
     - name: ctlabs.playbooks.lpic2.setup.local_facts.dir
       file:
         path : /etc/ansible/facts.d
@@ -46,41 +48,59 @@
             "type"   : "master",
             "domain" : "ctlabs.local"
           }
+
+# -----------------------------------------------------------------------------
+# ctlabs_ca
+# -----------------------------------------------------------------------------
     
 - name  : ctlabs.playbooks.lpic2.ca
   hosts :
     - all
   tags  : ca
-
   roles :
     - roles/ctlabs_ca
 
+# -----------------------------------------------------------------------------
+# ctlabs_bind
+# -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.bind
   hosts :
     - ns1
     - ns2
   tags  : bind
-
   roles :
     - roles/ctlabs_bind
 
+# -----------------------------------------------------------------------------
+# ctlabs_smbadc
+# -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.smbadc
   hosts :
     - dc1
     - dc2
   tags  : smbadc
-
   roles :
     - roles/ctlabs_smbadc
 
+# -----------------------------------------------------------------------------
+# ctlabs_slapd
+# -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.slapd
   hosts :
     - slapd1
     - slapd2
   tags  : slapd
-
   roles :
     - roles/ctlabs_slapd
     - roles/ctlabs_haproxy
 
+# -----------------------------------------------------------------------------
+# ctlabs_httpd
+# -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.httpd
+  hosts :
+    - slapd1
+    - slapd1
+  tags  : httpd
+  roles :
+    - roles/ctlabs_httpd
