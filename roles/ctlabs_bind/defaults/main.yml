@@ -16,12 +16,16 @@ ctlabs_bind:
         - name : bind-utils
     service:
       debian:
-        name : bind9.service
+        name  : bind9.service
+        user  : bind
+        group : bind
       redhat:
-        name : named.service
+        name  : named.service
+        user  : named
+        group : named
     config:
       allow_query    : [localhost, 192.168.0.0/16]
-      recursive      : no
+      recursive      : 'no'
       debian:
         file           : /etc/bind/named.conf
         dir            : /var/cache/bind
@@ -29,8 +33,10 @@ ctlabs_bind:
         stats_file     : /var/cache/bind/bind9_stats.txt
         memstats_file  : /var/cache/bind/bind9_mem_stats.txt
         secroots_file  : /var/cache/bind/bind9.secroots
-        recursing      : /var/cache/bind/bind9.recursing
-        key_dir        : /var/cache/bind/dynamic
+        recursing_file : /var/cache/bind/bind9.recursing
+        keys_dir       : /var/cache/bind/dynamic
+        zones_dir      : /var/cache/bind
+        log_dir        : /var/log
       redhat:
         file           : /etc/named.conf
         dir            : /var/named
@@ -40,11 +46,12 @@ ctlabs_bind:
         secroots_file  : /var/named/data/named.secroots
         recursing_file : /var/named/data/named.recursing
         keys_dir       : /var/named/dynamic
+        zones_dir      : /var/named/data
+        log_dir        : /var/log
 
       zones:
         - ctlabs.local
         - sub1.ctlabs.local
-
   os:
     - redhat8
     - redhat9

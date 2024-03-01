@@ -5,9 +5,9 @@
 # Description : services
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_bind.tasks.service.named.running
+- name: ctlabs_bind.tasks.service.bind.running
   service:
-    name    : "{{ ctlabs_bind.defaults[os_family].service.name }}"
+    name    : "{{ ctlabs_bind.defaults.service[os_family].name }}"
     state   : started
     enabled : true
 

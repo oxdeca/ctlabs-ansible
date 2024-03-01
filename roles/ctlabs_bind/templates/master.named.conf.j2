@@ -8,7 +8,7 @@ options {
 
   directory               "{{ ctlabs_bind.defaults.config[os_family].dir            }}";
   dump-file               "{{ ctlabs_bind.defaults.config[os_family].dump_file      }}";
-  statistics-file         "{{ ctlabs.bind.defaults.config[os_family].stats_file     }}";
+  statistics-file         "{{ ctlabs_bind.defaults.config[os_family].stats_file     }}";
   memstatistics-file      "{{ ctlabs_bind.defaults.config[os_family].memstats_file  }}";
   secroots-file           "{{ ctlabs_bind.defaults.config[os_family].secroots_file  }}";
   recursing-file          "{{ ctlabs_bind.defaults.config[os_family].recursing_file }}";
@@ -22,32 +22,33 @@ options {
   geoip-directory         "/usr/share/GeoIP";
   pid-file                "/run/named/named.pid";
   session-keyfile         "/run/named/session.key";
+{% if os_family == 'redhat' %}
   include                 "/etc/crypto-policies/back-ends/bind.config";
+{% endif %}
 };
 
 logging {
   channel default_debug {
-    file      "data/named.run";
+    file      "{{ ctlabs_bind.defaults.config[os_family].zones_dir}}/named.run";
     severity  dynamic;
   };
 };
 
+
+{% if os_family == 'redhat' %}
 zone "." IN {
   type   hint;
   file   "named.ca";
 };
+include  "/etc/named.rfc1912.zones";
+include  "/etc/named.root.key";
+{% elif os_family == 'debian' %}
+//include "/etc/bind/named.conf.default-zones";
+{% endif %}
 
 {% for zone in ansible_local.ctlabs_bind.zones %}
 zone "{{ zone }}" IN {
   type   master;
-  file   "data/{{ zone }}.db";
+  file   "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone }}.db";
 };
-
 {%  endfor %}
-
-{% if os_family == 'redhat' %}
-include  "/etc/named.rfc1912.zones";
-include  "/etc/named.root.key";
-{% elif os_family == 'debian' %}
-include "/etc/bind/named.conf.default-zones";
-{% endif %}
