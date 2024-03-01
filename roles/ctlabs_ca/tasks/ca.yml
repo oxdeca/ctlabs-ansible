@@ -33,14 +33,7 @@
   register: "ca_create_output"
 
 
-- name: ctlabs_ca.tasks.ca.debian.install
-  when: (ansible_os_family|lower) == "debian"
+- name: ctlabs_ca.tasks.ca.{{os_familiy}}.install
   blockinfile:
-    path : "{{ ctlabs_ca.defaults.config.ca_deb }}"
-    block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"
-
-- name: ctlabs_ca.tasks.ca.redhat.install
-  when: (ansible_os_family|lower) == "redhat"
-  blockinfile:
-    path : "{{ ctlabs_ca.defaults.config.ca_rhel }}"
+    path : "{{ ctlabs_ca.defaults.config[os_family].cacerts }}"
     block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"

@@ -6,19 +6,19 @@ options {
   listen-on               port 53 { 127.0.0.1; {{ ansible_default_ipv4.address }}; };
   listen-on-v6            port 53 { ::1; };
 
-  directory               "/var/named";
-  dump-file               "/var/named/data/cache_dump.db";
-  statistics-file         "/var/named/data/named_stats.txt";
-  memstatistics-file      "/var/named/data/named_mem_stats.txt";
-  secroots-file           "/var/named/data/named.secroots";
-  recursing-file          "/var/named/data/named.recursing";
+  directory               "{{ ctlabs_bind.defaults.config[os_family].dir            }}";
+  dump-file               "{{ ctlabs_bind.defaults.config[os_family].dump_file      }}";
+  statistics-file         "{{ ctlabs.bind.defaults.config[os_family].stats_file     }}";
+  memstatistics-file      "{{ ctlabs_bind.defaults.config[os_family].memstats_file  }}";
+  secroots-file           "{{ ctlabs_bind.defaults.config[os_family].secroots_file  }}";
+  recursing-file          "{{ ctlabs_bind.defaults.config[os_family].recursing_file }}";
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
 
   dnssec-validation       yes;
 
-  managed-keys-directory  "/var/named/dynamic";
+  managed-keys-directory  "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}";
   geoip-directory         "/usr/share/GeoIP";
   pid-file                "/run/named/named.pid";
   session-keyfile         "/run/named/session.key";
@@ -45,5 +45,9 @@ zone "{{ zone }}" IN {
 
 {%  endfor %}
 
+{% if os_family == 'redhat' %}
 include  "/etc/named.rfc1912.zones";
 include  "/etc/named.root.key";
+{% elif os_family == 'debian' %}
+include "/etc/bind/named.conf.default-zones";
+{% endif %}

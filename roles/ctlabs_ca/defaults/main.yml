@@ -21,8 +21,10 @@ ctlabs_ca:
         template    : certs.cnf.j2
         bits        : 4096
         encrypt_key : false
-      ca_deb : /etc/ssl/certs/ca-certificates.crt
-      ca_rhel: /etc/pki/tls/cert.pem
+      debian:
+        cacerts: /etc/ssl/certs/ca-certificates.crt
+      redhat:
+        cacerts: /etc/pki/tls/cert.pem
     service:
       name : slapd.service
   os:

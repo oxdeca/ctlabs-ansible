@@ -7,6 +7,6 @@
 
 - name: ctlabs_httpd.tasks.config.httpd
   template:
-    src  : "{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].template }}"
-    dest : "{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].file     }}"
+    src  : "{{ ctlabs_httpd.defaults.config[os_family].template }}"
+    dest : "{{ ctlabs_httpd.defaults.config[os_family].file     }}"
   notify: ctlabs_httpd.handlers.httpd.service.reload

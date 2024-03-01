@@ -3,8 +3,8 @@
 {# Description : main httpd.conf                                            #}
 {# ------------------------------------------------------------------------ #}
 
-ServerRoot   {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].root_dir   }}
-DocumentRoot {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].data_dir   }}
+ServerRoot   {{ ctlabs_httpd.defaults.config[os_family].root_dir   }}
+DocumentRoot {{ ctlabs_httpd.defaults.config[os_family].data_dir   }}
 User         {{ ctlabs_httpd.defaults.service.user      }}
 Group        {{ ctlabs_httpd.defaults.service.group     }}
 
@@ -12,8 +12,8 @@ ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}
 ServerName   {{ ctlabs_httpd.defaults.config.servername }}
 Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 
-ErrorLog     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.dir }}/{{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.error }}
-LogLevel     {{ ctlabs_httpd.defaults.config[ansible_os_family|lower].log.level }}
+ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[os_family].log.error }}
+LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
 Include      conf.modules.d/*.conf
 
 

@@ -9,4 +9,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_httpd.defaults.pkgs[ansible_os_family|lower] }}"
+  loop: "{{ ctlabs_httpd.defaults.pkgs[os_family] }}"

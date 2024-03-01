@@ -8,20 +8,38 @@
 ctlabs_bind:
   defaults:
     pkgs:
-      - name : bind
-      - name : bind-utils
+      debian:
+        - name : bind9
+        - name : bind9-dnsutils
+      redhat:
+        - name : bind
+        - name : bind-utils
     service:
-      name : named.service
+      debian:
+        name : bind9.service
+      redhat:
+        name : named.service
     config:
       allow_query    : [localhost, 192.168.0.0/16]
       recursive      : no
-      file           : /etc/named.conf
-      dir            : /var/named
-      dump_file      : /var/named/data/cache_dump.db
-      stats_file     : /var/named/data/named_stats.txt
-      memstats_file  : /var/named/data/named_mem_stats.txt
-      secroots_file  : /var/named/data/named.secroots
-      recursing_file : /var/named/data/named.recursing
+      debian:
+        file           : /etc/bind/named.conf
+        dir            : /var/cache/bind
+        dump_file      : /var/cache/bind/cache_dump.db
+        stats_file     : /var/cache/bind/bind9_stats.txt
+        memstats_file  : /var/cache/bind/bind9_mem_stats.txt
+        secroots_file  : /var/cache/bind/bind9.secroots
+        recursing      : /var/cache/bind/bind9.recursing
+        key_dir        : /var/cache/bind/dynamic
+      redhat:
+        file           : /etc/named.conf
+        dir            : /var/named
+        dump_file      : /var/named/data/cache_dump.db
+        stats_file     : /var/named/data/named_stats.txt
+        memstats_file  : /var/named/data/named_mem_stats.txt
+        secroots_file  : /var/named/data/named.secroots
+        recursing_file : /var/named/data/named.recursing
+        keys_dir       : /var/named/dynamic
 
       zones:
         - ctlabs.local
@@ -32,4 +50,4 @@ ctlabs_bind:
     - redhat9
     - centos8
     - centos9
-
+    - debian11

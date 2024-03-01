@@ -11,7 +11,7 @@
     - name: ctlabs_bind.tasks.config.named
       template:
         src  : master.named.conf.j2
-        dest : "{{ ctlabs_bind.defaults.config.file }}"
+        dest : "{{ ctlabs_bind.defaults.config[os_family].file }}"
 
     - name: ctlabs_bind.tasks.config.zones
       template:
