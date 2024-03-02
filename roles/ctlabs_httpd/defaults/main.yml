@@ -12,6 +12,7 @@ ctlabs_httpd:
         - name : apache2
       redhat:
         - name : httpd
+        - name : mod_ssl
     service:
       name : httpd
       user : apache
@@ -41,6 +42,11 @@ ctlabs_httpd:
           error : error.log
           access: access.log
           level : warn
+      vhosts:
+        - name  : www.ctlabs.local
+          
+
+
   os:
     - centos9
     - debian11

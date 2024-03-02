@@ -14,7 +14,7 @@ Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 
 ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[os_family].log.error }}
 LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
-Include      conf.modules.d/*.conf
+#Include      conf.modules.d/*.conf
 
 
 <Directory />

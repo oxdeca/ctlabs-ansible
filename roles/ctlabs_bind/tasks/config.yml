@@ -8,6 +8,15 @@
 - name: ctlabs_bind.tasks.config.master
   when: ansible_local.ctlabs_bind.type == 'master'
   block:
+    - name: ctlabs_bind.tasks.config.dirs.exist
+      file:
+        path : "{{ item }}"
+        state: directory
+        owner: "{{ ctlabs_bind.defaults.service[os_family].user  }}"
+        group: "{{ ctlabs_bind.defaults.service[os_family].group }}"
+      loop:
+        - "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}"
+
     - name: ctlabs_bind.tasks.config.named
       template:
         src  : master.named.conf.j2

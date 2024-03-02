@@ -7,5 +7,5 @@
 
 - name: ctlabs_httpd.handlers.httpd.service.reload
   service:
-    name  : "{{ ctlabs_httpd.defaults.service.name }}"
+    name  : "{{ ctlabs_httpd.defaults.service[os_family].name }}"
     state : reloaded
