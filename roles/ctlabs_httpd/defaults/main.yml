@@ -15,29 +15,31 @@ ctlabs_httpd:
         - name : mod_ssl
     service:
       name : httpd
-      user : apache
-      group: apache
+      user : apache2
+      group: apache2
     config:
       admin      : webadm@ctlabs.local
       servername : "{{ ansible_hostname }}.ctlabs.local"
       listen     : 80
       debian:
-        root_dir   : /etc/apache2
-        data_dir   : /var/www/html
-        template   : httpd.conf.j2
-        file       : /etc/apache2/apache2.conf
-        log        :
+        root_dir : /etc/apache2
+        data_dir : /var/www/html
+        template : httpd.conf.j2
+        modules  : mods-enabled
+        file     : /etc/apache2/apache2.conf
+        log      :
           dir    : /var/log/apache2
           error  : error.log
           access : access.log
           level  : warn
       redhat:
-        root_dir   : /etc/httpd
-        data_dir   : /var/www/html
-        template   : httpd.conf.j2
-        file       : /etc/httpd/conf/httpd.conf
-        dir        : /var/httpd/conf.d
-        log        :
+        root_dir : /etc/httpd
+        data_dir : /var/www/html
+        template : httpd.conf.j2
+        modules  : conf.modules.d
+        file     : /etc/httpd/conf/httpd.conf
+        dir      : /var/httpd/conf.d
+        log      :
           dir   : /var/log/httpd/
           error : error.log
           access: access.log
@@ -45,8 +47,6 @@ ctlabs_httpd:
       vhosts:
         - name  : www.ctlabs.local
           
-
-
   os:
     - centos9
     - debian11

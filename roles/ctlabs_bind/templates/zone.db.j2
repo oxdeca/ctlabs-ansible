@@ -8,7 +8,7 @@ $ORIGIN {{ zone }}.
 $TTL    3600
 
 {{ zone }}.   IN    SOA     ns1.{{ zone }}. root.{{ zone }}. (
-                                    {{ serial[:12] }} ; serial
+                                    {{ uxtime[:10] }} ; serial
                                     3600         ; refresh
                                     600          ; retry
                                     86400        ; expire

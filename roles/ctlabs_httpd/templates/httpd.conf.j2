@@ -14,8 +14,17 @@ Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 
 ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[os_family].log.error }}
 LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
-#Include      conf.modules.d/*.conf
 
+{% if os_family == 'redhat' %}
+Include      {{ ctlabs_httpd.defaults.config[os_family].modules   }}/*.{load,conf}
+IncludeOptional conf.d/*.conf
+{% elif os_family == 'debian' %}
+IncludeOptional mods-enabled/*.load
+IncludeOptional mods-enabled/*.conf
+Include         ports.conf
+IncludeOptional conf-enabled/*.conf
+IncludeOptional sites-enabled/*.conf
+{% endif %}
 
 <Directory />
   AllowOverride  None
@@ -81,5 +90,3 @@ AddDefaultCharset  UTF-8
 
 #ErrorDocument 500 "The server made a boo boo"
 EnableSendfile on
-
-IncludeOptional conf.d/*.conf

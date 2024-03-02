@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openvpn/defaults/main.yml
+# Description : ctlabs_openvpn defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_openvpn:
+  defaults:
+    pkgs:
+      - name : openvpn
+    service:
+      name : openvpn.service
+    user : openvpn
+    group: openvpn
+    config:
+      server:
+        template : server.conf.j2
+        file     : /etc/openvpn/server.conf
+      client:
+        template : client.conf.j2
+        file     : /etc/openvpn/client.conf
+      dir      : /etc/openvpn
+      ca_ctlabs:
+        certdir: /etc/ca-ctlabs
+  os:
+    - centos9
+
