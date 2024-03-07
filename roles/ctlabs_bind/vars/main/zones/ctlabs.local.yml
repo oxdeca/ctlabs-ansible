@@ -95,3 +95,25 @@ zone_ctlabs_local:
     type  : A
     value : 192.168.20.13
 
+# -----------------------------------------------------------------------------
+# grafana / prometheus
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : grafanfa / prometheus
+
+  - name  : prometheus
+    type  : A
+    value : 192.168.10.21
+
+  - name  : grafana
+    type  : A
+    value : 192.168.20.22
+
+  - name  : loki
+    type  : A
+    value : 192.168.20.23
+
+  - name  : mimir
+    type  : A
+    value : 192.168.20.24
+
