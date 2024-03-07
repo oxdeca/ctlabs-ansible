@@ -1,0 +1,49 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_promtail.tasks.package
+  block:
+    - name: ctlabs_promtail.tasks.package.bindir
+      file:
+        path  : "{{ ctlabs_promtail.defaults.config.bindir }}"
+        state : directory
+
+    - name: ctlabs_promtail.tasks.package.install.redhat
+      when: os_family == 'redhat'
+      yum:
+        name              : "{{ item.url }}"
+        disable_gpg_check : true
+        state             : present
+      loop: "{{ ctlabs_promtail.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_promtail.tasks.package.install.debian
+      when: ansible_os_family|lower == 'debian'
+      apt:
+        deb   : "{{ item.url }}"
+        state : present
+      loop: "{{ ctlabs_promtail.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_promtail.tasks.package.groups
+      group:
+        name   : "{{ item }}"
+        system : true
+      loop: "{{ ctlabs_promtail.defaults.config.groups }}"
+
+    - name: ctlabs_promtail.tasks.package.group
+      group:
+        name   : "{{ ctlabs_promtail.defaults.config.group }}"
+        system : true
+
+    - name: ctlabs_promtail.tasks.package.user
+      user:
+        name        : "{{ ctlabs_promtail.defaults.config.user   }}"
+        group       : "{{ ctlabs_promtail.defaults.config.group  }}"
+        groups      : "{{ ctlabs_promtail.defaults.config.groups }}"
+        create_home : false
+        system      : true
+
+

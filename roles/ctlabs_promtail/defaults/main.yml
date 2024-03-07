@@ -1,0 +1,53 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_promtail:
+  defaults:
+    pkgs:
+      redhat:
+        - name    : promtail
+          version : 2.9.1.x86_64
+          url     : https://github.com/grafana/loki/releases/download/v2.9.1/promtail-2.9.1.x86_64.rpm
+      debian:
+        - name    : promtail
+          version : 2.9.1_amd64
+          url     : https://github.com/grafana/loki/releases/download/v2.9.1/promtail_2.9.1_amd64.deb
+    config:
+      bin       : /opt/promtail/promtail
+      bindir    : /opt
+       tmpdir    : /tmp
+       cfgdir    : /etc/promtail
+       rundir    : /run/promtail
+       file      : config.yml
+       template  : promtail.conf.j2
+       user      : promtail
+       group     : promtail
+       groups    : [syslog,systemd-journal]
+       loki_url  : http://192.168.20.23:3100/loki/api/v1/push
+       templates :
+         - 01_forwarder.job.j2
+         - 01_syslog.job.j2
+    service:
+      name      : promtail.service
+      template  : promtail.service.j2
+    logs:
+      syslog:
+        dir   : /var/log
+        files :
+          - cron
+          - maillog
+          - messages
+          - secure
+          - spooler
+  os:
+    - debian11
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+

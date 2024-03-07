@@ -1,0 +1,14 @@
+[Unit]
+  Description= Node Exporter
+  Documentation= https://prometheus.io/docs/guides/node-exporter/
+  After= network-online.target
+
+[Service]
+  User=node_exporter
+  Group=node_exporter
+  Restart=on-failure
+  ExecStart="{{ ctlabs_node_exporter.defaults.config.bin }}"
+
+[Install]
+  WantedBy=multi-user.target
+

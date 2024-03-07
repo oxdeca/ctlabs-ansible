@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/tasks/service.yml
+# Description : default service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_grafana.tasks.service.start
+  service:
+    name  : "{{ ctlabs_grafana.defaults.service.name }}"
+    state : started
+

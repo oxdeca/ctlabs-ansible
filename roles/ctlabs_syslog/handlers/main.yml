@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_syslog.handlers.syslog.service.restart
+  service:
+    name    : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_syslog.handlers.syslog.service.reload
+  service:
+    name  : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].service.name }}"
+    state : reloaded
+

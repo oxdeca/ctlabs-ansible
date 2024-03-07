@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_mimir
+    - ctlabs_mimir.precheck
+    - ctlabs_mimir.package
+    - ctlabs_mimir.config
+    - ctlabs_mimir.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_mimir
+    - ctlabs_mimir.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_mimir
+    - ctlabs_mimir.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_mimir
+    - ctlabs_mimir.service
+

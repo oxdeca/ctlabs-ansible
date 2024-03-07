@@ -1,0 +1,36 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/templates/rsyslog.conf.j2
+# Description : rsyslog main config
+# ------------------------------------------------------------------------------
+
+# 
+# MODULES
+#
+module(load="imuxsock"       SysSock.Use="off")
+module(load="imjournal"      StateFile="imjournal.state")
+module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
+
+
+#
+# GLOBAL DIRECTIVES
+#
+$umask 0027
+$FileGroup syslog
+$FileCreateMode 0640
+
+global( workDirectory="/var/lib/rsyslog" )
+include( file="/etc/rsyslog.d/*.conf" mode="optional" )
+
+
+#
+# RULES
+#
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+authpriv.*                                              /var/log/secure
+mail.*                                                  -/var/log/maillog
+cron.*                                                  /var/log/cron
+*.emerg                                                 :omusrmsg:*
+uucp,news.crit                                          /var/log/spooler
+local7.*                                                /var/log/boot.log
+
+

@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_syslog
+    - ctlabs_syslog.precheck
+    - ctlabs_syslog.package
+    - ctlabs_syslog.config
+    - ctlabs_syslog.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_syslog
+    - ctlabs_syslog.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_syslog
+    - ctlabs_syslog.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_syslog
+    - ctlabs_syslog.service
+

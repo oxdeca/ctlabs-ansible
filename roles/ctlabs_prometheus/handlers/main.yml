@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_prometheus.handlers.prometheus.service.restart
+  service:
+    name    : "{{ ctlabs_prometheus.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_prometheus.handlers.prometheus.service.reload
+  service:
+    name  : "{{ ctlabs_prometheus.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_prometheus.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
+

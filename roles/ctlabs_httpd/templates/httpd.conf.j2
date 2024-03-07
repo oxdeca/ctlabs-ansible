@@ -16,7 +16,7 @@ ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_htt
 LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
 
 {% if os_family == 'redhat' %}
-Include      {{ ctlabs_httpd.defaults.config[os_family].modules   }}/*.{load,conf}
+Include      {{ ctlabs_httpd.defaults.config[os_family].modules   }}/*.conf
 IncludeOptional conf.d/*.conf
 {% elif os_family == 'debian' %}
 IncludeOptional mods-enabled/*.load

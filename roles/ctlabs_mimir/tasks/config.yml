@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mimir.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_mimir.defaults.config.cfgdir }}"
+    state : directory
+
+- name: ctlabs_mimir.tasks.config.mimir.installed
+  template:
+    src  : "{{ ctlabs_mimir.defaults.config.template }}"
+    dest : "{{ ctlabs_mimir.defaults.config.cfgdir }}/{{ ctlabs_mimir.defaults.config.file }}"
+  notify: ctlabs_mimir.handlers.mimir.service.restart
+
+- name: ctlabs_mimir.tasks.config.alertmanager.installed
+  template:
+    src  : "{{ ctlabs_mimir.defaults.config.alertmanager.template }}"
+    dest : "{{ ctlabs_mimir.defaults.config.cfgdir }}/{{ ctlabs_mimir.defaults.config.alertmanager.file }}"
+  notify: ctlabs_mimir.handlers.mimir.service.restart
+
+- name: ctlabs_mimir.tasks.config.sysconfig.installed
+  template:
+    src  : "{{ ctlabs_mimir.defaults.sysconfig.template }}"
+    dest : "{{ ctlabs_mimir.defaults.sysconfig.file }}"
+  notify: ctlabs_mimir.handlers.mimir.service.restart
+

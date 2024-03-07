@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/tasks/service.yml
+# Description : default service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mimir.tasks.service.start
+  service:
+    name  : "{{ ctlabs_mimir.defaults.service.name }}"
+    state : started
+

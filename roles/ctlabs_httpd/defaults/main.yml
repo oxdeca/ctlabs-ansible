@@ -14,9 +14,14 @@ ctlabs_httpd:
         - name : httpd
         - name : mod_ssl
     service:
-      name : httpd
-      user : apache2
-      group: apache2
+      debian:
+        name : apache2
+        user : www-data
+        group: www-data
+      redhat:
+        name : apache2
+        user : daemon
+        group: daemon
     config:
       admin      : webadm@ctlabs.local
       servername : "{{ ansible_hostname }}.ctlabs.local"

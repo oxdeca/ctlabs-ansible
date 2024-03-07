@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_loki.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_loki.defaults.config.bindir }}"
+    state : directory
+
+- name: ctlabs_loki.tasks.package.install
+  yum:
+    name              : "{{ item.url }}"
+    disable_gpg_check : true
+    state             : present
+  loop: "{{ ctlabs_loki.defaults.pkgs }}"
+
+- name: ctlabs_loki.tasks.package.group
+  group:
+    name   : "{{ ctlabs_loki.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_loki.tasks.package.user
+  user:
+    name   : "{{ ctlabs_loki.defaults.config.user  }}"
+    group  : "{{ ctlabs_loki.defaults.config.group }}"
+    system : true
+

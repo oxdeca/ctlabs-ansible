@@ -1,0 +1,51 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_syslog:
+  defaults:
+    syslog-ng:
+      pkgs:
+        name    : syslog-ng
+        version : latest
+      config:
+        file     : /etc/syslog-ng/syslog-ng.conf
+        template : syslog-ng.conf.j2
+        incdir   : /etc/syslog-ng/syslog-ng.d/
+        logdir   : /var/log
+      service:
+        name     : syslog-ng.service
+        template :
+    rsyslog:
+      pkgs:
+        name    : rsyslog
+        version : latest
+      config:
+        file     : /etc/rsyslog.conf
+        template : rsyslog.conf.j2
+        incdir   : /etc/rsyslog.d/
+      service:
+        name     : rsyslog.service
+        template :
+    logs:
+      group : syslog
+      acl   : default:group:syslog:rx
+      dir   : /var/log
+      mode  : "0640"
+      files :
+        - cron
+        - maillog
+        - messages
+        - secure
+        - spooler
+  kind : rsyslog
+  os   :
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+

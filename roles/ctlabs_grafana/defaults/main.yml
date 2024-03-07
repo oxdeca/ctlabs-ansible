@@ -1,0 +1,42 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/defaults/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+
+ctlabs_grafana:
+  defaults:
+    yum_repo:
+      name      : grafana
+      desc      : grafana-server
+      baseurl   : https://rpm.grafana.com
+      gpgkey    : https://rpm.grafana.com/gpg.key
+      sslcacert : /etc/pki/tls/certs/ca-bundle.crt
+    pkgs:
+      name    : grafana
+      version : latest
+    config:
+      ds:
+        dir : /etc/grafana/provisioning/datasources
+        loki:
+          url     : http://192.168.20.23:3100
+          file    : loki.yml
+          template: loki.yml.j2
+      smtp:
+        host     : 
+        user     :
+        pass     :
+        from_addr:
+        from_name:
+     
+    service:
+      name : grafana-server.service
+  os:
+    - rhel7
+    - rhel8
+    - centos7
+    - centos8
+    - centos9
+

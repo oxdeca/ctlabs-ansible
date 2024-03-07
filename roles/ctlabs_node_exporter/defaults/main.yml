@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_node_exporter/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_node_exporter:
+  defaults:
+    pkgs:
+      name    : node_exporter
+      version : 1.5.0.linux-amd64
+      url     : https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+      tmptar  : /tmp/node_exporter.tar.gz
+    config:
+      bin      : /opt/node_exporter/node_exporter
+      bindir   : /opt
+      tmpdir   : /tmp
+      cfgdir   : /etc/node_exporter
+      datadir  : /data
+      agentdir : /data-agent
+      file     : node_exporter.conf
+      template : node_exporter.conf.j2
+      user     : node_exporter
+      group    : node_exporter
+      listen   : 9100
+    service:
+      name     : node_exporter.service
+      template : node_exporter.service.j2
+    logrotate:
+    os:
+      - redhat7
+      - redhat8
+      - centos7
+      - centos8
+      - centos9
+

@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_prometheus.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_prometheus.os
+    fail_msg: "OS [{{ os }}] is not supported!"
+

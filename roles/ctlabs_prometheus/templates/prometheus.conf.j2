@@ -1,0 +1,60 @@
+# -----------------------------------------------------------------------------
+# {{ ansible_managed }} 
+# File     : prometheus.conf
+# Template : prometheus.conf.j2
+# -----------------------------------------------------------------------------
+
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 10s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# -----------------------------------------------------------------------------
+# CONFIGURE NO ALERTMANAGER WHEN IN AGENT MODE
+# Alertmanager configuration
+#alerting:
+#  alertmanagers:
+#    - static_configs:
+#        - targets:
+#          # - alertmanager:9093
+# -----------------------------------------------------------------------------
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets:
+{% for target in ctlabs_prometheus.defaults.config.targets %}
+        - {{ target }}
+{% endfor %}
+{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
+{%   for target in ( ansible_local.ctlabs_prometheus.config.agent.targets | default(ctlabs_prometheus.defaults.config.agent.targets )) %}
+        - {{ target }}
+{%   endfor %}
+{% endif %}
+
+{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
+remote_write:
+  - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri | default(ctlabs_prometheus.defaults.config.remote_write.uri) }}
+    remote_timeout: 5s
+{% endif %}
+
+{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'receiver' %}
+remote_write:
+  - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri }}
+    remote_timeout: 5s
+{% endif %}
+
+

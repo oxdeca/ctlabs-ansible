@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_node_exporter/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_node_exporter
+    - ctlabs_node_exporter.precheck
+    - ctlabs_node_exporter.package
+    - ctlabs_node_exporter.config
+    - ctlabs_node_exporter.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_node_exporter
+    - ctlabs_node_exporter.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_node_exporter
+    - ctlabs_node_exporter.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_node_exporter
+    - ctlabs_node_exporter.service
+

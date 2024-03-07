@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_node_exporter/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_node_exporter.tasks.service.create
+  template:
+    src  : "{{ ctlabs_node_exporter.defaults.service.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_node_exporter.defaults.service.name }}"
+  notify: ctlabs_node_exporter.handlers.systemd.reload
+
+- name: ctlabs_node_exporter.tasks.service.start
+  service:
+    name  : "{{ ctlabs_node_exporter.defaults.service.name }}"
+    state : started
+

@@ -1,0 +1,214 @@
+---
+
+# -----------------------------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/playbooks/lab07.yml
+# Description : setup monitoring stack (prometheus, grafana, node_exporter, syslogng, loki)
+# -----------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# ctlabs setup
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.setup
+  hosts : all
+  tags  : setup
+  tasks :
+    - name: ctlabs.playbooks.setup.local_facts.dir
+      file:
+        path : /etc/ansible/facts.d
+        state: directory
+
+    - name: ctlabs.playbooks.setup.bind.master.local_facts
+      when: ansible_hostname == 'ns1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_bind.fact
+        content: |
+          {
+            "type"   : "master",
+            "zones"  : [ "ctlabs.local" ],
+            "slaves" : [ "ns2" ]
+          }
+
+    - name: ctlabs.playbooks.setup.bind.slave.local_facts
+      when: ansible_hostname == 'ns2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_bind.fact
+        content: |
+          {
+            "type"    : "slave",
+            "zones"   : [ "ctlabs.local" ],
+            "masters" : [ "ns1" ]
+          }
+
+    - name: ctlabs.playbooks.smbadc.local_facts
+      when: ansible_hostname in [ 'dc1', 'dc2' ]
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
+        content: |
+          {
+            "type"   : "master",
+            "domain" : "ctlabs.local"
+          }
+
+    - name: ctlabs.playbooks.prometheus.local_facts
+      when: ansible_hostname == 'prometheus'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_prometheus.fact
+        content: |
+          {
+            "mode"   : "agent",
+            "config" : {
+              "remote_write" : {
+                "uri" : "http://prometheus.ctlabs.local:9009/api/v1/push"
+              }
+            }
+          }
+
+
+# -----------------------------------------------------------------------------
+# ctlabs_ca
+# -----------------------------------------------------------------------------
+    
+- name  : ctlabs.playbooks.ca
+  hosts :
+    - all
+  tags  : ca
+  roles :
+    - roles/ctlabs_ca
+
+# -----------------------------------------------------------------------------
+# ctlabs_bind
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.bind
+  hosts :
+    - ns1
+    - ns2
+  tags  : bind
+  roles :
+    - roles/ctlabs_bind
+
+# -----------------------------------------------------------------------------
+# ctlabs_smbadc
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.smbadc
+  hosts :
+    - dc1
+    - dc2
+  tags  : smbadc
+  roles :
+    - roles/ctlabs_smbadc
+
+# -----------------------------------------------------------------------------
+# ctlabs_slapd
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.slapd
+  hosts :
+    - slapd1
+    - slapd2
+  tags  : slapd
+  roles :
+    - roles/ctlabs_slapd
+    - roles/ctlabs_haproxy
+
+# -----------------------------------------------------------------------------
+# ctlabs_httpd
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.httpd
+  hosts :
+    - www1
+    - www2
+  tags  : httpd
+  roles :
+    - roles/ctlabs_httpd
+
+# -----------------------------------------------------------------------------
+# ctlabs_syslog
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.syslog
+  hosts :
+    - hosts
+  tags  : syslog
+  roles :
+    - roles/ctlabs_syslog
+
+# -----------------------------------------------------------------------------
+# ctlabs_prometheus
+# -----------------------------------------------------------------------------
+- name   : ctlabs.playbooks.monitoring.prometheus
+  hosts  :
+    - prometheus
+  tags   : prometheus
+  roles  :
+    - roles/ctlabs_prometheus
+
+# -----------------------------------------------------------------------------
+# ctlabs_grafana
+# -----------------------------------------------------------------------------
+- name   : ctlabs.playbooks.monitoring.grafana
+  hosts  :
+    - grafana
+  tags   : grafana
+  roles :
+    - roles/ctlabs_grafana
+
+# -----------------------------------------------------------------------------
+# ctlabs_node_exporter
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.node_exporter
+  hosts :
+    - prometheus
+    - grafana
+    - loki
+  tags  : node_exporter
+  roles :
+    - roles/ctlabs_node_exporter
+
+# -----------------------------------------------------------------------------
+# ctlabs_mimir
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.mimir
+  hosts :
+    - mimir
+  tags  : mimir
+  roles :
+    - roles/ctlabs_mimir
+
+# -----------------------------------------------------------------------------
+# ctlabs_promtail
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.promtail
+  hosts :
+    - hosts
+  tags  : promtail
+  roles :
+    - roles/ctlabs_promtail
+
+# -----------------------------------------------------------------------------
+# ctlabs_loki
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.loki
+  hosts :
+    - loki
+  tags  : loki
+  roles :
+    - roles/ctlabs_loki
+
+# -----------------------------------------------------------------------------
+# ctlabs_sssd
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.sssd
+  hosts :
+    - hosts
+  tags  : sssd
+  roles :
+    - roles/ctlabs_sssd
+
+# -----------------------------------------------------------------------------
+# ctlabs_sudo
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.monitoring.sudo
+  hosts :
+    - hosts
+  tags  : sudo
+  roles :
+    - roles/ctlabs_sudo
+

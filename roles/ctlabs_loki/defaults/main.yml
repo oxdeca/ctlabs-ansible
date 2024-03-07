@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_loki:
+  defaults:
+    pkgs:
+      - name    : loki
+        version : 2.8.0.x86_64
+        url     : https://github.com/grafana/loki/releases/download/v2.8.0/loki-2.8.0.x86_64.rpm
+    config:
+      bin       : /opt/loki/loki
+      bindir    : /opt
+      tmpdir    : /tmp
+      cfgdir    : /etc/loki
+      file      : loki.conf
+      template  : loki.conf.j2
+      user      : loki
+      group     : loki
+    service:
+      name      : loki.service
+      template  : loki.service.j2
+  os:
+    - rhel7
+    - rhel8
+    - centos7
+    - centos8
+    - centos9
+

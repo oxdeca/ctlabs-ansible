@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_loki
+    - ctlabs_loki.precheck
+    - ctlabs_loki.package
+    - ctlabs_loki.config
+    - ctlabs_loki.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_loki
+    - ctlabs_loki.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_loki
+    - ctlabs_loki.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_loki
+    - ctlabs_loki.service
+

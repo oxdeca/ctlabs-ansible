@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_loki.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_loki.os
+    fail_msg: "OS [{{ os }}] is not supported!"
+

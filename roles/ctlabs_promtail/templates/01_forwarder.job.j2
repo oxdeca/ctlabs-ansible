@@ -1,0 +1,37 @@
+{# ------------------------------------------------------------------------- #}
+{# File: ctlabs_promtail/templates/01_forwarder.job.j2                       #}
+{# ------------------------------------------------------------------------- #}
+
+
+{% if ansible_local.ctlabs_promtail.config.forwarder is defined %}
+# -----------------------------------------------------------------------------
+# Promtail Forwarder (Syslog)
+#  -> To set the right labels we need multiple forwarders
+# -----------------------------------------------------------------------------
+- job_name: loki_forwarder_sys
+  loki_push_api:
+    server:
+      http_listen_port: 3514 
+      grpc_listen_port: 0
+    use_incoming_timestamp: true
+    labels:
+      job  : syslog
+      host : {{ ansible_hostname }} # <<< that is the host of the forwarder. Not sure if the original labels are being forwarded??
+{% endif %}
+
+
+{% if ansible_local.ctlabs_promtail.config.win_forwarder is defined %}
+# -----------------------------------------------------------------------------
+# Promtail Forwarder (Windows Event Logs)
+#  -> receives event logs from windows hosts and forwards them to loki
+# -----------------------------------------------------------------------------
+- job_name: loki_forwarder_win
+  loki_push_api:
+    server:
+      http_listen_port: 5000
+      grpc_listen_port: 0
+    use_incoming_timestamp: true
+    labels:
+      job : windows_events
+{% endif %}
+

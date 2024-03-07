@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mimir.handlers.mimir.service.restart
+  service:
+    name    : "{{ ctlabs_mimir.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_mimir.handlers.mimir.service.reload
+  service:
+    name  : "{{ ctlabs_mimir.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_mimir.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
+

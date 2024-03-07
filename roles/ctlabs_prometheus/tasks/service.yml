@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_prometheus.tasks.service.create
+  template:
+    src  : "{{ ctlabs_prometheus.defaults.service.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_prometheus.defaults.service.name }}"
+  notify: ctlabs_prometheus.handlers.systemd.reload
+
+- name: ctlabs_prometheus.tasks.service.start
+  service:
+    name  : "{{ ctlabs_prometheus.defaults.service.name }}"
+    state : started
+

@@ -1,0 +1,33 @@
+{# ------------------------------------------------------------------------- #}
+{# File: ctlabs_promtail/templates/01_syslog.job.j2                          #}
+{# ------------------------------------------------------------------------- #}
+
+{% if ansible_local.ctlabs_promtail.config.syslog is defined %}
+# -----------------------------------------------------------------------------
+# syslog - File Tailing
+# -----------------------------------------------------------------------------
+- job_name: syslog
+  static_configs:
+{%   for file in ctlabs_promtail.defaults.logs.syslog.files %}
+    - targets:
+      - localhost
+      labels:
+        job      : syslog
+        host     : {{ ansible_fqdn                       | default('') }}
+        ctlabs   : {{ ansible_local.ctlabs.site_group    | default('') }}
+        __path__ : {{ ctlabs_promtail.defaults.logs.syslog.dir }}/{{ file }}
+{%    endfor %}
+{%  endif %}
+
+{% if ansible_local.ctlabs_promtail.config.syslog_socket is defined %}
+# -----------------------------------------------------------------------------
+# syslog - TCP Socket
+# -----------------------------------------------------------------------------
+- job_name: syslog
+  syslog:
+    listen_address: 0.0.0.0:1514
+    labels:
+      job      : syslog
+      host     : {{ ansible_hostname }}
+{% endif %}
+

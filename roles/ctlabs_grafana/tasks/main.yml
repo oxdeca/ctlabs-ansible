@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_grafana
+    - ctlabs_grafana.precheck
+    - ctlabs_grafana.package
+    - ctlabs_grafana.config
+    - ctlabs_grafana.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_grafana
+    - ctlabs_grafana.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_grafana
+    - ctlabs_grafana.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_grafana
+    - ctlabs_grafana.service
+

@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_loki.handlers.loki.service.restart
+  service:
+    name    : "{{ ctlabs_loki.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_loki.handlers.loki.service.reload
+  service:
+    name  : "{{ ctlabs_loki.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_loki.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
+

@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/tasks/package.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_grafana.tasks.yum.repo
+  yum_repository:
+    name        : grafana
+    description : grafana-server
+    baseurl     : https://rpm.grafana.com
+    gpgkey      : https://rpm.grafana.com/gpg.key
+    gpgcheck    : true
+    sslverify   : true
+    sslcacert   : /etc/pki/tls/certs/ca-bundle.crt
+
+- name: ctlabs_grafana.tasks.package.install
+  package:
+    name  : "{{ ctlabs_grafana.defaults.pkgs.name }}"
+    state : present
+
+#
+# install grafana package
+# service is grafana-server.service
+

@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+#
+# Linux
+#
+- name: ctlabs_promtail.tasks.config
+  block:
+    - name: ctlabs_promtail.tasks.config.dir
+      file:
+        path  : "{{ ctlabs_promtail.defaults.config.cfgdir }}"
+        state : directory
+
+    - name: ctlabs_promtail.tasks.config.rundir
+      file:
+        path  : "{{ ctlabs_promtail.defaults.config.rundir }}"
+        owner : "{{ ctlabs_promtail.defaults.config.user   }}"
+        group : "{{ ctlabs_promtail.defaults.config.group  }}"
+        mode  : '0750'
+        state : directory
+
+    - name: ctlabs_promtail.tasks.config.installed
+      template:
+        src  : "{{ ctlabs_promtail.defaults.config.template }}"
+        dest : "{{ ctlabs_promtail.defaults.config.cfgdir }}/{{ ctlabs_promtail.defaults.config.file }}"
+      notify: ctlabs_promtail.handlers.promtail.service.restart
+

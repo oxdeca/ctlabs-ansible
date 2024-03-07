@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_promtail
+    - ctlabs_promtail.precheck
+    - ctlabs_promtail.package
+    - ctlabs_promtail.config
+    - ctlabs_promtail.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_promtail
+    - ctlabs_promtail.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_promtail
+    - ctlabs_promtail.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_promtail
+    - ctlabs_promtail.service
+

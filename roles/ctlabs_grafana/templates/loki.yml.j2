@@ -1,0 +1,14 @@
+---
+
+# -----------------------------------------------------------------------------
+# File : ctlabs_grafana/templates/loki.yml.j2
+# Desc : adding loki as datasource
+# -----------------------------------------------------------------------------
+
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    url : "{{ ctlabs_grafana_loki_url }}"
+

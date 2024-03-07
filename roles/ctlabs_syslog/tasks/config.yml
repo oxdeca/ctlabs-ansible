@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_syslog.tasks.config.group
+  group:
+    name   : "{{ ctlabs_syslog.defaults.logs.group }}"
+    system : true
+
+- name: ctlabs_syslog.tasks.config.main.installed
+  template:
+    src  : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].config.template }}"
+    dest : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].config.file     }}"
+  notify: ctlabs_syslog.handlers.syslog.service.restart
+
+

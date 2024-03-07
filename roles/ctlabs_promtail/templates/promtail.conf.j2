@@ -1,0 +1,63 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : {{ ctlabs_promtail.defaults.config.cfgdir }}/{{ ctlabs_promtail.defaults.config.file }}
+# Template    : ctlabs_promtail/templates/promtail.conf.j2
+# Description : description
+# ------------------------------------------------------------------------------
+
+server:
+  disable          : true
+  http_listen_port : 9080
+  grpc_listen_port : 0
+
+positions:
+  filename: {{ ctlabs_promtail.defaults.config.rundir }}/positions.yaml
+
+clients:
+  - url: {{ ctlabs_promtail_loki_url | default(ctlabs_promtail.defaults.config.loki_url) }}
+
+
+scrape_configs:
+# -----------------------------------------------------------------------------
+# journald
+# -----------------------------------------------------------------------------
+- job_name: journald
+  journal:
+    #json: true
+    labels:
+      job           : journald
+      host          : {{ ansible_hostname }}
+      site_group    : {{ ansible_local.ctlabs.site_group    | default('') }}
+      site          : {{ ansible_local.ctlabs.site          | default('') }}
+      cluster_group : {{ ansible_local.ctlabs.cluster_group | default('') }}
+  relabel_configs:
+    - source_labels: ['__journal__systemd_unit']
+      target_label: unit
+    - source_labels: ['__journal__hostname']
+      target_label: host
+    - source_labels: ['__journal_priority_keyword']
+      target_label: level
+    - source_labels: ['__journal_syslog_identifier']
+      target_label: facility
+    - source_labels: ['__journal__comm']
+      target_label: comm
+    - source_labels: ['__journal__transport']
+      target_label: transport
+  pipeline_stages:
+  - match:
+      selector: '{unit=~"session-.*\\.scope"}'
+      stages:
+      - template:
+          source: merged_scope_unit
+          template: session.scope
+      - labels:
+          unit: merged_scope_unit
+
+# -----------------------------------------------------------------------------
+# Includes
+# -----------------------------------------------------------------------------
+{% for template in ctlabs_promtail.defaults.config.templates %}
+{%   include template %}
+{% endfor %}
+

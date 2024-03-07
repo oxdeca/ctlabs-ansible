@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mimir.tasks.precheck.os.supported
+  assert:
+    that: os is in ctlabs_mimir.os
+    fail_msg: "OS [{{ os }}] is not supported!"
+

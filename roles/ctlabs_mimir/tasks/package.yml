@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/tasks/package.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mimir.tasks.package.install
+  yum:
+    name              : "{{ ctlabs_mimir.defaults.pkgs.url        }}"
+    disable_gpg_check : "{{ not ctlabs_mimir.defaults.pkgs.chkgpg }}"
+    state             : present
+

@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_syslog.tasks.package.install
+  yum:
+    name   : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].pkgs.name }}"
+    state  : present
+

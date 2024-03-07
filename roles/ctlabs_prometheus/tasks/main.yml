@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_prometheus
+    - ctlabs_prometheus.precheck
+    - ctlabs_prometheus.package
+    - ctlabs_prometheus.config
+    - ctlabs_prometheus.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_prometheus
+    - ctlabs_prometheus.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_prometheus
+    - ctlabs_prometheus.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_prometheus
+    - ctlabs_prometheus.service
+

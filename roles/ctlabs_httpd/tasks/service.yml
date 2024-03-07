@@ -7,7 +7,7 @@
 
 - name: ctlabs_httpd.tasks.service.httpd.running
   service:
-    name    : "{{ ctlabs_httpd.defaults.service.name }}"
+    name    : "{{ ctlabs_httpd.defaults.service[os_family].name }}"
     state   : started
     enabled : true
 

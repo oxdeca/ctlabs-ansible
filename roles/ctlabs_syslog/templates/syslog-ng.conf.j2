@@ -1,0 +1,132 @@
+@version: 3.23
+@include "scl.conf"
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/templates/syslog-ng.conf.j2
+# Description : description
+# ------------------------------------------------------------------------------
+
+options {
+    flush_lines     (0);
+    time_reopen     (10);
+    log_fifo_size   (1000);
+    chain_hostnames (off);
+    use_dns         (no);
+    use_fqdn        (no);
+    create_dirs     (no);
+    keep_hostname   (yes);
+    owner           (root);
+    group           (syslog);
+    perm            (0640);
+    ts-format       (iso);
+};
+
+source s_sys {
+    system();
+    internal();
+    # udp(ip(0.0.0.0) port(514));
+};
+
+
+{% if ansible_local.syslog is defined and ansible_local.syslog.server %}
+# -----------------------------------------------------------------------------
+# Server Configuration
+# -----------------------------------------------------------------------------
+source pluto {
+  tcp(
+    ip              (0.0.0.0)    # <<< bind ip on server
+    port            (5000)       # <<< bind port on server
+    max-connections (5)          # <<< limit connections
+    flags           (no-parse)   # <<< keep messages raw
+  );
+};
+
+destination remote_logs { file("/var/log/${HOST}/messages"); };
+log {source(pluto); destination(remote_logs); };
+# -----------------------------------------------------------------------------
+# _~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_
+# -----------------------------------------------------------------------------
+{% endif %}
+
+{% if ansible_local.syslog is defined and ansible_local.syslog.client %}
+# -----------------------------------------------------------------------------
+#  Client Configuration
+# -----------------------------------------------------------------------------
+destination pluto {
+  tcp(
+    "192.168.20.23"
+    port(514)
+    so_keepalive(yes)
+  );
+};
+
+log { source(s_sys); destination(pluto); };
+# -----------------------------------------------------------------------------
+# _~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_
+# -----------------------------------------------------------------------------
+{% endif %}
+
+# -----------------------------------------------------------------------------
+# Promtail Configuration
+# -----------------------------------------------------------------------------
+destination promtail {
+  syslog(
+    "127.0.0.1"
+    port(1514)
+  );
+};
+
+
+{% if ansible_local.syslog is defined and ansible_local.syslog.server %}
+log { source(pluto);  destination(promtail); };
+{% endif %}
+#log { source(s_sys); destination(promtail); };
+# -----------------------------------------------------------------------------
+# _~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+#  Default Configuration (might not need that at all...)
+# -----------------------------------------------------------------------------
+destination d_cons { file("/dev/console"); };
+destination d_mesg { file("/var/log/messages"); };
+destination d_auth { file("/var/log/secure"); };
+destination d_mail { file("/var/log/maillog" flush_lines(10)); };
+destination d_spol { file("/var/log/spooler"); };
+destination d_boot { file("/var/log/boot.log"); };
+destination d_cron { file("/var/log/cron"); };
+destination d_kern { file("/var/log/kern"); };
+destination d_mlal { usertty("*"); };
+
+filter f_kernel     { facility(kern); };
+filter f_default    { level(info..emerg) and
+                        not (facility(mail)
+                        or facility(authpriv)
+                        or facility(cron)); };
+filter f_auth       { facility(authpriv); };
+filter f_mail       { facility(mail); };
+filter f_emergency  { level(emerg); };
+filter f_news       { facility(uucp) or
+                        (facility(news)
+                        and level(crit..emerg)); };
+filter f_boot   { facility(local7); };
+filter f_cron   { facility(cron); };
+
+#log { source(s_sys); filter(f_kernel); destination(d_cons); };
+log { source(s_sys); filter(f_kernel); destination(d_kern); };
+log { source(s_sys); filter(f_default); destination(d_mesg); };
+log { source(s_sys); filter(f_auth); destination(d_auth); };
+log { source(s_sys); filter(f_mail); destination(d_mail); };
+log { source(s_sys); filter(f_emergency); destination(d_mlal); };
+log { source(s_sys); filter(f_news); destination(d_spol); };
+log { source(s_sys); filter(f_boot); destination(d_boot); };
+log { source(s_sys); filter(f_cron); destination(d_cron); };
+
+
+# Source additional configuration files (.conf extension only)
+@include "/etc/syslog-ng/conf.d/*.conf"
+
+# vim:ft=syslog-ng:ai:si:ts=4:sw=4:et:
+

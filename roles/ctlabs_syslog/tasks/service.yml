@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_syslog.tasks.service.start
+  service:
+    name    : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].service.name }}"
+    enabled : true
+    state   : started
+
+- name: ctlabs_syslog.tasks.service.logs.perms
+  file:
+    path  : "{{ ctlabs_syslog.defaults.logs.dir }}/{{ item }}"
+    group : "{{ ctlabs_syslog.defaults.logs.group }}"
+    mode  : "{{ ctlabs_syslog.defaults.logs.mode }}"
+  loop: "{{ ctlabs_syslog.defaults.logs.files }}"
+

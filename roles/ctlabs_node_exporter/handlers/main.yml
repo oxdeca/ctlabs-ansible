@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_node_exporter/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_node_exporter.handlers.node_exporter.service.restart
+  service:
+    name    : "{{ ctlabs_node_exporter.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_node_exporter.handlers.node_exporter.service.reload
+  service:
+    name  : "{{ ctlabs_node_exporter.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_node_exporter.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
+

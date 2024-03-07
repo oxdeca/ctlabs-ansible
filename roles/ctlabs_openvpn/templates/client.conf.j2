@@ -1,7 +1,17 @@
 {# /etc/openvpn/client/client.conf #}
 
-remote    192.168.10.12
-dev       tun
-ifconfig  10.8.15.1 10.8.15.2
-secret    ovpn.key
-cipher    AES-256-CBC
+dev            tun
+persist-tun
+
+proto          udp
+keepalive      10 60 
+
+ifconfig       10.8.15.2 10.8.15.1
+remote         192.168.10.12
+
+cipher         AES-256-CBC
+secret         ovpn.key
+auth           SHA512
+auth-nocache 
+
+verb           3

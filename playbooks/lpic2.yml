@@ -1,8 +1,8 @@
 ---
 
 # -----------------------------------------------------------------------------------------------------------
-# File        : ctlabs-ansible/playbooks/lpic.yml
-# Description : setup lpic2 environment
+# File        : ctlabs-ansible/playbooks/lpic2.yml
+# Description : setup lpic2 environment used for the labs 2xx
 # -----------------------------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
@@ -104,3 +104,14 @@
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
+
+# -----------------------------------------------------------------------------
+# ctlabs_openvpn
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.openvpn
+  hosts :
+    - h1
+    - h2
+  tags  : openvpn
+  roles :
+    - roles/ctlabs_openvpn

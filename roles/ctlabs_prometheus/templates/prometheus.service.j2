@@ -1,0 +1,20 @@
+[Unit]
+  Description= Prometheus Server
+  Documentation= https://prometheus.io/docs/introduction/overview/
+  After= network-online.target
+
+[Service]
+  User=prometheus
+  Group=prometheus
+  Restart=on-failure
+  ExecStart="{{ ctlabs_prometheus.defaults.config.bin }}" --config.file "{{ ctlabs_prometheus.defaults.config.cfgdir + '/' + ctlabs_prometheus.defaults.config.file }}" \
+{% if   ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'receiver' %}
+    --web.enable-remote-write-receiver \
+    --storage.tsdb.retention 2h
+{% elif ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent'    %}
+    --enable-feature agent \
+{% endif %}
+
+[Install]
+  WantedBy=multi-user.target
+

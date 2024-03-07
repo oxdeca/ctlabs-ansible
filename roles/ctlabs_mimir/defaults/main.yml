@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_mimir/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_mimir:
+  defaults:
+    pkgs:
+      name    : mimir-2.8.0_amd64.rpm
+      version : 2.8.0
+      chkgpg  : false
+      url     : https://github.com/grafana/mimir/releases/download/mimir-2.8.0/mimir-2.8.0_amd64.rpm
+    config:
+      cfgdir   : /etc/mimir
+      file     : mimir.conf
+      template : mimir.conf.j2
+      user     : mimir
+      group    : mimir
+      listen   : 9090
+      remwruri : http://192.168.20.22:9090/api/v1/write
+      storage  :
+        bucket : ctlabs.lab07.mimir
+      alertmanager:
+        cfgdir   : /etc/mimir
+        file     : alertmanager.conf
+        template : alertmanager.conf.j2
+    service:
+      name     : mimir.service
+    sysconfig:
+      file     : /etc/sysconfig/mimir
+      template : mimir.sysconfig.j2
+    logrotate:
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+

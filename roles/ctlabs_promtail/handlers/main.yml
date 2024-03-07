@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_promtail.handlers.promtail.service.restart
+  service:
+    name  : "{{ ctlabs_promtail.defaults.service.name }}"
+    state : restarted
+

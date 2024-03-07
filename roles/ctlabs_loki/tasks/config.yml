@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_loki/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_loki.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_loki.defaults.config.cfgdir }}"
+    state : directory
+

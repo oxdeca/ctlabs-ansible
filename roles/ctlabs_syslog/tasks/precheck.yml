@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_syslog/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_syslog.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_syslog.os
+    fail_msg: "{{ os }} is not supported!"
+
+- name: ctlabs_syslog.tasks.precheck.default_type
+  set_fact:
+    ctlabs_syslog_kind: "{{ ctlabs_syslog_kind | default(ctlabs_syslog.kind) }}"
+
+- name: ctlabs_syslog.tasks.precheck.default_type
+  set_fact:
+    ctlabs_syslog_kind: "{{ ansible_local.ctlabs.syslog.kind | default(ctlabs_syslog.kind) }}"
+  when: ansible_local.ctlabs is defined and ansible_local.ctlabs.syslog is defined and ansible_local.ctlabs.syslog.kind is defined # and ansible_local.ctlabs.syslog.kind is in ["syslog-ng", "rsyslog"]                                                                                     
+

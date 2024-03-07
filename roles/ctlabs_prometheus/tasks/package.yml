@@ -1,0 +1,46 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_prometheus.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_prometheus.defaults.config.bindir }}"
+    state : directory
+
+- name: ctlabs_prometheus.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_prometheus.defaults.pkgs.url    }}"
+    dest : "{{ ctlabs_prometheus.defaults.pkgs.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_prometheus.tasks.package.copy
+  copy:
+    src : "{{ ctlabs_prometheus.defaults.pkgs.tmptar }}"
+    dest: "{{ ctlabs_prometheus.defaults.pkgs.tmptar }}"
+
+- name: ctlabs_prometheus.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_prometheus.defaults.pkgs.tmptar   }}"
+    dest : "{{ ctlabs_prometheus.defaults.config.bindir }}"
+    remote_src: true
+
+- name: ctlabs_prometheus.tasks.package.install
+  file:
+    src   : "{{ ctlabs_prometheus.defaults.config.bindir + '/' + ctlabs_prometheus.defaults.pkgs.name + '-' + ctlabs_prometheus.defaults.pkgs.version }}"
+    dest  : "{{ ctlabs_prometheus.defaults.config.bindir + '/' + ctlabs_prometheus.defaults.pkgs.name }}"
+    state : link
+
+- name: ctlabs_prometheus.tasks.package.group
+  group:
+    name   : "{{ ctlabs_prometheus.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_prometheus.tasks.package.user
+  user:
+    name   : "{{ ctlabs_prometheus.defaults.config.user  }}"
+    group  : "{{ ctlabs_prometheus.defaults.config.group }}"
+    system : true
+

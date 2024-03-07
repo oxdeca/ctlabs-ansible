@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_grafana.tasks.precheck.os.supported
+  assert:
+    that: os is in ctlabs_grafana.os
+    fail_msg: "OS [{{ os }}] is not supported!"
+
+- name: ctlabs_grafana.tasks.precheck.loki_url.var
+  set_fact:
+    ctlabs_grafana_loki_url: "{{ ctlabs_grafana_loki_url | default(ctlabs_grafana.defaults.config.ds.loki.url) }}"
+
+- name: ctlabs_grafana.tasks.precheck.loki_url.local
+  set_fact:
+    ctlabs_grafana_loki_url: "{{ ansible_local.ctlabs.grafana.ds.loki_url | default(ctlabs_grafana_loki_url) }}"
+

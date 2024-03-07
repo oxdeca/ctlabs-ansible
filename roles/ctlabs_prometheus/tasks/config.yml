@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_prometheus/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_prometheus.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_prometheus.defaults.config.cfgdir }}"
+    state : directory
+
+- name: ctlabs_prometheus.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_prometheus.defaults.config.template }}"
+    dest : "{{ ctlabs_prometheus.defaults.config.cfgdir }}/{{ ctlabs_prometheus.defaults.config.file }}"
+  notify: ctlabs_prometheus.handlers.prometheus.service.restart
+
+- name: ctlabs_prometheus.tasks.config.datadir
+  file:
+    dest    : "{{ ctlabs_prometheus.defaults.config.datadir }}"
+    owner   : "{{ ctlabs_prometheus.defaults.config.user    }}"
+    group   : "{{ ctlabs_prometheus.defaults.config.group   }}"
+    state   : directory
+    recurse : true
+
+- name: ctlabs_prometheus.tasks.config.agentdir
+  file:
+    dest    : "{{ ctlabs_prometheus.defaults.config.agentdir }}"
+    owner   : "{{ ctlabs_prometheus.defaults.config.user     }}"
+    group   : "{{ ctlabs_prometheus.defaults.config.group    }}"
+    state   : directory
+    recurse : true
+  when: ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent'
+

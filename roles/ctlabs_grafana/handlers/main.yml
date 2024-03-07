@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_grafana/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_grafana.handlers.grafana-server.service.restart
+  service:
+    name    : "{{ ctlabs_grafana.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_grafana.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
+

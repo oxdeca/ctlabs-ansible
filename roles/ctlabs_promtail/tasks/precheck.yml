@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_promtail/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_promtail.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_promtail.os
+    fail_msg: "OS [{{ os }}] is not supported!"
+
+- name: ctlabs_promtail.tasks.precheck.loki_url.var
+  set_fact:
+    oanda_promtail_loki_url: "{{ oanda_promtail_loki_url | default(ctlabs_promtail.defaults.config.loki_url) }}"
+
+- name: ctlabs_promtail.tasks.precheck.loki_url.local
+  set_fact:
+    oanda_promtail_loki_url: "{{ ansible_local.oanda.loki.url | default(oanda_promtail_loki_url) }}"
+
