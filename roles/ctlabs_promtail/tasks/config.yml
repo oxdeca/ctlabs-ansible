@@ -5,9 +5,6 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-#
-# Linux
-#
 - name: ctlabs_promtail.tasks.config
   block:
     - name: ctlabs_promtail.tasks.config.dir
@@ -28,4 +25,13 @@
         src  : "{{ ctlabs_promtail.defaults.config.template }}"
         dest : "{{ ctlabs_promtail.defaults.config.cfgdir }}/{{ ctlabs_promtail.defaults.config.file }}"
       notify: ctlabs_promtail.handlers.promtail.service.restart
+
+- name: ctlabs_promtail.tasks.config.journald.fix_perms
+  when: os == 'centos9'
+  file:
+    dest   : "{{ ctlabs_promtail.defaults.config.journald.dir   }}"
+    owner  : "{{ ctlabs_promtail.defaults.config.journald.owner }}"
+    group  : "{{ ctlabs_promtail.defaults.config.journald.group }}"
+    mode   : "{{ ctlabs_promtail.defaults.config.journald.perms }}"
+    recurse: yes
 

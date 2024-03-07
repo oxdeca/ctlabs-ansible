@@ -192,23 +192,3 @@
   roles :
     - roles/ctlabs_loki
 
-# -----------------------------------------------------------------------------
-# ctlabs_sssd
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.sssd
-  hosts :
-    - hosts
-  tags  : sssd
-  roles :
-    - roles/ctlabs_sssd
-
-# -----------------------------------------------------------------------------
-# ctlabs_sudo
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.sudo
-  hosts :
-    - hosts
-  tags  : sudo
-  roles :
-    - roles/ctlabs_sudo
-
