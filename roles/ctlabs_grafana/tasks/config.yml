@@ -8,6 +8,12 @@
 - name: ctlabs_grafana.tasks.config.datasource.loki
   template:
     src  : "{{ ctlabs_grafana.defaults.config.ds.loki.template }}"
-    dest : "{{ ctlabs_grafana.defaults.config.ds.dir}}/{{ ctlabs_grafana.defaults.config.ds.loki.file }}"
+    dest : "{{ ctlabs_grafana.defaults.config.ds.dir }}/{{ ctlabs_grafana.defaults.config.ds.loki.file }}"
+  notify: ctlabs_grafana.handlers.grafana-server.service.restart
+
+- name: ctlabs_grafana.tasks.config.datasource.mimir
+  template:
+    src  : "{{ ctlabs_grafana.defaults.config.ds.mimir.template }}"
+    dest : "{{ ctlabs_grafana.defaults.config.ds.dir }}/{{ ctlabs_grafana.defaults.config.ds.mimir.file }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
 

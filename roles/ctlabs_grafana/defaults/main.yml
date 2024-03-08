@@ -21,9 +21,13 @@ ctlabs_grafana:
       ds:
         dir : /etc/grafana/provisioning/datasources
         loki:
-          url     : http://192.168.20.23:3100
+          url     : http://loki.ctlabs.local:3100
           file    : loki.yml
           template: loki.yml.j2
+        mimir:
+          url     : http://mimir.ctlabs.local:9009/prometheus
+          file    : mimir.yml
+          template: mimir.yml.j2
       smtp:
         host     : 
         user     :

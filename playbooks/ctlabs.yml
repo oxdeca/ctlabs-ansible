@@ -58,7 +58,7 @@
             "mode"   : "agent",
             "config" : {
               "remote_write" : {
-                "uri" : "http://prometheus.ctlabs.local:9009/api/v1/push"
+                "uri" : "http://mimir.ctlabs.local:9009/api/v1/push"
               }
             }
           }
