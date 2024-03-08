@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_ca/tasks/config.yml
+# Description : configuration
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ca.tasks.config.group.certs.exists
+  group:
+    name   : "{{ ctlabs_ca.defaults.config.group }}"
+    system : true
+

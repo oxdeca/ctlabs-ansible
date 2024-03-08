@@ -26,12 +26,14 @@
 - name: ctlabs_ca.tasks.certs.copy
   when : inventory_hostname != 'localhost'
   copy: 
-    src : "{{ item.name }}"
-    dest: "{{ ctlabs_ca.defaults.config.dir }}"
-    mode: "{{ item.mode }}"
+    src   : "{{ item.name }}"
+    dest  : "{{ ctlabs_ca.defaults.config.dir   }}"
+    mode  : "{{ ctlabs_ca.defaults.config.perms }}"
+    owner : "{{ ctlabs_ca.defaults.config.user  }}"
+    group : "{{ ctlabs_ca.defaults.config.group }}"
   loop:
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt", mode: '0640' }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt", mode: '0640' }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key", mode: '0600' }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv", mode: '0600' }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv" }
 

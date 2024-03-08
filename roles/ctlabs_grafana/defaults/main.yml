@@ -28,6 +28,10 @@ ctlabs_grafana:
           url     : http://mimir.ctlabs.local:9009/prometheus
           file    : mimir.yml
           template: mimir.yml.j2
+      server:
+        proto: https
+        cert : /etc/ca-ctlabs/grafana.ctlabs.local.crt
+        key  : /etc/ca-ctlabs/grafana.ctlabs.local.prv
       smtp:
         host     : 
         user     :
@@ -36,7 +40,9 @@ ctlabs_grafana:
         from_name:
      
     service:
-      name : grafana-server.service
+      name  : grafana-server.service
+      user  : grafana
+      groups: [grafana,certs]
   os:
     - rhel7
     - rhel8

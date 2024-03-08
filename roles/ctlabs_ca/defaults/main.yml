@@ -10,6 +10,9 @@ ctlabs_ca:
     pkgs:
       - name : openssl
     config:
+      user   : root
+      group  : certs
+      perms  : 0640
       dir    : /etc/ca-ctlabs
       domain : ctlabs.local
       ca     :
@@ -25,8 +28,6 @@ ctlabs_ca:
         cacerts: /etc/ssl/certs/ca-certificates.crt
       redhat:
         cacerts: /etc/pki/tls/cert.pem
-    service:
-      name : slapd.service
   os:
     - centos7
     - centos8

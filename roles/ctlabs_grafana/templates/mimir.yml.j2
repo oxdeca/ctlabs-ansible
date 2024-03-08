@@ -9,7 +9,6 @@ apiVersion: 1
 
 datasources:
   - name          : mimir
-    type          : mimir
-    prometheusType: Mimir
+    type          : prometheus
     url           : "{{ ctlabs_grafana_mimir_url }}"
 

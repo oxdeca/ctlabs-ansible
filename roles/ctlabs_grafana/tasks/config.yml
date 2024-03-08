@@ -17,3 +17,8 @@
     dest : "{{ ctlabs_grafana.defaults.config.ds.dir }}/{{ ctlabs_grafana.defaults.config.ds.mimir.file }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
 
+- name: ctlabs_grafana.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_grafana.defaults.service.user   }}"
+    groups: "{{ ctlabs_grafana.defaults.service.groups }}"
+
