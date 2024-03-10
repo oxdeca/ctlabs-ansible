@@ -34,4 +34,5 @@ ctlabs_node_exporter:
     - centos7
     - centos8
     - centos9
-
+    - debian11
+    - kali2024

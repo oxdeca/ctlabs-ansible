@@ -1,0 +1,15 @@
+{# ------------------------------------------------------------------------- #}
+{# File: ctlabs_prometheus/templates/01_node_exporter.job.j2                 #}
+{# ------------------------------------------------------------------------- #}
+
+{% if ansible_local.ctlabs_prometheus.config.node_exporter is defined %}
+# -----------------------------------------------------------------------------
+# node_exporter
+# -----------------------------------------------------------------------------
+- job_name: node_exporter
+  static_configs:
+    - targets:
+{%   for target in ctlabs_prometheus.defaults.config.targets %}
+	    - {{ target }}
+{%    endfor %}
+{%  endif %}

@@ -57,7 +57,6 @@ scrape_configs:
 # -----------------------------------------------------------------------------
 # Includes
 # -----------------------------------------------------------------------------
-{% for template in ctlabs_promtail.defaults.config.templates %}
-{%   include template %}
-{% endfor %}
-
+{%- for template in ctlabs_promtail.defaults.config.templates -%}
+{%-   include template -%}
+{%- endfor -%}

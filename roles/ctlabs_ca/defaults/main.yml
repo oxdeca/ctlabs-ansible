@@ -12,7 +12,7 @@ ctlabs_ca:
     config:
       user   : root
       group  : certs
-      perms  : 0640
+      perms  : '0640'
       dir    : /etc/ca-ctlabs
       domain : ctlabs.local
       ca     :

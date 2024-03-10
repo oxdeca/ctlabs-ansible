@@ -34,9 +34,13 @@ ctlabs_prometheus:
         targets :
       agent:
         targets :
+          - 192.168.10.11:9100
+          - 192.168.20.11:9100
           - 192.168.10.21:9100
           - 192.168.20.22:9100
           - 192.168.20.23:9100
+      templates:
+        - 10_node_exporter.job.j2
     service:
       name     : prometheus.service
       template : prometheus.service.j2
@@ -47,4 +51,3 @@ ctlabs_prometheus:
     - centos7
     - centos8
     - centos9
-

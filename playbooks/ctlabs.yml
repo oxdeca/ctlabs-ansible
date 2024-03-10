@@ -125,7 +125,7 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.syslog
   hosts :
-    - hosts
+    - ns1
   tags  : syslog
   roles :
     - roles/ctlabs_syslog
