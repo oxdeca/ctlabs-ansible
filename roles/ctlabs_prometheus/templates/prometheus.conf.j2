@@ -30,20 +30,16 @@ rule_files:
 scrape_configs:
 - job_name: prometheus
   static_configs:
-    - targets: localhost:9090
+    - targets: 
+      - localhost:9090
 
 # -----------------------------------------------------------------------------
 # Includes
 # -----------------------------------------------------------------------------
-{%- for template in ctlabs_promtail.defaults.config.templates -%}
+{%- for template in ctlabs_prometheus.defaults.config.templates -%}
 {%-   include template -%}
 {%- endfor -%}
 
-{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
-{%   for target in ( ansible_local.ctlabs_prometheus.config.agent.targets | default(ctlabs_prometheus.defaults.config.agent.targets )) %}
-        - {{ target }}
-{%   endfor %}
-{% endif %}
 
 {% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
 remote_write:

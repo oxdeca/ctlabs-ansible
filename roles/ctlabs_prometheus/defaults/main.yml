@@ -32,7 +32,7 @@ ctlabs_prometheus:
         targets :
       receiver:
         targets :
-      agent:
+      node_exporter:
         targets :
           - 192.168.10.11:9100
           - 192.168.20.11:9100

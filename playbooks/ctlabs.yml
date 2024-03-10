@@ -57,7 +57,8 @@
           {
             "mode"   : "agent",
             "config" : {
-              "remote_write" : {
+              "node_exporter" : true,
+              "remote_write"  : {
                 "uri" : "http://mimir.ctlabs.local:9009/api/v1/push"
               }
             }
@@ -155,9 +156,7 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.monitoring.node_exporter
   hosts :
-    - prometheus
-    - grafana
-    - loki
+    - hosts
   tags  : node_exporter
   roles :
     - roles/ctlabs_node_exporter
