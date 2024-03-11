@@ -10,13 +10,27 @@
     name : "{{ ctlabs_slapd.defaults.config.tls.dir }}"
     state: directory
 
+- name: ctlabs_slapd.tasks.config.log.dir.exists
+  file:
+    name : "{{ ctlabs_slapd.defaults.config[os_family].log_dir }}"
+    state: directory
+    owner: "{{ ctlabs_slapd.defaults.service[os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
+
+- name: ctlabs_slapd.tasks.config.run.dir.exists
+  file:
+    name : "{{ ctlabs_slapd.defaults.config[os_family].run_dir }}"
+    state: directory
+    owner: "{{ ctlabs_slapd.defaults.service[os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
+
 - name: ctlabs_slapd.tasks.config.tls.prepare
   copy:
     src  : "{{ ctlabs_slapd.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
     dest : "{{ ctlabs_slapd.defaults.config.tls.dir }}/{{ item.name }}"
     mode : "{{ item.mode }}"
-    owner: "{{ ctlabs_slapd.defaults.user }}"
-    group: "{{ ctlabs_slapd.defaults.group }}"
+    owner: "{{ ctlabs_slapd.defaults.service[os_family].user }}"
+    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
   loop:
     - { name: "{{ ctlabs_slapd.defaults.config.tls.crt }}", mode: '0640' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.key }}", mode: '0600' }
@@ -30,13 +44,13 @@
   notify: ctlabs_slapd.handlers.service.restart
 
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
-  command: mv "{{ ctlabs_slapd.defaults.config.dir }}" "{{ ctlabs_slapd.defaults.config.dir }}.bak"
+  command: mv "{{ ctlabs_slapd.defaults.config[os_family].slapd_dir }}" "{{ ctlabs_slapd.defaults.config[os_family].slapd_dir }}.bak"
   ignore_errors: true
-    #src : "{{ ctlabs_slapd.defaults.config.dir }}"
-    #dest: "{{ ctlabs_slapd.defaults.config.dir }}.bak"
+    #src : "{{ ctlabs_slapd.defaults.config.slapd_dir }}"
+    #dest: "{{ ctlabs_slapd.defaults.config.slapd_dir }}.bak"
 
 - name: ctlabs_slapd.tasks.config.installed
   template:
-    src  : "{{ ctlabs_slapd.defaults.config.template }}"
-    dest : "{{ ctlabs_slapd.defaults.config.file     }}"
+    src  : "{{ ctlabs_slapd.defaults.config[os_family].template }}"
+    dest : "{{ ctlabs_slapd.defaults.config[os_family].file     }}"
   notify: ctlabs_slapd.handlers.service.restart

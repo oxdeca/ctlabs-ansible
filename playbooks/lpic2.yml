@@ -92,6 +92,16 @@
   tags  : slapd
   roles :
     - roles/ctlabs_slapd
+
+# -----------------------------------------------------------------------------
+# ctlabs_haproxy
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.haproxy
+  hosts :
+    - slapd1
+    - slapd2
+  tags  : haproxy
+  roles :
     - roles/ctlabs_haproxy
 
 # -----------------------------------------------------------------------------

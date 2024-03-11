@@ -8,18 +8,39 @@
 ctlabs_slapd:
   defaults:
     pkgs:
-      - name : slapd
-      - name : ldap-utils
+      debian:
+        - name : slapd
+        - name : ldap-utils
+      redhat:
+        - name : openldap-servers
+        - name : openldap-clients
     service:
-      name : slapd.service
-    user : openldap
-    group: openldap
+      debian:
+        name : slapd.service
+        user : openldap
+        group: openldap
+      redhat:
+        name : slapd.service
+        user : ldap
+        group: ldap
     config:
-      template : slapd.conf.j2
-      file     : /etc/ldap/slapd.conf
-      dir      : /etc/ldap/slapd.d
-      ca_ctlabs:
-        certdir: /etc/ca-ctlabs
+      debian:
+        dir      : /etc/ldap
+        run_dir  : /var/run/slapd
+        log_dir  : /var/log/slapd
+        slapd_dir: /etc/ldap/slapd.d
+        lib_dir  : /usr/lib/ldap
+        template : slapd.conf.j2
+        file     : /etc/ldap/slapd.conf
+      redhat:
+        dir      : /etc/openldap
+        run_dir  : /var/run/slapd
+        log_dir  : /var/log/slapd
+        slapd_dir: /etc/openldap/slapd.d
+        lib_dir  : /usr/lib64/openldap
+        template : slapd.conf.j2
+        file     : /etc/openldap/slapd.conf
+
       default:
         template: slapd.default.j2
         file    : /etc/default/slapd
@@ -32,6 +53,8 @@ ctlabs_slapd:
             user  : cn=slapd,ou=services,dc=ctlabs,dc=local
             pass  : secret123!
 
+      ca_ctlabs:
+        certdir: /etc/ca-ctlabs
       tls:
         dir : /etc/ldap/certs
         crt : "{{ inventory_hostname }}.ctlabs.local.crt"
@@ -42,4 +65,5 @@ ctlabs_slapd:
   os:
     - debian11
     - debian12
+    - centos9
 

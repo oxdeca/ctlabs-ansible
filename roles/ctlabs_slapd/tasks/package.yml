@@ -9,4 +9,4 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_slapd.defaults.pkgs }}"
+  loop: "{{ ctlabs_slapd.defaults.pkgs[os_family] }}"

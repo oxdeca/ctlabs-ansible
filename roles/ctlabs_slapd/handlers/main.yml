@@ -7,11 +7,11 @@
 
 - name: ctlabs_slapd.handlers.service.restart
   service:
-    name    : "{{ ctlabs_slapd.defaults.service.name }}"
+    name    : "{{ ctlabs_slapd.defaults.service[os_family].name }}"
     enabled : true
     state   : restarted
 
 - name: ctlabs_slapd.handlers.service.reload
   service:
-    name  : "{{ ctlabs_slapd.defaults.service.name }}"
+    name  : "{{ ctlabs_slapd.defaults.service[os_family].name }}"
     state : reloaded

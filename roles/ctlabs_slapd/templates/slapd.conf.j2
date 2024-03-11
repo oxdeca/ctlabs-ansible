@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
 # Global Configuration
 # -----------------------------------------------------------------------------
-pidfile                 /var/run/ldap/slapd.pid
-argsfile                /var/run/ldap/slapd.args
+pidfile                 {{ ctlabs_slapd.defaults.config[os_family].run_dir }}/slapd.pid
+argsfile                {{ ctlabs_slapd.defaults.config[os_family].run_dir }}/slapd.args
 
 TLSCACertificateFile    {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.ca  }}
 TLSCertificateFile      {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.crt }}
@@ -10,23 +10,23 @@ TLSCertificateKeyFile   {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_sla
 #TLSVerifyClient         never
 
 sizelimit               10000
-logfile                 /var/log/slapd/slapd.log
+logfile                 {{ ctlabs_slapd.defaults.config[os_family].log_dir }}/slapd.log
 loglevel                256
 
 # -----------------------------------------------------------------------------
 # Schemas
 # -----------------------------------------------------------------------------
-include                 /etc/ldap/schema/core.schema
-include                 /etc/ldap/schema/cosine.schema
-include                 /etc/ldap/schema/inetorgperson.schema
-include                 /etc/ldap/schema/misc.schema
-include                 /etc/ldap/schema/nis.schema
-#include                 /etc/ldap/schema/ad.schema
+include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/core.schema
+include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/cosine.schema
+include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/inetorgperson.schema
+include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/misc.schema
+include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/nis.schema
+#include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/ad.schema
 
 # -----------------------------------------------------------------------------
 # Modules
 # -----------------------------------------------------------------------------
-modulepath              /usr/lib/ldap/
+modulepath              {{ ctlabs_slapd.defaults.config[os_family].lib_dir }}
 moduleload              back_ldap
 moduleload              rwm
 
@@ -49,7 +49,7 @@ idassert-authzFrom       "*"
 # Overlays
 # -----------------------------------------------------------------------------
 overlay                  rwm
-rwm-map                  attribute       uid             sAMAccountName
+#rwm-map                  attribute       uid             sAMAccountName
 rwm-map                  objectClass     posixAccount    person
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
