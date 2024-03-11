@@ -11,7 +11,7 @@
     dest : "{{ ctlabs_semaphore.defaults.config.file     }}"
   notify: ctlabs_semaphore.handlers.semaphore.service.restart
 
-- name: ctlabs_semaphore.tasks.config.boltdb
-  copy:
-    dest    : "{{ ctlabs_semaphore.defaults.config.boltdb }}"
-    content : "{{ lookup('file', ctlabs_semaphore.defaults.config.boltdb.b64) | b64decode }}"
+#- name: ctlabs_semaphore.tasks.config.boltdb
+#  copy:
+#    dest    : "{{ ctlabs_semaphore.defaults.config.boltdb }}"
+#    content : "{{ lookup('file', ctlabs_semaphore.defaults.config.boltdb.b64) | b64decode }}"

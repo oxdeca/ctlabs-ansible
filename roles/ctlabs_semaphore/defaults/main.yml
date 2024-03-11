@@ -27,3 +27,4 @@ ctlabs_semaphore:
     - rhel8
     - centos7
     - centos8
+    - centos9
