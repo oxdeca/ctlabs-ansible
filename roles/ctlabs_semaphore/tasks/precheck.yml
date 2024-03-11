@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_semaphore/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_semaphore.os
+    fail_msg: "OS [{{ os }}] is not supported!"

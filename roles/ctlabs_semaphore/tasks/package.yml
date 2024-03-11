@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_semaphore/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+#- name: ctlabs_semaphore.tasks.package.bindir
+#  file:
+#    path  : "{{ ctlabs_semaphore.defaults.config.bindir }}"
+#    state : directory
+
+- name: ctlabs_semaphore.tasks.package.install
+  yum:
+    name              : "{{ item.url if item.url is defined else item.name }}"
+    disable_gpg_check : true
+    state             : present
+  loop: "{{ ctlabs_semaphore.defaults.pkgs }}"
+
+#- name: ctlabs_semaphore.tasks.package.group
+#  group:
+#    name   : "{{ ctlabs_semaphore.defaults.config.group }}"
+#    system : true
+
+#- name: ctlabs_semaphore.tasks.package.user
+#  user:
+#    name   : "{{ ctlabs_semaphore.defaults.config.user  }}"
+#    group  : "{{ ctlabs_semaphore.defaults.config.group }}"
+#    system : true

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_semaphore/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_semaphore:
+  defaults:
+    pkgs:
+      - name    : semaphore
+        version : 2.9.45
+        url     : https://github.com/ansible-semaphore/semaphore/releases/download/v2.9.45/semaphore_2.9.45_linux_amd64.rpm
+      - name    : bolt
+        version : latest
+    config:
+      bin        : /usr/bin/semaphore
+      file       : /root/config.json
+      template   : config.json.j2
+      boltdb     : /root/semaphore.boltdb
+      boltdb.b64 : files/db.b64
+    service:
+      name     : semaphore.service
+      template : semaphore.service.j2
+  os:
+    - rhel7
+    - rhel8
+    - centos7
+    - centos8

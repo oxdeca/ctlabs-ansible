@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_semaphore/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore.handlers.semaphore.service.restart
+  service:
+    name    : "{{ ctlabs_semaphore.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_semaphore.handlers.semaphore.service.reload
+  service:
+    name  : "{{ ctlabs_semaphore.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_semaphore.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

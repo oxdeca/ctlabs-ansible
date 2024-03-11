@@ -1,0 +1,15 @@
+[Unit]
+Description=Semaphore Ansible
+Documentation=https://github.com/ansible-semaphore/semaphore
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart={{ ctlabs_semaphore.defaults.config.bin }} service --config={{ ctlabs_semaphore.defaults.config.file }}
+SyslogIdentifier=semaphore
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

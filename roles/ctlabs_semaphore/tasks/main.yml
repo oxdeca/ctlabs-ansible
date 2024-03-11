@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_semaphore/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_semaphore
+    - ctlabs_semaphore.precheck
+    - ctlabs_semaphore.package
+    - ctlabs_semaphore.config
+    - ctlabs_semaphore.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_semaphore
+    - ctlabs_semaphore.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_semaphore
+    - ctlabs_semaphore.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_semaphore
+    - ctlabs_semaphore.service
