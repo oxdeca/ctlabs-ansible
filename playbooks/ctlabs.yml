@@ -25,7 +25,7 @@
           {
             "type"   : "master",
             "zones"  : [ "ctlabs.local" ],
-            "slaves" : [ "ns2" ]
+            "slaves" : [ "192.168.20.11" ]
           }
 
     - name: ctlabs.playbooks.setup.bind.slave.local_facts
@@ -36,7 +36,7 @@
           {
             "type"    : "slave",
             "zones"   : [ "ctlabs.local" ],
-            "masters" : [ "ns1" ]
+            "masters" : [ "192.168.10.11" ]
           }
 
     - name: ctlabs.playbooks.smbadc.local_facts

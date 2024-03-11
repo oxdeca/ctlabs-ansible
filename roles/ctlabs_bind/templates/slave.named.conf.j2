@@ -1,5 +1,5 @@
 {# --------------------------------------------------------------------- #}
-{# File: ctlabs-ansible/roles/ctlabs_bind/templates/master.named.conf.j2 #}
+{# File: ctlabs-ansible/roles/ctlabs_bind/templates/slave.named.conf.j2  #}
 {# --------------------------------------------------------------------- #}
 
 options {
@@ -57,7 +57,7 @@ include  "/etc/named.root.key";
 
 {% for zone in ansible_local.ctlabs_bind.zones %}
 zone "{{ zone }}" IN {
-  type   master;
-  file   "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone }}.db";
+  type   slave;
+  masters  { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
 };
 {%  endfor %}
