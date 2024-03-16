@@ -1,0 +1,79 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_tomcat/tasks/instance.yml
+# Description : creates instance configuration files instance.<id>
+#               - expects a dictionary 'item' which looks like this
+#
+# 3075:                              # <<< item.key = instance.id
+#   tomcat_version : 8               # <<< tomcat version
+#     jdk_version  : 11              # <<< jdk version
+#     jvm_options  : -Xss1m -Xms200m -Xmx400m
+#     env:
+#       CASINOSERVICES_HOME     : /bigdisk0/tomcat/conf/3075-common
+#       CASINOSERVICESTEST_HOME : /bigdisk0/tomcat/conf/3075-common-test
+#       CS_JPF_HOME             : /bigdisk0/tomcat/conf/3075-jpf-relax
+#       VENDOR                  : RELAX
+#       VENDOR_ID               : 30
+#
+# called by ctlabs_tomcat/tasks/main.yml as loop
+# ------------------------------------------------------------------------------
+
+- name: instance
+  tags:
+    - ctlabs_tomcat
+    - ctlabs_tomcat.instance
+
+  block:
+  # store item in fact 'instance'
+  - name: ctlabs_tomcat.instance.item_to_facts
+    set_fact:
+      instance : "{{ instances.key }}"
+      props    : "{{ instances.value }}"
+
+  - name: ctlabs_tomcat.instance.default.config.gather
+    find:
+      path     : "{{ ctlabs_tomcat.defaults.config.tomcat_path }}{{ props.tomcat_version }}/conf"
+      pattern  : "*"
+    register: default_config
+
+  #- debug: var=default_config
+
+  - name: ctlabs_tomcat.instance.default.config.present
+    copy:
+      src           : "{{ item.path }}"
+      dest          : "{{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ instance }}/conf/"
+      remote_src    : true
+    loop: "{{ default_config.files }}"
+
+  - name: ctlabs_tomcat.instance.config.present
+    template:
+      src  : templates/sysconfig.instance.j2
+      dest : "{{ ctlabs_tomcat.defaults.config.data_dir }}/sysconfig/instance.{{ instance }}"
+    notify: ctlabs_tomcat.handler.instance.restart
+
+  - name: ctlabs_tomcat.instance.catalina_base.present
+    file:
+      name  : "{{ ctlabs_tomcat.defaults.config.catalina_base }}"
+      state : directory
+      mode  : '0755'
+
+  - name: ctlabs_tomcat.instance.instance_dirs.present
+    file:
+      name  : "{{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ instance }}/{{ dirs }}"
+      owner : "{{ ctlabs_tomcat.defaults.config.user }}"
+      group : "{{ ctlabs_tomcat.defaults.config.group }}"
+      state : directory
+    loop  : "{{ ctlabs_tomcat.defaults.config.instance_dirs }}"
+    loop_control:
+      loop_var: dirs
+
+  - name: ctlabs_tomcat.instance.server.xml.present
+    template:
+      src  : templates/server.xml.j2
+      dest : "{{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ instance }}/conf/server.xml"
+
+  - name: ctlabs_tomcat.instance.connector.xml.present
+    template:
+      src  : templates/connector.xml.j2
+      dest : "{{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ instance }}/conf/connector.xml"

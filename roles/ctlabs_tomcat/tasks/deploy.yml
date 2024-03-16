@@ -1,0 +1,27 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_tomcat/tasks/deploy.yml
+# Description : deploys an application for an instance
+#
+# called by ctlabs_tomcat/tasks/main.yml as loop
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_tomcat.deploy.block
+  block:
+  - name: ctlabs_tomcat.deploy.instance.fact
+    set_fact:
+      instances_to_restart : "{{ instances_to_restart + [deploy.instance] }}"
+
+  - name: ctlabs_tomcat.deploy.war
+    get_url:
+      url            : "{{ deploy.src }}"
+      dest           : "{{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ deploy.instance }}/webapps/"
+      owner          : "{{ ctlabs_tomcat.defaults.config.user }}"
+      group          : "{{ ctlabs_tomcat.defaults.config.group }}"
+      validate_certs : no
+    notify: ctlabs_tomcat.handler.instance.restart
+  tags:
+    - ctlabs_tomcat
+    - ctlabs_tomcat.deploy

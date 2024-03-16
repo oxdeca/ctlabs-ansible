@@ -1,0 +1,76 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_tomcat:
+  defaults:
+    pkgs:
+      - name : tomcat
+      - name : jdk
+    service:
+      name     : ctlabs_tomcat
+      file     : "{{ systemd_dir }}/ctlabs_tomcat@.service"
+      template : templates/service.j2
+    config:
+      user             : tomcat
+      group            : users
+      dir_mode         : '0770'
+      umask            : '0002'
+      shell            : /sbin/nologin
+      data_dir         : "{{ data_dir }}/tomcat"
+      catalina_base    : "{{ data_dir }}/tomcat/catalina_base"
+      tomcat_path      : "{{ software_dir }}/tomcat"
+      jdk_path         : "{{ software_dir }}/jdk"
+      tomcat_version   : 8
+      jdk_version      : 11
+      jvm_options      : -Xss1m -Xms512m -Xmx2048m
+      base_listen_port : 8079
+      base_server_port : 9004
+
+      server:
+        template: templates/server.xml.j2
+        xml     : server.xml
+      connector:
+        template: templates/connector.xml.j2
+        xml     : connector.xml
+      files:
+        - catalina.policy
+        - catalina.properties
+        - context.xml
+#      - jaspic-providers.xml
+#      - jaspic-providers.xsd
+        - logging.properties
+        - tomcat-users.xml
+        - tomcat-users.xsd
+        - web.xml
+      data_dirs:
+        - conf
+        - sysconfig
+        - logs
+        - pids
+        - temp
+        - catalina_base
+      instance_dirs:
+        - conf
+        - lib
+        - logs
+        - temp
+        - webapps
+        - work
+    sysconfig:
+      name     : 'instance.'
+      dir      : "{{ data_dir }}/tomcat/sysconfig"
+      template : templates/sysconfig.instance.j2
+#  instances:
+#    1:
+#      tomcat_version:  8
+#      jdk_version   : 11
+#    3:
+#      tomcat_version:  7
+#      jdk_version   : 11
+  os:
+    - centos7
+    - centos8

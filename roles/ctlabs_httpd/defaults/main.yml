@@ -15,11 +15,11 @@ ctlabs_httpd:
         - name : mod_ssl
     service:
       debian:
-        name : apache2
+        name : apache2.service
         user : www-data
         group: www-data
       redhat:
-        name : apache2
+        name : httpd.service
         user : daemon
         group: daemon
     config:

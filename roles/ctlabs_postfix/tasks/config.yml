@@ -1,0 +1,43 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/tasks/config.yml
+# Description : default task
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postfix.tasks.config.files
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_postfix.defaults.config.dir }}/{{ item.name }}"
+  loop: "{{ ctlabs_postfix.defaults.config.files }}"
+  notify: ctlabs_postfix.handlers.service.reload
+
+- name: ctlabs_postfix.tasks.config.maps
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_postfix.defaults.config.dir }}/{{ item.name }}"
+  loop: "{{ ctlabs_postfix.defaults.config.maps }}"
+  notify: "ctlabs_postfix.handlers.postmap.{{ item.name }}"
+
+- name: ctlabs_postfix.tasks.config.group.syslog.exists
+  group:
+    name   : "{{ ctlabs_postfix.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_postfix.tasks.config.datadir.exists
+  file:
+    path  : "{{ ctlabs_postfix.defaults.config.datadir }}"
+    owner : "{{ ctlabs_postfix.defaults.config.user  }}"
+    group : "{{ ctlabs_postfix.defaults.config.group }}"
+    mode  : '2750'
+    state : directory
+
+- name: ctlabs_postfix.tasks.config.datadir.perms
+  acl:
+    path    : "{{ ctlabs_postfix.defaults.config.datadir }}"
+    entry   : "{{ item }}"
+    default : true
+    state   : present
+  loop:
+    - "default:group:{{ ctlabs_postfix.defaults.config.group }}:rx"
+

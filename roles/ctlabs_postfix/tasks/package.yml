@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/tasks/package.yml
+# Description : main ctlabs_postfix tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postfix.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop : "{{ ctlabs_postfix.defaults.pkgs }}"

@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/tasks/main.yml
+# Description : default task
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.precheck
+    - ctlabs_postfix.package
+    - ctlabs_postfix.config
+    - ctlabs_postfix.service
+    - ctlabs_postfix.helper
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.service
+
+- import_tasks: helper.yml
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.helper

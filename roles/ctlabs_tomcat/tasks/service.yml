@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_tomcat/tasks/service.yml
+# Description : main ctlabs_tomcat service
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_tomcat.service.installed
+  template:
+    src  : templates/service.j2
+    dest : "{{ ctlabs_tomcat.defaults.service.file }}"
+  notify: ctlabs_tomcat.handler.systemd.reload
+
+
+#
+# https://www.freedesktop.org/wiki/Software/systemd/Incompatibilities/

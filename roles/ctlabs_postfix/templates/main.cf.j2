@@ -1,0 +1,11 @@
+# -----------------------------------------------------------------------------
+# File : /etc/postfix/main.cf
+# -----------------------------------------------------------------------------
+
+mydomain            = localdomain
+myhostname          = localhost
+relayhost           = [localhost]
+
+recipient_bcc_maps  = pcre:/etc/postfix/recipient_bcc_maps
+transport_maps      = hash:/etc/postfix/transport
+

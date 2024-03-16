@@ -1,0 +1,40 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/defaults/main.yml
+# Description : defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_postfix:
+  defaults:
+    pkgs:
+      - name : postfix
+      - name : mailx
+      - name : postfix-pcre # for RHEL8
+    config:
+      dir     : /etc/postfix
+      datadir : /var/email_archive
+      postmap : /usr/sbin/postmap
+      files :
+        - name     : main.cf
+          template : main.cf.j2
+        - name     : master.cf
+          template : master.cf.j2
+      maps:
+        - name     : virtual
+          template : virtual.j2
+        - name     : transport
+          template : transport.j2
+        - name     : recipient_bcc_maps
+          template : recipient_bcc_maps.j2
+      template :
+      user     : mail
+      group    : syslog
+    service:
+      name      : postfix.service
+      templates : postfix.service.j2
+    os:
+      - rhel7
+      - rhel8
+      - centos7
+      - centos8

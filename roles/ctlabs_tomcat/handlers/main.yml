@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/handlers/main.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tomcat.handlers.systemd.reload
+  systemd:
+    daemon_reload: yes
+
+- name: ctlabs_tomcat.handlers.instance.restart
+  systemd:
+    name  : "ctlabs_tomcat@{{ item }}.service"
+    state : restarted
+  when: instances_to_restart is defined
+  loop: "{{ instances_to_restart }}"
+  notify: ctlabs_tomcat.handlers.empty.instances_to_restart
+
+- name: ctlabs_tomcat.handlers.empty.instances_to_restart
+  set_fact:
+    instances_to_restart : []

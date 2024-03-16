@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/tasks/service.yml
+# Description : service tasks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postfix.tasks.service.running
+  service:
+    name    : "{{ ctlabs_postfix.defaults.service.name }}"
+    enabled : true
+    state   : started

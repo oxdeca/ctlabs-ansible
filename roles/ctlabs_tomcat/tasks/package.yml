@@ -1,0 +1,68 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_tomcat/tasks/package.yml
+# Description : install tomcat's and jdk's
+# ------------------------------------------------------------------------------
+
+# install tomcat
+# destination is /.software/ctlabs_tomcat-<majorversion>.<minorversion>
+# /software/tomcat-<major_version> links to /.software/ctlabs_tomcat-<M>.<m>
+# multiple tomcat versions can be installed at the same time, but only
+# 1 major version link can exist (/software/tomcat-<major_version>)
+
+- name: ctlabs_tomcat.package.dirs.present
+  file:
+    name : "{{ item }}"
+    state: directory
+  loop:
+    - "{{ sw_install }}"
+    - "{{ software_dir }}"
+
+#- name: ctlabs_tomcat.package.pkgs.installed
+#  yum:
+#    name : "{{ item.key  }}"
+#    state: "{{ item.value.version }}"
+#  loop: "{{ ctlabs_tomcat.defaults.pkgs|dict2items }}"
+
+
+- name: ctlabs_tomcat.package.jdk.installed
+  unarchive:
+    src        : https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
+    dest       : "{{ sw_install }}"
+    remote_src : yes
+
+- name: ctlabs_tomcat.package.jdk.path.present
+  wait_for:
+    path: "{{ sw_install }}/jdk-11.0.12+7"
+
+
+- name: ctlabs_tomcat.package.jdk.link.present
+  file:
+    src   : "{{ sw_install }}/jdk-11.0.12+7"
+    dest  : "{{ software_dir }}/jdk11"
+    state : link
+    force : true
+
+
+- name: ctlabs_tomcat.package.tomcat.installed
+  unarchive:
+    src            : https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.75/bin/apache-tomcat-8.5.75.tar.gz
+    dest           : "{{ sw_install }}"
+    owner          : "{{ ctlabs_tomcat.defaults.config.user }}"
+    group          : "{{ ctlabs_tomcat.defaults.config.group }}"
+    remote_src     : yes
+    validate_certs : no
+
+#- name: ctlabs_tomcat.package.tomcat.installed
+#  yum:
+#    name  : "{{ item }}"
+#    state : "{{ item.version }}"
+#  loop: {{ ctlabs_tomcat.defaults.pkgs }}
+
+- name: ctlabs_tomcat.package.tomcat.link.present
+  file:
+    src   : "{{ sw_install }}/apache-tomcat-8.5.75"
+    dest  : "{{ software_dir }}/tomcat8"
+    state : link
+

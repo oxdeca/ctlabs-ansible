@@ -14,8 +14,10 @@ options {
   recursing-file          "{{ ctlabs_bind.defaults.config[os_family].recursing_file }}";
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
-  recursion               {{ ctlabs_bind.defaults.config.recursive }};
+  allow-transfer          { none; };
+  allow-notify            { {{ ansible_local.ctlabs_bind.masters|joint('; ') }}; };
 
+  recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       yes;
 
   managed-keys-directory  "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}";

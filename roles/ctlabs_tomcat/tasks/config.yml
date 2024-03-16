@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/config.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_tomcat.config.data_dirs.present
+  file:
+    name  : "{{ ctlabs_tomcat.defaults.config.data_dir }}/{{ item }}"
+    state : directory
+    owner : "{{ ctlabs_tomcat.defaults.config.user }}"
+    group : "{{ ctlabs_tomcat.defaults.config.group }}"
+  loop: "{{ ctlabs_tomcat.defaults.config.data_dirs }}"
+

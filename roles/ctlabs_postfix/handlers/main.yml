@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/handler/config.yml
+# Description : default handler
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postfix.handlers.postmap.transport
+  command: "{{ ctlabs_postfix.defaults.config.postmap }} {{ ctlabs_postfix.defaults.config.dir }}/transport"
+
+- name: ctlabs_postfix.handlers.postmap.virtual
+  command: "{{ ctlabs_postfix.defaults.config.postmap }} {{ ctlabs_postfix.defaults.config.dir }}/virtual"
+
+- name: ctlabs_postfix.handlers.postmap.recipient_bcc_maps
+  assert:
+    that: true
+
+- name: ctlabs_postfix.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_postfix.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_postfix.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_postfix.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_postfix.handlers.systemd.reload
+  systemd:
+    daemon_reload: true
