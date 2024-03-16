@@ -23,8 +23,8 @@ ctlabs_httpd:
         user : daemon
         group: daemon
     config:
-      admin      : webadm@ctlabs.local
-      servername : "{{ ansible_hostname }}.ctlabs.local"
+      admin      : webadm@ctlabs.internal
+      servername : "{{ ansible_hostname }}.ctlabs.internal"
       listen     : 80
       debian:
         root_dir : /etc/apache2
@@ -50,7 +50,7 @@ ctlabs_httpd:
           access: access.log
           level : warn
       vhosts:
-        - name  : www.ctlabs.local
+        - name  : www.ctlabs.internal
           
   os:
     - centos9

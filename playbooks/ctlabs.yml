@@ -24,7 +24,7 @@
         content: |
           {
             "type"   : "master",
-            "zones"  : [ "ctlabs.local" ],
+            "zones"  : [ "ctlabs.internal" ],
             "slaves" : [ "192.168.20.11" ]
           }
 
@@ -35,7 +35,7 @@
         content: |
           {
             "type"    : "slave",
-            "zones"   : [ "ctlabs.local" ],
+            "zones"   : [ "ctlabs.internal" ],
             "masters" : [ "192.168.10.11" ]
           }
 
@@ -46,7 +46,7 @@
         content: |
           {
             "type"   : "master",
-            "domain" : "ctlabs.local"
+            "domain" : "ctlabs.internal"
           }
 
     - name: ctlabs.playbooks.prometheus.local_facts
@@ -59,7 +59,7 @@
             "config" : {
               "node_exporter" : true,
               "remote_write"  : {
-                "uri" : "http://mimir.ctlabs.local:9009/api/v1/push"
+                "uri" : "http://mimir.ctlabs.internal:9009/api/v1/push"
               }
             }
           }

@@ -24,8 +24,8 @@
         content: |
           {
             "type"   : "master",
-            "zones"  : [ "ctlabs.local" ],
-            "slaves" : [ "ns2" ]
+            "zones"  : [ "ctlabs.internal" ],
+            "slaves" : [ "192.168.20.11" ]
           }
 
     - name: ctlabs.playbooks.lpic2.setup.bind.slave.local_facts
@@ -35,8 +35,8 @@
         content: |
           {
             "type"    : "slave",
-            "zones"   : [ "ctlabs.local" ],
-            "masters" : [ "ns1" ]
+            "zones"   : [ "ctlabs.internal" ],
+            "masters" : [ "192.168.10.11" ]
           }
 
     - name: ctlabs.playbooks.lpic2.smbadc.local_facts
@@ -46,7 +46,7 @@
         content: |
           {
             "type"   : "master",
-            "domain" : "ctlabs.local"
+            "domain" : "ctlabs.internal"
           }
 
 # -----------------------------------------------------------------------------

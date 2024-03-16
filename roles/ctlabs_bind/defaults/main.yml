@@ -50,8 +50,7 @@ ctlabs_bind:
         log_dir        : /var/log
 
       zones:
-        - ctlabs.local
-        - sub1.ctlabs.local
+        - ctlabs.internal
   os:
     - redhat8
     - redhat9

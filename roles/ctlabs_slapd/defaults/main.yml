@@ -46,20 +46,20 @@ ctlabs_slapd:
         file    : /etc/default/slapd
       dbs:
         ldap:
-          suffix: dc=ctlabs,dc=local
-          uri   : ldaps://dc1.ctlabs.local ldaps://dc2.ctlabs.local
+          suffix: dc=ctlabs,dc=internal
+          uri   : ldaps://dc1.ctlabs.internal ldaps://dc2.ctlabs.internal
           bind  : 
             method: simple
-            user  : cn=slapd,ou=services,dc=ctlabs,dc=local
+            user  : cn=slapd,ou=services,dc=ctlabs,dc=internal
             pass  : secret123!
 
       ca_ctlabs:
         certdir: /etc/ca-ctlabs
       tls:
         dir : /etc/ldap/certs
-        crt : "{{ inventory_hostname }}.ctlabs.local.crt"
-        key : "{{ inventory_hostname }}.ctlabs.local.key"
-        prv : "{{ inventory_hostname }}.ctlabs.local.prv"
+        crt : "{{ inventory_hostname }}.ctlabs.internal.crt"
+        key : "{{ inventory_hostname }}.ctlabs.internal.key"
+        prv : "{{ inventory_hostname }}.ctlabs.internal.prv"
         ca  : ca-ctlabs.crt
 
   os:

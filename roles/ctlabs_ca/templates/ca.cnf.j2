@@ -1,14 +1,14 @@
 #
-# openssl config CA-ctlabs.local
+# openssl config CA-ctlabs.internal
 #
 
 [ req ]
 default_bits       = {{ ctlabs_ca.defaults.config.ca.bits }}
-distinguished_name = req_ca_ctlabs_local
+distinguished_name = req_ca_ctlabs_internal
 encrypt_key        = {{ ctlabs_ca.defaults.config.ca.encrypt_key }}
 prompt             = no
 
-[ req_ca_ctlabs_local ]
+[ req_ca_ctlabs_internal ]
 CN                 = {{ ctlabs_ca.defaults.config.ca.name }}
 C                  = CA
 ST                 = Ontario

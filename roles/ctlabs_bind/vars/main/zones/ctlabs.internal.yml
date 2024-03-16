@@ -1,0 +1,119 @@
+zone_ctlabs_internal:
+# -----------------------------------------------------------------------------
+# name server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : define name server
+
+  - name  : '@'
+    type  : NS
+    value : ns1.ctlabs.internal.
+
+  - name  : '@'
+    type  : NS
+    value : ns1.ctlabs.internal.
+
+  - type  : COMMENT
+    value : nameservers need an A-record
+
+  - name  : ns1
+    type  : A
+    value : 192.168.10.11
+
+  - name  : ns2
+    type  : A
+    value : 192.168.20.11
+
+# -----------------------------------------------------------------------------
+# web server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : web server
+
+  - name  : www
+    type  : CNAME
+    value : www1.ctlabs.internal.
+
+  - name  : www1
+    type  : A
+    value : 192.168.10.13
+
+  - name  : www2
+    type  : A
+    value : 192.168.20.13
+
+
+# -----------------------------------------------------------------------------
+# Other Hosts
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : other hosts
+
+  - name  : h1
+    type  : A
+    value : 192.168.10.12
+
+  - name  : h2
+    type  : A
+    value : 192.168.20.12
+
+# -----------------------------------------------------------------------------
+# TXT records
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : TXT Records
+
+  - name : some_secret_key
+    type : TXT
+    value: cn=wer,ou=user,dc=me,dc=internal
+
+# -----------------------------------------------------------------------------
+# Active Directory
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : Active Directory
+
+  - name  : dc1
+    type  : A
+    value : 192.168.10.14
+
+  - name  : dc2
+    type  : A
+    value : 192.168.20.14
+
+# -----------------------------------------------------------------------------
+# slapd Server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : slapd server
+
+  - name  : slapd1
+    type  : A
+    value : 192.168.10.13
+
+  - name  : slapd2
+    type  : A
+    value : 192.168.20.13
+
+# -----------------------------------------------------------------------------
+# grafana / prometheus
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : grafanfa / prometheus
+
+  - name  : prometheus
+    type  : A
+    value : 192.168.10.21
+
+  - name  : grafana
+    type  : A
+    value : 192.168.20.22
+
+  - name  : loki
+    type  : A
+    value : 192.168.20.23
+
+  - name  : mimir
+    type  : A
+    value : 192.168.20.24
+

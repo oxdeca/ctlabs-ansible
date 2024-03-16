@@ -14,7 +14,7 @@ ctlabs_ca:
       group  : certs
       perms  : '0640'
       dir    : /etc/ca-ctlabs
-      domain : ctlabs.local
+      domain : ctlabs.internal
       ca     :
         name        : ca-ctlabs
         template    : ca.cnf.j2

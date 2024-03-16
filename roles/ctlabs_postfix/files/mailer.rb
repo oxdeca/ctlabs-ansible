@@ -7,8 +7,8 @@ class Mailer
     @strlen      = 80   # max string length
     @lines       = 250  # max lines
     @alpha       = [*('a'..'z'),*('A'..'Z'),*(0..9),"# $@%^&*;:,.?/-_=+()[]{}\|".chars].flatten
-    @from_domain = "sub1.ctlabs.local"
-    @rcpt_domain = "ctlabs.local"
+    @from_domain = "sub1.ctlabs.internal"
+    @rcpt_domain = "ctlabs.internal"
   end
 
   def randstr()

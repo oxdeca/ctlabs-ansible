@@ -21,7 +21,7 @@ ctlabs_grafana:
       ds:
         dir : /etc/grafana/provisioning/datasources
         loki:
-          url     : http://loki.ctlabs.local:3100
+          url     : http://loki.ctlabs.internal:3100
           file    : loki.yml
           template: loki.yml.j2
         mimir:
@@ -30,8 +30,8 @@ ctlabs_grafana:
           template: mimir.yml.j2
       server:
         proto: https
-        cert : /etc/ca-ctlabs/grafana.ctlabs.local.crt
-        key  : /etc/ca-ctlabs/grafana.ctlabs.local.prv
+        cert : /etc/ca-ctlabs/grafana.ctlabs.internal.crt
+        key  : /etc/ca-ctlabs/grafana.ctlabs.internal.prv
       smtp:
         host     : 
         user     :

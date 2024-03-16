@@ -15,7 +15,7 @@ options {
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
   allow-transfer          { none; };
-  allow-notify            { {{ ansible_local.ctlabs_bind.masters|joint('; ') }}; };
+  allow-notify            { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
 
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       yes;

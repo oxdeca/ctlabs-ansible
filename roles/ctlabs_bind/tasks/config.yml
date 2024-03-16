@@ -40,3 +40,4 @@
       template:
         src  : slave.named.conf.j2
         dest : "{{ ctlabs_bind.defaults.config[os_family].file }}"
+      notify: ctlabs_bind.handlers.named.service.reload

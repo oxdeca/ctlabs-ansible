@@ -23,9 +23,9 @@ ctlabs_smbadc:
       ca_ctlabs:
         certdir : /etc/ca-ctlabs/
       dir        : /etc/samba/
-      krb5_realm : CTLABS.LOCAL
+      krb5_realm : CTLABS.INTERNAL
       ad_domain  : CTLABS
-      dns_domain : ctlabs.local
+      dns_domain : ctlabs.internal
       dns        :
         - "{{ ansible_default_ipv4.address }}"
         - 127.0.0.11
