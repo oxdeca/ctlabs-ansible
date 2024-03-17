@@ -33,6 +33,7 @@ moduleload              rwm
 # -----------------------------------------------------------------------------
 # Databases
 # -----------------------------------------------------------------------------
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
 database                 ldap
 suffix                   "{{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }}"
 uri                      "{{ ctlabs_slapd.defaults.config.dbs.ldap.uri }}"
@@ -45,12 +46,16 @@ idassert-bind            bindmethod={{ ctlabs_slapd.defaults.config.dbs.ldap.bin
                          tls_cacert=/etc/ssl/certs/ca-certificates.crt
 idassert-authzFrom       "*"
 
-# -----------------------------------------------------------------------------
-# Overlays
-# -----------------------------------------------------------------------------
 overlay                  rwm
 #rwm-map                  attribute       uid             sAMAccountName
 rwm-map                  objectClass     posixAccount    person
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
 
+# -----------------------------------------------------------------------------
+# Monitoring
+# -----------------------------------------------------------------------------
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+database                 monitor
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
