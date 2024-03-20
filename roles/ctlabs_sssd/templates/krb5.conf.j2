@@ -1,0 +1,38 @@
+# ------------------------------------------------------------------------------
+# File        : {{ ctlabs_sssd.defaults.config.krb5.file }}
+# Template    : ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.krb5.template }}
+# Description : 
+# ------------------------------------------------------------------------------
+
+
+includedir /etc/krb5.conf.d/
+
+[logging]
+  default              = FILE:/var/log/krb5libs.log
+  kdc                  = FILE:/var/log/krb5kdc.log
+  admin_server         = FILE:/va/log/kadmind.log
+
+[libdefaults]
+  default_realm        = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
+  dns_lookup_realm     = false
+  dns_lookup_kdc       = true
+  ticket_lifetime      = 24h
+  renew_lifetime       = 7d
+  rdns                 = false
+  forwardable          = true
+  pkinit_anchors       = FILE:/etc/pki/tls/certs/ca-bundle.crt
+  spake_preauth_groups = edwards25519
+  udp_preference_limit = 0
+  #default_ccache_name  = KEYRING:persistent:%{uid}
+  #default_ccache_name  = FILE:/tmp/krb5cc_%{uid}
+
+
+[realms]
+  {{ ctlabs_sssd.defaults.config.dc.domain | upper }} = {
+    default_domain = {{ ctlabs_sssd.defaults.config.dc.domain }}
+    kdc            = {{ ctlabs_sssd.defaults.config.dc.hosts[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
+  }
+
+[domain_realm]
+  {{ ctlabs_sssd.defaults.config.dc.hosts[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }} = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
+

@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_sssd.tasks.config.krb5
+  template:
+    src  : "{{ ctlabs_sssd.defaults.config.krb5.template }}"
+    dest : "{{ ctlabs_sssd.defaults.config.krb5.file     }}"
+  notify: ctlabs_sssd.handlers.service.restart
+
+- name: ctlabs_sssd.tasks.config.dc.join
+  when: testjoin.rc > 0
+  expect:
+    command: "realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    responses:
+      (?i)password: "{{ ctlabs_sssd.defaults.config.dc.join.pass }}"
+
+- name: ctlabs_sssd.tasks.config.sssd
+  template:
+    src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
+    dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
+  notify: ctlabs_sssd.handlers.service.restart
+

@@ -1,0 +1,43 @@
+# ------------------------------------------------------------------------------
+# File        : {{ ctlabs_sssd.defaults.config.sssd.file }}
+# Template    : ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.sssd.template }}
+# Description :
+# ------------------------------------------------------------------------------
+{%- set tmp = [] -%}
+{%- set host = "" %}
+{%- for host in ctlabs_sssd.defaults.config.dc.hosts -%}
+{%-   set _ = tmp.append(host + '.' + ctlabs_sssd.defaults.config.dc.domain) -%}
+{%- endfor -%}
+{%- set hosts = (tmp|join(', ')) %}
+
+
+[domain/{{ ctlabs_sssd.defaults.config.dc.domain }}]
+  access_provider                = ad
+  id_provider                    = ad
+
+  ad_server                      = {{ hosts }}
+  ad_domain                      = {{ ctlabs_sssd.defaults.config.dc.domain }}
+
+  krb5_realm                     = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
+  krb5_store_password_if_offline = true
+
+  realmd_tags                    = manages-system joined-with-adcli
+  cache_credentials              = true
+
+  default_shell                  = /bin/bash
+  ldap_id_mapping                = true
+  fallback_homedir               = /home/%u
+  #fallback_homedir               = /home/%u@%d
+
+  ldap_user_extra_attrs          = altSecurityIdentities
+  ldap_user_ssh_public_key       = altSecurityIdentities
+
+  use_fully_qualified_names      = false
+  enumerate                      = true
+
+[sssd]
+  domains                        = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  config_file_version            = 2
+  services                       = nss, pam, ssh
+  # default_domain_suffix        =
+

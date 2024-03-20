@@ -83,6 +83,15 @@
     - roles/ctlabs_smbadc
 
 # -----------------------------------------------------------------------------
+# ctlabs_sssd
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.sssd
+  hosts : hosts
+  tags  : sssd
+  roles :
+    - roles/ctlabs_sssd
+
+# -----------------------------------------------------------------------------
 # ctlabs_slapd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.slapd
@@ -125,3 +134,4 @@
   tags  : openvpn
   roles :
     - roles/ctlabs_openvpn
+

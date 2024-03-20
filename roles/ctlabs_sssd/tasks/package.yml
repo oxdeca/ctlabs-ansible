@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/package.yml
+# Description : main ctlabs_sssd tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_sssd.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_sssd.defaults.pkgs }}"
+
+- name: ctlabs_sssd.tasks.python.pips.installed
+  pip:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_sssd.defaults.python.pips }}"
+

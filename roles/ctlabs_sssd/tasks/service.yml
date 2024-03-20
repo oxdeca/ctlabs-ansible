@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_sssd.tasks.service.start
+  service:
+    name    : "{{ ctlabs_sssd.defaults.service.name }}"
+    enabled : true
+    state   : started
+

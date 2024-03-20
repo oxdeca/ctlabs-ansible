@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_sssd.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_sssd.os
+    fail_msg : "OS[{{os}}] is not supported!"
+
+- name: ctlabs_sssd.tasks.precheck.is_joined
+  command       : "adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  ignore_errors : true
+  register      : testjoin
+
+# - name: ctlabs_sssd.tasks.precheck.supported.env
+#  assert:
+#    that: ansible_local.ctlabs is defined and ansible_local.ctlabs.env is in ctlabs_sssd.env
+

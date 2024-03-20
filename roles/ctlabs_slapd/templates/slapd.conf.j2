@@ -28,6 +28,7 @@ include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema
 # -----------------------------------------------------------------------------
 modulepath              {{ ctlabs_slapd.defaults.config[os_family].lib_dir }}
 moduleload              back_ldap
+moduleload              back_monitor
 moduleload              rwm
 
 # -----------------------------------------------------------------------------

@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_sssd.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_sssd.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_sssd.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_sssd.defaults.service.name }}"
+    state : reloaded
+

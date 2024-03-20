@@ -1,0 +1,51 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_sssd:
+  defaults:
+    pkgs:
+      redhat:
+        - name : sssd
+        - name : bind-utils
+        - name : realmd
+        - name : krb5-workstation
+        - name : oddjob
+        - name : oddjob-mkhomedir
+        - name : adcli
+        - name : samba-common-tools
+      debian:
+        - name: sssd
+    python:
+      pips:
+        - pexpect
+    config:
+      dc:
+        domain : ctlabs.internal
+        hosts  :
+          - dc1
+          - dc2
+        join:
+          user: administrator
+          pass: secret123!
+      sssd:
+        file     : /etc/sssd/sssd.conf
+        template : sssd.conf.j2
+      krb5 :
+        file     : /etc/krb5.conf
+        template : krb5.conf.j2
+    service:
+      name     : sssd.service
+      template : sssd.service.j2
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+  env:
+    - gcp-use1-dev
+

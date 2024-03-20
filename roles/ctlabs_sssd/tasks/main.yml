@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_sssd
+    - ctlabs_sssd.precheck
+    - ctlabs_sssd.package
+    - ctlabs_sssd.config
+    - ctlabs_sssd.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_sssd
+    - ctlabs_sssd.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_sssd
+    - ctlabs_sssd.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_sssd
+    - ctlabs_sssd.service
+

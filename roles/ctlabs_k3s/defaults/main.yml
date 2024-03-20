@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_k3s/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_k3s:
+  defaults:
+    pkgs:
+      name : k3s
+      uri  : https://github.com/k3s-io/k3s/releases/download/v1.29.2+k3s1/k3s
+    service:
+      name     : k3s.service
+      template : k3s.service.j2
+    bin:
+      path: /usr/bin/k3s
+      mode: '0750'
+  os:
+    - rhel8
+    - centos8
+    - centos9

@@ -16,21 +16,21 @@ moduleload              rwm
 # Main settings ###############################################################
 pidfile                 /var/run/ldap/slapd.pid
 argsfile                /var/run/ldap/slapd.args
-#TLSCACertificateFile    /etc/ldap/certs/ca.ctlabs.local.crt
-#TLSCertificateFile      /etc/ldap/certs/ctlabs.local.crt
-#TLSCertificateKeyFile   /etc/ldap/certs/ctlabs.local.key
+#TLSCACertificateFile    /etc/ldap/certs/ca.ctlabs.internal.crt
+#TLSCertificateFile      /etc/ldap/certs/ctlabs.internal.crt
+#TLSCertificateKeyFile   /etc/ldap/certs/ctlabs.internal.key
 TLSVerifyClient         never
 sizelimit               10000
 
 ### Database definition (Proxy to AD) #########################################
 database                meta
-suffix                  "dc=ctlabs,dc=local"
+suffix                  "dc=ctlabs,dc=internal"
 #uri                     ldap://127.0.0.1:635
-uri                     "ldaps://192.168.10.11/dc=ctlabs,dc=local" "ldaps://192.168.10.12/"
+uri                     "ldaps://192.168.10.11/dc=ctlabs,dc=internal" "ldaps://192.168.10.12/"
 #uri                     ldaps://192.168.10.11
 rebind-as-user
 idassert-bind           bindmethod=simple
-                        binddn=cn=openldapro,ou=services,dc=ctlabs,dc=local
+                        binddn=cn=openldapro,ou=services,dc=ctlabs,dc=internal
                         credentials="secret123!"
                         flags=override
                         mode=none

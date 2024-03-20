@@ -1,0 +1,14 @@
+[Unit]
+Description=k3s
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart={{ ctlabs_k3s.defaults.bin.path }} server
+
+[Install]
+WantedBy=multi-user.target
