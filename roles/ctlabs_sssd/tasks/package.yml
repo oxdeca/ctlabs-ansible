@@ -9,7 +9,7 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_sssd.defaults.pkgs }}"
+  loop: "{{ ctlabs_sssd.defaults.pkgs[os_family] }}"
 
 - name: ctlabs_sssd.tasks.python.pips.installed
   pip:
