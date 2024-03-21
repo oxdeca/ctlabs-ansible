@@ -10,7 +10,7 @@ includedir /etc/krb5.conf.d/
 [logging]
   default              = FILE:/var/log/krb5libs.log
   kdc                  = FILE:/var/log/krb5kdc.log
-  admin_server         = FILE:/va/log/kadmind.log
+  admin_server         = FILE:/var/log/kadmind.log
 
 [libdefaults]
   default_realm        = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
@@ -31,8 +31,9 @@ includedir /etc/krb5.conf.d/
   {{ ctlabs_sssd.defaults.config.dc.domain | upper }} = {
     default_domain = {{ ctlabs_sssd.defaults.config.dc.domain }}
     kdc            = {{ ctlabs_sssd.defaults.config.dc.hosts[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
+    kdc            = {{ ctlabs_sssd.defaults.config.dc.hosts[1] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
   }
 
 [domain_realm]
-  {{ ctlabs_sssd.defaults.config.dc.hosts[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }} = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
+  {{ ctlabs_sssd.defaults.config.dc.domain }} = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
 
