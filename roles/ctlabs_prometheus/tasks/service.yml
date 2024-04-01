@@ -15,4 +15,3 @@
   service:
     name  : "{{ ctlabs_prometheus.defaults.service.name }}"
     state : started
-

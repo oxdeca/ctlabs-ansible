@@ -35,12 +35,13 @@
 
 - name: ctlabs_prometheus.tasks.package.group
   group:
-    name   : "{{ ctlabs_prometheus.defaults.config.group }}"
+    name   : "{{ ctlabs_prometheus.defaults.service.group }}"
     system : true
 
 - name: ctlabs_prometheus.tasks.package.user
   user:
-    name   : "{{ ctlabs_prometheus.defaults.config.user  }}"
-    group  : "{{ ctlabs_prometheus.defaults.config.group }}"
+    name   : "{{ ctlabs_prometheus.defaults.service.user   }}"
+    group  : "{{ ctlabs_prometheus.defaults.service.group  }}"
+    groups : "{{ ctlabs_prometheus.defaults.service.groups }}"
     system : true
 

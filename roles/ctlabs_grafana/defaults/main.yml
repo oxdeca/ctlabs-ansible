@@ -25,13 +25,15 @@ ctlabs_grafana:
           file    : loki.yml
           template: loki.yml.j2
         mimir:
-          url     : http://mimir.ctlabs.local:9009/prometheus
+          url     : http://mimir.ctlabs.internal:9009/prometheus
           file    : mimir.yml
           template: mimir.yml.j2
       server:
-        proto: https
-        cert : /etc/ca-ctlabs/grafana.ctlabs.internal.crt
-        key  : /etc/ca-ctlabs/grafana.ctlabs.internal.prv
+        file     : /etc/grafana/grafana.ini
+        template : grafana.ini.j2
+        proto    : https
+        cert     : /etc/ca-ctlabs/grafana.ctlabs.internal.crt
+        key      : /etc/ca-ctlabs/grafana.ctlabs.internal.prv
       smtp:
         host     : 
         user     :
@@ -42,11 +44,11 @@ ctlabs_grafana:
     service:
       name  : grafana-server.service
       user  : grafana
-      groups: [grafana,certs]
+      group : grafana
+      groups: [certs]
   os:
     - rhel7
     - rhel8
     - centos7
     - centos8
     - centos9
-

@@ -5,6 +5,12 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_grafana.tasks.config.server
+  template:
+    src  : "{{ ctlabs_grafana.defaults.config.server.template }}"
+    dest : "{{ ctlabs_grafana.defaults.config.server.file     }}"
+  notify: ctlabs_grafana.handlers.grafana-server.service.restart
+
 - name: ctlabs_grafana.tasks.config.datasource.loki
   template:
     src  : "{{ ctlabs_grafana.defaults.config.ds.loki.template }}"
@@ -16,9 +22,3 @@
     src  : "{{ ctlabs_grafana.defaults.config.ds.mimir.template }}"
     dest : "{{ ctlabs_grafana.defaults.config.ds.dir }}/{{ ctlabs_grafana.defaults.config.ds.mimir.file }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
-
-- name: ctlabs_grafana.tasks.config.group.certs.member
-  user:
-    name  : "{{ ctlabs_grafana.defaults.service.user   }}"
-    groups: "{{ ctlabs_grafana.defaults.service.groups }}"
-

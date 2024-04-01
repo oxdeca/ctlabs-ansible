@@ -21,15 +21,17 @@ ctlabs_prometheus:
       agentdir     : /data-agent
       file         : prometheus.conf
       template     : prometheus.conf.j2
-      user         : prometheus
-      group        : prometheus
       listen       : 9090
       remote_write :
-        uri : http://192.168.20.22:9090/api/v1/write
+        uri : http://mimir.ctlabs.internal:9090/api/v1/write
       targets  :
         - localhost:9090
       server :
-        targets :
+        file     : /etc/prometheus/web-config.yml
+        template : web-config.yml.j2
+        tls      :
+          crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       receiver:
         targets :
       node_exporter:
@@ -44,6 +46,9 @@ ctlabs_prometheus:
     service:
       name     : prometheus.service
       template : prometheus.service.j2
+      user     : prometheus
+      group    : prometheus
+      groups   : [certs]
     logrotate:
   os:
     - redhat7

@@ -1,0 +1,9 @@
+# -----------------------------------------------------------------------------
+# {{ ansible_managed }} 
+# File     : web-config.yml
+# Template : web-config.yml.j2
+# -----------------------------------------------------------------------------
+
+tls_server_config:
+  cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
+  key_file:  {{ ctlabs_prometheus.defaults.config.server.tls.key }}
