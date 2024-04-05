@@ -14,6 +14,7 @@
         server role                     = active directory domain controller
         idmap_ldb:use rfc2307           = yes
 
+        interfaces                      = 127.0.0.1 {{ ansible_default_ipv4.address }}
         tls enabled                     = yes
         tls certfile                    = {{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ ctlabs_smbadc.defaults.config.tls.crt }}
         tls keyfile                     = {{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ ctlabs_smbadc.defaults.config.tls.prv }}
