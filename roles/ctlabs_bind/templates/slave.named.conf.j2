@@ -58,8 +58,9 @@ include  "/etc/named.root.key";
 {% endif %}
 
 {% for zone in ansible_local.ctlabs_bind.zones %}
-zone "{{ zone }}" IN {
-  type   slave;
+zone "{{ zone.name }}" IN {
+  type     slave;
   masters  { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
+  file     "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db";
 };
 {%  endfor %}

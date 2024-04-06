@@ -50,7 +50,13 @@ ctlabs_bind:
         log_dir        : /var/log
 
       zones:
-        - ctlabs.internal
+        - name: ctlabs.internal
+        - name: svc.ctlabs.internal
+          ddns:
+            allow:
+              - 127.0.0.1
+              - 192.168.0.0/16
+
   os:
     - redhat8
     - redhat9

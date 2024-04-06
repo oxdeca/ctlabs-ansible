@@ -1,0 +1,25 @@
+zone_svc_ctlabs_internal:
+# -----------------------------------------------------------------------------
+# name server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : define name server
+
+  - name  : '@'
+    type  : NS
+    value : ns1.svc.ctlabs.internal.
+
+  - name  : '@'
+    type  : NS
+    value : ns2.svc.ctlabs.internal.
+
+  - type  : COMMENT
+    value : nameservers need an A-record
+
+  - name  : ns1
+    type  : A
+    value : 192.168.10.11
+
+  - name  : ns2
+    type  : A
+    value : 192.168.20.11

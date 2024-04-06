@@ -25,12 +25,12 @@
     - name: ctlabs_bind.tasks.config.zones
       template:
         src  : zone.db.j2
-        dest : "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone }}.db"
+        dest : "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db"
       loop: "{{ ctlabs_bind.defaults.config.zones }}"
       loop_control:
         loop_var: zone
       vars:
-        zone_data: "{{ lookup('vars', 'zone_' + zone.replace('.', '_')) }}"
+        zone_data: "{{ lookup('vars', 'zone_' + zone.name.replace('.', '_')) }}"
       notify: ctlabs_bind.handlers.named.service.reload
 
 - name: ctlabs_bind.tasks.config.slave

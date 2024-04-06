@@ -11,7 +11,7 @@ zone_sub1_ctlabs_local:
 
   - name  : '@'
     type  : NS
-    value : ns1.sub1.ctlabs.local.
+    value : ns2.sub1.ctlabs.local.
 
   - type  : COMMENT
     value : nameservers need an A-record

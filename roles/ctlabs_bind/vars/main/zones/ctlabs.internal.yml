@@ -11,7 +11,7 @@ zone_ctlabs_internal:
 
   - name  : '@'
     type  : NS
-    value : ns1.ctlabs.internal.
+    value : ns2.ctlabs.internal.
 
   - type  : COMMENT
     value : nameservers need an A-record
