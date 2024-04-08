@@ -9,10 +9,10 @@ $TTL    3600
 
 {{ zone.name }}.   IN    SOA     ns1.{{ zone.name }}. root.{{ zone.name }}. (
                                   {{ uxtime[:10] }} ; serial
-                                  3600         ; refresh
-                                  600          ; retry
-                                  86400        ; expire
-                                  600          ; negative cache TTL
+                                  3600       ; refresh
+                                  600        ; retry
+                                  86400      ; expire
+                                  600        ; negative cache TTL
 );
 
 {#% set zone_data = vars['zone_' + zone.replace('.', '_')] #}
