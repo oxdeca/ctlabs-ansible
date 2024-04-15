@@ -71,7 +71,7 @@
           }
 
     - name: ctlabs.playbooks.setup.openvpn.server.local_facts
-      when: ansible_hostname == 'ro2'
+      when: ansible_hostname == 'ro1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
         content: |
@@ -82,7 +82,7 @@
           }
 
     - name: ctlabs.playbooks.setup.openvpn.client.local_facts
-      when: ansible_hostname == 'ro1'
+      when: ansible_hostname == 'ro2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
         content: |

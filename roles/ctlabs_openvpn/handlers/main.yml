@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openvpn.handlers.main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openvpn.handlers.server.service.reload
+  service:
+    name  : "{{ ctlabs_openvpn.defaults.service.server.name }}"
+    state : reloaded
+
+- name: ctlabs_openvpn.handlers.client.service.reload
+  service:
+    name  : "{{ ctlabs_openvpn.defaults.service.client.name }}"
+    state : reloaded

@@ -10,3 +10,7 @@
     that: os is in ctlabs_openvpn.os
     fail_msg: "OS [{{ os }}] is not supported!"
 
+- name: ctlabs_openvpn.tasks.precheck.facts_exists
+  assert:
+    that: ansible_local.ctlabs_openvpn.type in ["server", "client"]
+    fail_msg: "Ansible local facts are missing!"
