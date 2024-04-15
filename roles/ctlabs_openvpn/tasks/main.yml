@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openvpn/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - 
+    - ctlabs_openvpn.precheck
+    - ctlabs_openvpn.package
+    - ctlabs_openvpn.config
+    - ctlabs_openvpn.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_openvpn
+    - ctlabs_openvpn.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_openvpn
+    - ctlabs_openvpn.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_openvpn
+    - ctlabs_openvpn.service

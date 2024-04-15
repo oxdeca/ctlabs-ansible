@@ -8,21 +8,25 @@
 ctlabs_openvpn:
   defaults:
     pkgs:
-      - name : openvpn
+      debian:
+      redhat:
+        - name : openvpn
     service:
-      name : openvpn.service
-    user : openvpn
-    group: openvpn
+      user : openvpn
+      group: openvpn
+      server:
+        name: openvpn-server@server.service
+      client:
+        name: openvpn-client@client.service
     config:
       server:
         template : server.conf.j2
-        file     : /etc/openvpn/server.conf
+        file     : /etc/openvpn/server/server.conf
       client:
         template : client.conf.j2
-        file     : /etc/openvpn/client.conf
+        file     : /etc/openvpn/client/client.conf
       dir      : /etc/openvpn
       ca_ctlabs:
         certdir: /etc/ca-ctlabs
   os:
     - centos9
-

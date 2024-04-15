@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openvpn/tasks/service.yml
+# Description : services
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openvpn.tasks.service.server.running
+  service:
+    name    : "{{ ctlabs_openvpn.defaults.service.server.[os_family].name }}"
+    state   : started
+    enabled : true
+
+- name: ctlabs_openvpn.tasks.service.client.running
+  service:
+    name    : "{{ ctlabs_openvpn.defaults.service.client.[os_family].name }}"
+    state   : started
+    enabled : true

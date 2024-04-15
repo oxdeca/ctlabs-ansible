@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openvpn/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openvpn.tasks.config.httpd
+  template:
+    src  : "{{ ctlabs_openvpn.defaults.config[os_family].template }}"
+    dest : "{{ ctlabs_openvpn.defaults.config[os_family].file     }}"
+  notify: ctlabs_openvpn.handlers.httpd.service.reload
