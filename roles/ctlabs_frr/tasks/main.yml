@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_frr/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - 
+    - ctlabs_frr.precheck
+    - ctlabs_frr.package
+    - ctlabs_frr.config
+    - ctlabs_frr.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_frr
+    - ctlabs_frr.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_frr
+    - ctlabs_frr.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_frr
+    - ctlabs_frr.service

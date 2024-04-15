@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_frr/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_frr.tasks.config.httpd
+  template:
+    src  : "{{ ctlabs_frr.defaults.config[os_family].template }}"
+    dest : "{{ ctlabs_frr.defaults.config[os_family].file     }}"
+  notify: ctlabs_frr.handlers.httpd.service.reload

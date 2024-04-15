@@ -1,16 +1,15 @@
-{# /etc/openvpn/server/server.conf #}
+#{# /etc/openvpn/server/server.conf #}
 
-dev           tun
-persist-tun
+dev          tun
+persist-tun 
 
-proto         udp
-keepalive     10 60
+proto        udp
+ifconfig     { ansible_local.ctlabs_openvpn.server_ip } { ansible_local.ctlabs_openvpn.client_ip }
 
-ifconfig      10.8.15.1 10.8.15.2
+secret       ovpn.key
+auth         SHA512
+auth-nocache
 
-cipher        AES-256-CBC
-secret        ovpn.key
-auth          SHA512
-auth-nocache 
-
-verb          3
+cipher       AES-256-CBC
+keepalive    10 60 
+verb         3

@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_frr.handlers.main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_frr.handlers.httpd.service.restart
+  service:
+    name  : "{{ ctlabs_frr.defaults.service[os_family].name }}"
+    state : restarted

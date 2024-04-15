@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_frr/defaults/main.yml
+# Description : ctlabs_frr defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_frr:
+  defaults:
+    pkgs:
+      debian:
+      redhat:
+        - name: frr
+    service:
+      name: frr.service
+      user : frr
+      group: frr
+    config:
+      dir   : /etc/frr
+      daemons:
+        template : daemons.j2
+        file     : /etc/frr/daemons
+        profile  : datacenter
+      router:
+        template : frr.conf.j2
+        file     : /etc/frr/frr.conf
+      ca_ctlabs:
+        certdir: /etc/ca-ctlabs
+  os:
+    - centos9

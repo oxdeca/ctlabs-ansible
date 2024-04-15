@@ -70,6 +70,30 @@
             }
           }
 
+    - name: ctlabs.playbooks.setup.openvpn.server.local_facts
+      when: ansible_hostname == 'ro2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
+        content: |
+          {
+            "type"      : "server",
+            "server_ip" : 10.8.15.1,
+            "client_ip" : 10.8.15.2
+          }
+
+    - name: ctlabs.playbooks.setup.openvpn.client.local_facts
+      when: ansible_hostname == 'ro1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
+        content: |
+          {
+            "type"      : "client",
+            "server_ip" : 10.8.15.1,
+            "client_ip" : 10.8.15.2,
+            "remote"    : 192.168.16.2
+          }
+
+
 # -----------------------------------------------------------------------------
 # semaphore
 # -----------------------------------------------------------------------------
@@ -225,3 +249,13 @@
   roles :
     - roles/ctlabs_loki
 
+# -----------------------------------------------------------------------------
+# ctlabs_openvpn
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.openvpn
+  hosts :
+    - ro1
+    - ro2
+  tags  : openvpn
+  roles :
+    - roles/ctlabs_openvpn
