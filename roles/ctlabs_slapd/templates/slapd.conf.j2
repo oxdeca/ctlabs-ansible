@@ -13,6 +13,8 @@ sizelimit               10000
 logfile                 {{ ctlabs_slapd.defaults.config[os_family].log_dir }}/slapd.log
 loglevel                256
 
+access                  to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * none
+
 # -----------------------------------------------------------------------------
 # Schemas
 # -----------------------------------------------------------------------------
@@ -37,7 +39,7 @@ moduleload              rwm
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
 database                 ldap
 suffix                   "{{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }}"
-uri                      "{{ ctlabs_slapd.defaults.config.dbs.ldap.uri }}"
+uri                      "{{ ctlabs_slapd.defaults.config.dbs.ldap.uri    }}"
 norefs                   yes
 rebind-as-user           yes
 idassert-bind            bindmethod={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.method }}
@@ -45,7 +47,9 @@ idassert-bind            bindmethod={{ ctlabs_slapd.defaults.config.dbs.ldap.bin
                          credentials={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.pass }}
                          mode=none
                          tls_cacert=/etc/ssl/certs/ca-certificates.crt
+
 idassert-authzFrom       "*"
+access                   to dn.children={{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }} by * read                         
 
 overlay                  rwm
 #rwm-map                  attribute       uid             sAMAccountName
@@ -59,4 +63,13 @@ rwm-map                  objectClass     posixAccount    person
 # -----------------------------------------------------------------------------
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
 database                 monitor
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+# -----------------------------------------------------------------------------
+# Config (use olc-style config with static slapd.conf)
+# -----------------------------------------------------------------------------
+# ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+database                 config
+access                   to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
