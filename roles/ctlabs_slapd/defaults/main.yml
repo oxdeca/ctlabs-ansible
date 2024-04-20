@@ -14,6 +14,9 @@ ctlabs_slapd:
       redhat:
         - name : openldap-servers
         - name : openldap-clients
+    files:
+      - src: switch_slapd_config.sh
+        dst: /root/switch_slapd_config.sh
     service:
       debian:
         name : slapd.service

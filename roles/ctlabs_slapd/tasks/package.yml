@@ -10,3 +10,10 @@
     name    : "{{ item.name }}"
     state : present
   loop: "{{ ctlabs_slapd.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_slapd.tasks.package.script.installed
+  copy:
+    src : "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    mode: "0750"
+  loop: "{{ ctlabs_slapd.defaults.files }}"
