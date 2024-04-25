@@ -23,13 +23,15 @@
   delegate_to: localhost
   connection : local 
   run_once   : true
-  cmd: openvpn --genkey secret /tmp/ovpn.key
+  shell: openvpn --genkey secret /tmp/ovpn.key
   register: "ovpn_key"
 
-- name: ctlabs_openvpn.tasks.ovpn_key.copy
-  blockinfile:
-    path : "{{ item }}"
-    block: "{{ lookup('file', '/tmp/ovpn.key') }}"
+- name: ctlabs_openvpn.tasks.config.ovpn_key.copy
+  copy:
+    src  : '/tmp/ovpn.key'
+    dest : "{{ item }}"
+    #mode : '0640'
+    #owner:
   loop:
-    - ctlabs_openvpn.defaults.config.server.key
-    - ctlabs_openvpn.defaults.config.client.key
+    - "{{ ctlabs_openvpn.defaults.config.server.key }}"
+    - "{{ ctlabs_openvpn.defaults.config.client.key }}"

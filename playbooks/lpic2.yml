@@ -55,6 +55,30 @@
             "domain" : "ctlabs.internal"
           }
 
+    - name: ctlabs.playbooks.setup.openvpn.server.local_facts
+      when: ansible_hostname == 'ns1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
+        content: |
+          {
+            "type"      : "server",
+            "server_ip" : "10.8.15.1",
+            "client_ip" : "10.8.15.2"
+          }
+
+    - name: ctlabs.playbooks.setup.openvpn.client.local_facts
+      when: ansible_hostname == 'ns2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
+        content: |
+          {
+            "type"      : "client",
+            "server_ip" : "10.8.15.1",
+            "client_ip" : "10.8.15.2",
+            "remote"    : "192.168.16.2"
+          }
+
+
 # -----------------------------------------------------------------------------
 # ctlabs_ca
 # -----------------------------------------------------------------------------
@@ -91,7 +115,9 @@
 # ctlabs_sssd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.sssd
-  hosts : hosts
+  hosts :
+    - ns1
+    - slapd1
   tags  : sssd
   roles :
     - roles/ctlabs_sssd

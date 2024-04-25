@@ -6,13 +6,15 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_openvpn.tasks.service.server.running
-  service:
-    name    : "{{ ctlabs_openvpn.defaults.service.server.[os_family].name }}"
+  when: ansible_local.ctlabs_openvpn.type == "server"
+  systemd:
+    name    : "{{ ctlabs_openvpn.defaults.service.server.name }}"
     state   : started
     enabled : true
 
 - name: ctlabs_openvpn.tasks.service.client.running
-  service:
-    name    : "{{ ctlabs_openvpn.defaults.service.client.[os_family].name }}"
+  when: ansible_local.ctlabs_openvpn.type == "client"
+  systemd:
+    name    : "{{ ctlabs_openvpn.defaults.service.client.name }}"
     state   : started
     enabled : true

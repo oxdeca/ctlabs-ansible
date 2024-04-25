@@ -9,8 +9,9 @@ ctlabs_openvpn:
   defaults:
     pkgs:
       debian:
+        - name: openvpn
       redhat:
-        - name : openvpn
+        - name: openvpn
     service:
       user : openvpn
       group: openvpn
@@ -32,3 +33,4 @@ ctlabs_openvpn:
         certdir: /etc/ca-ctlabs
   os:
     - centos9
+    - debian11
