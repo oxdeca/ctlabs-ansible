@@ -10,14 +10,14 @@
   template:
     src  : "{{ ctlabs_openvpn.defaults.config.server.template }}"
     dest : "{{ ctlabs_openvpn.defaults.config.server.file     }}"
-  notify: ctlabs_openvpn.handlers.server.service.reload
+  notify: ctlabs_openvpn.handlers.server.service.restart
 
 - name: ctlabs_openvpn.tasks.config.client
   when: ansible_local.ctlabs_openvpn.type == "client"
   template:
     src  : "{{ ctlabs_openvpn.defaults.config.client.template }}"
     dest : "{{ ctlabs_openvpn.defaults.config.client.file     }}"
-  notify: ctlabs_openvpn.handlers.client.service.reload
+  notify: ctlabs_openvpn.handlers.client.service.restart
 
 - name: ctlabs_openvpn.tasks.config.ovpn_key.create
   delegate_to: localhost

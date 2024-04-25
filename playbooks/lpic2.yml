@@ -56,7 +56,7 @@
           }
 
     - name: ctlabs.playbooks.setup.openvpn.server.local_facts
-      when: ansible_hostname == 'ns1'
+      when: ansible_hostname == 'ro1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
         content: |
@@ -67,7 +67,7 @@
           }
 
     - name: ctlabs.playbooks.setup.openvpn.client.local_facts
-      when: ansible_hostname == 'ns2'
+      when: ansible_hostname == 'ro2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
         content: |
@@ -99,6 +99,17 @@
   tags  : bind
   roles :
     - roles/ctlabs_bind
+
+# -----------------------------------------------------------------------------
+# ctlabs_openvpn
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.openvpn
+  hosts :
+    - ro1
+    - ro2
+  tags  : openvpn
+  roles :
+    - roles/ctlabs_openvpn
 
 # -----------------------------------------------------------------------------
 # ctlabs_smbadc
@@ -154,15 +165,3 @@
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
-
-# -----------------------------------------------------------------------------
-# ctlabs_openvpn
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.openvpn
-  hosts :
-    - h1
-    - h2
-  tags  : openvpn
-  roles :
-    - roles/ctlabs_openvpn
-

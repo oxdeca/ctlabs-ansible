@@ -5,12 +5,12 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openvpn.handlers.server.service.reload
+- name: ctlabs_openvpn.handlers.server.service.restart
   service:
     name  : "{{ ctlabs_openvpn.defaults.service.server.name }}"
-    state : reloaded
+    state : restarted
 
-- name: ctlabs_openvpn.handlers.client.service.reload
+- name: ctlabs_openvpn.handlers.client.service.restart
   service:
     name  : "{{ ctlabs_openvpn.defaults.service.client.name }}"
-    state : reloaded
+    state : restarted
