@@ -22,9 +22,11 @@ ctlabs_openvpn:
       server:
         template : server.conf.j2
         file     : /etc/openvpn/server/server.conf
+        key      : /etc/openvpn/server/ovpn.key
       client:
         template : client.conf.j2
         file     : /etc/openvpn/client/client.conf
+        key      : /etc/openvpn/client/ovpn.key
       dir      : /etc/openvpn
       ca_ctlabs:
         certdir: /etc/ca-ctlabs

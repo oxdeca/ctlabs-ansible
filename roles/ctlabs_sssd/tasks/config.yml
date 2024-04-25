@@ -14,7 +14,7 @@
 - name: ctlabs_sssd.tasks.config.dc.join
   when: testjoin.rc > 0
   expect:
-    command: "realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    command: "realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     responses:
       (?i)password: "{{ ctlabs_sssd.defaults.config.dc.join.pass }}"
 

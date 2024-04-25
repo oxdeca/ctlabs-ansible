@@ -4,7 +4,7 @@ dev          tun
 persist-tun 
 
 proto        udp
-ifconfig     { ansible_local.ctlabs_openvpn.server_ip } { ansible_local.ctlabs_openvpn.client_ip }
+ifconfig     {{ ansible_local.ctlabs_openvpn.server_ip }} {{ ansible_local.ctlabs_openvpn.client_ip }}
 
 secret       ovpn.key
 auth         SHA512

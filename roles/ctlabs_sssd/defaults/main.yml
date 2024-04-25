@@ -24,12 +24,13 @@ ctlabs_sssd:
         - pexpect
     config:
       dc:
+        realm  : CTLABS.INTERNAL
         domain : ctlabs.internal
         hosts  :
           - dc1
           - dc2
         join:
-          user: administrator
+          user: Administrator
           pass: secret123!
       sssd:
         file     : /etc/sssd/sssd.conf

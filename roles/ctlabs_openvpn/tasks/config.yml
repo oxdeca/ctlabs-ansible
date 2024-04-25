@@ -18,3 +18,18 @@
     src  : "{{ ctlabs_openvpn.defaults.config.client.template }}"
     dest : "{{ ctlabs_openvpn.defaults.config.client.file     }}"
   notify: ctlabs_openvpn.handlers.client.service.reload
+
+- name: ctlabs_openvpn.tasks.config.ovpn_key.create
+  delegate_to: localhost
+  connection : local 
+  run_once   : true
+  cmd: openvpn --genkey secret /tmp/ovpn.key
+  register: "ovpn_key"
+
+- name: ctlabs_openvpn.tasks.ovpn_key.copy
+  blockinfile:
+    path : "{{ item }}"
+    block: "{{ lookup('file', '/tmp/ovpn.key') }}"
+  loop:
+    - ctlabs_openvpn.defaults.config.server.key
+    - ctlabs_openvpn.defaults.config.client.key

@@ -60,8 +60,7 @@
 # -----------------------------------------------------------------------------
     
 - name  : ctlabs.playbooks.lpic2.ca
-  hosts :
-    - all
+  hosts : all
   tags  : ca
   roles :
     - roles/ctlabs_ca

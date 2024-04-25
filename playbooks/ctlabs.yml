@@ -77,8 +77,8 @@
         content: |
           {
             "type"      : "server",
-            "server_ip" : 10.8.15.1,
-            "client_ip" : 10.8.15.2
+            "server_ip" : "10.8.15.1",
+            "client_ip" : "10.8.15.2"
           }
 
     - name: ctlabs.playbooks.setup.openvpn.client.local_facts
@@ -88,9 +88,9 @@
         content: |
           {
             "type"      : "client",
-            "server_ip" : 10.8.15.1,
-            "client_ip" : 10.8.15.2,
-            "remote"    : 192.168.16.2
+            "server_ip" : "10.8.15.1",
+            "client_ip" : "10.8.15.2",
+            "remote"    : "192.168.16.2"
           }
 
 
