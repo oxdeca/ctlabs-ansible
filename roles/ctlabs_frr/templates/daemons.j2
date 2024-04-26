@@ -4,24 +4,15 @@
 
 frr_profile="{{ ctlabs_frr.defaults.config.daemons.profile | default('traditional') }}"
 
-bgpd={{  ctlabs_frr.defaults.config.daemons.bgpd  | default('no') }}
-ospfd={{ ctlabs_frr.defaults.config.daemons.ospfd | default('no') }}
-ospf6d=no
-ripd=no
-ripngd=no
-isisd=no
-pimd=no
-pim6d=no
-ldpd=no
-nhrpd=no
-eigrpd=no
-babeld=no
-sharpd=no
-pbrd=no
-bfdd={{ ctlabs_frr.defaults.config.daemons.bfdd | default('no') }}
-fabricd=no
-vrrpd=no
-pathd=no
+{% set daemons = ['bgpd', 'ospfd', 'ospf6d', 'ripd', 'ripngd', 'isisd', 'pimd', 'pim6d', 'ldpd', 'nhrpd', 'eigrpd', 'babeld', 'sharpd', 'pbrd', 'bfdd', 'fabricd', 'vrrpd', 'pathd' ] %}
+
+{% for daemon in daemons %}
+{%   if daemon in ctlabs_frr_daemons_enabled %}
+{{ daemon }}=yes
+{%   else %}
+{{ daemon }}=no
+{%   endif %}
+{% endfor %}
 
 vtysh_enable=yes
 zebra_options="  -A 127.0.0.1 -s 90000000"

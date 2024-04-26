@@ -5,8 +5,8 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_frr.tasks.config.httpd
+- name: ctlabs_frr.tasks.config.daemons
   template:
-    src  : "{{ ctlabs_frr.defaults.config[os_family].template }}"
-    dest : "{{ ctlabs_frr.defaults.config[os_family].file     }}"
-  notify: ctlabs_frr.handlers.httpd.service.reload
+    src  : "{{ ctlabs_frr.defaults.config.daemons.template }}"
+    dest : "{{ ctlabs_frr.defaults.config.daemons.file     }}"
+  notify: ctlabs_frr.handlers.frr.service.restart

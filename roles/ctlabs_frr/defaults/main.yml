@@ -21,6 +21,7 @@ ctlabs_frr:
         template : daemons.j2
         file     : /etc/frr/daemons
         profile  : datacenter
+        enabled  : [bgpd, ospfd]
       router:
         template : frr.conf.j2
         file     : /etc/frr/frr.conf

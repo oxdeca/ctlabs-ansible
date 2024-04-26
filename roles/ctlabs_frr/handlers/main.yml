@@ -5,7 +5,7 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_frr.handlers.httpd.service.restart
+- name: ctlabs_frr.handlers.frr.service.restart
   service:
-    name  : "{{ ctlabs_frr.defaults.service[os_family].name }}"
+    name  : "{{ ctlabs_frr.defaults.service.name }}"
     state : restarted

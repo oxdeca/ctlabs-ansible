@@ -5,8 +5,8 @@
 # Description : services
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_frr.tasks.service.httpd.running
+- name: ctlabs_frr.tasks.service.frr.running
   service:
-    name    : "{{ ctlabs_frr.defaults.service[os_family].name }}"
+    name    : "{{ ctlabs_frr.defaults.service.name }}"
     state   : started
     enabled : true
