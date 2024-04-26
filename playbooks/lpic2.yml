@@ -45,7 +45,7 @@
             "masters" : [ "192.168.10.11" ]
           }
 
-    - name: ctlabs.playbooks.lpic2.smbadc.local_facts
+    - name: ctlabs.playbooks.lpic2.setup.smbadc.local_facts
       when: ansible_hostname in [ 'dc1', 'dc2' ]
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
@@ -55,7 +55,7 @@
             "domain" : "ctlabs.internal"
           }
 
-    - name: ctlabs.playbooks.setup.openvpn.server.local_facts
+    - name: ctlabs.playbooks.lpic2.setup.openvpn.server.local_facts
       when: ansible_hostname == 'ro1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
@@ -66,7 +66,7 @@
             "client_ip" : "10.8.15.2"
           }
 
-    - name: ctlabs.playbooks.setup.openvpn.client.local_facts
+    - name: ctlabs.playbooks.lpic2.setup.openvpn.client.local_facts
       when: ansible_hostname == 'ro2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
@@ -76,6 +76,18 @@
             "server_ip" : "10.8.15.1",
             "client_ip" : "10.8.15.2",
             "remote"    : "192.168.16.2"
+          }
+
+    - name: ctlabs.playbooks.lpic2.setup.frr.local_facts
+      when: ansible_hostname in [ 'ro1', 'ro2' ]
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "bgpd" ],
+              "profile" : "datacenter",
+            }
           }
 
 
@@ -90,17 +102,6 @@
     - roles/ctlabs_ca
 
 # -----------------------------------------------------------------------------
-# ctlabs_bind
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.bind
-  hosts :
-    - ns1
-    - ns2
-  tags  : bind
-  roles :
-    - roles/ctlabs_bind
-
-# -----------------------------------------------------------------------------
 # ctlabs_openvpn
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.openvpn
@@ -110,6 +111,28 @@
   tags  : openvpn
   roles :
     - roles/ctlabs_openvpn
+
+# -----------------------------------------------------------------------------
+# ctlabs_frr
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.frr
+  hosts :
+    - ro1
+    - ro2
+  tags  : frr
+  roles :
+    - roles/ctlabs_frr
+
+# -----------------------------------------------------------------------------
+# ctlabs_bind
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.bind
+  hosts :
+    - ns1
+    - ns2
+  tags  : bind
+  roles :
+    - roles/ctlabs_bind
 
 # -----------------------------------------------------------------------------
 # ctlabs_smbadc
