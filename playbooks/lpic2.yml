@@ -86,7 +86,7 @@
           {
             "daemons" : { 
               "enabled" : [ "bgpd" ],
-              "profile" : "datacenter",
+              "profile" : "datacenter"
             }
           }
 
