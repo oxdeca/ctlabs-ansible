@@ -5,7 +5,7 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_smbadc.tasls.config.tls.prepare
+- name: ctlabs_smbadc.tasks.config.tls.prepare
   copy:
     src  : "{{ ctlabs_smbadc.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
     dest : "{{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ item.name }}"
