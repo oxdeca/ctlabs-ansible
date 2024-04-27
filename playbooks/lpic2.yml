@@ -90,10 +90,10 @@
             },
             "router" : {
               "bgp" : {
-                "local_asn"  : 65001,
-                "local_ip"   : 10.8.15.1,
-                "remote_ip"  : 10.8.15.2,
-                "remote_asn" : 65002,
+                "local_asn"  : "65001",
+                "local_ip"   : "10.8.15.1",
+                "remote_ip"  : "10.8.15.2",
+                "remote_asn" : "65002",
                 "nets"       : ["192.168.10.0/24"]
               }
             }
@@ -111,12 +111,24 @@
             },
             "router" : {
               "bgp" : {
-                "local_asn"  : 65002,
-                "local_ip"   : 10.8.15.2,
-                "remote_ip"  : 10.8.15.1,
-                "remote_asn" : 65001,
+                "local_asn"  : "65002",
+                "local_ip"   : "10.8.15.2",
+                "remote_ip"  : "10.8.15.1",
+                "remote_asn" : "65001",
                 "nets"       : ["192.168.20.0/24"]
               }
+            }
+          }
+
+    - name: ctlabs.playbooks.lpic2.setup.frr.local_facts
+      when: ansible_hostname == 'isp1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "bgpd" ],
+              "profile" : "datacenter"
             }
           }
 
