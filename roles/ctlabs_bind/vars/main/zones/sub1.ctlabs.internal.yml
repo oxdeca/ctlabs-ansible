@@ -1,4 +1,4 @@
-zone_sub1_ctlabs_local:
+zone_sub1_ctlabs_internal:
 # -----------------------------------------------------------------------------
 # name server
 # -----------------------------------------------------------------------------
@@ -7,11 +7,11 @@ zone_sub1_ctlabs_local:
 
   - name  : '@'
     type  : NS
-    value : ns1.sub1.ctlabs.local.
+    value : ns1.sub1.ctlabs.internal.
 
   - name  : '@'
     type  : NS
-    value : ns2.sub1.ctlabs.local.
+    value : ns2.sub1.ctlabs.internal.
 
   - type  : COMMENT
     value : nameservers need an A-record
@@ -36,7 +36,7 @@ zone_sub1_ctlabs_local:
 
   - name  : www2
     type  : CNAME
-    value : www.ctlabs.local.
+    value : www.ctlabs.internal.
 
 # -----------------------------------------------------------------------------
 # TXT records
@@ -46,5 +46,5 @@ zone_sub1_ctlabs_local:
 
   - name : some_secret_key
     type : TXT
-    value: cn=wer,ou=user,dc=me,dc=local
+    value: cn=wer,ou=user,dc=me,dc=internal
 

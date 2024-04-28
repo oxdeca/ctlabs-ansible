@@ -1,4 +1,4 @@
-zone_ctlabs_local:
+zone_net03_ctlabs_internal:
 # -----------------------------------------------------------------------------
 # name server
 # -----------------------------------------------------------------------------
@@ -7,65 +7,22 @@ zone_ctlabs_local:
 
   - name  : '@'
     type  : NS
-    value : ns1.ctlabs.local.
+    value : ns1.site1.ctlabs.local.
 
   - name  : '@'
     type  : NS
-    value : ns1.ctlabs.local.
+    value : ns1.site1.ctlabs.local.
 
   - type  : COMMENT
     value : nameservers need an A-record
 
   - name  : ns1
     type  : A
-    value : 192.168.10.11
+    value : 192.168.12.13
 
   - name  : ns2
     type  : A
-    value : 192.168.20.11
-
-# -----------------------------------------------------------------------------
-# web server
-# -----------------------------------------------------------------------------
-  - type  : COMMENT
-    value : web server
-
-  - name  : www
-    type  : CNAME
-    value : www1.ctlabs.local.
-
-  - name  : www1
-    type  : A
-    value : 192.168.10.13
-
-  - name  : www2
-    type  : A
-    value : 192.168.20.13
-
-
-# -----------------------------------------------------------------------------
-# Other Hosts
-# -----------------------------------------------------------------------------
-  - type  : COMMENT
-    value : other hosts
-
-  - name  : h1
-    type  : A
-    value : 192.168.10.12
-
-  - name  : h2
-    type  : A
-    value : 192.168.20.12
-
-# -----------------------------------------------------------------------------
-# TXT records
-# -----------------------------------------------------------------------------
-  - type  : COMMENT
-    value : TXT Records
-
-  - name : some_secret_key
-    type : TXT
-    value: cn=wer,ou=user,dc=me,dc=local
+    value : 192.168.12.14
 
 # -----------------------------------------------------------------------------
 # Active Directory
@@ -75,11 +32,21 @@ zone_ctlabs_local:
 
   - name  : dc1
     type  : A
-    value : 192.168.10.14
+    value : 192.168.12.11
 
   - name  : dc2
     type  : A
-    value : 192.168.20.14
+    value : 192.168.12.12
+
+# -----------------------------------------------------------------------------
+# Other Hosts
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : other hosts
+
+  - name  : h1
+    type  : A
+    value : 192.168.32.15
 
 # -----------------------------------------------------------------------------
 # slapd Server
@@ -89,31 +56,26 @@ zone_ctlabs_local:
 
   - name  : slapd1
     type  : A
-    value : 192.168.10.13
+    value : 192.168.22.21
 
   - name  : slapd2
     type  : A
-    value : 192.168.20.13
+    value : 192.168.22.22
 
 # -----------------------------------------------------------------------------
-# grafana / prometheus
+# Other Hosts
 # -----------------------------------------------------------------------------
   - type  : COMMENT
-    value : grafanfa / prometheus
+    value : other hosts
 
-  - name  : prometheus
+  - name  : h4
     type  : A
-    value : 192.168.10.21
+    value : 192.168.41.16
 
-  - name  : grafana
+  - name  : h5
     type  : A
-    value : 192.168.20.22
+    value : 192.168.43.17
 
-  - name  : loki
+  - name  : h6
     type  : A
-    value : 192.168.20.23
-
-  - name  : mimir
-    type  : A
-    value : 192.168.20.24
-
+    value : 192.168.24.18
