@@ -231,6 +231,8 @@
   hosts :
     - ro1
     - ro2
+    - ro3
+    - ro4
   tags  : frr
   roles :
     - roles/ctlabs_frr
