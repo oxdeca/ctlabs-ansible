@@ -18,11 +18,11 @@ zone_net03_ctlabs_internal:
 
   - name  : ns1
     type  : A
-    value : 192.168.12.13
+    value : 192.168.10.11
 
   - name  : ns2
     type  : A
-    value : 192.168.12.14
+    value : 192.168.20.11
 
 # -----------------------------------------------------------------------------
 # Active Directory
@@ -32,21 +32,11 @@ zone_net03_ctlabs_internal:
 
   - name  : dc1
     type  : A
-    value : 192.168.12.11
+    value : 192.168.10.14
 
   - name  : dc2
     type  : A
-    value : 192.168.12.12
-
-# -----------------------------------------------------------------------------
-# Other Hosts
-# -----------------------------------------------------------------------------
-  - type  : COMMENT
-    value : other hosts
-
-  - name  : h1
-    type  : A
-    value : 192.168.32.15
+    value : 192.168.20.14
 
 # -----------------------------------------------------------------------------
 # slapd Server
@@ -56,26 +46,34 @@ zone_net03_ctlabs_internal:
 
   - name  : slapd1
     type  : A
-    value : 192.168.22.21
+    value : 192.168.21.21
 
   - name  : slapd2
     type  : A
     value : 192.168.22.22
 
 # -----------------------------------------------------------------------------
-# Other Hosts
+# Hosts
 # -----------------------------------------------------------------------------
   - type  : COMMENT
-    value : other hosts
+    value : hosts
+
+  - name  : h3
+    type  : A
+    value : 192.168.11.15
 
   - name  : h4
     type  : A
-    value : 192.168.41.16
+    value : 192.168.22.16
 
   - name  : h5
     type  : A
-    value : 192.168.43.17
+    value : 192.168.23.17
 
   - name  : h6
     type  : A
-    value : 192.168.24.18
+    value : 192.168.21.18
+
+  - name  : h7
+    type  : A
+    value : 192.168.12.19
