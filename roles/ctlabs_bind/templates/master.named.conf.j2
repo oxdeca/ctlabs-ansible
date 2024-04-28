@@ -57,7 +57,7 @@ include  "/etc/named.root.key";
 //include "/etc/bind/named.conf.default-zones";
 {% endif %}
 
-{% for zone in ansible_local.ctlabs_bind.zones %}
+{% for zone in ctlabs_bind_zones %}
 zone "{{ zone.name }}" IN {
   type         master;
   file         "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db";

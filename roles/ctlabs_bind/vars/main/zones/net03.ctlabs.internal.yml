@@ -7,11 +7,11 @@ zone_net03_ctlabs_internal:
 
   - name  : '@'
     type  : NS
-    value : ns1.site1.ctlabs.local.
+    value : ns1.net03.ctlabs.local.
 
   - name  : '@'
     type  : NS
-    value : ns1.site1.ctlabs.local.
+    value : ns2.net03.ctlabs.local.
 
   - type  : COMMENT
     value : nameservers need an A-record

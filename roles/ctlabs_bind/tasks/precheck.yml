@@ -14,3 +14,11 @@
   assert:
     that: ansible_local.ctlabs_bind.type in [ 'master', 'slave' ]
     fail_msg: "No type specified. ['master', 'slave']"
+
+- name: ctlabs_bind.tasks.precheck.zones.var
+  set_fact:
+    ctlabs_bind_zones: "{{ ctlabs_bind_zones | default(ctlabs_bind.defaults.config.zones) }}"
+
+- name: ctlabs_bind.tasks.precheck.zones.local
+  set_fact:
+    ctlabs_bind_zones: "{{ ansible_local.ctlabs_bind.zones | default(ctlabs_bind_zones) }}"

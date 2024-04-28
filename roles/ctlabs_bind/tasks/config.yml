@@ -26,7 +26,7 @@
       template:
         src  : zone.db.j2
         dest : "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db"
-      loop: "{{ ctlabs_bind.defaults.config.zones }}"
+      loop: "{{ ctlabs_bind_zones }}"
       loop_control:
         loop_var: zone
       vars:
