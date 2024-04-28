@@ -12,12 +12,12 @@
   hosts : all
   tags  : setup
   tasks :
-    - name: ctlabs.playbooks.setup.local_facts.dir
+    - name: ctlabs.playbooks.ctlabs.setup.local_facts.dir
       file:
         path : /etc/ansible/facts.d
         state: directory
 
-    - name: ctlabs.playbooks.setup.bind.master.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.bind.master.local_facts
       when: ansible_hostname == 'ns1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
@@ -31,7 +31,7 @@
             "slaves" : [ "192.168.20.11" ]
           }
 
-    - name: ctlabs.playbooks.setup.bind.slave.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.bind.slave.local_facts
       when: ansible_hostname == 'ns2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
@@ -45,7 +45,7 @@
             "masters" : [ "192.168.10.11" ]
           }
 
-    - name: ctlabs.playbooks.smbadc.local_facts
+    - name: ctlabs.playbooks.ctlabs.smbadc.local_facts
       when: ansible_hostname in [ 'dc1', 'dc2' ]
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
@@ -55,7 +55,7 @@
             "domain" : "ctlabs.internal"
           }
 
-    - name: ctlabs.playbooks.prometheus.local_facts
+    - name: ctlabs.playbooks.ctlabs.prometheus.local_facts
       when: ansible_hostname == 'prometheus'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_prometheus.fact
@@ -70,7 +70,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.setup.openvpn.server.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.openvpn.server.local_facts
       when: ansible_hostname == 'ro1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
@@ -81,7 +81,7 @@
             "client_ip" : "10.8.15.2"
           }
 
-    - name: ctlabs.playbooks.setup.openvpn.client.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.openvpn.client.local_facts
       when: ansible_hostname == 'ro2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_openvpn.fact
@@ -93,12 +93,67 @@
             "remote"    : "192.168.16.2"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+      when: ansible_hostname == 'ro1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "bgpd" ],
+              "profile" : "datacenter"
+            },
+            "router" : {
+              "bgp" : {
+                "local_asn"  : "65001",
+                "local_ip"   : "10.8.15.1",
+                "remote_ip"  : "10.8.15.2",
+                "remote_asn" : "65002",
+                "nets"       : ["192.168.10.0/24"]
+              }
+            }
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+      when: ansible_hostname == 'ro2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "bgpd" ],
+              "profile" : "datacenter"
+            },
+            "router" : {
+              "bgp" : {
+                "local_asn"  : "65002",
+                "local_ip"   : "10.8.15.2",
+                "remote_ip"  : "10.8.15.1",
+                "remote_asn" : "65001",
+                "nets"       : ["192.168.20.0/24"]
+              }
+            }
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+      when: ansible_hostname == 'isp1'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "bgpd" ],
+              "profile" : "datacenter"
+            }
+          }
+
+
 
 # -----------------------------------------------------------------------------
 # semaphore
 # -----------------------------------------------------------------------------
     
-- name  : ctlabs.playbooks.semaphore
+- name  : ctlabs.playbooks.ctlabs.semaphore
   hosts :
     - localhost
   tags  : semaphore
@@ -109,16 +164,38 @@
 # ctlabs_ca
 # -----------------------------------------------------------------------------
     
-- name  : ctlabs.playbooks.ca
+- name  : ctlabs.playbooks.ctlabs.ca
   hosts : all
   tags  : ca
   roles :
     - roles/ctlabs_ca
 
 # -----------------------------------------------------------------------------
+# ctlabs_openvpn
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.openvpn
+  hosts :
+    - ro1
+    - ro2
+  tags  : openvpn
+  roles :
+    - roles/ctlabs_openvpn
+
+# -----------------------------------------------------------------------------
+# ctlabs_frr
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.frr
+  hosts :
+    - ro1
+    - ro2
+  tags  : frr
+  roles :
+    - roles/ctlabs_frr
+
+# -----------------------------------------------------------------------------
 # ctlabs_bind
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.bind
+- name  : ctlabs.playbooks.ctlabs.bind
   hosts :
     - ns1
     - ns2
@@ -129,7 +206,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_smbadc
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.smbadc
+- name  : ctlabs.playbooks.ctlabs.smbadc
   hosts :
     - dc1
     - dc2
@@ -140,7 +217,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_sssd
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.sssd
+- name  : ctlabs.playbooks.ctlabs.sssd
   hosts : hosts
   tags  : sssd
   roles :
@@ -149,7 +226,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_slapd
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.slapd
+- name  : ctlabs.playbooks.ctlabs.slapd
   hosts :
     - slapd1
     - slapd2
@@ -160,7 +237,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_haproxy
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.haproxy
+- name  : ctlabs.playbooks.ctlabs.haproxy
   hosts :
     - slapd1
     - slapd2
@@ -171,7 +248,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_httpd
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.httpd
+- name  : ctlabs.playbooks.ctlabs.httpd
   hosts :
     - www1
     - www2
@@ -182,7 +259,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_syslog
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.syslog
+- name  : ctlabs.playbooks.ctlabs.syslog
   hosts :
     - ns1
   tags  : syslog
@@ -192,7 +269,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_prometheus
 # -----------------------------------------------------------------------------
-- name   : ctlabs.playbooks.monitoring.prometheus
+- name   : ctlabs.playbooks.ctlabs.prometheus
   hosts  :
     - prometheus
   tags   : prometheus
@@ -202,7 +279,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_grafana
 # -----------------------------------------------------------------------------
-- name   : ctlabs.playbooks.monitoring.grafana
+- name   : ctlabs.playbooks.ctlabs.grafana
   hosts  :
     - grafana
   tags   : grafana
@@ -212,7 +289,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_node_exporter
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.node_exporter
+- name  : ctlabs.playbooks.ctlabs.node_exporter
   hosts :
     - hosts
   tags  : node_exporter
@@ -222,7 +299,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_mimir
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.mimir
+- name  : ctlabs.playbooks.ctlabs.mimir
   hosts :
     - mimir
   tags  : mimir
@@ -232,7 +309,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_promtail
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.promtail
+- name  : ctlabs.playbooks.ctlabs.promtail
   hosts :
     - hosts
   tags  : promtail
@@ -242,20 +319,10 @@
 # -----------------------------------------------------------------------------
 # ctlabs_loki
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.monitoring.loki
+- name  : ctlabs.playbooks.ctlabs.loki
   hosts :
     - loki
   tags  : loki
   roles :
     - roles/ctlabs_loki
 
-# -----------------------------------------------------------------------------
-# ctlabs_openvpn
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.openvpn
-  hosts :
-    - ro1
-    - ro2
-  tags  : openvpn
-  roles :
-    - roles/ctlabs_openvpn
