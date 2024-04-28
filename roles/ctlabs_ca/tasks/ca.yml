@@ -16,7 +16,7 @@
 # CA
 #
 - name: ctlabs_ca.tasks.ca.create
-  when: ctlabs_ca_root_cert.exists == false
+  when: ctlabs_ca_root_cert.stat.exists == false
   block:
     - name: ctlabs_ca.tasks.ca.config.prepare
       delegate_to : localhost
