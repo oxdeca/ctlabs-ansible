@@ -102,7 +102,7 @@
         content: |
           {
             "daemons" : { 
-              "enabled" : [ "bgpd" ],
+              "enabled" : [ "bgpd", "ospfd" ],
               "profile" : "datacenter"
             },
             "router" : {
@@ -126,7 +126,7 @@
         content: |
           {
             "daemons" : { 
-              "enabled" : [ "bgpd" ],
+              "enabled" : [ "bgpd", "ospfd" ],
               "profile" : "datacenter"
             },
             "router" : {
@@ -142,6 +142,41 @@
               }
             }
           }
+
+    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+      when: ansible_hostname == 'ro3'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "ospfd" ],
+              "profile" : "datacenter"
+            },
+            "router" : {
+              "ospf" : {
+                "nets" : ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+              }
+            }
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+      when: ansible_hostname == 'ro4'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_frr.fact
+        content: |
+          {
+            "daemons" : { 
+              "enabled" : [ "ospfd" ],
+              "profile" : "datacenter"
+            },
+            "router" : {
+              "ospf" : {
+                "nets" : ["192.168.20.0/24", "192.168.21.0/24", "192.168.22.0/24", "192.168.23.0/24"]
+              }
+            }
+          }
+
 
     - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
       when: ansible_hostname == 'isp1'
