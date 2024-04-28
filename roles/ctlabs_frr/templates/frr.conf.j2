@@ -21,4 +21,12 @@ router bgp {{ ansible_local.ctlabs_frr.router.bgp.local_asn }}
 {%   endif %}
  exit-address-family
 {% endif %}
+
+{# OSPF -#}
+{% if ansible_local.ctlabs_frr.router.ospf %}
+router ospf
+{%   for net in ansible_local.ctlabs_frr.router.ospf.nets %}
+  network {{ net }}
+{%   endfor %}
+{% endif %}
 exit

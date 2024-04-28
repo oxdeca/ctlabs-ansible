@@ -26,7 +26,8 @@
             "type"   : "master",
             "zones"  : [
               { "name" : "ctlabs.internal" }, 
-              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
+              { "name" : "net03.ctlabs.internal" }, 
+              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } }
             ],
             "slaves" : [ "192.168.20.11" ]
           }
@@ -40,6 +41,7 @@
             "type"    : "slave",
             "zones"  : [
               { "name" : "ctlabs.internal" }, 
+              { "name" : "net03.ctlabs.internal" }, 
               { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
             ],
             "masters" : [ "192.168.10.11" ]
@@ -109,7 +111,10 @@
                 "local_ip"   : "10.8.15.1",
                 "remote_ip"  : "10.8.15.2",
                 "remote_asn" : "65002",
-                "nets"       : ["192.168.10.0/24"]
+                "nets"       : ["192.168.10.0/24", "192.168.11.0/24"]
+              },
+              "ospf" : {
+                "nets" : ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
               }
             }
           }
@@ -130,7 +135,10 @@
                 "local_ip"   : "10.8.15.2",
                 "remote_ip"  : "10.8.15.1",
                 "remote_asn" : "65001",
-                "nets"       : ["192.168.20.0/24"]
+                "nets"       : ["192.168.20.0/24", "192.168.23.0/24"]
+              },
+              "ospf" : {
+                "nets" : ["192.168.20.0/24", "192.168.21.0/24", "192.168.22.0/24", "192.168.23.0/24"]
               }
             }
           }
