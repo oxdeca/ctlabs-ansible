@@ -72,7 +72,7 @@
         content: |
           {
             "dbs" : [{
-              "type"        : "ldap"
+              "type"        : "ldap",
               "suffix"      : "{{ CTLABS_DOMAIN }}",
               "uri"         : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
               "bind_method" : "simple",
