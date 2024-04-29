@@ -53,7 +53,7 @@ idassert-bind            bindmethod={{ db.bind_method }}
 idassert-authzFrom       "*"
 access                   to dn.children={{ db.suffix }} by * read                         
 
-#overlay                  rwm
+overlay                  rwm
 #rwm-map                  attribute       uid             sAMAccountName
 rwm-map                  objectClass     posixAccount    person
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
