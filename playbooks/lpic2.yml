@@ -55,6 +55,22 @@
             "domain" : "ctlabs.internal"
           }
 
+    - name: ctlabs.playbooks.lpic2.slapd.local_facts
+      when: ansible_hostname in [ 'slapd1', 'slapd2']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_slapd.fact
+        content: |
+          {
+            "dbs" : [{
+              "type"        : "ldap",
+              "suffix"      : "dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
+              "uri"         : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
+              "bind_method" : "simple",
+              "bind_user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
+              "bind_pass"   : "secret123!"
+            }]
+          }
+
     - name: ctlabs.playbooks.lpic2.setup.openvpn.server.local_facts
       when: ansible_hostname == 'ro1'
       copy:
