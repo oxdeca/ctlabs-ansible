@@ -9,8 +9,8 @@
         ldap server require strong auth = no
         dns forwarder                   = {{ ansible_dns.nameservers[0] }}
         netbios name                    = {{ ansible_hostname | upper }}
-        realm                           = {{ ctlabs_smbadc.defaults.config.krb5_realm }}
-        workgroup                       = {{ ctlabs_smbadc.defaults.config.ad_domain }}
+        realm                           = {{ ctlabs_smbadc_domain | upper }}
+        workgroup                       = {{ ctlabs_smbadc_domain | split('.')[0] | upper }}
         server role                     = active directory domain controller
         idmap_ldb:use rfc2307           = yes
 
