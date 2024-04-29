@@ -37,8 +37,8 @@ moduleload              rwm
 # Databases
 # -----------------------------------------------------------------------------
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
-{% ctlabs_slapd_dbs is defined %}
-{% for db in ctlabs_slapd_dbs %}
+{% if ctlabs_slapd_dbs is defined %}
+{%   for db in ctlabs_slapd_dbs %}
 database                 {{ db.key }}
 suffix                   "{{ db.suffix }}"
 uri                      "{{ db.uri    }}"
@@ -58,6 +58,8 @@ access                   to dn.children={{ db.suffix }} by * read
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+{%   endfor %}
+{% endif %}
 
 # -----------------------------------------------------------------------------
 # Monitoring
