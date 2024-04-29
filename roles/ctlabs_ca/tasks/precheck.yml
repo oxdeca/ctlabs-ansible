@@ -19,6 +19,6 @@
   set_fact:
     ctlabs_ca_domain: "{{ ctlabs_ca_domain | default(ctlabs_ca.defaults.config.domain) }}"
 
-- name: ctlabs_ca.tasks.precheck.ca.domain.local
+- name: ctlabs_ca.tasks.precheck.ca.domain.local_fact
   set_fact:
     ctlabs_ca_domain: "{{ ansible_local.ctlabs_ca.domain | default(ctlabs_ca_domain) }}"

@@ -10,5 +10,13 @@
     that     : os is in ctlabs_slapd.os
     fail_msg : "OS[{{os}}] is not supported!"
 
+- name: ctlabs_slapd.tasks.precheck.dbs.var
+  set_fact:
+    ctlabs_slapd_dbs: "{{ ctlabs_slapd_dbs | default(ctlabs_slapd.defaults.config.dbs) }}"
+
+- name: ctlabs_slapd.tasks.precheck.dbs.local_fact
+  set_fact:
+    ctlabs_slapd_dbs: "{{ ansible_local.ctlabs_slapd.dbs | default(ctlabs_slapd_dbs) }}"
+
 # TODO
 #   - check which config format we should install slapd.conf or OLC

@@ -14,7 +14,7 @@
   set_fact:
     ctlabs_promtail_loki_url: "{{ ctlabs_promtail_loki_url | default(ctlabs_promtail.defaults.config.loki_url) }}"
 
-- name: ctlabs_promtail.tasks.precheck.loki_url.local
+- name: ctlabs_promtail.tasks.precheck.loki_url.local_fact
   set_fact:
     ctlabs_promtail_loki_url: "{{ ansible_local.ctlabs_loki.url | default(ctlabs_promtail_loki_url) }}"
 

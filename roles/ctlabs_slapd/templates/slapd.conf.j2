@@ -37,23 +37,24 @@ moduleload              rwm
 # Databases
 # -----------------------------------------------------------------------------
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
-database                 ldap
-suffix                   "{{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }}"
-uri                      "{{ ctlabs_slapd.defaults.config.dbs.ldap.uri    }}"
+{% ctlabs_slapd_dbs is defined %}
+{% for db in ctlabs_slapd_dbs %}
+database                 {{ db.key }}
+suffix                   "{{ db.suffix }}"
+uri                      "{{ db.uri    }}"
 norefs                   yes
 rebind-as-user           yes
-idassert-bind            bindmethod={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.method }}
-                         binddn={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.user }}
-                         credentials={{ ctlabs_slapd.defaults.config.dbs.ldap.bind.pass }}
+idassert-bind            bindmethod={{ db.bind.method }}
+                         binddn={{ db.bind.user }}
+                         credentials={{ db.bind.pass }}
                          mode=none
-                         tls_cacert=/etc/ssl/certs/ca-certificates.crt
 
 idassert-authzFrom       "*"
-access                   to dn.children={{ ctlabs_slapd.defaults.config.dbs.ldap.suffix }} by * read                         
+access                   to dn.children={{ db.suffix }} by * read                         
 
-overlay                  rwm
+#overlay                  rwm
 #rwm-map                  attribute       uid             sAMAccountName
-rwm-map                  objectClass     posixAccount    person
+#rwm-map                  objectClass     posixAccount    person
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
