@@ -14,3 +14,11 @@
   stat: 
     path: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
   register: ctlabs_ca_root_cert
+
+- name: ctlabs_ca.tasks.precheck.ca.domain.var
+  set_fact:
+    ctlabs_ca_domain: "{{ ctlabs_ca_domain | default(ctlabs_ca.defaults.config.domain) }}"
+
+- name: ctlabs_ca.tasks.precheck.ca.domain.local
+  set_fact:
+    ctlabs_ca_domain: "{{ ansible_local.ctlabs_ca.domain | default(ctlabs_ca_domain) }}"

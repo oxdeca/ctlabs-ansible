@@ -17,6 +17,14 @@
         path : /etc/ansible/facts.d
         state: directory
 
+    - name: ctlabs.playbooks.ctlabs.setup.ca.local_facts
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_ca.fact
+        content: |
+          {
+            "domain" : "{{ CTLABS_DOMAIN }}"
+          }
+
     - name: ctlabs.playbooks.ctlabs.setup.bind.master.local_facts
       when: ansible_hostname == 'ns1'
       copy:
@@ -25,8 +33,8 @@
           {
             "type"   : "master",
             "zones"  : [
+              { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
-              { "name" : "net03.ctlabs.internal" }, 
               { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } }
             ],
             "slaves" : [ "192.168.20.11" ]
@@ -40,8 +48,8 @@
           {
             "type"    : "slave",
             "zones"  : [
+              { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
-              { "name" : "net03.ctlabs.internal" }, 
               { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
             ],
             "masters" : [ "192.168.10.11" ]
@@ -54,7 +62,7 @@
         content: |
           {
             "type"   : "master",
-            "domain" : "ctlabs.internal"
+            "domain" : "{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.ctlabs.prometheus.local_facts

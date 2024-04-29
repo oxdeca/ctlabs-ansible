@@ -9,7 +9,7 @@ encrypt_key        = {{ ctlabs_ca.defaults.config.certs.encrypt_key }}
 prompt             = no
 
 [ req_server_cert ]
-CN                 = {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}
+CN                 = {{ ansible_hostname }}.{{ ctlabs_ca_domain }}
 C                  = CA
 ST                 = Ontario
 L                  = Toronto

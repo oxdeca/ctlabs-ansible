@@ -13,13 +13,13 @@
   delegate_to : localhost
   template    :
     src  : "{{ ctlabs_ca.defaults.config.certs.template }}"
-    dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf"
+    dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.cnf"
 
 - name: ctlabs_ca.tasks.certs.create
   when        : inventory_hostname != 'localhost'
   delegate_to : localhost
   script      : 
-    cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.cnf {{ ctlabs_ca.defaults.config.ca.name }}"
+    cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca_domain }}.cnf {{ ctlabs_ca.defaults.config.ca.name }}"
     chdir : "{{ ctlabs_ca.defaults.config.dir }}"
   register: "cert_create_output"
 
@@ -33,7 +33,7 @@
     group : "{{ ctlabs_ca.defaults.config.group }}"
   loop:
     -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt" }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.crt" }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.key" }
-    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca.defaults.config.domain }}.prv" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.key" }
+    -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.prv" }
 
