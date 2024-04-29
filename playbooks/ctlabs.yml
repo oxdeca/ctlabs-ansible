@@ -73,7 +73,7 @@
           {
             "dbs" : [{
               "type"        : "ldap",
-              "suffix"      : "{{ CTLABS_DOMAIN }}",
+              "suffix"      : "dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
               "uri"         : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
               "bind_method" : "simple",
               "bind_user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
