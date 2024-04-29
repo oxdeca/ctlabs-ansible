@@ -71,17 +71,14 @@
         dest: /etc/ansible/facts.d/ctlabs_slapd.fact
         content: |
           {
-            "dbs" : {
-              "ldap" : {
-                "suffix" : "{{ CTLABS_DOMAIN }}",
-                "uri"    : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
-                "bind"   : {
-                  "method" : "simple",
-                  "user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
-                  "pass"   : "secret123!"
-                }
-              }
-            }
+            "dbs" : [{
+              "db"          : "ldap"
+              "suffix"      : "{{ CTLABS_DOMAIN }}",
+              "uri"         : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
+              "bind_method" : "simple",
+              "bind_user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
+              "bind_pass"   : "secret123!"
+            }]
           }
 
     - name: ctlabs.playbooks.ctlabs.prometheus.local_facts

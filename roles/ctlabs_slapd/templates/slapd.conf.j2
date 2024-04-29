@@ -39,14 +39,15 @@ moduleload              rwm
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
 {% if ctlabs_slapd_dbs is defined %}
 {%   for db in ctlabs_slapd_dbs %}
-database                 {{ db.key }}
+{%     if db.type == 'ldap' %}
+database                 {{ db.type }}
 suffix                   "{{ db.suffix }}"
 uri                      "{{ db.uri    }}"
 norefs                   yes
 rebind-as-user           yes
-idassert-bind            bindmethod={{ db.bind.method }}
-                         binddn={{ db.bind.user }}
-                         credentials={{ db.bind.pass }}
+idassert-bind            bindmethod={{ db.bind_method }}
+                         binddn={{ db.bind_user }}
+                         credentials={{ db.bind_pass }}
                          mode=none
 
 idassert-authzFrom       "*"
@@ -58,6 +59,7 @@ access                   to dn.children={{ db.suffix }} by * read
 #rwm-map                 attribute       homeDirectory   unixHomeDirectory
 #rwm-map                 objectClass     posixGroup      group
 # ~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~_~
+{%     endif %}
 {%   endfor %}
 {% endif %}
 
