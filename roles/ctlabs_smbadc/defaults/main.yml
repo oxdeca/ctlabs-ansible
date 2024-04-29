@@ -32,9 +32,9 @@ ctlabs_smbadc:
         - 127.0.0.11
       tls:
         dir  : /etc/samba/tls
-        crt  : "{{ inventory_hostname }}.ctlabs.internal.crt"
-        key  : "{{ inventory_hostname }}.ctlabs.internal.key"
-        prv  : "{{ inventory_hostname }}.ctlabs.internal.prv"
+        crt  : "{{ ansible_nodename }}.crt"
+        key  : "{{ ansible_nodename }}.key"
+        prv  : "{{ ansible_nodename }}.prv"
         ca   : ca-ctlabs.crt
         proto: NORMAL:-VERS-TLS1.0:-VERS-TLS1.1
       smb:
