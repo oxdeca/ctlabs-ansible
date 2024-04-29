@@ -28,7 +28,8 @@
 
 - name: ctlabs_smbadc.tasks.config.domain
   when: ansible_facts.services['samba-ad-dc'].state != 'running'
-  command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm}}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
+  command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc_domain|upper }}" --domain="{{ ctlabs_smbadc_domain|split('.')[0]|upper }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
+  #command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm }}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
 
 # - name: ctlabs_smbadc.tasks.config.resolver
 #  template:

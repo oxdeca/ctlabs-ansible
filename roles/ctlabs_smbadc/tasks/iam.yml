@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_smbadc.tasks.config.domain.ou.created
-  command: /usr/bin/samba-tool ou create ou={{ item.name }},{{ item.path }}
+  command: /usr/bin/samba-tool ou create ou={{ item.name }}{{ ',' + item.path|default('') }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}
   loop: "{{ domain_ou }}"
   ignore_errors: true
 

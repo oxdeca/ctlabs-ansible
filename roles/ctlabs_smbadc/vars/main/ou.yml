@@ -8,13 +8,10 @@
 
 domain_ou:
   - name : users
-    path : dc=ctlabs,dc=internal
 
   - name : groups
-    path : dc=ctlabs,dc=internal
 
   - name : services
-    path : dc=ctlabs,dc=internal
 
   - name : slapd
-    path : ou=services,dc=ctlabs,dc=internal
+    path : ou=services
