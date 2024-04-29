@@ -49,6 +49,7 @@ idassert-bind            bindmethod={{ db.bind_method }}
                          binddn={{ db.bind_user }}
                          credentials={{ db.bind_pass }}
                          mode=none
+                         network-timeout=3
 
 idassert-authzFrom       "*"
 access                   to dn.children={{ db.suffix }} by * read                         

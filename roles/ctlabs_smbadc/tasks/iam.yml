@@ -5,35 +5,35 @@
 # Description : iam
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_smbadc.tasks.config.domain.ou.created
-  command: /usr/bin/samba-tool ou create ou={{ item.name }}{{ (',' + item.path)|default('') }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}
+- name: ctlabs_smbadc.tasks.iam.domain.ou.created
+  command: /usr/bin/samba-tool ou create ou={{ item.name }}{{ (',' + item.path) if item.path is defined }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}
   loop: "{{ domain_ou }}"
   ignore_errors: true
 
-- name: ctlabs_smbadc.tasks.config.domain.groups.created
+- name: ctlabs_smbadc.tasks.iam.domain.groups.created
   command: /usr/bin/samba-tool group add {{ item.name }} --groupou={{ item.ou }}
   loop: "{{ domain_groups }}"
   ignore_errors: true
 
-- name: ctlabs_smbadc.tasks.config.domain.users.created
+- name: ctlabs_smbadc.tasks.iam.domain.users.created
   when: item.firstname and item.lastname
   command: /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --userou={{ item.ou }} --random-password
   loop: "{{ domain_users }}"
   ignore_errors: true
 
-- name: ctlabs_smbadc.tasks.config.domain.users.pass.set
+- name: ctlabs_smbadc.tasks.iam.domain.users.pass.set
   when: item.firstname and item.lastname and item.pass is defined
   command: /usr/bin/samba-tool user setpassword {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --newpassword="{{ item.pass }}"
   loop: "{{ domain_users }}"
   ignore_errors: true
 
-- name: ctlabs_smbadc.tasks.config.domain.service.users.created
+- name: ctlabs_smbadc.tasks.iam.domain.service.users.created
   when: item.name
   command: /usr/bin/samba-tool user create {{ item.name }} --userou={{ item.ou }} --random-password
   loop: "{{ domain_services }}"
   ignore_errors: true
 
-- name: ctlabs_smbadc.tasks.config.domain.service.users.pass.set
+- name: ctlabs_smbadc.tasks.iam.domain.service.users.pass.set
   when: item.name and item.pass is defined
   command: /usr/bin/samba-tool user setpassword {{ item.name }} --newpassword="{{ item.pass }}"
   loop: "{{ domain_services }}"
