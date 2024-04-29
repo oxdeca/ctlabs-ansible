@@ -60,9 +60,9 @@ ctlabs_slapd:
         certdir: /etc/ca-ctlabs
       tls:
         dir : /etc/ldap/certs
-        crt : "{{ inventory_hostname }}.ctlabs.internal.crt"
-        key : "{{ inventory_hostname }}.ctlabs.internal.key"
-        prv : "{{ inventory_hostname }}.ctlabs.internal.prv"
+        crt : "{{ inventory_nodename }}.crt"
+        key : "{{ inventory_nodename }}.key"
+        prv : "{{ inventory_nodename }}.prv"
         ca  : ca-ctlabs.crt
 
   os:
