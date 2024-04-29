@@ -77,7 +77,7 @@
                 "uri"    : "ldaps://dc1.{{ CTLABS_DOMAIN }} ldaps://dc2.{{ CTLABS_DOMAIN }}",
                 "bind"   : {
                   "method" : "simple",
-                  "user"   : "cn=slapd,ou=services,{{ CTLABS_DOMAIN|split('.')|join('dc=') }}",
+                  "user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
                   "pass"   : "secret123!"
                 }
               }
