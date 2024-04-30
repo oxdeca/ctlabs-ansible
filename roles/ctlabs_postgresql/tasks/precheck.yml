@@ -13,7 +13,7 @@
 - name: ctlabs_postgresql.tasks.precheck.datadir_empty.check
   find:
     path      : "{{ ctlabs_postgresql.defaults.config.datadir }}"
-    file_type : all
+    file_type : any
     hidden    : true
   register: datadir_files_found
 
