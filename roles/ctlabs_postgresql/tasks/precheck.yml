@@ -10,17 +10,11 @@
     that     : os is in ctlabs_postgresql.os
     fail_msg : "OS[{{os}}] is not supported!"
 
-- name: ctlabs_postgresql.tasks.precheck.datadir_empty.check
-  find:
-    path      : "{{ ctlabs_postgresql.defaults.config.datadir }}"
-    file_type : any
-    hidden    : true
-  register: datadir_files_found
+- name: ctlabs_postgresql.tasks.precheck.db.setup.stat
+  stat:
+    path      : "{{ ctlabs_postgresql.defaults.config.datadir }}/PG_VERSION"
+  register: pg_version
 
-- debug: "msg={{datadir_files_found}}"
-
-- name: ctlabs_postgresql.tasks.precheck.datadir_empty.set_fact
+- name: ctlabs_postgresql.tasks.precheck.db.setup.set_fact
   set_fact:
-    ctlabs_postgresql_datadir_empty: "{{ true if datadir_files_found.matched == 0 else false }}"
-
-- debug: "msg={{ctlabs_postgresql_datadir_empty}}"
+    ctlabs_postgresql_db_setup: "{{ false if pg_version.stat.exists else true }}"
