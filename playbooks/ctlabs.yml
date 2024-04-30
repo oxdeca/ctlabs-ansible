@@ -403,3 +403,14 @@
   tags  : postgresql
   roles :
     - roles/ctlabs_postgresql
+
+# -----------------------------------------------------------------------------
+# ctlabs_redis
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.redis
+  hosts :
+    - db1
+    - db2
+  tags  : redis
+  roles :
+    - roles/ctlabs_redis
