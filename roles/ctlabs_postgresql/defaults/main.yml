@@ -11,7 +11,7 @@ ctlabs_postgresql:
       debian:
         - name : postgresql
       redhat:
-        - name : @postgresql:15
+        - name : "@postgresql:15"
     service:
       debian:
         name  : postgresql.service
