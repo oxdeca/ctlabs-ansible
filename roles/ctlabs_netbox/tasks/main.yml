@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_netbox
+    - ctlabs_netbox.precheck
+    - ctlabs_netbox.package
+    - ctlabs_netbox.config
+    - ctlabs_netbox.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_netbox
+    - ctlabs_netbox.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_netbox
+    - ctlabs_netbox.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_netbox
+    - ctlabs_netbox.service

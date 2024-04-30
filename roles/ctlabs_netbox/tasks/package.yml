@@ -1,0 +1,60 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/package.yml
+# Description : main ctlabs_netbox tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_netbox.tasks.package.dependencies.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_netbox.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_netbox.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_netbox.defaults.pkgs.nb.url    }}" 
+    dest : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_netbox.tasks.package.copy
+  copy:
+    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar }}"
+    dest : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar }}"
+
+- name: ctlabs_netbox.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar    }}"
+    dest : "{{ ctlabs_netbox.defaults.config.nb_rootdir }}"
+    remote_src: true
+
+- name: ctlabs_netbox.tasks.package.group
+  group:
+    name  : "{{ ctlabs_netbox.defaults.service.group }}"
+    system: true
+
+- name: ctlabs_netbox.tasks.package.user
+  user:
+    name   : "{{ ctlabs_netbox.defaults.service.user  }}"
+    group  : "{{ ctlabs_netbox.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_netbox.tasks.package.chown
+  block:
+    - name: ctlabs_netbox.tasks.package.chown.find
+      find:
+        path     : "{{ ctlabs_netbox.defaults.config.nb_appdir }}/{{ item }}"
+        file_type: any
+        recurse  : true
+      register: files_to_change
+      loop:
+        - media
+        - reports
+        - scripts
+
+    - name: ctlabs_netbox.tasks.package.chown.file
+      file:
+        path   : "{{ item.path }}"
+        ownner : "{{ ctlabs_netbox.defaults.service.user  }}"
+        group  : "{{ ctlabs_netbox.defaults.service.group }}"
+      loop: "{{ files_to_change }}"

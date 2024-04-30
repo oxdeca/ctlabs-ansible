@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_netbox.tasks.service.installed
+  systemd:
+    name    : "{{ ctlabs_netbox.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

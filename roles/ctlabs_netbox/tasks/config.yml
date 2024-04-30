@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_netbox.tasks.config.redis.conf
+  template:
+    src  : "{{ ctlabs_netbox.defaults.config.template }}"
+    dest : "{{ ctlabs_netbox.defaults.config.file     }}"
+  notify: ctlabs_netbox.handlers.service.restart

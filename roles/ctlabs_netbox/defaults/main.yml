@@ -1,0 +1,46 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_netbox:
+  defaults:
+    pkgs:
+      debian:
+        - name : python3-dev
+        - name : build-essential
+        - name : libxml2-dev
+        - name : libxslt1-dev
+        - name : libffi-dev
+        - name : libpq-dev
+        - name : libssl-dev
+        - name : zlib1g-dev
+      redhat:
+        - name : gcc
+        - name : libxml2-devel
+        - name : libxslt-devel
+        - name : libffi-devel
+        - name : libpq-devel
+        - name : openssl-devel
+        - name : redhat-rpm-config
+      nb:
+        url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
+        tmptar : /tmp/netbox.tar.gz
+    service:
+      name  : netbox.service
+      user  : netbox
+      group : netbox
+    config:
+      nb_rootdir : /opt
+      nb_appdir  : /opt/netbox/netbox
+      template   : configuration.py.j2
+      file       : /opt/netbox/netbox/netbox/configuration.py
+
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9
+    - debian11
