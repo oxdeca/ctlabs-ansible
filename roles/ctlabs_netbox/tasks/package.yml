@@ -52,12 +52,19 @@
         - reports
         - scripts
 
-    - name: ctlabs_netbox.tasks.package.chown.file
+    - name: ctlabs_netbox.tasks.package.chown.dirs
+      file:
+        path  : "{{ ctlabs_netbox.defaults.config.nb_appdir }}/{{ item }}"
+        owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
+        group  : "{{ ctlabs_netbox.defaults.service.group }}"
+      loop:
+        - media
+        - reports
+        - scripts
+        
+    - name: ctlabs_netbox.tasks.package.chown.files
       file:
         path   : "{{ item.path }}"
-        ownner : "{{ ctlabs_netbox.defaults.service.user  }}"
+        owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
-      loop: 
-        - "{{ files_to_change[0].files }}"
-        - "{{ files_to_change[1].files }}"
-        - "{{ files_to_change[2].files }}"
+      loop: "{{ files_to_change.results[0].files + files_to_change.results[1].files + files_to_change.results[2].files }}"
