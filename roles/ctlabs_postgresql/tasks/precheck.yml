@@ -12,5 +12,5 @@
 
 - name: ctlabs_postgresql.tasks.precheck.datadir.exists
   stat:
-    path: {{ ctlabs_postgresql.defaults.config.datadir }}/*
+    path: "{{ ctlabs_postgresql.defaults.config.datadir }}/*"
   register: ctlabs_postgresql_datadir_exists
