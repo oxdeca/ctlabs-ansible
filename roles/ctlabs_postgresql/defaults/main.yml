@@ -13,14 +13,9 @@ ctlabs_postgresql:
       redhat:
         - name : "@postgresql:15"
     service:
-      debian:
-        name  : postgresql.service
-        user  : postgres
-        group : postgres
-      redhat:
-        name  : postgresql.service
-        user  : postgres
-        group : postgres
+      name  : postgresql.service
+      user  : postgres
+      group : postgres
     config:
       datadir: /var/lib/pqsql/data/
       postgresql:
