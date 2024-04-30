@@ -5,7 +5,7 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_netbox.tasks.config.redis.conf
+- name: ctlabs_netbox.tasks.config.file
   template:
     src  : "{{ ctlabs_netbox.defaults.config.template }}"
     dest : "{{ ctlabs_netbox.defaults.config.file     }}"

@@ -49,7 +49,7 @@ REDIS = {
     },
     'caching': {
         'HOST': '{{ ctlabs_netbox.defaults.config.redis.host }}',
-        'PORT':  {{ ctlabs_netbox.defaults.config.redis_port }},
+        'PORT':  {{ ctlabs_netbox.defaults.config.redis.port }},
         # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
         # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
         # 'SENTINEL_SERVICE': 'netbox',
