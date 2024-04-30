@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_redis/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_redis.tasks.config.redis.conf
+  template:
+    src  : "{{ ctlabs_redis.defaults.config.template }}"
+    dest : "{{ ctlabs_redis.defaults.config.file     }}"
+  notify: ctlabs_redis.handlers.service.reload

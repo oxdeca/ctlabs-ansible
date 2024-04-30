@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_redis/tasks/package.yml
+# Description : main ctlabs_redis tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_redis.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_redis.defaults.pkgs[os_family] }}"

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_redis/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_redis
+    - ctlabs_redis.precheck
+    - ctlabs_redis.package
+    - ctlabs_redis.config
+    - ctlabs_redis.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_redis
+    - ctlabs_redis.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_redis
+    - ctlabs_redis.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_redis
+    - ctlabs_redis.service

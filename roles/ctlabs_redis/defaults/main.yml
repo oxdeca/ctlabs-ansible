@@ -1,0 +1,27 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_redis/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_redis:
+  defaults:
+    pkgs:
+      debian:
+        - name : redis
+      redhat:
+        - name : redis
+    service:
+      name  : redis.service
+      user  : redis
+      group : postgresredis
+    config:
+      template: redis.conf.j2
+      file    : /etc/redis/redis.conf
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9
+    - debian11

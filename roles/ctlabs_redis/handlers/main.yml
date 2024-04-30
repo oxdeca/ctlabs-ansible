@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_redis/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_redis.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_redis.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_redis.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_redis.defaults.service.name }}"
+    state : reloaded

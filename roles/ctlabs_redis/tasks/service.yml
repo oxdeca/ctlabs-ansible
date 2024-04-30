@@ -1,13 +1,13 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_postgresql/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_redis/tasks/service.yml
 # Description : service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_postgresql.tasks.service.installed
+- name: ctlabs_redis.tasks.service.installed
   systemd:
-    name    : "{{ ctlabs_postgresql.defaults.service.name }}"
+    name    : "{{ ctlabs_redis.defaults.service.name }}"
     enabled : true
     masked  : false
     state   : started
