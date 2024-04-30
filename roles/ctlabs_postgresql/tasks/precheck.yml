@@ -17,6 +17,8 @@
     hidden    : true
   register: datadir_files_found
 
+- debug: "msg={{datadir_files_found}}"
+
 - name: ctlabs_postgresql.tasks.precheck.datadir_empty.set_fact
   set_fact:
     ctlabs_postgresql_datadir_empty: "{{ true if datadir_files_found.matched == 0 else false }}"
