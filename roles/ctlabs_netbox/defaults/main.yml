@@ -45,7 +45,7 @@ ctlabs_netbox:
         pass: secret123!
         host: 192.168.50.3
         port: 5432
-        cons: 25
+        cons: 300
       redis:
         host: 192.168.50.3
         port: 6379
