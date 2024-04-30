@@ -49,7 +49,7 @@ ctlabs_netbox:
       redis:
         host: 192.168.50.3
         port: 6379
-      secret_key: "{{ lookup('ansible.builtin.password', '/dev/null', length=32) }}"
+      secret_key: "{{ lookup('ansible.builtin.password', '/dev/null', length=60) }}"
 
   os:
     - redhat8
