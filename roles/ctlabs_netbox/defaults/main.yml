@@ -33,10 +33,12 @@ ctlabs_netbox:
       user  : netbox
       group : netbox
     config:
-      nb_rootdir : /opt
-      nb_appdir  : /opt/netbox-3.7.6/netbox
-      template   : configuration.py.j2
-      file       : /opt/netbox/netbox/netbox/configuration.py
+      nb_inst_dir : /opt
+      nb_tar_dir  : /opt/netbox-3.7.6
+      nb_root_dir : /opt/netbox
+      nb_app_dir  : /opt/netbox/netbox
+      template    : configuration.py.j2
+      file        : /opt/netbox/netbox/netbox/configuration.py
       db:
         name: netbox
         user: netbox

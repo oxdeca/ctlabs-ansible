@@ -24,9 +24,15 @@
 
 - name: ctlabs_netbox.tasks.package.untar
   unarchive:
-    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar    }}"
-    dest : "{{ ctlabs_netbox.defaults.config.nb_rootdir }}"
+    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar     }}"
+    dest : "{{ ctlabs_netbox.defaults.config.nb_inst_dir }}"
     remote_src: true
+
+- name: ctlabs_netbox.tasks.package.link
+  file:
+    src   : "{{ ctlabs_netbox.defaults.config.nb_tar_dir  }}"
+    dest  : "{{ ctlabs_netbox.defaults.config.nb_root_dir }}"
+    state : link
 
 - name: ctlabs_netbox.tasks.package.group
   group:
@@ -43,7 +49,7 @@
   block:
     - name: ctlabs_netbox.tasks.package.chown.find
       find:
-        path     : "{{ ctlabs_netbox.defaults.config.nb_appdir }}/{{ item }}"
+        path     : "{{ ctlabs_netbox.defaults.config.nb_app_dir }}/{{ item }}"
         file_type: any
         recurse  : true
       register: files_to_change
@@ -54,14 +60,14 @@
 
     - name: ctlabs_netbox.tasks.package.chown.dirs
       file:
-        path  : "{{ ctlabs_netbox.defaults.config.nb_appdir }}/{{ item }}"
+        path  : "{{ ctlabs_netbox.defaults.config.nb_app_dir }}/{{ item }}"
         owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
       loop:
         - media
         - reports
         - scripts
-        
+
     - name: ctlabs_netbox.tasks.package.chown.files
       file:
         path   : "{{ item.path }}"
