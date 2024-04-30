@@ -43,11 +43,11 @@ ctlabs_netbox:
         name: netbox
         user: netbox
         pass: secret123!
-        host: 192.168.50.3
+        host: 192.168.50.5
         port: 5432
         cons: 300
       redis:
-        host: 192.168.50.3
+        host: 192.168.50.5
         port: 6379
       secret_key: "{{ lookup('ansible.builtin.password', '/dev/null', length=60) }}"
 
