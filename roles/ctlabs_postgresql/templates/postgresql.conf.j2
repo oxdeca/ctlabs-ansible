@@ -3,7 +3,7 @@
 {# Description : main postgresql.conf                                            #}
 {# ----------------------------------------------------------------------------- #}
 
-listen_addresses           = 'localhost,{{ ansible_default_ipv4_address }}'
+listen_addresses           = 'localhost,{{ ansible_default_ipv4.address }}'
 max_connections            = 100                   # (change requires restart)
 shared_buffers             = 128MB                 # min 128kB
 dynamic_shared_memory_type = posix                 # the default is usually the first option
