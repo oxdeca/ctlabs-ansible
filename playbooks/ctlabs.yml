@@ -396,7 +396,7 @@
 # -----------------------------------------------------------------------------
 # ctlabs_postgresql
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.postgresql
+- name  : ctlabs.playbooks.ctlabs.postgresql
   hosts :
     - db1
     - db2
@@ -407,10 +407,21 @@
 # -----------------------------------------------------------------------------
 # ctlabs_redis
 # -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.lpic2.redis
+- name  : ctlabs.playbooks.ctlabs.redis
   hosts :
     - db1
     - db2
   tags  : redis
   roles :
     - roles/ctlabs_redis
+
+# -----------------------------------------------------------------------------
+# ctlabs_netbox
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.netbox
+  hosts :
+    - www1
+    - www2
+  tags  : netbox
+  roles :
+    - roles/ctlabs_netbox

@@ -269,3 +269,14 @@
   tags  : redis
   roles :
     - roles/ctlabs_redis
+
+# -----------------------------------------------------------------------------
+# ctlabs_netbox
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.netbox
+  hosts :
+    - www1
+    - www2
+  tags  : netbox
+  roles :
+    - roles/ctlabs_netbox
