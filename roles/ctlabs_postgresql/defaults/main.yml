@@ -22,12 +22,15 @@ ctlabs_postgresql:
         user  : postgres
         group : postgres
     config:
-      debian:
-        file     : /var/lib/pgsql/data/pg_hba.conf
-        template : pg_hba.conf.j2
-      redhat:
-        file     : /var/lib/pgsql/data/pg_hba.conf
-        template : pg_hba.conf.j2
+      postgresql:
+        template: postgresql.conf.j2
+        file    : /var/lib/pgsql/data/postgresql.conf
+      pg_hba:
+        template: pg_hba.conf.j2
+        file    : /var/lib/pgsql/data/pg_hba.conf
+      gai:
+        template: gai.conf.j2
+        file    : /etc/gai.conf
   os:
     - redhat8
     - redhat9
