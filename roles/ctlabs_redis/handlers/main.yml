@@ -10,8 +10,3 @@
     name    : "{{ ctlabs_redis.defaults.service.name }}"
     enabled : true
     state   : restarted
-
-- name: ctlabs_redis.handlers.service.reload
-  service:
-    name  : "{{ ctlabs_redis.defaults.service.name }}"
-    state : reloaded

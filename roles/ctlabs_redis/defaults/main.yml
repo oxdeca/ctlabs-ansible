@@ -15,7 +15,7 @@ ctlabs_redis:
     service:
       name  : redis.service
       user  : redis
-      group : postgresredis
+      group : redis
     config:
       template: redis.conf.j2
       file    : /etc/redis/redis.conf

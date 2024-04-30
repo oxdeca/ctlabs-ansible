@@ -9,4 +9,4 @@
   template:
     src  : "{{ ctlabs_redis.defaults.config.template }}"
     dest : "{{ ctlabs_redis.defaults.config.file     }}"
-  notify: ctlabs_redis.handlers.service.reload
+  notify: ctlabs_redis.handlers.service.restart
