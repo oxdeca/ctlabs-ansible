@@ -1,0 +1,36 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_postgresql:
+  defaults:
+    pkgs:
+      debian:
+        - name : postgresql
+      redhat:
+        - name : @postgresql:15
+    service:
+      debian:
+        name  : postgresql.service
+        user  : postgres
+        group : postgres
+      redhat:
+        name  : postgresql.service
+        user  : postgres
+        group : postgres
+    config:
+      debian:
+        file     : /var/lib/pgsql/data/pg_hba.conf
+        template : pg_hba.conf.j2
+      redhat:
+        file     : /var/lib/pgsql/data/pg_hba.conf
+        template : pg_hba.conf.j2
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9
+    - debian11

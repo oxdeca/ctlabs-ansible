@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/tasks/package.yml
+# Description : main ctlabs_postgresql tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postgresql.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_postgresql.defaults.pkgs[os_family] }}"

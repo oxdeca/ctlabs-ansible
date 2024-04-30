@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_postgresql
+    - ctlabs_postgresql.precheck
+    - ctlabs_postgresql.package
+    - ctlabs_postgresql.config
+    - ctlabs_postgresql.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_postgresql
+    - ctlabs_postgresql.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_postgresql
+    - ctlabs_postgresql.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_postgresql
+    - ctlabs_postgresql.service

@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postgresql.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_postgresql.os
+    fail_msg : "OS[{{os}}] is not supported!"

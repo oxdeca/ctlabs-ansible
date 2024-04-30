@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postgresql.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_postgresql.defaults.config.template }}"
+    dest : "{{ ctlabs_postgresql.defaults.config.dir }}{{ ctlabs_postgresql.defaults.config.file }}"
+  notify: ctlabs_postgresql.handlers.service.reload

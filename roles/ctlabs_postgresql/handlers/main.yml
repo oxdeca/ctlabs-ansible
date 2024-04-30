@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postgresql.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_postgresql.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_postgresql.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_postgresql.defaults.service.name }}"
+    state : reloaded
