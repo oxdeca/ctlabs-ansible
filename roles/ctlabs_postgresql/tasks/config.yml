@@ -5,8 +5,23 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_postgresql.tasks.config.installed
+- name: ctlabs_postgresql.tasks.config.setup
+  shell:
+    cmd: "postgresql-setup --initdb"
+
+- name: ctlabs_postgresql.tasks.config.postgresql.conf
   template:
-    src  : "{{ ctlabs_postgresql.defaults.config.template }}"
-    dest : "{{ ctlabs_postgresql.defaults.config.dir }}{{ ctlabs_postgresql.defaults.config.file }}"
+    src  : "{{ ctlabs_postgresql.defaults.config.postgresql.template }}"
+    dest : "{{ ctlabs_postgresql.defaults.config.postgresql.file     }}"
+  notify: ctlabs_postgresql.handlers.service.reload
+
+- name: ctlabs_postgresql.tasks.config.pg_hba.conf
+  template:
+    src  : "{{ ctlabs_postgresql.defaults.config.pg_hba.template }}"
+    dest : "{{ ctlabs_postgresql.defaults.config.pg_hba.file     }}"
+  notify: ctlabs_postgresql.handlers.service.reload
+
+- name: ctlabs_postgresql.tasks.config.gai.conf
+    src  : "{{ ctlabs_postgresql.defaults.config.gai.template }}"
+    dest : "{{ ctlabs_postgresql.defaults.config.gai.file     }}"
   notify: ctlabs_postgresql.handlers.service.reload

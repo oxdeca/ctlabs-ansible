@@ -1,0 +1,12 @@
+{# -------------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_postgresql/templates/pg_hba.conf.j2  #}
+{# Description : client access                                                    #}
+{# ------------------------------------------------------------------------------ #}
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            ident
+
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            ident
