@@ -34,7 +34,7 @@ ctlabs_netbox:
       group : netbox
     config:
       nb_rootdir : /opt
-      nb_appdir  : /opt/netbox/netbox
+      nb_appdir  : /opt/netbox-3.7.6/netbox
       template   : configuration.py.j2
       file       : /opt/netbox/netbox/netbox/configuration.py
 

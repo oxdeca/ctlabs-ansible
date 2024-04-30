@@ -57,4 +57,4 @@
         path   : "{{ item.path }}"
         ownner : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
-      loop: "{{ files_to_change }}"
+      loop: "{{ files_to_change.files }}"
