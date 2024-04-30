@@ -22,6 +22,7 @@ ctlabs_postgresql:
         user  : postgres
         group : postgres
     config:
+      datadir: /var/lib/pqsql/data/
       postgresql:
         template: postgresql.conf.j2
         file    : /var/lib/pgsql/data/postgresql.conf
