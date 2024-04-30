@@ -21,3 +21,4 @@
   set_fact:
     ctlabs_postgresql_datadir_empty: "{{ true if datadir_files_found.matched == 0 else false }}"
 
+- debug: "msg={{ctlabs_postgresql_datadir_empty}}"
