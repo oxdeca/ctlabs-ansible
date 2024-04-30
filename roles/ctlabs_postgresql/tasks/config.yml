@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_postgresql.tasks.config.setup
-  when: ctlabs_postgresql_datadir.stat.exists == false
+  when: ctlabs_postgresql_datadir_empty == true
   shell:
     cmd: "postgresql-setup --initdb"
 
