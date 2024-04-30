@@ -247,3 +247,14 @@
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
+
+# -----------------------------------------------------------------------------
+# ctlabs_postgresql
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.postgresql
+  hosts :
+    - db1
+    - db2
+  tags  : postgresql
+  roles :
+    - roles/ctlabs_postgresql

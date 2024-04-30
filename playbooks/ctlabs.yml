@@ -393,3 +393,13 @@
   roles :
     - roles/ctlabs_loki
 
+# -----------------------------------------------------------------------------
+# ctlabs_postgresql
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.postgresql
+  hosts :
+    - db1
+    - db2
+  tags  : postgresql
+  roles :
+    - roles/ctlabs_postgresql
