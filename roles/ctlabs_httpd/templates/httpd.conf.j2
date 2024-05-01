@@ -92,3 +92,11 @@ AddDefaultCharset  UTF-8
 
 #ErrorDocument 500 "The server made a boo boo"
 EnableSendfile on
+
+<Location />
+  AuthType           Basic
+  AuthName          "Restricted Area"
+  AuthBasicProvider file
+  AuthUserFile      httpd.passwd
+  Require           valid-user # all granted
+</Location>

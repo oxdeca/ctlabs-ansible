@@ -23,12 +23,15 @@ ctlabs_httpd:
         user : daemon
         group: daemon
     config:
+      auth_user  : ctlabs
+      auth_pass  : secret123!
       admin      : webadm@ctlabs.internal
       servername : "{{ ansible_hostname }}.ctlabs.internal"
       listen     : 80
       debian:
         root_dir : /etc/apache2
         data_dir : /var/www/html
+        passwd   : /etc/apache2/httpd.passwd
         template : httpd.conf.j2
         modules  : mods-enabled
         file     : /etc/apache2/apache2.conf
@@ -40,6 +43,7 @@ ctlabs_httpd:
       redhat:
         root_dir : /etc/httpd
         data_dir : /var/www/html
+        passwd   : /etc/httpd/httpd.passwd
         template : httpd.conf.j2
         modules  : conf.modules.d
         file     : /etc/httpd/conf/httpd.conf

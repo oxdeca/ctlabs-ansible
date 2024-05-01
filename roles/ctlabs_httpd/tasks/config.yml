@@ -10,3 +10,7 @@
     src  : "{{ ctlabs_httpd.defaults.config[os_family].template }}"
     dest : "{{ ctlabs_httpd.defaults.config[os_family].file     }}"
   notify: ctlabs_httpd.handlers.httpd.service.reload
+
+- name: ctlabs_httpd.tasks.config.httpd.passwd
+  shell:
+    cmd: htpasswd -bc {{ ctlabs_httpd.defaults.config[os_family].passwd }} {{ ctlabs_httpd.defaults.config.auth_user }} {{ ctlabs_httpd.defaults.config.auth_pass }}
