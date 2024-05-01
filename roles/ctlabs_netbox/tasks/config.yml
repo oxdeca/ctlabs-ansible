@@ -12,15 +12,15 @@
   notify: ctlabs_netbox.handlers.service.restart
 
 - name: ctlabs_netbox.tasks.config.upgrade
-  cmd: "{{ ctlabs_netbox.default.config.upgrade_cmd }}"
+  command: "{{ ctlabs_netbox.defaults.config.upgrade_cmd }}"
 
 - name: ctlabs_netbox.tasks.config.superuser.create
   shell: |
    . /opt/netbox/venv/bin/activate
    cd {{ ctlabs_netbox.defaults.config.nb_app_dir }}
-   DJANGO_SUPERUSER_USERNAME='admin'
-   DJANGO_SUPERUSER_PASSWORD='secret123!'
-   DJANGO_SUPERUSER_EMAIL='admin@ctlabs.internal'
+   DJANGO_SUPERUSER_USERNAME="admin"
+   DJANGO_SUPERUSER_PASSWORD="secret123!"
+   DJANGO_SUPERUSER_EMAIL="admin@ctlabs.internal"
    python3 ./manage.py createsuperuser --noinput
 
 - name: ctlabs_netbox.tasks.config.housekeeping
