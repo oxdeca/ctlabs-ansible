@@ -12,8 +12,7 @@
   notify: ctlabs_netbox.handlers.service.restart
 
 - name: ctlabs_netbox.tasks.config.upgrade
-  cmd:
-    path: "{{ ctlabs_netbox.default.config.upgrade_cmd }}"
+  cmd: "{{ ctlabs_netbox.default.config.upgrade_cmd }}"
 
 - name: ctlabs_netbox.tasks.config.superuser.create
   shell: |
