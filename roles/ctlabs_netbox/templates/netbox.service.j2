@@ -1,0 +1,14 @@
+[Unit]
+Description=Netbox Development Server
+After=network.target
+
+[Service]
+KillMode=process
+Type=forking
+NotifyAccess=all
+ExecStart=". /opt/netbox/venv/bin/activate && cd /opt/netbox/netbox && python3 ./manage.py runserver 127.0.0.1:8080 --insecure"
+#ExecStop=
+
+[Install]
+WantedBy=multi-user.target
+

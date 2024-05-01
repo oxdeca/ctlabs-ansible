@@ -50,6 +50,7 @@ ctlabs_netbox:
         host: 192.168.50.5
         port: 6379
       secret_key: "{{ lookup('ansible.builtin.password', '/dev/null', length=60) }}"
+      upgrade_cmd: /opt/netbox/upgrade.sh
 
   os:
     - redhat8

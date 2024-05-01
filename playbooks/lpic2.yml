@@ -55,8 +55,8 @@
             "domain" : "ctlabs.internal"
           }
 
-    - name: ctlabs.playbooks.lpic2.slapd.local_facts
-      when: ansible_hostname in [ 'slapd1', 'slapd2']
+    - name: ctlabs.playbooks.lpic2.setup.slapd.local_facts
+      when: ansible_hostname in [ 'slapd1', 'slapd2' ]
       copy:
         dest: /etc/ansible/facts.d/ctlabs_slapd.fact
         content: |
