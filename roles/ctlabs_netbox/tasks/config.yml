@@ -11,7 +11,7 @@
     dest : "{{ ctlabs_netbox.defaults.config.file     }}"
   notify: ctlabs_netbox.handlers.service.restart
 
-- name: ctlabs_netbox.tasks.config.post_install
+- name: ctlabs_netbox.tasks.config.netbox.sh
   copy: 
     src  : files/netbox.sh
     dest : /usr/bin/netbox.sh
