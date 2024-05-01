@@ -29,9 +29,10 @@ ctlabs_netbox:
         url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
     service:
-      name  : netbox.service
-      user  : netbox
-      group : netbox
+      template : netbox.service.j2
+      name     : netbox.service
+      user     : netbox
+      group    : netbox
     config:
       nb_inst_dir : /opt
       nb_tar_dir  : /opt/netbox-3.7.6

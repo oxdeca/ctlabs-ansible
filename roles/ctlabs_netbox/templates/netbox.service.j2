@@ -6,8 +6,9 @@ After=network.target
 KillMode=process
 Type=forking
 NotifyAccess=all
-ExecStart=". /opt/netbox/venv/bin/activate && cd /opt/netbox/netbox && python3 ./manage.py runserver 127.0.0.1:8080 --insecure"
+ExecStart=-/usr/bin/netbox.sh
 #ExecStop=
+TimeoutSec=300
 
 [Install]
 WantedBy=multi-user.target
