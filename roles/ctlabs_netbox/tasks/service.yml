@@ -18,7 +18,7 @@
     dest : "{{ systemd_dir + '/' + ctlabs_netbox.defaults.service.name }}"
   #notify: ctlabs_netbox.handlers.systemd.reload
 
-- name: ctlabs_semaphore.tasks.service.start
+- name: ctlabs_netbox.tasks.service.start
   service:
     name  : "{{ ctlabs_netbox.defaults.service.name }}"
     state : started

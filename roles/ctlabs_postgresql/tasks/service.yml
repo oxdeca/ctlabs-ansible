@@ -11,3 +11,6 @@
     enabled : true
     masked  : false
     state   : started
+
+- name: ctlabs_postgresql.tasks.config.netbox_db
+  script: files/db_netbox.sh

@@ -27,6 +27,3 @@
     src  : "{{ ctlabs_postgresql.defaults.config.gai.template }}"
     dest : "{{ ctlabs_postgresql.defaults.config.gai.file     }}"
   notify: ctlabs_postgresql.handlers.service.reload
-
-- name: ctlabs_postgresql.tasks.config.netbox_db
-  script: files/db_netbox.sh
