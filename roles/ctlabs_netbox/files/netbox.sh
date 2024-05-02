@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function update() {
-  /opt/netbox/upgrade.sh
+  sh -c '/opt/netbox/upgrade.sh'
 }
 
 function create_admin() {
