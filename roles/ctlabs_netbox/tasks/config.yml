@@ -31,8 +31,8 @@
 
 - name: ctlabs_netbox.tasks.config.update
   shell:
-    cmd: /usr/bin/netbox.sh update
+    cmd: /usr/sbin/ip vrf exec default /usr/bin/netbox.sh update
 
 - name: ctlabs_netbox.tasks.config.admin.create
   shell:
-    cmd: /usr/bin/netbox.sh admin
+    cmd: /usr/sbin/ip vrf exec default /usr/bin/netbox.sh admin
