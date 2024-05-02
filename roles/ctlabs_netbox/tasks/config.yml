@@ -27,6 +27,7 @@
   copy:
     src  : files/netbox.conf
     dest : /etc/httpd/conf.d/netbox.conf
+  #notify: ctlabs_httpd.handlers.httpd.service
 
 - name: ctlabs_netbox.tasks.config.update
   shell:
