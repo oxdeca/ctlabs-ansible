@@ -28,3 +28,10 @@
     src  : files/netbox.conf
     dest : /etc/httpd/conf.d/netbox.conf
 
+- name: ctlabs_netbox.tasks.config.update
+  shell:
+    cmd: /usr/bin/netbox.sh update
+
+- name: ctlabs_netbox.tasks.config.admin.create
+  shell:
+    cmd: /usr/bin/netbox.sh admin
