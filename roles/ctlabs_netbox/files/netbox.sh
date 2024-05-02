@@ -21,6 +21,10 @@ function start() {
 case $1 in
   update)
     update
+    create_admin
+    ;;
+  admin)
+    create_admin
     ;;
   start)
     start
