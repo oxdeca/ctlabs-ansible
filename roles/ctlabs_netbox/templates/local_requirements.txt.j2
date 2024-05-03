@@ -4,5 +4,5 @@
 {# ------------------------------------------------------------------------------------- #}
 
 {% for pip in ctlabs_netbox.defaults.config.local_reqs.pips %}
-{{ pip }}
+{{ pip.name }}
 {% endfor %}
