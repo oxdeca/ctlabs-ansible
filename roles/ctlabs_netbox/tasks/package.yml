@@ -34,6 +34,12 @@
     dest  : "{{ ctlabs_netbox.defaults.install.root_dir }}"
     state : link
 
+- name: ctlabs_netbox.tasks.package.scripts.netbox
+  template: 
+    src  : "{{ ctlabs_netbox.defaults.scripts.netbox.template }}"
+    dest : "{{ ctlabs_netbox.defaults.scripts.netbox.file     }}"
+    mode : '0750'
+
 - name: ctlabs_netbox.tasks.package.group
   group:
     name  : "{{ ctlabs_netbox.defaults.service.group }}"
@@ -50,7 +56,6 @@
     src  : "{{ ctlabs_netbox.defaults.config.local_reqs.template }}"
     dest : "{{ ctlabs_netbox.defaults.config.local_reqs.file     }}"
 
-
 - name: ctlabs_netbox.tasks.package.chown
   block:
     - name: ctlabs_netbox.tasks.package.chown.find
@@ -59,20 +64,14 @@
         file_type: any
         recurse  : true
       register: files_to_change
-      loop:
-        - media
-        - reports
-        - scripts
+      loop: "{{ ctlabs_netbox.defaults.install.web_dirs }}"
 
     - name: ctlabs_netbox.tasks.package.chown.dirs
       file:
         path  : "{{ ctlabs_netbox.defaults.install.app_dir }}/{{ item }}"
         owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
-      loop:
-        - media
-        - reports
-        - scripts
+      loop: "{{ ctlabs_netbox.defaults.install.web_dirs }}"
 
     - name: ctlabs_netbox.tasks.package.chown.files
       file:

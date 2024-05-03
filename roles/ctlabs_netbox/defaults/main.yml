@@ -35,6 +35,7 @@ ctlabs_netbox:
       tar_dir  : /opt/netbox-3.7.6
       root_dir : /opt/netbox
       app_dir  : /opt/netbox/netbox
+      web_dirs : [ media, reports, scripts]
     scripts:
       netbox:
         template: netbox.sh.j2
@@ -58,8 +59,9 @@ ctlabs_netbox:
         allowed_hosts: ['*']
         auth:
           backend : netbox.authentication.LDAPBackend
-          template: ldap_config.py.j2
-          file    : /opt/netbox/netbox/netbox/ldap_config.py
+      ldap:
+        template: ldap_config.py.j2
+        file    : /opt/netbox/netbox/netbox/ldap_config.py
       httpd:
         template: netbox.conf.j2
         file: 

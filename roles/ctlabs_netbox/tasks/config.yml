@@ -5,17 +5,16 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_netbox.tasks.config.file
+- name: ctlabs_netbox.tasks.config.main
   template:
     src  : "{{ ctlabs_netbox.defaults.config.main.template }}"
     dest : "{{ ctlabs_netbox.defaults.config.main.file     }}"
   notify: ctlabs_netbox.handlers.service.restart
 
-- name: ctlabs_netbox.tasks.config.netbox
-  template: 
-    src  : "{{ ctlabs_netbox.defaults.scripts.netbox.template }}"
-    dest : "{{ ctlabs_netbox.defaults.scripts.netbox.file     }}"
-    mode : '0750'
+- name: ctlabs_netbox.tasks.config.ldap
+  template:
+    src  : "{{ ctlabs_netbox.defaults.config.ldap.template }}"
+    dest : "{{ ctlabs_netbox.defaults.config.ldap.file     }}"
 
 - name: ctlabs_netbox.tasks.config.housekeeping
   file:
