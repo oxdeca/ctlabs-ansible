@@ -3,20 +3,14 @@
 {# Description : client access                                                     #}
 {# ------------------------------------------------------------------------------- #}
 
-#########################
-#                       #
-#   Required settings   #
-#                       #
-#########################
-
-# This is a list of valid fully-qualified domain names (FQDNs) for the NetBox server. NetBox will not permit write
-# access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
-#
-# Example: ALLOWED_HOSTS = ['netbox.example.com', 'netbox.internal.local']
+# -----------------------------------------------------------------------------
+# Required Settings
+# -----------------------------------------------------------------------------
 ALLOWED_HOSTS = [ '{{ ctlabs_netbox.defaults.config.main.allowed_hosts|join("', '") }}' ]
 
-# PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
-#   https://docs.djangoproject.com/en/stable/ref/settings/#databases
+# -----------------------------------------------------------------------------
+# Database [PostgreSQL]
+# -----------------------------------------------------------------------------
 DATABASE = {
     'ENGINE'      : 'django.db.backends.postgresql',                    # Database engine
     'NAME'        : '{{ ctlabs_netbox.defaults.config.db.name }}',      # Database name
@@ -27,64 +21,54 @@ DATABASE = {
     'CONN_MAX_AGE':  {{ ctlabs_netbox.defaults.config.db.cons }},       # Max database connection age
 }
 
-# Redis database settings. Redis is used for caching and for queuing background tasks such as webhook events. A separate
-# configuration exists for each. Full connection details are required in both sections, and it is strongly recommended
-# to use two separate database IDs.
+# -----------------------------------------------------------------------------
+# Database [Redis]
+# -----------------------------------------------------------------------------
 REDIS = {
     'tasks': {
         'HOST': '{{ ctlabs_netbox.defaults.config.redis.host }}',
-        'PORT': {{ ctlabs_netbox.defaults.config.redis.port }},
-        # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
-        # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
-        # 'SENTINEL_SERVICE': 'netbox',
+        'PORT':  {{ ctlabs_netbox.defaults.config.redis.port }},
         'USERNAME': '',
         'PASSWORD': '',
         'DATABASE': 0,
         'SSL': False,
-        # Set this to True to skip TLS certificate verification
-        # This can expose the connection to attacks, be careful
-        # 'INSECURE_SKIP_TLS_VERIFY': False,
-        # Set a path to a certificate authority, typically used with a self signed certificate.
         # 'CA_CERT_PATH': '/etc/ssl/certs/ca.crt',
     },
     'caching': {
         'HOST': '{{ ctlabs_netbox.defaults.config.redis.host }}',
         'PORT':  {{ ctlabs_netbox.defaults.config.redis.port }},
-        # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
-        # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
-        # 'SENTINEL_SERVICE': 'netbox',
         'USERNAME': '',
         'PASSWORD': '',
         'DATABASE': 1,
         'SSL': False,
-        # Set this to True to skip TLS certificate verification
-        # This can expose the connection to attacks, be careful
-        # 'INSECURE_SKIP_TLS_VERIFY': False,
-        # Set a path to a certificate authority, typically used with a self signed certificate.
         # 'CA_CERT_PATH': '/etc/ssl/certs/ca.crt',
     }
 }
 
-# This key is used for secure generation of random numbers and strings. It must never be exposed outside of this file.
-# For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
-# symbols. NetBox will not run without this defined. For more information, see
-# https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-SECRET_KEY
+# -----------------------------------------------------------------------------
+# Secrets
+# -----------------------------------------------------------------------------
 SECRET_KEY = '{{ ctlabs_netbox.defaults.config.main.secret_key }}'
 
+# -----------------------------------------------------------------------------
+# Customization
+# -----------------------------------------------------------------------------
+FIELD_CHOICES = {
+    'dcim.Device.status+': (
+        ('retired',  'Retired',  'magenta'),
+        ('archived', 'Archived', 'purple'),
+    )
+}
 
-#########################
-#                       #
-#   Optional settings   #
-#                       #
-#########################
 
-# Specify one or more name and email address tuples representing NetBox administrators. These people will be notified of
-# application errors (assuming correct email settings are provided).
+
+# -----------------------------------------------------------------------------
+# Optional Settings
+# -----------------------------------------------------------------------------
 ADMINS = [
     # ('John Doe', 'jdoe@example.com'),
 ]
 
-# Permit the retrieval of API tokens after their creation.
 ALLOW_TOKEN_RETRIEVAL = False
 
 # Enable any desired validators for local account passwords below. For a list of included validators, please see the
@@ -98,8 +82,6 @@ AUTH_PASSWORD_VALIDATORS = [
     # },
 ]
 
-# Base URL path if accessing NetBox within a directory. For example, if installed at https://example.com/netbox/, set:
-# BASE_PATH = 'netbox/'
 BASE_PATH = ''
 
 # API Cross-Origin Resource Sharing (CORS) settings. If CORS_ORIGIN_ALLOW_ALL is set to True, all origins will be
