@@ -29,9 +29,9 @@
     dest : "{{ ctlabs_netbox.defaults.config.httpd.file[os_family] }}"
   #notify: ctlabs_httpd.handlers.httpd.service
 
-- name: ctlabs_netbox.tasks.config.update
+- name: ctlabs_netbox.tasks.config.upgrade
   shell:
-    cmd: "{{ ctlabs_netbox.defaults.scripts.netbox.cmd.update }}"
+    cmd: "{{ ctlabs_netbox.defaults.scripts.netbox.cmd.upgrade }}"
 
 - name: ctlabs_netbox.tasks.config.admin.create
   shell:

@@ -40,8 +40,8 @@ ctlabs_netbox:
         template: netbox.sh.j2
         file    : /usr/bin/netbox
         cmd:
-          update: /usr/sbin/ip vrf exec mgmt /usr/bin/netbox update
-          admin : /usr/sbin/ip vrf exec mgmt /usr/bin/netbox admin
+          upgrade: /usr/sbin/ip vrf exec mgmt /usr/bin/netbox update
+          admin  : /usr/sbin/ip vrf exec mgmt /usr/bin/netbox admin
       housekeeping:
         src : /opt/netbox/contrib/netbox-housekeeping.sh
         dst : /etc/cron.daily/netbox-housekeeping
