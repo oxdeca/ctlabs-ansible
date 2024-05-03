@@ -26,21 +26,21 @@ DATABASE = {
 # -----------------------------------------------------------------------------
 REDIS = {
     'tasks': {
-        'HOST': '{{ ctlabs_netbox.defaults.config.redis.host }}',
-        'PORT':  {{ ctlabs_netbox.defaults.config.redis.port }},
+        'HOST'    : '{{ ctlabs_netbox.defaults.config.redis.host }}',
+        'PORT'    :  {{ ctlabs_netbox.defaults.config.redis.port }},
         'USERNAME': '',
         'PASSWORD': '',
         'DATABASE': 0,
-        'SSL': False,
+        'SSL'     : False,
         # 'CA_CERT_PATH': '/etc/ssl/certs/ca.crt',
     },
     'caching': {
-        'HOST': '{{ ctlabs_netbox.defaults.config.redis.host }}',
-        'PORT':  {{ ctlabs_netbox.defaults.config.redis.port }},
+        'HOST'    : '{{ ctlabs_netbox.defaults.config.redis.host }}',
+        'PORT'    :  {{ ctlabs_netbox.defaults.config.redis.port }},
         'USERNAME': '',
         'PASSWORD': '',
         'DATABASE': 1,
-        'SSL': False,
+        'SSL'     : False,
         # 'CA_CERT_PATH': '/etc/ssl/certs/ca.crt',
     }
 }
@@ -108,13 +108,13 @@ DEFAULT_LANGUAGE = 'en-us'
 
 # Email settings
 EMAIL = {
-    'SERVER': 'localhost',
-    'PORT': 25,
-    'USERNAME': '',
-    'PASSWORD': '',
-    'USE_SSL': False,
-    'USE_TLS': False,
-    'TIMEOUT': 10,  # seconds
+    'SERVER'    : 'localhost',
+    'PORT'      : 25,
+    'USERNAME'  : '',
+    'PASSWORD'  : '',
+    'USE_SSL'   : False,
+    'USE_TLS'   : False,
+    'TIMEOUT'   : 10,  # seconds
     'FROM_EMAIL': '',
 }
 
@@ -178,14 +178,14 @@ PLUGINS = []
 # }
 
 # Remote authentication support
-REMOTE_AUTH_ENABLED = False
-REMOTE_AUTH_BACKEND = '{{ ctlabs_netbox.defaults.config.main.auth.backend }}'
-REMOTE_AUTH_HEADER = 'HTTP_REMOTE_USER'
-REMOTE_AUTH_USER_FIRST_NAME = 'HTTP_REMOTE_USER_FIRST_NAME'
-REMOTE_AUTH_USER_LAST_NAME = 'HTTP_REMOTE_USER_LAST_NAME'
-REMOTE_AUTH_USER_EMAIL = 'HTTP_REMOTE_USER_EMAIL'
-REMOTE_AUTH_AUTO_CREATE_USER = True
-REMOTE_AUTH_DEFAULT_GROUPS = []
+REMOTE_AUTH_ENABLED             = False
+REMOTE_AUTH_BACKEND             = '{{ ctlabs_netbox.defaults.config.main.auth.backend }}'
+REMOTE_AUTH_HEADER              = 'HTTP_REMOTE_USER'
+REMOTE_AUTH_USER_FIRST_NAME     = 'HTTP_REMOTE_USER_FIRST_NAME'
+REMOTE_AUTH_USER_LAST_NAME      = 'HTTP_REMOTE_USER_LAST_NAME'
+REMOTE_AUTH_USER_EMAIL          = 'HTTP_REMOTE_USER_EMAIL'
+REMOTE_AUTH_AUTO_CREATE_USER    = True
+REMOTE_AUTH_DEFAULT_GROUPS      = []
 REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
 
 # This repository is used to check whether there is a new release of NetBox available. Set to None to disable the
@@ -216,10 +216,10 @@ SESSION_FILE_PATH = None
 # class path of the storage driver in STORAGE_BACKEND and any configuration options in STORAGE_CONFIG. For example:
 # STORAGE_BACKEND = 'storages.backends.s3boto3.S3Boto3Storage'
 # STORAGE_CONFIG = {
-#     'AWS_ACCESS_KEY_ID': 'Key ID',
-#     'AWS_SECRET_ACCESS_KEY': 'Secret',
+#     'AWS_ACCESS_KEY_ID'      : 'Key ID',
+#     'AWS_SECRET_ACCESS_KEY'  : 'Secret',
 #     'AWS_STORAGE_BUCKET_NAME': 'netbox',
-#     'AWS_S3_REGION_NAME': 'eu-west-1',
+#     'AWS_S3_REGION_NAME'     : 'eu-west-1',
 # }
 
 # Time zone (default: UTC)
@@ -227,9 +227,9 @@ TIME_ZONE = 'UTC'
 
 # Date/time formatting. See the following link for supported formats:
 # https://docs.djangoproject.com/en/stable/ref/templates/builtins/#date
-DATE_FORMAT = 'N j, Y'
-SHORT_DATE_FORMAT = 'Y-m-d'
-TIME_FORMAT = 'g:i a'
-SHORT_TIME_FORMAT = 'H:i:s'
-DATETIME_FORMAT = 'N j, Y g:i a'
+DATE_FORMAT           = 'N j, Y'
+SHORT_DATE_FORMAT     = 'Y-m-d'
+TIME_FORMAT           = 'g:i a'
+SHORT_TIME_FORMAT     = 'H:i:s'
+DATETIME_FORMAT       = 'N j, Y g:i a'
 SHORT_DATETIME_FORMAT = 'Y-m-d H:i'

@@ -11,3 +11,11 @@
     enabled       : true
     daemon_reload : true
     state         : restarted
+
+# !!!!
+# TODO: Find a better way to include ctlabs_httpd.handlers.
+#
+- name: ctlabs_netbox.handlers.httpd.reload
+  service:
+    name : "{{ ctlabs_netbox.defaults.handlers.httpd[os_family] }}"
+    state: reloaded
