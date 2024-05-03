@@ -37,7 +37,7 @@ ctlabs_netbox:
       app_dir  : /opt/netbox/netbox
     scripts:
       netbox:
-        template: files/netbox.sh
+        template: netbox.sh.j2
         file    : /usr/bin/netbox
         cmd:
           update: /usr/sbin/ip vrf exec mgmt /usr/bin/netbox update
