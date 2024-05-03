@@ -12,9 +12,9 @@
   notify: ctlabs_netbox.handlers.service.restart
 
 - name: ctlabs_netbox.tasks.config.netbox
-  copy: 
-    src  : "{{ ctlabs_netbox.defaults.scripts.netbox.src }}"
-    dest : "{{ ctlabs_netbox.defaults.scripts.netbox.dst }}"
+  template: 
+    src  : "{{ ctlabs_netbox.defaults.scripts.netbox.template }}"
+    dest : "{{ ctlabs_netbox.defaults.scripts.netbox.file     }}"
     mode : '0750'
 
 - name: ctlabs_netbox.tasks.config.housekeeping
