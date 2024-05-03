@@ -24,7 +24,7 @@
     state: link
 
 - name: ctlabs_netbox.tasks.config.httpd
-  copy:
+  template:
     src  : "{{ ctlabs_netbox.defaults.config.httpd.template        }}"
     dest : "{{ ctlabs_netbox.defaults.config.httpd.file[os_family] }}"
   #notify: ctlabs_httpd.handlers.httpd.service
