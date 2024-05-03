@@ -14,7 +14,7 @@ function create_admin() {
   export DJANGO_SUPERUSER_USERNAME="admin"                               && \
   export DJANGO_SUPERUSER_PASSWORD="secret123!"                          && \
   export DJANGO_SUPERUSER_EMAIL="admin@ctlabs.internal"                  && \
-  /opt/netbox/netbox && python3 ./manage.py createsuperuser --noinput
+  cd /opt/netbox/netbox && python3 ./manage.py createsuperuser --noinput
 }
 
 function start_nb() {
@@ -36,7 +36,6 @@ function stop_rq() {
 case $1 in
   update)
     update
-    create_admin
     ;;
   admin)
     create_admin
