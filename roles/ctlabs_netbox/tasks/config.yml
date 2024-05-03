@@ -7,8 +7,8 @@
 
 - name: ctlabs_netbox.tasks.config.file
   template:
-    src  : "{{ ctlabs_netbox.defaults.config.template }}"
-    dest : "{{ ctlabs_netbox.defaults.config.file     }}"
+    src  : "{{ ctlabs_netbox.defaults.config.main.template }}"
+    dest : "{{ ctlabs_netbox.defaults.config.main.file     }}"
   notify: ctlabs_netbox.handlers.service.restart
 
 - name: ctlabs_netbox.tasks.config.netbox
