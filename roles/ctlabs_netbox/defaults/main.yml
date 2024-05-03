@@ -51,6 +51,10 @@ ctlabs_netbox:
       name     : netbox.service
       user     : netbox
       group    : netbox
+    handlers:
+      httpd:
+        debian: apache2.service
+        redhat: httpd.service
     config:
       main:
         template     : configuration.py.j2
