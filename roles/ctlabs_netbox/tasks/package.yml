@@ -24,14 +24,14 @@
 
 - name: ctlabs_netbox.tasks.package.untar
   unarchive:
-    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar     }}"
-    dest : "{{ ctlabs_netbox.defaults.config.nb_inst_dir }}"
+    src  : "{{ ctlabs_netbox.defaults.pkgs.nb.tmptar }}"
+    dest : "{{ ctlabs_netbox.defaults.install.dir    }}"
     remote_src: true
 
 - name: ctlabs_netbox.tasks.package.link
   file:
-    src   : "{{ ctlabs_netbox.defaults.config.nb_tar_dir  }}"
-    dest  : "{{ ctlabs_netbox.defaults.config.nb_root_dir }}"
+    src   : "{{ ctlabs_netbox.defaults.install.tar_dir  }}"
+    dest  : "{{ ctlabs_netbox.defaults.install.root_dir }}"
     state : link
 
 - name: ctlabs_netbox.tasks.package.group
@@ -45,11 +45,17 @@
     group  : "{{ ctlabs_netbox.defaults.service.group }}"
     system : true
 
+- name: ctlabs_netbox.tasks.package.local_requirements
+  template:
+    src  : "{{ ctlabs_netbox.defaults.config.local_reqs.template }}"
+    dest : "{{ ctlabs_netbox.defaults.config.local_reqs.file     }}"
+
+
 - name: ctlabs_netbox.tasks.package.chown
   block:
     - name: ctlabs_netbox.tasks.package.chown.find
       find:
-        path     : "{{ ctlabs_netbox.defaults.config.nb_app_dir }}/{{ item }}"
+        path     : "{{ ctlabs_netbox.defaults.install.app_dir }}/{{ item }}"
         file_type: any
         recurse  : true
       register: files_to_change
@@ -60,7 +66,7 @@
 
     - name: ctlabs_netbox.tasks.package.chown.dirs
       file:
-        path  : "{{ ctlabs_netbox.defaults.config.nb_app_dir }}/{{ item }}"
+        path  : "{{ ctlabs_netbox.defaults.install.app_dir }}/{{ item }}"
         owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
       loop:

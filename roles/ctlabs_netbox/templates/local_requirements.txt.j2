@@ -1,0 +1,8 @@
+{# ------------------------------------------------------------------------------------- #}
+{# File        : ctlabs-ansible/roles/ctlabs_netbox/templates/local_requirements.txt.j2  #}
+{# Description : client access                                                           #}
+{# ------------------------------------------------------------------------------------- #}
+
+{% for pip in ctlabs_netbox.defaults.config.local_reqs.pips %}
+{{ pip }}
+{% endfor %}

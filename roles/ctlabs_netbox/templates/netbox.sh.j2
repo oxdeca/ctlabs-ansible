@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/templates/netbox.sh.j2
+# Description : service
+# ------------------------------------------------------------------------------
+
+function update() {
+  sh -c '/opt/netbox/upgrade.sh'
+}
+
+function create_admin() {
+  . /opt/netbox/venv/bin/activate                                        && \
+  export DJANGO_SUPERUSER_USERNAME="admin"                               && \
+  export DJANGO_SUPERUSER_PASSWORD="secret123!"                          && \
+  export DJANGO_SUPERUSER_EMAIL="admin@ctlabs.internal"                  && \
+  /opt/netbox/netbox && python3 ./manage.py createsuperuser --noinput
+}
+
+function start_nb() {
+  nohup /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py runserver 127.0.0.1:8080 --insecure &
+}
+
+function start_rq() {
+  nohup /opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py rqworker high default low &
+}
+
+function stop_nb() {
+  /usr/bin/pkill -f runserver
+}
+
+function stop_rq() {
+  /usr/bin/pkill -f rqworker
+}
+
+case $1 in
+  update)
+    update
+    create_admin
+    ;;
+  admin)
+    create_admin
+    ;;
+  start)
+    start_nb
+    sleep 5
+    start_rq
+    ;;
+  start_ng)
+    start_nb
+    ;;
+  start_rq)
+    start_rq
+    ;;
+  stop)
+    stop_rq
+    stop_nb
+    ;;
+  stop_nb)
+    stop_nb
+    ;;
+  stop_rq)
+    stop_rq
+    ;;
+esac
+
+exit 0

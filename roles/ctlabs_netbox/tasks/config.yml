@@ -11,28 +11,28 @@
     dest : "{{ ctlabs_netbox.defaults.config.file     }}"
   notify: ctlabs_netbox.handlers.service.restart
 
-- name: ctlabs_netbox.tasks.config.netbox.sh
+- name: ctlabs_netbox.tasks.config.netbox
   copy: 
-    src  : files/netbox.sh
-    dest : /usr/bin/netbox.sh
+    src  : "{{ ctlabs_netbox.defaults.scripts.netbox.src }}"
+    dest : "{{ ctlabs_netbox.defaults.scripts.netbox.dst }}"
     mode : '0750'
 
 - name: ctlabs_netbox.tasks.config.housekeeping
   file:
-    src  : /opt/netbox/contrib/netbox-housekeeping.sh
-    dest : /etc/cron.daily/netbox-housekeeping
+    src  : "{{ ctlabs_netbox.defaults.scripts.housekeeping.src }}"
+    dest : "{{ ctlabs_netbox.defaults.scripts.housekeeping.dst }}"
     state: link
 
 - name: ctlabs_netbox.tasks.config.httpd
   copy:
-    src  : files/netbox.conf
-    dest : /etc/httpd/conf.d/netbox.conf
+    src  : "{{ ctlabs_netbox.defaults.config.httpd.template   }}"
+    dest : "{{ ctlabs_netbox.defaults.config.httpd[os_family] }}"
   #notify: ctlabs_httpd.handlers.httpd.service
 
 - name: ctlabs_netbox.tasks.config.update
   shell:
-    cmd: /usr/sbin/ip vrf exec default /usr/bin/netbox.sh update
+    cmd: "{{ ctlabs_netbox.defaults.scripts.netbox.cmd.update }}"
 
 - name: ctlabs_netbox.tasks.config.admin.create
   shell:
-    cmd: /usr/sbin/ip vrf exec default /usr/bin/netbox.sh admin
+    cmd: "{{ ctlabs_netbox.defaults.scripts.netbox.cmd.admin }}"

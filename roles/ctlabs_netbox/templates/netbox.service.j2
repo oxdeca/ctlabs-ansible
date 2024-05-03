@@ -6,8 +6,8 @@ After=network.target
 KillMode=process
 Type=forking
 NotifyAccess=all
-ExecStart=-/bin/sh -c '/usr/bin/netbox.sh start'
-ExecStop=/usr/bin/pkill -f runserver
+ExecStart=-/bin/sh -c '/usr/bin/netbox start'
+ExecStop=-/bin/sh -c '/usr/bin/netbox stop'
 TimeoutSec=300
 
 [Install]

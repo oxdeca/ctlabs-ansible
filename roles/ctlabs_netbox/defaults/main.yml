@@ -25,21 +25,51 @@ ctlabs_netbox:
         - name : libpq-devel
         - name : openssl-devel
         - name : redhat-rpm-config
+        - name : openldap-devel
+        - name : python3-devel
       nb:
         url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
+    install:
+      dir      : /opt
+      tar_dir  : /opt/netbox-3.7.6
+      root_dir : /opt/netbox
+      app_dir  : /opt/netbox/netbox
+    scripts:
+      netbox:
+        template: files/netbox.sh
+        file    : /usr/bin/netbox
+        cmd:
+          update: /usr/sbin/ip vrf exec mgmt /usr/bin/netbox update
+          admin : /usr/sbin/ip vrf exec mgmt /usr/bin/netbox admin
+      housekeeping:
+        src : /opt/netbox/contrib/netbox-housekeeping.sh
+        dst : /etc/cron.daily/netbox-housekeeping
     service:
       template : netbox.service.j2
       name     : netbox.service
       user     : netbox
       group    : netbox
     config:
-      nb_inst_dir : /opt
-      nb_tar_dir  : /opt/netbox-3.7.6
-      nb_root_dir : /opt/netbox
-      nb_app_dir  : /opt/netbox/netbox
-      template    : configuration.py.j2
-      file        : /opt/netbox/netbox/netbox/configuration.py
+      main:
+        template     : configuration.py.j2
+        file         : /opt/netbox/netbox/netbox/configuration.py
+        secret_key   : "{{ lookup('ansible.builtin.password', '/dev/null', length=60) }}"
+        allowed_hosts: ['*']
+        auth:
+          backend : netbox.authentication.LDAPBackend
+          template: ldap_config.py.j2
+          file    : /opt/netbox/netbox/netbox/ldap_config.py
+      httpd:
+        template: netbox.conf.j2
+        file    : 
+          debian: /etc/apache2/conf.d/netbox.conf
+          redhat: /etc/httpd/conf.d/netbox.conf
+      local_reqs:
+        template: local_requirements.txt.j2
+        file    : /opt/netbox/local_requirements.txt
+        pips:
+          - name : django_auth_ldap
       db:
         name: netbox
         user: netbox
@@ -50,12 +80,8 @@ ctlabs_netbox:
       redis:
         host: 192.168.50.5
         port: 6379
-      secret_key: "{{ lookup('ansible.builtin.password', '/dev/null', length=60) }}"
-      upgrade_cmd: /opt/netbox/upgrade.sh
-
   os:
     - redhat8
     - redhat9
     - centos8
     - centos9
-    - debian11
