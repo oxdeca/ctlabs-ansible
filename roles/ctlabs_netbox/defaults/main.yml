@@ -62,7 +62,7 @@ ctlabs_netbox:
           file    : /opt/netbox/netbox/netbox/ldap_config.py
       httpd:
         template: netbox.conf.j2
-        file    : 
+        file: 
           debian: /etc/apache2/conf.d/netbox.conf
           redhat: /etc/httpd/conf.d/netbox.conf
       local_reqs:
