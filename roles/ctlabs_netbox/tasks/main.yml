@@ -27,3 +27,15 @@
   tags:
     - ctlabs_netbox
     - ctlabs_netbox.service
+
+- import_tasks: update.yml
+  tags:
+    - never
+    - ctlabs_netbox
+    - ctlabs_netbox.update
+
+- import_tasks: service.yml
+  tags:
+    - never
+    - ctlabs_netbox
+    - ctlabs_netbox.service

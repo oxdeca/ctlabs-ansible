@@ -1,0 +1,76 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/update.yml
+# Description : virtual machines
+# ------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Virtual Machine Details
+# -----------------------------------------------------------------------------
+#
+
+#
+# VM
+#
+- name: ctlabs_netbox.tasks.update.virtual_machine
+  connection: local
+  netbox.netbox.netbox_virtual_machine:
+    state        : present
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    data:
+      name                 : "{{ intentory_hostname }}"
+      site                 : "{{ ansible_local.site | default('GCP') }}"
+      platform             : "{{ os }}"
+      comments             : "{{ ansible_virtualization_type }}"
+      memory               : "{{ ansible_memtotal_mb }}"
+      vcpus                : "{{ ansible_processor_vcpus }}"
+      virtual_machine_role : "{{ 'container' if ansible_virtualization_type is in ['docker','container','containerd'] else 'Virtual Machine' if ansible_virtualization_type is in ['VMware','KVM'] else 'bare-metal' }}"
+
+#
+# Network Interface
+#
+- name: ctlabs_netbox.tasks.update.vm_interface
+  connection: local
+  netbox.netbox.netbox_vm_interface:
+    state        : present
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    data:
+      virtual_machine: "{{ intentory_hostname }}"
+      name           : "{{ item }}"
+      enabled        : "{{ lookup('vars', 'ansible_' + item)['active'] }}"
+      mac_address    : "{{ lookup('vars', 'ansible_' + item)['macaddress'] }}"
+      mtu            : "{{ lookup('vars', 'ansible_' + item)['mtu'] }}"
+  loop: "{{ ansible_interfaces | difference(['lo','mgmt']) }}"
+
+#
+# IP Address
+#
+- name: ctlabs_netbox.tasks.update.ip_address
+  connection: local
+  when: lookup('vars', 'ansible_' + item)['ipv4'] is defined
+  netbox.netbox.netbox_ip_address:
+    state        : present
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    data:
+      address          : "{{ lookup('vars', 'ansible_' + item)['ipv4']['address'] }}/{{ lookup('vars', 'ansible_' + item)['ipv4']['prefix'] }}"
+      assigned_object :
+        name           : "{{ item }}"
+        virtual_machine: "{{ intentory_hostname }}"
+  loop: "{{ ansible_interfaces | difference(['lo','mgmt']) }}"
+
+#
+# Set Primary IPv4
+#
+- name: ctlabs_netbox.tasks.update.primary_ipv4
+  connection: local
+  netbox.netbox.netbox_virtual_machine:
+    state        : present
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    data:
+      name                 : "{{ intentory_hostname }}"
+      primary_ip4          : "{{ ansible_default_ipv4['address'] }}/{{ ansible_default_ipv4['prefix'] }}"

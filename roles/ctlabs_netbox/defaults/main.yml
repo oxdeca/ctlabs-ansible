@@ -76,6 +76,7 @@ ctlabs_netbox:
         file    : /opt/netbox/local_requirements.txt
         pips:
           - name : django_auth_ldap
+          - name : netmiko
       db:
         name: netbox
         user: netbox

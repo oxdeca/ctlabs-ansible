@@ -1,0 +1,121 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_netbox/tasks/setup.yml
+# Description : basic setup
+# ------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# SETUP - Manufacturer
+# -----------------------------------------------------------------------------
+#
+- name: ctlabs_netbox.tasks.config.setup
+  connection : local
+  run_once   : true
+  block:
+    - name: ctlabs_netbox.tasks.config.setup.site
+      netbox.netbox.netbox_site:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name: "{{ item }}"
+      loop: "{{ ctlabs_netbox_setup.sites }}"
+
+    - name: ctlabs_netbox.tasks.config.setup.device_role
+      netbox.netbox.netbox_device_role:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name : "{{ item }}"
+      loop: "{{ ctlabs_netbox_setup.device_roles }}"
+
+    - name: ctlabs_netbox.tasks.config.setup.manufacturer
+      netbox.netbox.netbox_manufacturer:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name : "{{ item.key }}"
+      loop: "{{ ctlabs_netbox_setup.manufacturer | dict2items }}"
+
+    - name: ctlabs_netbox.tasks.config.setup.device_type
+      netbox.netbox.netbox_device_type:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          slug         : "{{ item.model }}"
+          model        : "{{ item.model }}"
+          manufacturer : "{{ item.manufacturer }}"
+      loop: "{{ ctlabs_netbox_setup.manufacturer | dev_types }}"
+
+    - name: ctlabs_netbox.tasks.config.setup.platforms
+      netbox.netbox.netbox_platform:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name         : "{{ item.platform }}"
+          manufacturer : "{{ item.manufacturer }}"
+      loop: "{{ ctlabs_netbox_setup.manufacturer | platforms }}"
+
+# -----------------------------------------------------------------------------
+# SETUP - Cluster
+# -----------------------------------------------------------------------------
+#
+- name: ctlabs_netbox.tasks.config.vms
+  connection : local
+  run_once   : true
+  block:
+    - name: ctlabs_netbox.tasks.config.vms.cluster_type
+      netbox.netbox.netbox_cluster_type:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name: "{{ item }}"
+      loop: "{{ ctlabs_netbox_setup.cluster_types }}"
+
+    - name: ctlabs_netbox.tasks.config.vms.cluster_group
+      netbox.netbox.netbox_cluster_group:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name: "{{ item }}"
+      loop: "{{ ctlabs_netbox_setup.cluster_groups }}"
+
+
+    - name: ctlabs_netbox.tasks.config.vm.cluster
+      netbox.netbox.netbox_cluster:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          name         : "{{ item.name  }}"
+          cluster_type : "{{ item.type  }}"
+          cluster_group: "{{ item.group }}"
+      loop: "{{ ctlabs_netbox_setup.cluster | cluster }}"
+
+
+# -----------------------------------------------------------------------------
+# SETUP - Custom Links
+# -----------------------------------------------------------------------------
+#
+- name: ctlabs_netbox.tasks.setup.custom_links
+  connection : local
+  run_once   : true
+  block:
+    - name: ctlabs_netbox.tasks.setup.custom_links.grafana
+      netbox.netbox.netbox_custom_link:
+        state        : present
+        netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
+        netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+        data:
+          content_type: "{{ item.content_type }}"
+          name        : "{{ item.name         }}"
+          link_text   : "{{ item.link_text    }}"
+          link_url    : "{{ item.link_url     }}"
+      loop: "{{ ctlabs_netbox_setup.custom_links }}"
