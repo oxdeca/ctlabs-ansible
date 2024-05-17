@@ -55,8 +55,15 @@ SECRET_KEY = '{{ ctlabs_netbox.defaults.config.main.secret_key }}'
 # -----------------------------------------------------------------------------
 FIELD_CHOICES = {
     'dcim.Device.status+': (
-        ('retired', 'Retired', 'dark orange'),
-        ('archive', 'Archive', 'brown'),
+        ( 'retired',    'Retired',     'indigo' ),
+        ( 'maintained', 'Maintenance', 'purple' ),
+    ),
+    'virtualization.VirtualMachine.status+': (
+        ( 'retired',    'Retired',     'indigo' ),
+        ( 'maintained', 'Maintenance', 'purple' ),
+    ),
+    'extras.JournalEntry.kind+': (
+        ( 'maintenance', 'Maintenance', 'purple' ),
     )
 }
 
