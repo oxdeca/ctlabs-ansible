@@ -9,7 +9,7 @@
   template:
     src  : "{{ ctlabs_netbox.defaults.config.main.template }}"
     dest : "{{ ctlabs_netbox.defaults.config.main.file     }}"
-  notify: ctlabs_netbox.handlers.service.restart
+  notify: ctlabs_netbox.handlers.service.nb.restart
 
 - name: ctlabs_netbox.tasks.config.ldap
   template:
