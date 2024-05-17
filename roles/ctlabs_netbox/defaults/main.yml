@@ -47,10 +47,17 @@ ctlabs_netbox:
         src : /opt/netbox/contrib/netbox-housekeeping.sh
         dst : /etc/cron.daily/netbox-housekeeping
     service:
-      template : netbox.service.j2
-      name     : netbox.service
       user     : netbox
       group    : netbox
+      nb:
+        template : netbox.service.j2
+        name     : netbox.service
+      nbrq:
+        template : netbox-rq.service.j2
+        name     : netbox-rq.service
+      nbhk:
+        template : netbox-housekeeping.service.j2
+        name     : netbox-housekeeping.service
     handlers:
       httpd:
         debian: apache2.service
@@ -66,6 +73,9 @@ ctlabs_netbox:
       ldap:
         template: ldap_config.py.j2
         file    : /opt/netbox/netbox/netbox/ldap_config.py
+      gunicorn:
+        template: gunicorn.py.j2
+        file: /opt/netbox/gunicorn.py
       httpd:
         template: netbox.conf.j2
         file: 

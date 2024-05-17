@@ -1,5 +1,5 @@
 [Unit]
-Description=NetBox WSGI Service
+Description=NetBox Request Queue Worker
 Documentation=https://docs.netbox.dev/
 After=network-online.target
 Wants=network-online.target
@@ -9,10 +9,9 @@ Type=simple
 
 User=netbox
 Group=netbox
-PIDFile=/var/tmp/netbox.pid
 WorkingDirectory=/opt/netbox
 
-ExecStart=/opt/netbox/venv/bin/gunicorn --pid /var/tmp/netbox.pid --pythonpath /opt/netbox/netbox --config /opt/netbox/gunicorn.py netbox.wsgi
+ExecStart=/opt/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py rqworker high default low
 
 Restart=on-failure
 RestartSec=30

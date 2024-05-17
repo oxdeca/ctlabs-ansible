@@ -22,6 +22,11 @@
     dest : "{{ ctlabs_netbox.defaults.scripts.housekeeping.dst }}"
     state: link
 
+- name: ctlabs_netbox.tasks.config.gunicorn
+  template:
+    src  : "{{ ctlabs_netbox.defaults.config.gunicorn.template }}"
+    dest : "{{ ctlabs_netbox.defaults.config.gunicorn.file     }}"
+
 - name: ctlabs_netbox.tasks.config.httpd
   template:
     src  : "{{ ctlabs_netbox.defaults.config.httpd.template        }}"

@@ -5,12 +5,27 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_netbox.handlers.service.restart
+- name: ctlabs_netbox.handlers.service.nb.restart
   service:
-    name          : "{{ ctlabs_netbox.defaults.service.name }}"
+    name          : "{{ ctlabs_netbox.defaults.service.nb.name }}"
     enabled       : true
     daemon_reload : true
     state         : restarted
+
+- name: ctlabs_netbox.handlers.service.nbrq.restart
+  service:
+    name          : "{{ ctlabs_netbox.defaults.service.nbrq.name }}"
+    enabled       : true
+    daemon_reload : true
+    state         : restarted
+
+- name: ctlabs_netbox.handlers.service.nbhk.restart
+  service:
+    name          : "{{ ctlabs_netbox.defaults.service.nbhk.name }}"
+    enabled       : true
+    daemon_reload : true
+    state         : restarted
+
 
 # !!!!
 # TODO: Find a better way to include ctlabs_httpd.handlers.
