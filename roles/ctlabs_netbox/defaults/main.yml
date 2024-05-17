@@ -63,6 +63,9 @@ ctlabs_netbox:
         debian: apache2.service
         redhat: httpd.service
     config:
+      update:
+        url: http://nb1:8080
+        token: 12345
       main:
         template     : configuration.py.j2
         file         : /opt/netbox/netbox/netbox/configuration.py

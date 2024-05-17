@@ -17,8 +17,8 @@
   connection: local
   netbox.netbox.netbox_virtual_machine:
     state        : present
-    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
-    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.update.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.update.token }}"
     data:
       name                 : "{{ intentory_hostname }}"
       site                 : "{{ ansible_local.site | default('GCP') }}"
@@ -35,8 +35,8 @@
   connection: local
   netbox.netbox.netbox_vm_interface:
     state        : present
-    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
-    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.update.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.update.token }}"
     data:
       virtual_machine: "{{ intentory_hostname }}"
       name           : "{{ item }}"
@@ -53,8 +53,8 @@
   when: lookup('vars', 'ansible_' + item)['ipv4'] is defined
   netbox.netbox.netbox_ip_address:
     state        : present
-    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
-    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.update.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.update.token }}"
     data:
       address          : "{{ lookup('vars', 'ansible_' + item)['ipv4']['address'] }}/{{ lookup('vars', 'ansible_' + item)['ipv4']['prefix'] }}"
       assigned_object :
@@ -69,8 +69,8 @@
   connection: local
   netbox.netbox.netbox_virtual_machine:
     state        : present
-    netbox_url   : "{{ ctlabs_netbox.defaults.config.url   }}"
-    netbox_token : "{{ ctlabs_netbox.defaults.config.token }}"
+    netbox_url   : "{{ ctlabs_netbox.defaults.config.update.url   }}"
+    netbox_token : "{{ ctlabs_netbox.defaults.config.update.token }}"
     data:
       name                 : "{{ intentory_hostname }}"
       primary_ip4          : "{{ ansible_default_ipv4['address'] }}/{{ ansible_default_ipv4['prefix'] }}"
