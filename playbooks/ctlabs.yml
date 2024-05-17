@@ -319,6 +319,8 @@
   hosts :
     - www1
     - www2
+    - nb1
+    - nb2
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
@@ -420,8 +422,8 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.netbox
   hosts :
-    - www1
-    - www2
+    - nb1
+    - nb2
   tags  : netbox
   roles :
     - roles/ctlabs_netbox
