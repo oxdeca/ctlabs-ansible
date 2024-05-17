@@ -23,3 +23,17 @@
     dest : "{{ systemd_dir + '/' + ctlabs_netbox.defaults.service.nbhk.name }}"
   notify: ctlabs_netbox.handlers.service.nbhk.restart
 
+- name: ctlabs_netbox.tasks.service.nb.start
+  service:
+    name  : "{{ ctlabs_netbox.defaults.service.nb.name }}"
+    state : started
+
+- name: ctlabs_netbox.tasks.service.nbrq.start
+  service:
+    name  : "{{ ctlabs_netbox.defaults.service.nbrq.name }}"
+    state : started
+
+- name: ctlabs_netbox.tasks.service.nbhk.start
+  service:
+    name  : "{{ ctlabs_netbox.defaults.service.nbhk.name }}"
+    state : started
