@@ -11,6 +11,8 @@
     - ctlabs_sssd.precheck
     - ctlabs_sssd.package
     - ctlabs_sssd.config
+    - ctlabs_sssd.join
+    - ctlabs_sssd.leave
     - ctlabs_sssd.service
 
 - import_tasks: package.yml
@@ -23,8 +25,20 @@
     - ctlabs_sssd
     - ctlabs_sssd.config
 
+- import_tasks: join.yml
+  when: CTLABS_DOMAIN_LEAVE is undefined
+  tags:
+    - ctlabs_sssd
+    - ctlabs_sssd.join
+
 - import_tasks: service.yml
+  when: CTLABS_DOMAIN_LEAVE is undefined
   tags:
     - ctlabs_sssd
     - ctlabs_sssd.service
 
+- import_tasks: leave.yml
+  when: CTLABS_DOMAIN_LEAVE is defined
+  tags:
+    - never
+    - ctlabs_sssd.leave

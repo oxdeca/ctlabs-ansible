@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_sssd/tasks/leave.yml
+# Description : leave domain
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_sssd.tasks.leave.adcli.available
+  stat:
+    path: /usr/sbin/adcli
+  register: adcli_available
+
+#- debug: "msg={{ adcli_available }}"
+
+- name: ctlabs_sssd.tasks.leave.is_joined
+  when: adcli_available.stat.exists
+  command       : "adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  ignore_errors : true
+  failed_when   : testjoin.rc != 0
+  changed_when  : false
+  register      : testjoin
+
+#- debug: "msg={{ testjoin }}"
+
+- name: ctlabs_sssd.tasks.leave.dc.realm_leave
+  when: testjoin.rc == 0
+  command: "realm leave {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  notify: ctlabs_sssd.handlers.service.stop

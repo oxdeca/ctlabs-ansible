@@ -2,7 +2,7 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs_sssd/handlers/main.yml
-# Description : description
+# Description : ctlabs_sssd handlers
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_sssd.handlers.service.restart
@@ -16,3 +16,7 @@
     name  : "{{ ctlabs_sssd.defaults.service.name }}"
     state : reloaded
 
+- name: ctlabs_sssd.handlers.service.stop
+  service:
+    name  : "{{ ctlabs_sssd.defaults.service.name }}"
+    state : stopped

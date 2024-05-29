@@ -10,3 +10,4 @@
     src  : "{{ ctlabs_sssd.defaults.config.krb5.template }}"
     dest : "{{ ctlabs_sssd.defaults.config.krb5.file     }}"
   notify: ctlabs_sssd.handlers.service.restart
+

@@ -11,7 +11,7 @@
     state : present
   loop: "{{ ctlabs_sssd.defaults.pkgs[os_family] }}"
 
-- name: ctlabs_sssd.tasks.python.pips.installed
+- name: ctlabs_sssd.tasks.package.python.pips.installed
   pip:
     name: "{{ item }}"
   loop: "{{ ctlabs_sssd.defaults.python.pips }}"

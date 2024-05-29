@@ -23,15 +23,16 @@ includedir /etc/krb5.conf.d/
   pkinit_anchors       = FILE:/etc/pki/tls/certs/ca-bundle.crt
   spake_preauth_groups = edwards25519
   udp_preference_limit = 0
-  #default_ccache_name  = KEYRING:persistent:%{uid}
+  default_ccache_name  = KEYRING:persistent:%{uid}
   #default_ccache_name  = FILE:/tmp/krb5cc_%{uid}
 
 
 [realms]
   {{ ctlabs_sssd.defaults.config.dc.realm }} = {
     default_domain = {{ ctlabs_sssd.defaults.config.dc.domain }}
-    kdc            = {{ ctlabs_sssd.defaults.config.dc.hosts[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
-    kdc            = {{ ctlabs_sssd.defaults.config.dc.hosts[1] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
+{% for host in ctlabs_sssd.defaults.config.dc.hosts %}
+    kdc            = {{ host }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
+{% endfor %}
   }
 
 [domain_realm]
