@@ -14,7 +14,7 @@
 
 - name: ctlabs_sssd.tasks.leave.is_joined
   when: adcli_available.stat.exists
-  command       : "adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  command       : "ip vrf exec default adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
   ignore_errors : true
   failed_when   : testjoin.rc != 0
   changed_when  : false
@@ -24,5 +24,5 @@
 
 - name: ctlabs_sssd.tasks.leave.dc.realm_leave
   when: testjoin.rc == 0
-  command: "realm leave {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  command: "ip vrf exec default realm leave {{ ctlabs_sssd.defaults.config.dc.domain }}"
   notify: ctlabs_sssd.handlers.service.stop

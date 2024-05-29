@@ -14,7 +14,7 @@
 
 - name: ctlabs_sssd.tasks.join.is_joined
   when: adcli_available.stat.exists
-  command       : "adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  command       : "ip vrf exec default adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
   ignore_errors : true
   failed_when   : testjoin.rc != 0
   changed_when  : false
@@ -25,7 +25,7 @@
 - name: ctlabs_sssd.tasks.join.dc.realm_join
   when: testjoin.rc != 0
   expect:
-    command: "realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    command: "ip vrf exec default realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     responses:
       (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
 
