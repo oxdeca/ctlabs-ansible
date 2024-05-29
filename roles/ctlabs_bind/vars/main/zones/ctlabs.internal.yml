@@ -85,9 +85,9 @@ zone_ctlabs_internal:
     type  : SRV
     value : 10 50 389 dc1
 
-  - name  : _ldap._tcp
+  - name  : _kerberos._tcp
     type  : SRV
-    value : 10 50 389 dc2
+    value : 10 50  88 dc1
 
 
 # -----------------------------------------------------------------------------
