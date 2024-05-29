@@ -1,13 +1,36 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_sssd/tasks/config.yml
-# Description : configurations
+# File        : ctlabs_sssd/tasks/join.yml
+# Description : join domain
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.config.krb5
-  template:
-    src  : "{{ ctlabs_sssd.defaults.config.krb5.template }}"
-    dest : "{{ ctlabs_sssd.defaults.config.krb5.file     }}"
-  notify: ctlabs_sssd.handlers.service.restart
+- name: ctlabs_sssd.tasks.join.adcli.available
+  stat:
+    path: /usr/sbin/adcli
+  register: adcli_available
 
+#- debug: "msg={{ adcli_available }}"
+
+- name: ctlabs_sssd.tasks.join.is_joined
+  when: adcli_available.stat.exists
+  command       : "adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
+  ignore_errors : true
+  failed_when   : testjoin.rc != 0
+  changed_when  : false
+  register      : testjoin
+
+#- debug: "msg={{ testjoin }}"
+
+- name: ctlabs_sssd.tasks.join.dc.realm_join
+  when: testjoin.rc != 0
+  expect:
+    command: "realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    responses:
+      (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
+
+- name: ctlabs_sssd.tasks.join.sssd
+  template:
+    src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
+    dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
+  notify: ctlabs_sssd.handlers.service.restart
