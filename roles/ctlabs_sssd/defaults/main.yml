@@ -30,7 +30,7 @@ ctlabs_sssd:
           - dc1
           - dc2
         join:
-          user: Administrator
+          user: sssd
           pass: secret123!
       sssd:
         file     : /etc/sssd/sssd.conf

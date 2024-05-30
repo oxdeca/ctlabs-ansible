@@ -38,3 +38,10 @@
   command: /usr/bin/samba-tool user setpassword {{ item.name }} --newpassword="{{ item.pass }}"
   loop: "{{ domain_services }}"
   ignore_errors: true
+
+# TODO: Fix that hack
+- name: ctlabs_smbadc.tasks.iam.domain.admins
+  when: item.roles is defined and 'admins' in item.roles
+  command: /usr/bin/samba-tool group addmembers 'Domain Admins' {{ item.name }}
+  loop: "{{ domain_services }}"
+  ignore_errors: true

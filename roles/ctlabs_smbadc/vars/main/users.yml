@@ -46,3 +46,11 @@ domain_services:
     gid  : 4003
     ou   : ou=services
     pass : secret123!
+
+  - name : sssd
+    uid  : 4004
+    gid  : 4004
+    ou   : ou=services
+    pass : secret123!
+    roles:
+      - admins
