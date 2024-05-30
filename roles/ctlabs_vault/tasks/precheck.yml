@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_vault.os
+    fail_msg : "OS[{{os}}] is not supported!"

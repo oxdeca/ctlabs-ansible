@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.precheck
+    - ctlabs_vault.package
+    - ctlabs_vault.config
+    - ctlabs_vault.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.service

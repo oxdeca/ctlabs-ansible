@@ -1,0 +1,25 @@
+# Systemd unit file for tomcat
+[Unit]
+Description=Apache Tomcat Web Application Container [Instance:%i]
+After=syslog.target network.target
+ 
+[Service]
+Type=forking
+ 
+ExecStart=/bin/bash -c "source {{ ctlabs_tomcat.defaults.sysconfig.dir }}/instance.%i && $CATALINA_HOME/bin/startup.sh"
+ExecStop=/bin/bash -c "source {{ ctlabs_tomcat.defaults.sysconfig.dir }}/instance.%i && $CATALINA_HOME/bin/shutdown.sh"
+SuccessExitStatus=143
+ 
+User={{ ctlabs_tomcat.defaults.config.user }}
+Group={{ ctlabs_tomcat.defaults.config.group }}
+UMask={{ ctlabs_tomcat.defaults.config.umask }}
+RestartSec=10
+Restart=always
+
+Environment="INSTANCE_NUMBER=%i"
+Environment="CATALINA_OUT={{ ctlabs_tomcat.defaults.config.data_dir }}/logs/catalina%i.out"
+Environment="CATALINA_PID={{ ctlabs_tomcat.defaults.config.data_dir }}/pids/java%i.pid"
+Environment="CATALINA_BASE={{ ctlabs_tomcat.defaults.config.catalina_base }}/%i"
+
+[Install]
+WantedBy=multi-user.target

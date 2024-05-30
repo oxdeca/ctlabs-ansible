@@ -1,0 +1,11 @@
+<Connector 
+  acceptCount       = "20"
+  connectionTimeout = "60000"
+  maxConnections    = "200"
+  maxThreads        = "80"
+  port              = "${listenPort}"
+  protocol          = "org.apache.coyote.http11.Http11NioProtocol"
+  redirectPort      = "8443"
+  secure            = "true"
+  server            = "Tomcat - Instance-ID: {{ instance }}"
+/>

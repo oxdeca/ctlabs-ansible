@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_vault/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.handlers.service.vault.restart
+  service:
+    name    : "{{ ctlabs_vault.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_vault.handlers.service.vault.reload
+  systemd:
+    daemon_reload: true
+

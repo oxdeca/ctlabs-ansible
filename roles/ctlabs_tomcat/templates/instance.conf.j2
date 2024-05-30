@@ -1,0 +1,11 @@
+# CREATED: {{ datetime }}
+
+# Basic VARS
+export INSTANCE_NUMBER={{ instance_num }}
+export TOMCAT_VERSION={{ tomcat_version }}
+export JAVA_HOME={{ jdk_path }}
+export JRE_HOME={{ jdk_path }}
+export CATALINA_HOME={{ tomcat_path}}{{ tomcat_version }}
+export CATALINA_BASE={{ catalina_base_path }}/{{ instance_num }}
+export JAVA_OPTS="$JAVA_DEFAULT_OPTS -Xss1m -Xms512m -Xmx2G  -DlistenPort={{ listen_port }} -DserverPort={{ server_port }}"
+

@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_vault/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_vault:
+  defaults:
+    repos:
+      redhat:
+      debian:
+        - name: hashicorp
+          type: main
+          url : https://apt.releases.hashicorp.com 
+          key : https://apt.releases.hashicorp.com/gpg
+    pkgs:
+      redhat:
+        - name: vault
+      debian:
+        - name: vault
+    config:
+      dir     : /etc/vault.d
+      gui      : true
+      data     : /opt/vault/data
+      file     : vault.hcl
+      template : vault.hcl.j2
+      port     : 8200
+      cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
+      key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+    service:
+      name  : vault.service
+      user  : vault
+      group : vault
+      groups: [certs]
+  os:
+    - debian11

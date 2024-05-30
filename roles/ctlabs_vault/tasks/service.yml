@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.service.vault.start
+  service:
+    name    : "{{ ctlabs_vault.defaults.service.name }}"
+    enabled : true
+    state   : started

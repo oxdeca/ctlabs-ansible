@@ -1,0 +1,52 @@
+{% from 'ctlabs_tomcat/map.jinja' import logrotate with context -%}
+
+{{ logfiles }} {
+  create         {{ perms }} {{ user }} {{ group }}
+  daily
+  nocompress
+  rotate         {{ keep }}
+  missingok
+  notifempty
+  sharedscripts
+  dateext
+  dateformat     .{{ date_format }}
+  olddir         {{ backup_dir  }}
+  postrotate
+    BASENAME=/usr/bin/basename
+    MV=/usr/bin/mv
+    SED=/usr/bin/sed
+    CAT=/usr/bin/cat
+    CUT=/usr/bin/cut
+    GREP=/usr/bin/egrep
+    HEAD=/usr/bin/head
+    ECHO=/usr/bin/echo
+    CHOWN=/usr/bin/chown
+    CHMOD=/usr/bin/chmod
+    GZIP=/usr/bin/gzip
+    KILL=/usr/bin/kill
+    HOSTNAME=/usr/bin/hostname
+
+    DATE=$( /usr/bin/date +{{ date_format }} )
+
+    systemctl reload {{ service }} &&
+    (
+      cd {{ backup_dir }} &&
+      for FILE in ${1}; do
+        LOG_FILE=$( ${BASENAME} ${FILE} ).${DATE}
+
+        if [ -e "${LOG_FILE}" ]; then
+          # 172.30.8.25 - - [02/Sep/2019:02:28:02 -0400] "GET / HTTP/1.1" 403 153 "-" "curl/7.29.0" "-"
+          LOG_DATE=$( /usr/bin/date -d "$( ${HEAD} -n1 ${LOG_FILE} | ${SED} 's@^.*\[@@;s@\].*@@;s@\/@ @g' | ${CUT} -d':' -f1 )" +{{ date_format }} ) ||
+          # 2020/10/02 09:02:22 [error] 6493#6493: *1002 open() "/bigdisk0/nginx/htdocs/error" failed (2: No such file or directory), client: 172.30.8.25, server: _, request: "GET /error HTTP/1.1", host: "minion-5"
+          LOG_DATE=$( /usr/bin/date -d "$( ${HEAD} -n1 ${LOG_FILE} | ${GREP} "..../../.." | ${CUT} -d' ' -f1 )" +{{ date_format }} ) || ""
+
+          ${GZIP}  -v ${LOG_FILE};
+          ${CHOWN} {{ backup_user }}.{{ group }} ${LOG_FILE}.gz;
+          ${CHMOD} {{ backup_mode }} ${LOG_FILE}.gz;
+          ${MV} -v --backup=t ${LOG_FILE}.gz ${LOG_DATE}.$( ${HOSTNAME} ).$( ${BASENAME} ${FILE} | ${SED} "s@\.@_@" ).gz;
+        fi
+
+      done
+    ) || true
+  endscript
+}

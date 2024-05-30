@@ -1,0 +1,18 @@
+{# ------------------------------------------------------------------------ #}
+{# File        : ctlabs-ansible/roles/ctlabs_vault/templates/vault.hcl.j2   #}
+{# Description : client access                                              #}
+{# ------------------------------------------------------------------------ #}
+
+ui = {{ ctlabs_vault.defaults.config.gui | lower }}
+
+api_addr = "https://{{ ansible_default_ipv4.address }}:{{ ctlabs_vault.defaults.config.port }}"
+
+storage "file" {
+  path = "{{ ctlabs_vault.defaults.config.data }}"
+}
+
+listener "tcp" {
+  address       = "{{ ansible_default_ipv4.address }}:{{ ctlabs_vault.defaults.config.port }}"
+  tls_cert_file = "{{ ctlabs_vault.defaults.config.cert }}"
+  tls_key_file  = "{{ ctlabs_vault.defaults.config.key  }}"
+}

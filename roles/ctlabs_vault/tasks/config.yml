@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.config.dir
+  file:
+    path : "{{ ctlabs_vault.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_vault.defaults.service.user  }}"
+    group: "{{ ctlabs_vault.defaults.service.group }}"
+
+- name: ctlabs_vault.tasks.config.vault.data.dir
+  file:
+    path : "{{ ctlabs_vault.defaults.config.data }}"
+    state: directory
+    owner: "{{ ctlabs_vault.defaults.service.user  }}"
+    group: "{{ ctlabs_vault.defaults.service.group }}"
+
+- name: ctlabs_vault.tasks.config.vault
+  template:
+    src  : "{{ ctlabs_vault.defaults.config.template }}"
+    dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.file }}"
+  notify: ctlabs_vault.handlers.service.vault.reload

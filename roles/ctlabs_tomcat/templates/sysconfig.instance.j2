@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Date     : {{ date }}
+# Instance : {{ instance }}
+# ---------------------------------------------------------------------------
+
+# BASIC SETTINGS
+export INSTANCE_NUMBER={{ instance }}
+
+#export CATALINA_OUT={{ ctlabs_tomcat.defaults.config.data_dir }}/logs/catalina{{ instance }}.out
+#export CATALINA_PID={{ ctlabs_tomcat.defaults.config.data_dir }}/pids/java{{ instance }}.pid
+#export CATALINA_BASE={{ ctlabs_tomcat.defaults.config.catalina_base }}/{{ instance }}
+
+{% if props.tomcat_version is defined %}
+export CATALINA_HOME={{ ctlabs_tomcat.defaults.config.tomcat_path }}{{ props.tomcat_version }}
+export TOMCAT_VERSION={{ ctlabs_tomcat.defaults.config.tomcat_path }}{{ props.tomcat_version }}
+{% else %}
+export CATALINA_HOME={{ ctlabs_tomcat.defaults.config.tomcat_path }}{{ ctlabs_tomcat.defaults.config.tomcat_version }}
+export TOMCAT_VERSION={{ ctlabs_tomcat.defaults.config.tomcat_path }}{{ ctlabs_tomcat.defaults.config.tomcat_version }}
+{% endif %}
+export CATALINA_SCRIPT=$CATALINA_HOME/bin/catalina.sh
+
+{% if props.jdk_version is defined %}
+export JAVA_HOME={{ ctlabs_tomcat.defaults.config.jdk_path }}{{ props.jdk_version }}
+#export JRE_HOME={{ ctlabs_tomcat.defaults.config.jdk_path }}{{ props.jdk_version }}
+{% else %}
+export JAVA_HOME={{ ctlabs_tomcat.defaults.config.jdk_path }}{{ ctlabs_tomcat.defaults.config.jdk_version }}
+#export JRE_HOME={{ ctlabs_tomcat.defaults.config.jdk_path }}{{ ctlabs_tomcat.defaults.config.jdk_version }}
+{% endif %}
+
+{% if props.jvm_options is defined %}
+export JAVA_OPTS="$JAVA_DEFAULT_OPTS {{ props.jvm_options }} -DlistenPort={{ ctlabs_tomcat.defaults.config.base_listen_port + instance|int }} -DserverPort={{ ctlabs_tomcat.defaults.config.base_server_port + instance|int }}"
+{% else %}
+export JAVA_OPTS="$JAVA_DEFAULT_OPTS {{ ctlabs_tomcat.defaults.config.jvm_options }} -DlistenPort={{ ctlabs_tomcat.defaults.config.base_listen_port + instance|int }} -DserverPort={{ ctlabs_tomcat.defaults.config.base_server_port + instance|int }}"
+{% endif %}
+
+# ADDITIONAL SETTINGS
+{% if props.env is defined %}
+  {%- for k,v in props.env.items() %}
+
+export {{ k }}={{ v }}
+
+  {%- endfor %}
+{% endif %}
