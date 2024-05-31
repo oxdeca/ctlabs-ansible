@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_rundeck/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rundeck.tasks.config.rundeck
+  template:
+    src  : "{{ ctlabs_rundeck.defaults.config.rundeck.template }}"
+    dest : "{{ ctlabs_rundeck.defaults.config.rundeck.file     }}"
+  notify: ctlabs_rundeck.handlers.service.restart

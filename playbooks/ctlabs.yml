@@ -439,3 +439,13 @@
   tags  : netbox
   roles :
     - roles/ctlabs_netbox
+
+# -----------------------------------------------------------------------------
+# ctlabs_rundeck
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.rundeck
+  hosts :
+    - rundeck
+  tags  : rundeck
+  roles :
+    - roles/ctlabs_rundeck

@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rundeck/tasks/package.yml
+# Description : main ctlabs_rundeck tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rundeck.tasks.package
+  block:
+    - name: ctlabs_rundeck.tasks.package.install.redhat
+      when: os_family == 'redhat'
+      yum:
+        name              : "{{ item.url if item.url is defined else item.name }}"
+        disable_gpg_check : true
+        state             : present
+      loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_rundeck.tasks.package.url.install.debian
+      when: os_family == 'debian' and item.url is defined
+      apt:
+        deb   : "{{ item.url }}"
+        state : present
+      loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_rundeck.tasks.package.apt.install.debian
+      when: os_family == 'debian' and item.name is defined
+      apt:
+        name   : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_rundeck.tasks.package.systemd.reload
+  systemd_service:
+    daemon_reload: true

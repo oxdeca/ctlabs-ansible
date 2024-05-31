@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_rundeck/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_rundeck
+    - ctlabs_rundeck.precheck
+    - ctlabs_rundeck.package
+    - ctlabs_rundeck.config
+    - ctlabs_rundeck.join
+    - ctlabs_rundeck.leave
+    - ctlabs_rundeck.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_rundeck
+    - ctlabs_rundeck.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_rundeck
+    - ctlabs_rundeck.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_rundeck
+    - ctlabs_rundeck.service

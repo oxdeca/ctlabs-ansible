@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rundeck/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rundeck.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_rundeck.defaults.service.name }}"
+    enabled : true
+    state   : restarted

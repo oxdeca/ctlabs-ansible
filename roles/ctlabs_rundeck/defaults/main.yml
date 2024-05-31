@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_rundeck/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_rundeck:
+  defaults:
+    pkgs:
+      redhat:
+        - name: java-latest-openjdk-headless
+        - url : https://packagecloud.io/pagerduty/rundeck/packages/rpm_any/rpm_any/rundeck-5.3.0.20240520-1.noarch.rpm/download.rpm?distro_version_id=227
+      debian:
+        - name: openjdk-17-jre-headless
+        - url : https://packagecloud.io/pagerduty/rundeck/packages/any/any/rundeck_5.3.0.20240520-1_all.deb/download.deb?distro_version_id=35
+    config:
+      rundeck:
+        file      : /etc/rundeck/rundeck-config.properties
+        template  : rundeck-config.properties.j2
+        server_url: http://192.168.100.193:8200
+    service:
+      name     : rundeckd.service
+  os:
+    - centos9
+    - debian11
