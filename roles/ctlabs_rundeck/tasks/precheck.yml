@@ -9,3 +9,11 @@
   assert:
     that     : os is in ctlabs_rundeck.os
     fail_msg : "OS[{{os}}] is not supported!"
+
+- name: ctlabs_rundeck.tasks.precheck.rundeck.server_url.var
+  set_fact:
+    ctlabs_rundeck_server_url: "{{ ctlabs_rundeck_server_url | default(ctlabs_rundeck.defaults.config.rundeck.server_url) }}"
+
+- name: ctlabs_rundeck.tasks.precheck.rundeck.server_url.local_fact
+  set_fact:
+    ctlabs_rundeck_server_url: "{{ ansible_local.ctlabs_rundeck.rundeck.server_url | default(ctlabs_rundeck_server_url) }}"
