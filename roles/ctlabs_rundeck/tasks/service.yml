@@ -6,6 +6,10 @@
 # ------------------------------------------------------------------------------
 
 
+- name: ctlabs_rundeck.tasks.service.systemd.reload
+  systemd_service:
+    daemon_reload: true
+
 - name: ctlabs_rundeck.tasks.service.start
   service:
     name    : "{{ ctlabs_rundeck.defaults.service.name }}"

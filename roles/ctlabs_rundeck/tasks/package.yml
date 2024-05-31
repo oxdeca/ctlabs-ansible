@@ -29,6 +29,3 @@
         state : present
       loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
 
-- name: ctlabs_rundeck.tasks.package.systemd.reload
-  systemd_service:
-    daemon_reload: true
