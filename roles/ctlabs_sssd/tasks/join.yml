@@ -29,8 +29,11 @@
     responses:
       (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
 
-- name: ctlabs_sssd.tasks.join.sssd
+- name: ctlabs_sssd.tasks.join.config.sssd
   template:
+    owner: "{{ ctlabs_sssd.defaults.config.sssd.user     }}"
+    group: "{{ ctlabs_sssd.defaults.config.sssd.group     }}"
+    mode : "{{ ctlabs_sssd.defaults.config.sssd.mode     }}"
     src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
     dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
   notify: ctlabs_sssd.handlers.service.restart

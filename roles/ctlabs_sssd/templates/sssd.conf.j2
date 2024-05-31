@@ -23,6 +23,8 @@
 
   realmd_tags                    = manages-system joined-with-adcli
   cache_credentials              = true
+  entry_cache_timeout            = 14400
+  cached_auth_timeout            = 600
 
   default_shell                  = /bin/bash
   ldap_id_mapping                = true
@@ -41,3 +43,5 @@
   services                       = nss, pam, ssh
   # default_domain_suffix        =
 
+[pam]
+  pam_verbosity                  = 2

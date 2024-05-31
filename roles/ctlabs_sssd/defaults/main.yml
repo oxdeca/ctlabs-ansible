@@ -33,6 +33,9 @@ ctlabs_sssd:
           user: sssd
           pass: secret123!
       sssd:
+        user     : root
+        group    : root
+        mode     : '0600'
         file     : /etc/sssd/sssd.conf
         template : sssd.conf.j2
       krb5 :
