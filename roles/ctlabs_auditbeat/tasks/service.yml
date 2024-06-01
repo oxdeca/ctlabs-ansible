@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_auditbeat/tasks/service.yml
+# Description : main ctlabs_auditbeat service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditbeat.tasks.service.start
+  service:
+    name    : "{{ ctlabs_auditbeat.defaults.service.name }}"
+    enabled : true
+    state   : started

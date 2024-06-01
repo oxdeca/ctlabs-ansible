@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_auditbeat/tasks/main.yml
+# Description : main ctlabs_auditbeat tasks file.
+# ------------------------------------------------------------------------------
+
+- include: precheck.yml
+  tags:
+    - ctlabs_auditbeat
+    - ctlabs_auditbeat.precheck
+    - ctlabs_auditbeat.package
+    - ctlabs_auditbeat.config
+    - ctlabs_auditbeat.service
+    
+- include: package.yml
+  tags:
+    - ctlabs_auditbeat
+    - ctlabs_auditbeat.package
+
+- include: config.yml
+  tags:
+    - ctlabs_auditbeat
+    - ctlabs_auditbeat.config
+
+- include: service.yml
+  tags:
+    - ctlabs_auditbeat
+    - ctlabs_auditbeat.service

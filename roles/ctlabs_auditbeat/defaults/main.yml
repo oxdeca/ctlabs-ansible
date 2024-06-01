@@ -1,0 +1,45 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_auditbeat/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_auditbeat:
+  defaults:
+    pkgs:
+      redhat:
+        url: https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-8.13.4-x86_64.rpm
+    config:
+      dir : /etc/auditbeat
+      main:
+        file     : auditbeat.yml
+        template : auditbeat.yml.j2
+      logstash:
+        hosts: 
+          - 127.0.0.1:5044
+        x509_ca: 
+          file : certificates/ca.pem
+        x509_crt: 
+          file: certificates/default.crt
+        x509_key:
+          file: certificates/default.key
+      processors:
+        env:
+          name: LocalHost
+        host_metadata:
+          geo:
+            name             : local
+            location         : 0, 0
+            continent_name   : North America
+            country_iso_code : CA
+            region_name      : Toronto
+            region_iso_code  : TOR
+            city_name        : Toronto
+    service:
+      name     : auditbeat.service
+      template : auditbeat.service.j2
+  os:
+    - centos7
+    - centos8
+    - centos9

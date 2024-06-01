@@ -1,0 +1,28 @@
+---
+
+# -------------------------------------------------------------------------------------
+# File         : ctlabs_auditbeat/tasks/package.yml
+# Description  : installs the auditbeat package (rpm)
+# -------------------------------------------------------------------------------------
+
+#- name: ctlabs_auditbeat.tasks.package.install
+#  yum:
+#    name  : yum-plugin-versionlock
+#    state : present
+#
+#- name: ctlabs_auditbeat.package.gpgkey.imported
+#  rpm_key:
+#    key   : https://artifacts.elastic.co/GPG-KEY-elasticsearch
+#    state : present
+    
+- name: ctlabs_auditbeat.tasks.package.install
+  dnf:
+    name              : "{{ ctlabs_auditbeat.defaults.pkgs[os_family].url }}"
+    disable_gpg_check : true
+    state             : present
+
+#- name: ctlabs_auditbeat.tasks.package.versionlog.auditbeat
+#  community.general.yum_versionlock:
+#    name  : auditbeat
+#    state : present
+

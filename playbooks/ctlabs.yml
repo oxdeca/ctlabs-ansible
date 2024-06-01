@@ -469,3 +469,22 @@
   roles :
     - roles/ctlabs_netbox
 
+# -----------------------------------------------------------------------------
+# ctlabs_auditbeat
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.auditbeat
+  hosts :
+    - ns1
+  tags  : auditbeat
+  roles :
+    - roles/ctlabs_auditbeat
+
+# -----------------------------------------------------------------------------
+# ctlabs_elasticsearch
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.elasticsearch
+  hosts :
+    - ns1
+  tags  : elasticsearch
+  roles :
+    - roles/ctlabs_elasticsearch

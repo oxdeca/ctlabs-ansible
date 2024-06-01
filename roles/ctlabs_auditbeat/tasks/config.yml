@@ -1,0 +1,24 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_auditbeat/tasks/config.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+- debug: var=inventory_hostname
+- debug: var=auditbeat.cluster.master.name
+- debug: var=ansible_hostname
+
+- name: ctlabs_auditbeat.tasks.config.docker.check
+  stat:
+    name: '/.dockerenv'
+  register: dockerenv
+
+- debug: var=dockerenv
+
+- name: ctlabs_auditbeat.tasks.config.auditbeat
+  template:
+    src   : "{{ ctlabs_auditbeat.defaults.config.main.template }}"
+    dest  : "{{ ctlabs_auditbeat.defaults.config.dir }}/{{ ctlabs_auditbeat.defaults.config.main.file }}"
+    force : yes
+  notify: ctlabs_auditbeat.handlers.service.restart
