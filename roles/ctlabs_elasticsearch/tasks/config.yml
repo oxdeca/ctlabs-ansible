@@ -1,0 +1,45 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/tasks/config.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+- debug: var=inventory_hostname
+- debug: var=ctlabs_elasticsearch.cluster.master.name
+- debug: var=ansible_hostname
+
+- name: ctlabs_elasticsearch.tasks.config.files
+  notify: ctlabs_elasticsearch.handlers.service.restart
+  template:
+    src   : "{{ item.template }}"
+    dest  : "{{ ctlabs_elasticsearch.defaults.config.dirs.main }}/{{ item.file }}"
+  loop:
+    - "{{ ctlabs_elasticsearch.defaults.config.main }}"
+    - "{{ ctlabs_elasticsearch.defaults.config.jvm  }}"
+#    - "{{ ctlabs_elasticsearch.defaults.config.log  }}"
+
+- name: ctlabs_elasticsearch.tasks.config.certs.dir
+  file:
+    name  : "{{ ctlabs_elasticsearch.defaults.config.certs.dir }}"
+    state : directory
+
+- name: ctlabs_elasticsearch.tasks.config.certs.copy
+  copy:
+    src   : "{{ ctlabs_elasticsearch.defaults.config.certs.src }}/{{ item }}"
+    dest  : "{{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ item }}"
+    owner : root
+    group : "{{ ctlabs_elasticsearch.defaults.service.group }}"
+    mode  : "0640"
+  loop:
+    - "{{ ctlabs_elasticsearch.defaults.config.certs.crt }}"
+    - "{{ ctlabs_elasticsearch.defaults.config.certs.key }}"
+    - "{{ ctlabs_elasticsearch.defaults.config.certs.ca  }}"
+
+- name: ctlabs_elasticsearch.tasks.config.password.set
+  shell    : echo 'y' | /usr/share/elasticsearch/bin/elasticsearch-setup-passwords auto 
+  register : passwords
+  when     : inventory_hostname == ctlabs_elasticsearch.defaults.config.cluster.master.name
+
+- debug: var=passwords
+  when: inventory_hostname == ctlabs_elasticsearch.defaults.config.cluster.master.name

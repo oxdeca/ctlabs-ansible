@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/tasks/main.yml
+# Description : main ctlabs_elasticsearch tasks file.
+# ------------------------------------------------------------------------------
+
+- include: precheck.yml
+  tags:
+    - ctlabs_elasticsearch
+    - ctlabs_elasticsearch.precheck
+    - ctlabs_elasticsearch.package
+    - ctlabs_elasticsearch.config
+    - ctlabs_elasticsearch.service
+    
+- include: package.yml
+  tags:
+    - ctlabs_elasticsearch
+    - ctlabs_elasticsearch.package
+
+- include: config.yml
+  tags:
+    - ctlabs_elasticsearch
+    - ctlabs_elasticsearch.config
+
+- include: service.yml
+  tags:
+    - ctlabs_elasticsearch
+    - ctlabs_elasticsearch.service

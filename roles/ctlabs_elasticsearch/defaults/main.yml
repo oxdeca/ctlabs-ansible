@@ -1,0 +1,48 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_elasticsearch:
+  defaults:
+    pkgs:
+      redhat:
+        key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        url: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.13.4-x86_64.rpm
+    config:
+      certs:
+        src : /etc/ca-ctlabs
+        dir : /etc/elasticsearch/certs
+        crt : "{{ ansible_nodename }}.crt"
+        key : "{{ ansible_nodename }}.prv"
+        ca  : ca-ctlabs.crt
+      dirs : 
+        main: /etc/elasticsearch
+        data: /var/lib/elasticsearch
+        logs: /var/log/elasticsearch
+      main:
+        file     : elasticsearch.yml
+        template : elasticsearch.yml.j2
+      jvm:
+        file     : jvm.options
+        template : jvm.options.j2
+      log:
+        file     : log4j2.properties
+        template : log4j2.properties.j2
+      cluster:
+        name: ctlabs
+        master: 
+          name : "{{ ansible_nodename }}"
+          ip   : "{{ ansible_default_ipv4.address }}"
+          port : 9200
+        data_nodes:
+          - data-1
+          - data-2
+    service:
+      name : elasticsearch.service
+      user : elasticsearch
+      group: elasticsearch
+  os:
+    - centos9

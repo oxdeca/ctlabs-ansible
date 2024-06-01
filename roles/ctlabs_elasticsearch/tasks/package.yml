@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/tasks/package.yml
+# Description : install elasticsearc
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_elasticsearch.tasks.package.key.import
+  rpm_key:
+    key   : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].key }}"
+    state : present
+
+- name: ctlabs_elasticsearch.tasks.package.install
+  dnf:
+    name              : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].url }}"
+    disable_gpg_check : false
+    state             : present

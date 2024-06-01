@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/tasks/service.yml
+# Description : main ctlabs_elasticsearch service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_elasticsearch.tasks.service.start
+  service:
+    name    : "{{ ctlabs_elasticsearch.defaults.service.name }}"
+    enabled : yes
+    state   : started

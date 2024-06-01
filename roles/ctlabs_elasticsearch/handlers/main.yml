@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_elasticsearch.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_elasticsearch.defaults.service.name }}"
+    enabled : true
+    state   : restarted

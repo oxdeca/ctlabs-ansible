@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : /etc/elasticsearch/elasticsearch.yml
+# Template    : ctlabs_elasticsearch/templates/elasticsearch.yml.j2
+# ------------------------------------------------------------------------------
+
+cluster.name                                         : {{ ctlabs_elasticsearch.defaults.config.cluster.name }}
+node.name                                            : {{ ansible_nodename }}
+
+path.data                                            : {{ ctlabs_elasticsearch.defaults.config.dirs.data }}
+path.logs                                            : {{ ctlabs_elasticsearch.defaults.config.dirs.logs }}
+
+network.host                                         : {{ ansible_nodename }}
+discovery.seed_hosts                                 : "{{ ctlabs_elasticsearch.defaults.config.cluster.master.ip }}" 
+cluster.initial_master_nodes                         : ["{{ ctlabs_elasticsearch.defaults.config.cluster.master.name }}"] 
+
+xpack.security.enabled                               : true
+xpack.security.http.ssl.enabled                      : true
+xpack.security.transport.ssl.enabled                 : true
+
+xpack.security.http.ssl.key                          : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.key }}
+xpack.security.http.ssl.certificate                  : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.crt }}
+xpack.security.http.ssl.certificate_authorities      : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.ca  }}
+
+xpack.security.transport.ssl.key                     : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.key }}
+xpack.security.transport.ssl.certificate             : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.crt }}
+xpack.security.transport.ssl.certificate_authorities : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.ca  }}
+

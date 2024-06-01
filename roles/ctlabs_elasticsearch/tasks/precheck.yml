@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_elasticsearch/tasks/precheck.yml
+# Description : ctlabs_elasticsearch prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_elasticsearch.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_elasticsearch.os
+    fail_msg : "OS[{{os}}] is not supported!"
