@@ -1,0 +1,42 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kibana/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_kibana:
+  defaults:
+    pkgs:
+      redhat:
+        url: https://artifacts.elastic.co/downloads/kibana/kibana-8.13.4-x86_64.rpm
+        gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    config:
+      certs:
+        src : /etc/ca-ctlabs
+        dir : /etc/kibana/certs
+        crt : "{{ ansible_nodename }}.crt"
+        key : "{{ ansible_nodename }}.key"
+        ca  : ca-ctlabs.crt
+      dirs:
+        main: /etc/kibana
+      main:
+        file     : kibana.yml
+        template : kibana.yml.j2
+      server:
+        host: "{{ ansible_nodename }}"
+        port: 8080
+    escluster:
+      name  : ctlabs
+      master: 
+        name: es1.ctlabs.internal
+        ip  : 172.31.30.50
+      data_nodes:
+        - data-1
+        - data-2
+    service:
+      name : kibana.service
+      user : kibana
+      group: kibana
+  os:
+    - centos9

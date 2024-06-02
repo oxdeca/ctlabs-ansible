@@ -484,7 +484,19 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.elasticsearch
   hosts :
-    - ns1
+    - es1
+    - es2
   tags  : elasticsearch
   roles :
     - roles/ctlabs_elasticsearch
+
+# -----------------------------------------------------------------------------
+# ctlabs_kibana
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.kibana
+  hosts :
+    - kb1
+    - kb2
+  tags  : kibana
+  roles :
+    - roles/ctlabs_kibana

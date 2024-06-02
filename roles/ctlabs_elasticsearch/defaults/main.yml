@@ -9,8 +9,8 @@ ctlabs_elasticsearch:
   defaults:
     pkgs:
       redhat:
-        key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         url: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.13.4-x86_64.rpm
+        gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
     config:
       certs:
         src : /etc/ca-ctlabs

@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kibana/tasks/precheck.yml
+# Description : ctlabs_kibana prechecks
+# ------------------------------------------------------------------------------
+
+- debug: var=os
+- debug: var=ctlabs_kibana.os
+
+- name: ctlabs_kibana.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_kibana.os
+    fail_msg : "OS[{{os}}] is not supported!"
+
+# TODO: make sure we install the same version as elasticsearch was installed
+#- name: ctlabs_kibana.precheck.version.check
+#  fail:
+#    msg: "Wrong version"
+#  when: ( )

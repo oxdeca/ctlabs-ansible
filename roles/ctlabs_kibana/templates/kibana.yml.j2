@@ -1,0 +1,47 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : /etc/kibana/kibana.yml
+# Template    : ctlabs_kibana/templates/kibana.yml.j2
+# ------------------------------------------------------------------------------
+
+#kibana.index                             : ".kibana"
+#kibana.defaultAppId                      : "home"
+
+server.host                               : "{{ ctlabs_kibana.defaults.config.server.host }}"
+server.port                               : "{{ ctlabs_kibana.defaults.config.server.port }}"
+server.ssl.enabled                        : true
+server.ssl.key                            : "{{ ctlabs_kibana.defaults.config.certs.dir }}/{{ ctlabs_kibana.defaults.config.certs.key }}"
+server.ssl.certificate                    : "{{ ctlabs_kibana.defaults.config.certs.dir }}/{{ ctlabs_kibana.defaults.config.certs.crt }}"
+
+#server.basePath                          : ""
+#server.rewriteBasePath                   : false
+#server.publicBaseUrl                     : ""
+#server.maxPayload                        : 1048576
+#server.name                              : "your-hostname"
+
+#pid.file                                 : /run/kibana/kibana.pid
+#logging.dest                             : stdout
+#logging.silent                           : false
+#logging.quiet                            : false
+#logging.verbose                          : false
+#ops.interval                             : 5000
+#i18n.locale                              : "en"
+
+
+#elasticsearch.hosts                      : ["http://localhost:9200"]
+elasticsearch.username                    : "kibana"
+elasticsearch.password                    : "yFw3ibTrhP7wXGNXOvbS"
+#elasticsearch.serviceAccountToken        : "my_token"
+
+#elasticsearch.ssl.certificate            : /path/to/your/client.crt
+#elasticsearch.ssl.key                    : /path/to/your/client.key
+#elasticsearch.ssl.certificateAuthorities : [ "/path/to/your/CA.pem" ]
+#elasticsearch.ssl.verificationMode       : full
+
+#elasticsearch.pingTimeout                : 1500
+#elasticsearch.requestTimeout             : 30000
+#elasticsearch.requestHeadersWhitelist    : [ authorization ]
+#elasticsearch.customHeaders              : {}
+#elasticsearch.shardTimeout               : 30000
+#elasticsearch.logQueries                 : false

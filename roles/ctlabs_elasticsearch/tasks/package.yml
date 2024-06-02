@@ -5,9 +5,9 @@
 # Description : install elasticsearc
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_elasticsearch.tasks.package.key.import
+- name: ctlabs_elasticsearch.tasks.package.gpg.import
   rpm_key:
-    key   : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].key }}"
+    key   : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].gpg }}"
     state : present
 
 - name: ctlabs_elasticsearch.tasks.package.install

@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kibana/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kibana.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_kibana.defaults.service.name }}"
+    enabled : true
+    state   : restarted

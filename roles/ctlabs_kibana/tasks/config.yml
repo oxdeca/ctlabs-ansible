@@ -1,0 +1,24 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kibana/tasks/config.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kibana.tasks.config.file
+  template:
+    src   : "{{ ctlabs_kibana.defaults.config.main.template }}"
+    dest  : "{{ ctlabs_kibana.defaults.config.dirs.main }}/{{ ctlabs_kibana.defaults.config.main.file }}"
+  notify: ctlabs_kibana.handlers.service.restart
+
+- name: ctlabs_kibana.tasks.config.certs.copy
+  copy:
+    src   : "{{ ctlabs_kibana.defaults.config.certs.src }}/{{ item }}"
+    dest  : "{{ ctlabs_kibana.defaults.config.certs.dir }}/{{ item }}"
+    owner : root
+    group : "{{ ctlabs_kibana.defaults.service.group }}"
+    mode  : "0640"
+  loop:
+    - "{{ ctlabs_kibana.defaults.config.certs.crt }}"
+    - "{{ ctlabs_kibana.defaults.config.certs.key }}"
+    - "{{ ctlabs_kibana.defaults.config.certs.ca  }}"

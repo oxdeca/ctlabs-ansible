@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kibana/tasks/service.yml
+# Description : main ctlabs_kibana service
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_kibana.tasks.service.start
+  service:
+    name    : "{{ ctlabs_kibana.defaults.service.name }}"
+    enabled : yes
+    state   : started
