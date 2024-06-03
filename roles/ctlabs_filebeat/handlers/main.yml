@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_filebeat/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_filebeat.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_filebeat.defaults.service.name }}"
+    enabled : true
+    state   : restarted

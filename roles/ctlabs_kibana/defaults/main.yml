@@ -11,6 +11,9 @@ ctlabs_kibana:
       redhat:
         url: https://artifacts.elastic.co/downloads/kibana/kibana-8.13.4-x86_64.rpm
         gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      debian:
+        url:
+        gpg:
     config:
       certs:
         src : /etc/ca-ctlabs
@@ -24,7 +27,8 @@ ctlabs_kibana:
         file     : kibana.yml
         template : kibana.yml.j2
       server:
-        host: "{{ ansible_nodename }}"
+        ip  : "{{ ansible_ipv4_default.address }}"
+        name: "{{ ansible_nodename }}"
         port: 8080
       es:
         cluster : ctlabs

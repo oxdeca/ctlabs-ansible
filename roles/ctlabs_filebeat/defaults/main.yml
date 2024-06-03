@@ -1,0 +1,53 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_filebeat/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_filebeat:
+  defaults:
+    pkgs:
+      redhat:
+        url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.13.4-x86_64.rpm
+        gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      debian:
+        url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.13.4-amd64.deb
+        gpg:
+    config:
+      certs:
+        crt : /etc/ca-ctlabs
+        dir : /etc/filebeat/certs
+        crt : "{{ ansible_nodename }}.crt"
+        key : "{{ ansible_nodename }}.prv"
+        ca  : ca-ctlabs.crt
+      dirs:
+        main: /etc/filebeat
+      main:
+        file     : filebeat.yml
+        template : filebeat.yml.j2
+      inputs:
+        log:
+          enabled: false
+          paths  :
+            - /var/log/*.log
+        stream:
+          enabled: false
+          paths :
+            - /var/log/*.log
+      server:
+        ip   : 172.31.30.50
+        port : 
+      es:
+        cluster: ctlabs
+        proto : https
+        hosts : 
+          - es1.ctlabs.internal:9200
+      kba:
+        host: https://kba1.ctlabs.internal:8080
+    service:
+      name : filebeat.service
+      user : filebeat
+      group: filebeat
+  os:
+    - centos9

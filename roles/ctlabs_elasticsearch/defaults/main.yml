@@ -37,6 +37,7 @@ ctlabs_elasticsearch:
           name : "{{ ansible_nodename }}"
           ip   : "{{ ansible_default_ipv4.address }}"
           port : 9200
+          url  : "https://{{ ansible_nodename }}:9200/"
         data_nodes:
           - data-1
           - data-2

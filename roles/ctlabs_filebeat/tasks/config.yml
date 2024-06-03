@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_filebeat/tasks/config.yml
+# Description : create default configuration user/directories
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_filebeat.tasks.config.file
+  template:
+    src   : filebeat.yml.j2
+    dest  : /etc/filebeat/filebeat.yml
+    force : yes
+  notify: ctlabs_filebeat.handlers.service.restart
+
+- name: ctlabs_filebeat.tasks.config.module.activate
+  command: filebeat modules enable system 
+  notify: ctlabs_filebeat.handlers.service.restart
+
+- name: ctlabs_filebeat.tasks.config.module.setup
+  command: filebeat setup
+  notify: ctlabs_filebeat.handlers.service.restart

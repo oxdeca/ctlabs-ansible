@@ -1,0 +1,17 @@
+---
+
+# -------------------------------------------------------------------------------------
+# File         : ctlabs_filebeat/tasks/package.yml
+# Description  : installs the filebeat package (rpm)
+# -------------------------------------------------------------------------------------
+
+- name: ctlabs_filebeat.tasks.package.gpg.import
+  rpm_key:
+    key   : "{{ ctlabs_filebeat.defaults.pkgs[os_family].gpg }}"
+    state : present
+    
+- name: ctlabs_filebeat.tasks.package.install
+  dnf:
+    name              : "{{ ctlabs_filebeat.defaults.pkgs[os_family].url }}"
+    disable_gpg_check : false
+    state             : present

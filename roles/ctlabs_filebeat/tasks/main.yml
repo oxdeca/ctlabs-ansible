@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_filebeat/tasks/main.yml
+# Description : main ctlabs_filebeat tasks file.
+# ------------------------------------------------------------------------------
+
+- include: precheck.yml
+  tags:
+    - ctlabs_filebeat
+    - ctlabs_filebeat.precheck
+    - ctlabs_filebeat.package
+    - ctlabs_filebeat.config
+    - ctlabs_filebeat.service
+    
+- include: package.yml
+  tags:
+    - ctlabs_filebeat
+    - ctlabs_filebeat.package
+
+- include: config.yml
+  tags:
+    - ctlabs_filebeat
+    - ctlabs_filebeat.config
+
+- include: service.yml
+  tags:
+    - ctlabs_filebeat
+    - ctlabs_filebeat.service
+

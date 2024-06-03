@@ -230,6 +230,15 @@
             "server_url" : "http://192.168.100.193:8092"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
+      when: ansible_hostname == 'localhost'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_rundeck.fact
+        content: |
+          {
+            "server_url" : "http://192.168.100.193:8080"
+          }
+
 
 
 # -----------------------------------------------------------------------------
@@ -400,8 +409,7 @@
 # ctlabs_node_exporter
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.node_exporter
-  hosts :
-    - hosts
+  hosts : hosts
   tags  : node_exporter
   roles :
     - roles/ctlabs_node_exporter
@@ -420,8 +428,7 @@
 # ctlabs_promtail
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.promtail
-  hosts :
-    - hosts
+  hosts : hosts
   tags  : promtail
   roles :
     - roles/ctlabs_promtail
@@ -500,3 +507,12 @@
   tags  : kibana
   roles :
     - roles/ctlabs_kibana
+
+# -----------------------------------------------------------------------------
+# ctlabs_filebeat
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.filebeat
+  hosts : hosts
+  tags  : filebeat
+  roles :
+    - roles/ctlabs_filebeat

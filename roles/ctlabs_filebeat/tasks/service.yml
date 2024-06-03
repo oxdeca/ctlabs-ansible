@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_filebeat/tasks/service.yml
+# Description : main ctlabs_filebeat service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_filebeat.tasks.service.start
+  service:
+    name    : "{{ ctlabs_filebeat.defaults.service.name }}"
+    enabled : yes
+    state   : started
