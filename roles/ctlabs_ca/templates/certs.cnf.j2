@@ -1,12 +1,16 @@
-#
-# openssl config server-cert
-#
+# ------------------------------------------------------------------------------
+# Template    : ctlabs_ca/templates/certs.cnf2
+# Description : openssl config server-cert
+# ------------------------------------------------------------------------------
 
 [ req ]
-default_bits       = {{ ctlabs_ca.defaults.config.certs.bits }}
-distinguished_name = req_server_cert
-encrypt_key        = {{ ctlabs_ca.defaults.config.certs.encrypt_key }}
 prompt             = no
+default_bits       = {{ ctlabs_ca.defaults.config.certs.bits }}
+encrypt_key        = {{ ctlabs_ca.defaults.config.certs.encrypt_key }}
+distinguished_name = req_server_cert
+req_extensions     = v3_req
+x509_extensions    = v3_req
+
 
 [ req_server_cert ]
 CN                 = {{ ansible_hostname }}.{{ ctlabs_ca_domain }}
@@ -14,3 +18,9 @@ C                  = CA
 ST                 = Ontario
 L                  = Toronto
 O                  = oxdeca.com
+
+[ v3_req ]
+subjectAltName     = @alt_names
+
+[ alt_names ]
+DNS.1 = {{ ansible_hostname }}.{{ ctlabs_ca_domain }}
