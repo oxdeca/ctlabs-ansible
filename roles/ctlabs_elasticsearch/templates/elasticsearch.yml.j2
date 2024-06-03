@@ -12,12 +12,14 @@ path.data                                            : {{ ctlabs_elasticsearch.d
 path.logs                                            : {{ ctlabs_elasticsearch.defaults.config.dirs.logs }}
 
 network.host                                         : {{ ansible_nodename }}
-discovery.seed_hosts                                 : "{{ ctlabs_elasticsearch.defaults.config.cluster.master.ip }}" 
+network.bind_host                                    : {{ ansible_default_ipv4.address }}
+#discovery.seed_hosts                                 : "{{ ctlabs_elasticsearch.defaults.config.cluster.master.ip }}" 
 cluster.initial_master_nodes                         : ["{{ ctlabs_elasticsearch.defaults.config.cluster.master.name }}"] 
 
 xpack.security.enabled                               : true
 xpack.security.http.ssl.enabled                      : true
 xpack.security.transport.ssl.enabled                 : true
+xpack.security.enrollment.enabled                    : true
 
 xpack.security.http.ssl.key                          : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.key }}
 xpack.security.http.ssl.certificate                  : {{ ctlabs_elasticsearch.defaults.config.certs.dir }}/{{ ctlabs_elasticsearch.defaults.config.certs.crt }}
