@@ -29,7 +29,7 @@ server.ssl.certificate                    : "{{ ctlabs_kibana.defaults.config.ce
 #i18n.locale                              : "en"
 
 
-#elasticsearch.hosts                      : ["http://localhost:9200"]
+elasticsearch.hosts                       : {{ ctlabs_kibana.defaults.config.es.host }}
 elasticsearch.username                    : "kibana"
 elasticsearch.password                    : "yFw3ibTrhP7wXGNXOvbS"
 #elasticsearch.serviceAccountToken        : "my_token"

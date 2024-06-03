@@ -126,3 +126,48 @@ zone_ctlabs_internal:
     type  : A
     value : 192.168.20.24
 
+# -----------------------------------------------------------------------------
+# elasticsearch / kibana
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : elasticsearch / kibana
+
+  - name  : es1
+    type  : A
+    value : 192.168.10.31
+
+  - name  : es2
+    type  : A
+    value : 192.168.20.31
+
+  - name  : kba1
+    type  : A
+    value : 192.168.10.32
+
+  - name  : kba2
+    type  : A
+    value : 192.168.20.32
+
+
+# -----------------------------------------------------------------------------
+# DB's
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : dbs
+
+  - name  : db1
+    type  : A
+    value : 192.168.50.5
+
+  - name  : db2
+    type  : A
+    value : 192.168.50.6
+
+  - name  : vdb1
+    type  : A
+    value : 192.168.30.11
+
+  - name  : vdb2
+    type  : A
+    value : 192.168.30.12
+

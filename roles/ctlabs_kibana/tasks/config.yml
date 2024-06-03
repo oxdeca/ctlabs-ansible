@@ -11,6 +11,11 @@
     dest  : "{{ ctlabs_kibana.defaults.config.dirs.main }}/{{ ctlabs_kibana.defaults.config.main.file }}"
   notify: ctlabs_kibana.handlers.service.restart
 
+- name: ctlabs_kibana.tasks.config.certs.dir
+  file:
+    name  : "{{ ctlabs_kibana.defaults.config.certs.dir }}"
+    state : directory
+
 - name: ctlabs_kibana.tasks.config.certs.copy
   copy:
     src   : "{{ ctlabs_kibana.defaults.config.certs.src }}/{{ item }}"
