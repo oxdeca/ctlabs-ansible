@@ -5,8 +5,26 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_rundeck.tasks.config.rundeck
+- name: ctlabs_rundeck.tasks.config.files
   template:
-    src  : "{{ ctlabs_rundeck.defaults.config.rundeck.template }}"
-    dest : "{{ ctlabs_rundeck.defaults.config.rundeck.file     }}"
+    src  : "{{ item.template }}"
+    dest : "{{ item.file     }}"
   notify: ctlabs_rundeck.handlers.service.restart
+  loop:
+    - "{{ ctlabs_rundeck.defaults.config.rundeck   }}"
+    - "{{ ctlabs_rundeck.defaults.config.sysconfig }}"
+
+- name: ctlabs_rundeck.tasks.config.keystore.p12
+  openssl_pkcs12:
+    action             : export
+    path               : "{{ ctlabs_rundeck.defaults.config.certs.dir }}/{{ ctlabs_rundeck.defaults.config.certs.keystore }}.p12"
+    friendly_name      : rundeck
+    privatekey_path    : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.key }}"
+    certificate_path   : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.crt }}"
+    other_certificates : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.ca  }}"
+    owner              : "{{ ctlabs_rundeck.defaults.service.user }}"
+    group              : "{{ ctlabs_rundeck.defaults.service.group }}"
+
+- name: ctlabs_rundeck.tasks.config.keystore.jks
+  command: "cd {{ ctlabs_rundeck.config.certs.dir }} && keytool -importkeystore -destkeystore keystore -srckeystore keystore.p12 -srcstoretype pkcs12"
+

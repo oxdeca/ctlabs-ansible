@@ -15,12 +15,35 @@ ctlabs_rundeck:
         - name: openjdk-17-jre-headless
         - url : https://packagecloud.io/pagerduty/rundeck/packages/any/any/rundeck_5.3.0.20240520-1_all.deb/download.deb?distro_version_id=35
     config:
+      certs:
+        src        : /etc/ca-ctlabs
+        crt        : "{{ ansible_nodename }}.crt"
+        key        : "{{ ansible_nodename }}.prv"
+        ca         : ca-ctlabs.crt
+        dir        : /etc/rundeck/ssl/
+        pass       : "{{ lookup('ansible.builtin.password', '/dev/null', length=16 ) }}"
+        keystore   : keystore
+        truststore : truststore
       rundeck:
         file      : /etc/rundeck/rundeck-config.properties
         template  : rundeck-config.properties.j2
         server_url: http://192.168.100.193:8200
+        admin_user: admin
+        admin_pass: "$1$k4hIuP.M$EM9a2yVSI7Kh9..NzyZRV1"
+      sysconfig:
+        file     : /etc/sysconfig/rundeckd
+        template : rundeckd.sysconfig.j2
+      realm:
+        file     : /etc/rundeck/realm.properties
+        template : realm.properties.j2
+      server:
+        ssl_enable : true
+        ssl_port   : 4443
+        tcp_port   : 4440
     service:
-      name     : rundeckd.service
+      name : rundeckd.service
+      user : rundeck
+      group: rundeck
   os:
     - centos9
     - debian11
