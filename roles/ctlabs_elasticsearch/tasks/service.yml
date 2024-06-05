@@ -10,3 +10,7 @@
     name    : "{{ ctlabs_elasticsearch.defaults.service.name }}"
     enabled : yes
     state   : started
+
+- name: ctlabs_elasticsearch.tasks.service.pass.reset
+  command: "echo y | /usr/share/elasticsearch/bin/ealsticsearch-reset-password -uelastic --url={{ ctlabs_elasticsearch.defaults.config.cluster.master.url }}"
+  register: elastic_pass

@@ -16,7 +16,7 @@ ctlabs_filebeat:
         gpg:
     config:
       certs:
-        crt : /etc/ca-ctlabs
+        src : /etc/ca-ctlabs
         dir : /etc/filebeat/certs
         crt : "{{ ansible_nodename }}.crt"
         key : "{{ ansible_nodename }}.prv"
@@ -42,7 +42,7 @@ ctlabs_filebeat:
         cluster: ctlabs
         proto : https
         hosts : 
-          - es1.ctlabs.internal:9200
+          - https://es1.ctlabs.internal:9200
       kba:
         host: https://kba1.ctlabs.internal:8080
     service:

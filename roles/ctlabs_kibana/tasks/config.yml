@@ -27,3 +27,4 @@
     - "{{ ctlabs_kibana.defaults.config.certs.crt }}"
     - "{{ ctlabs_kibana.defaults.config.certs.key }}"
     - "{{ ctlabs_kibana.defaults.config.certs.ca  }}"
+

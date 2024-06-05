@@ -7,9 +7,8 @@
 
 - name: ctlabs_filebeat.tasks.config.file
   template:
-    src   : filebeat.yml.j2
-    dest  : /etc/filebeat/filebeat.yml
-    force : yes
+    src   : "{{ ctlabs_filebeat.defaults.config.main.templates }}"
+    dest  : "{{ ctlabs_filebeat.defaults.config.dirs.main }}/{{ ctlabs_filebeat.defaults.config.main.file }}"
   notify: ctlabs_filebeat.handlers.service.restart
 
 - name: ctlabs_filebeat.tasks.config.module.activate

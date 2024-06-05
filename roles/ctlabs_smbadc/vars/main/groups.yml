@@ -19,3 +19,15 @@ domain_groups:
 
   - name: ssh_users
     ou: ou=groups
+
+  - name: netbox
+    ou: ou=netbox
+
+  - name: active
+    ou: ou=netbox
+
+  - name: staff
+    ou: ou=netbox
+
+  - name: superuser
+    ou: ou=netbox

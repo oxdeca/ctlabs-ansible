@@ -8,10 +8,12 @@
 
 domain_ou:
   - name : users
-
   - name : groups
-
   - name : services
+  - name : apps
 
   - name : slapd
     path : ou=services
+
+  - name : netbox
+    path : apps

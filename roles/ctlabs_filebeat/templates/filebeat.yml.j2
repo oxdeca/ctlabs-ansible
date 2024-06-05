@@ -16,7 +16,7 @@ filebeat.inputs:
 
 filebeat.config.modules:
   path          : ${path.config}/modules.d/*.yml
-  reload.enabled: false
+  reload.enabled: true
 
 setup.template.settings:
   index.number_of_shards: 1
@@ -27,13 +27,9 @@ setup.kibana:
 output.elasticsearch:
   hosts   : {{ ctlabs_filebeat.defaults.config.es.hosts }}
   protocol: {{ ctlabs_filebeat.defaults.config.es.proto }}
-
-  # Authentication credentials - either API key or username/password.
-  #api_key: "id:api_key"
-  #username: "elastic"
-  #password: "changeme"
   username: "elastic"
   password: "gPxUQQRiMvpmsySN8Tn2"
+  #api_key: "id:api_key"
 
 processors:
   - add_host_metadata:

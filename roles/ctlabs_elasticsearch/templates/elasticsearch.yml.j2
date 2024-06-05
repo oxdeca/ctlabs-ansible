@@ -7,12 +7,13 @@
 
 cluster.name                                         : {{ ctlabs_elasticsearch.defaults.config.cluster.name }}
 node.name                                            : {{ ansible_nodename }}
+bootstrap.password                                   : secret123
 
 path.data                                            : {{ ctlabs_elasticsearch.defaults.config.dirs.data }}
 path.logs                                            : {{ ctlabs_elasticsearch.defaults.config.dirs.logs }}
 
 network.host                                         : {{ ansible_nodename }}
-network.bind_host                                    : {{ ansible_default_ipv4.address }}
+network.bind_host                                    : "127.0.0.1, {{ ansible_default_ipv4.address }}"
 #discovery.seed_hosts                                 : "{{ ctlabs_elasticsearch.defaults.config.cluster.master.ip }}" 
 cluster.initial_master_nodes                         : ["{{ ctlabs_elasticsearch.defaults.config.cluster.master.name }}"] 
 
