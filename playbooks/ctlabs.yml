@@ -213,7 +213,7 @@
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
-      when: ansible_hostname == 'localhost'
+      when: ansible_hostname == 'ansible'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_rundeck.fact
         content: |
