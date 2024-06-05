@@ -213,30 +213,14 @@
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
-      when: ansible_hostname == 'rdk1'
-      copy:
-        dest: /etc/ansible/facts.d/ctlabs_rundeck.fact
-        content: |
-          {
-            "server_url" : "http://192.168.100.193:8091"
-          }
-
-    - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
-      when: ansible_hostname == 'rdk2'
-      copy:
-        dest: /etc/ansible/facts.d/ctlabs_rundeck.fact
-        content: |
-          {
-            "server_url" : "http://192.168.100.193:8092"
-          }
-
-    - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
       when: ansible_hostname == 'localhost'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_rundeck.fact
         content: |
           {
-            "server_url" : "http://192.168.100.193:8080"
+            "rundeck" : {
+              "server_url" : "https://192.168.100.166:8192"
+            }
           }
 
 
@@ -279,8 +263,7 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.rundeck
   hosts :
-    - rdk1
-    - rdk2
+    - ansible
   tags  : rundeck
   roles :
     - roles/ctlabs_rundeck
