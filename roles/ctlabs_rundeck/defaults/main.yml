@@ -20,8 +20,8 @@ ctlabs_rundeck:
         crt        : "{{ ansible_nodename }}.crt"
         key        : "{{ ansible_nodename }}.prv"
         ca         : ca-ctlabs.crt
-        dir        : /etc/rundeck/ssl/
-        pass       : "{{ lookup('ansible.builtin.password', '/dev/null', length=16 ) }}"
+        dir        : /etc/rundeck/ssl
+        pass       : "{{ lookup('ansible.builtin.password', '/dev/null', length=16, chars=['ascii_letters', 'digits'], seed=inventory_hostname ) }}"
         keystore   : keystore
         truststore : truststore
       rundeck:
@@ -36,6 +36,9 @@ ctlabs_rundeck:
       realm:
         file     : /etc/rundeck/realm.properties
         template : realm.properties.j2
+      ssl:
+        file     : /etc/rundeck/ssl/ssl.properties
+        template : ssl.properties.j2
       server:
         ssl_enable : true
         ssl_port   : 4443

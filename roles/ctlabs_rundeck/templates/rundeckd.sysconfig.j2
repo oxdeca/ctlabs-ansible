@@ -3,7 +3,7 @@
 # Template    : ctlabs_rundeck/templates/rundeckd.sysconfig.j2
 # ------------------------------------------------------------------------------
 
-export RUNDECK_WITH_SSL={{ ctlabs_rundeck.defaults.config.server.ssl_enable }}
+export RUNDECK_WITH_SSL={{ ctlabs_rundeck.defaults.config.server.ssl_enable |lower }}
 
 export RDECK_HTTP_PORT={{ ctlabs_rundeck.defaults.config.server.tcp_port    }}
 export RDECK_HTTPS_PORT={{ ctlabs_rundeck.defaults.config.server.ssl_port   }}

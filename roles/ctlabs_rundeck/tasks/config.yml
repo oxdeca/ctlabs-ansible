@@ -13,18 +13,23 @@
   loop:
     - "{{ ctlabs_rundeck.defaults.config.rundeck   }}"
     - "{{ ctlabs_rundeck.defaults.config.sysconfig }}"
+    - "{{ ctlabs_rundeck.defaults.config.ssl       }}"
 
-- name: ctlabs_rundeck.tasks.config.keystore.p12
-  openssl_pkcs12:
-    action             : export
-    path               : "{{ ctlabs_rundeck.defaults.config.certs.dir }}/{{ ctlabs_rundeck.defaults.config.certs.keystore }}.p12"
-    friendly_name      : rundeck
-    privatekey_path    : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.key }}"
-    certificate_path   : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.crt }}"
-    other_certificates : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.ca  }}"
-    owner              : "{{ ctlabs_rundeck.defaults.service.user }}"
-    group              : "{{ ctlabs_rundeck.defaults.service.group }}"
+#- name: ctlabs_rundeck.tasks.config.keystore.p12
+#  openssl_pkcs12:
+#    action             : export
+#    path               : "{{ ctlabs_rundeck.defaults.config.certs.dir }}/{{ ctlabs_rundeck.defaults.config.certs.keystore }}.p12"
+#    friendly_name      : rundeck
+#    privatekey_path    : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.key }}"
+#    certificate_path   : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.crt }}"
+#    other_certificates : "{{ ctlabs_rundeck.defaults.config.certs.src }}/{{ ctlabs_rundeck.defaults.config.certs.ca  }}"
+#    owner              : "{{ ctlabs_rundeck.defaults.service.user }}"
+#    group              : "{{ ctlabs_rundeck.defaults.service.group }}"
+#    passphrase         : "{{ ctlabs_rundeck.defaults.config.certs.pass }}"
+
+- name : ctlabs_rundeck.tasks.config.keystore.p12
+  shell: "cd {{ ctlabs_rundeck.defaults.config.certs.src }} && openssl pkcs12 -export -in {{ ctlabs_rundeck.defaults.config.certs.crt }} -inkey {{ ctlabs_rundeck.defaults.config.certs.key }} -certfile {{ ctlabs_rundeck.defaults.config.certs.ca }} -out {{ ctlabs_rundeck.defaults.config.certs.dir }}/{{ ctlabs_rundeck.defaults.config.certs.keystore }}.p12 -password pass:{{ ctlabs_rundeck.defaults.config.certs.pass }}"
 
 - name: ctlabs_rundeck.tasks.config.keystore.jks
-  command: "cd {{ ctlabs_rundeck.config.certs.dir }} && keytool -importkeystore -destkeystore keystore -srckeystore keystore.p12 -srcstoretype pkcs12"
+  shell: "cd {{ ctlabs_rundeck.defaults.config.certs.dir }} && keytool -importkeystore -deststorepass {{ ctlabs_rundeck.defaults.config.certs.pass }} -destkeystore keystore -srcstorepass {{ ctlabs_rundeck.defaults.config.certs.pass }} -srckeystore keystore.p12 -srcstoretype pkcs12 -noprompt"
 
