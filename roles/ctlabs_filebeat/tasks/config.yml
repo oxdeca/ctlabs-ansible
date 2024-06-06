@@ -21,5 +21,6 @@
 
 - name: ctlabs_filebeat.tasks.config.modules.config
   template:
-    src  : "{{ item }}"
-    dest : "{{ ctlabs_filebeat.defaults.config.dirs.modules }}/{{ item.module }}"
+    src  : "modules/{{ item }}.yml.j2"
+    dest : "{{ ctlabs_filebeat.defaults.config.dirs.modules }}/{{ item }}"
+  loop: "{{ ctlabs_filebeat.defaults.config.modules }}"

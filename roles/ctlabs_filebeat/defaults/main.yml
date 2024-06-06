@@ -22,7 +22,8 @@ ctlabs_filebeat:
         key : "{{ ansible_nodename }}.prv"
         ca  : ca-ctlabs.crt
       dirs:
-        main: /etc/filebeat
+        main   : /etc/filebeat
+        modules: /etc/filebeat/modules.d
       main:
         file     : filebeat.yml
         template : filebeat.yml.j2
@@ -31,7 +32,7 @@ ctlabs_filebeat:
           enabled: true
           paths  :
             - /var/log/*.log
-        filestream:
+        stream:
           enabled: true
           paths :
             - /var/log/*.log
