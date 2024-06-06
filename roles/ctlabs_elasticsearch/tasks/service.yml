@@ -12,5 +12,34 @@
     state   : started
 
 - name: ctlabs_elasticsearch.tasks.service.pass.reset
-  command: "echo y | /usr/share/elasticsearch/bin/ealsticsearch-reset-password -uelastic --url={{ ctlabs_elasticsearch.defaults.config.cluster.master.url }}"
+  command: "echo y | /usr/share/elasticsearch/bin/ealsticsearch-reset-password -uelastic --url={{ ctlabs_elasticsearch.defaults.config.cluster.master.url }} 2> /dev/null"
   register: elastic_pass
+
+# TODO: if token exists already we cannot read it anymore, so we need to delete it and recreate
+- name: ctlabs_elasticsearch.tasks.service.token.kibana.create
+  command: "/usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/kibana kibana"
+  register: kibana_token
+
+- name: ctlabs_elasticsearch.tasks.service.token.storage.perms
+  file:
+    path : "{{ ctlabs_elasticsearch.defaults.config.dirs.main }}/service_tokens"
+    owner: root
+    group: "{{ ctlabs_elasticsearch.defaults.service.group }}"
+    mode : '0640'
+
+- debug: "msg={{ kibana_token }}"
+
+- name: ctlabs_elasticsearch.tasks.service.token.kibana.fact
+  delegate_to: localhost
+  delegate_facts: true
+  set_fact:
+    ctlabs_elasticsearch_kibana_token: "{{ kibana_token.stdout.split('=')[1] }}"
+
+# TODO: 
+# - hack: should be doing this from ctlabs_kibana/filebeat role via API calls
+- name: ctlabs_elasticsearch.tasks.service.kibana_admin
+  command: "/usr/share/elasticsearch/bin/elasticsearch-users useradd ctlabs -r superuser -p 'secret123!'"
+
+# can we use api key?
+- name: ctlabs_elasticsearch.tasks.service.filebeat_admin
+  command: "/usr/share/elasticsearch/bin/elasticsearch-users useradd filebeat -r superuser -p 'secret123!'"

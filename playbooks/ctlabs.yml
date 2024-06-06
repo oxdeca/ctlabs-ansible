@@ -497,8 +497,8 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.kibana
   hosts :
-    - kb1
-    - kb2
+    - kba1
+    - kba2
   tags  : kibana
   roles :
     - roles/ctlabs_kibana

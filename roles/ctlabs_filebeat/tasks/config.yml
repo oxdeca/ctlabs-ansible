@@ -7,7 +7,7 @@
 
 - name: ctlabs_filebeat.tasks.config.file
   template:
-    src   : "{{ ctlabs_filebeat.defaults.config.main.templates }}"
+    src   : "{{ ctlabs_filebeat.defaults.config.main.template }}"
     dest  : "{{ ctlabs_filebeat.defaults.config.dirs.main }}/{{ ctlabs_filebeat.defaults.config.main.file }}"
   notify: ctlabs_filebeat.handlers.service.restart
 
@@ -16,5 +16,10 @@
   notify: ctlabs_filebeat.handlers.service.restart
 
 - name: ctlabs_filebeat.tasks.config.module.setup
-  command: filebeat setup
+  command: ip vrf exec default sh -c 'filebeat setup'
   notify: ctlabs_filebeat.handlers.service.restart
+
+- name: ctlabs_filebeat.tasks.config.modules.config
+  template:
+    src  : "{{ item }}"
+    dest : "{{ ctlabs_filebeat.defaults.config.dirs.modules }}/{{ item.module }}"

@@ -27,7 +27,7 @@ ctlabs_kibana:
         file     : kibana.yml
         template : kibana.yml.j2
       server:
-        ip  : "{{ ansible_ipv4_default.address }}"
+        ip  : "{{ ansible_default_ipv4.address }}"
         name: "{{ ansible_nodename }}"
         port: 8080
       es:

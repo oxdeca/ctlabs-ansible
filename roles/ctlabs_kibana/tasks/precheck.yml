@@ -13,6 +13,10 @@
     that     : os is in ctlabs_kibana.os
     fail_msg : "OS[{{os}}] is not supported!"
 
+- name: ctlabs_kibana.tasks.precheck.kibana_token
+  set_fact:
+    ctlabs_elasticsearch_kibana_token: "{{ hostvars.localhost.ctlabs_elasticsearch_kibana_token }}"
+
 # TODO: make sure we install the same version as elasticsearch was installed
 #- name: ctlabs_kibana.precheck.version.check
 #  fail:

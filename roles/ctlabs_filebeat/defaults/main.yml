@@ -28,23 +28,27 @@ ctlabs_filebeat:
         template : filebeat.yml.j2
       inputs:
         log:
-          enabled: false
+          enabled: true
           paths  :
             - /var/log/*.log
-        stream:
-          enabled: false
+        filestream:
+          enabled: true
           paths :
             - /var/log/*.log
+      modules:
+        - system
       server:
         ip   : 172.31.30.50
         port : 
       es:
         cluster: ctlabs
+        user   : filebeat
+        pass   : secret123!
         proto : https
         hosts : 
           - https://es1.ctlabs.internal:9200
       kba:
-        host: https://kba1.ctlabs.internal:8080
+        host: https://kba2.ctlabs.internal:8080
     service:
       name : filebeat.service
       user : filebeat

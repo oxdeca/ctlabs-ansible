@@ -27,8 +27,8 @@ setup.kibana:
 output.elasticsearch:
   hosts   : {{ ctlabs_filebeat.defaults.config.es.hosts }}
   protocol: {{ ctlabs_filebeat.defaults.config.es.proto }}
-  username: "elastic"
-  password: "gPxUQQRiMvpmsySN8Tn2"
+  username: {{ ctlabs_filebeat.defaults.config.es.user  }}
+  password: {{ ctlabs_filebeat.defaults.config.es.pass  }}
   #api_key: "id:api_key"
 
 processors:
