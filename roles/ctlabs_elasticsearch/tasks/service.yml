@@ -27,7 +27,7 @@
     group: "{{ ctlabs_elasticsearch.defaults.service.group }}"
     mode : '0640'
 
-- debug: "msg={{ kibana_token }}"
+# - debug: "msg={{ kibana_token }}"
 
 - name: ctlabs_elasticsearch.tasks.service.token.kibana.fact
   delegate_to: localhost
