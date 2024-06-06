@@ -16,4 +16,4 @@ domain_ou:
     path : ou=services
 
   - name : netbox
-    path : apps
+    path : ou=apps

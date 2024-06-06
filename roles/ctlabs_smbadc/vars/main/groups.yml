@@ -21,13 +21,13 @@ domain_groups:
     ou: ou=groups
 
   - name: netbox
-    ou: ou=netbox
+    ou: ou=netbox,ou=apps
 
   - name: active
-    ou: ou=netbox
+    ou: ou=netbox,ou=apps
 
   - name: staff
-    ou: ou=netbox
+    ou: ou=netbox,ou=apps
 
   - name: superuser
-    ou: ou=netbox
+    ou: ou=netbox,ou=apps
