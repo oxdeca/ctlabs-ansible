@@ -235,6 +235,14 @@
             }
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.k3s.local_facts
+      when: ansible_hostname in ['k3s1', 'k3s2', 'k3s3', 'k3s4']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_k3s
+        content: |
+          {
+            "node" : "control-plane"
+          }
 
 
 # -----------------------------------------------------------------------------
@@ -511,3 +519,12 @@
   tags  : filebeat
   roles :
     - roles/ctlabs_filebeat
+
+# -----------------------------------------------------------------------------
+# ctlabs_k3s
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.k3s
+  hosts : ['k3s1', 'k3s2', 'k3s3', 'k3s4']
+  tags  : k3s
+  roles :
+    - roles/ctlabs_k3s
