@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/tasks/service.yml
+# Description : main ctlabs_kafka service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kafka.taka.service.zookeeper.install
+  template:
+    src  : "{{ ctlabs_kafka.defaults.service.zookeeper.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.zookeeper.name }}"
+  notify: ctlabs_kafka.handlers.service.zookeeper.restart
+
+- name: ctlabs_kafka.taka.service.kafka.install
+  template:
+    src  : "{{ ctlabs_kafka.defaults.service.kafka.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.kafka.name }}"
+  notify: ctlabs_kafka.handlers.service.kafka.restart
+
+- name: ctlabs_kafka.tasks.service.zookeeper.start
+  service:
+    name    : "{{ ctlabs_kafka.defaults.service.zookeeper.name }}"
+    enabled : yes
+    state   : started
+
+- name: ctlabs_kafka.tasks.service.kafka.start
+  service:
+    name    : "{{ ctlabs_kafka.defaults.service.kafka.name }}"
+    enabled : yes
+    state   : started

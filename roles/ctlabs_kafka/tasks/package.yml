@@ -1,0 +1,68 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/tasks/package.yml
+# Description : install kibana
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kafka.tasks.package
+  block:
+    - name: ctlabs_kafka.tasks.package.install.redhat
+      when: os_family == 'redhat'
+      yum:
+        name              : "{{ item.url if item.url is defined else item.name }}"
+        disable_gpg_check : true
+        state             : present
+      loop: "{{ ctlabs_kafka.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_kafka.tasks.package.url.install.debian
+      when: os_family == 'debian' and item.url is defined
+      apt:
+        deb   : "{{ item.url }}"
+        state : present
+      loop: "{{ ctlabs_kafka.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_kafka.tasks.package.apt.install.debian
+      when: os_family == 'debian' and item.name is defined
+      apt:
+        name   : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_kafka.defaults.pkgs[os_family] }}"
+
+
+- name: ctlabs_kafka.tasks.package.group
+  group:
+    name  : "{{ ctlabs_kafka.defaults.service.group }}"
+    system: true
+
+- name: ctlabs_kafka.tasks.package.user
+  user:
+    name   : "{{ ctlabs_kafka.defaults.service.user  }}"
+    group  : "{{ ctlabs_kafka.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_kafka.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_kafka.defaults.pkgs.kafka.url    }}" 
+    dest : "{{ ctlabs_kafka.defaults.pkgs.kafka.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_kafka.tasks.package.copy
+  copy:
+    src  : "{{ ctlabs_kafka.defaults.pkgs.kafka.tmptar }}"
+    dest : "{{ ctlabs_kafka.defaults.pkgs.kafka.tmptar }}"
+
+- name: ctlabs_kafka.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_kafka.defaults.pkgs.kafka.tmptar }}"
+    dest : "{{ ctlabs_kafka.defaults.install.dir       }}"
+    owner: "{{ ctlabs_kafka.defaults.service.user      }}"
+    group: "{{ ctlabs_kafka.defaults.service.group     }}"
+    remote_src: true
+
+- name: ctlabs_kafka.tasks.package.link
+  file:
+    src   : "{{ ctlabs_kafka.defaults.install.tar_dir  }}"
+    dest  : "{{ ctlabs_kafka.defaults.install.root_dir }}"
+    state : link
+

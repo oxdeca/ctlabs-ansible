@@ -5,10 +5,13 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
+
+User=root
+
+ExecStart={{ ctlabs_k3s.defaults.bin.path }} server
+
 Restart=always
 RestartSec=5
-User=root
-ExecStart={{ ctlabs_k3s.defaults.bin.path }} server
 
 [Install]
 WantedBy=multi-user.target

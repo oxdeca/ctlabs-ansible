@@ -1,0 +1,21 @@
+[Unit]
+Description=Kafka server service
+After=network-online.target
+Wants=kafka-zookeeper.service
+
+[Service]
+Type=simple
+
+User=kafka
+Group=kafka
+#PIDFile=/var/tmp/kafka.pid
+WorkingDirectory={{ ctlabs_kafka.defaults.install.root_dir }}
+
+ExecStart={{ ctlabs_kafka.defaults.install.root_dir }}/bin/kafka-server-start.sh {{ ctlabs_kafka.defaults.install.root_dir }}/config/server.properties
+
+Restart=on-failure
+RestartSec=30
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

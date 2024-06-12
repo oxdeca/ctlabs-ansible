@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kafka.handlers.service.zookeeper.restart
+  service:
+    name    : "{{ ctlabs_kafka.defaults.service.zookeeper.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_kafka.handlers.service.kafka.restart
+  service:
+    name    : "{{ ctlabs_kafka.defaults.service.kafka.name }}"
+    enabled : true
+    state   : restarted

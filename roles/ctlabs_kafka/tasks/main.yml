@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/tasks/main.yml
+# Description : main ctlabs_kafka tasks file.
+# ------------------------------------------------------------------------------
+
+- include: precheck.yml
+  tags:
+    - ctlabs_kafka
+    - ctlabs_kafka.precheck
+    - ctlabs_kafka.package
+    - ctlabs_kafka.config
+    - ctlabs_kafka.service
+    
+- include: package.yml
+  tags:
+    - ctlabs_kafka
+    - ctlabs_kafka.package
+
+- include: config.yml
+  tags:
+    - ctlabs_kafka
+    - ctlabs_kafka.config
+
+- include: service.yml
+  tags:
+    - ctlabs_kafka
+    - ctlabs_kafka.service
+

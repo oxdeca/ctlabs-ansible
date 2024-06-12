@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_kafka:
+  defaults:
+    pkgs:
+      redhat:
+        - name: java-latest-openjdk-headless
+      debian:
+        - name: openjdk-17-jre-headless
+      kafka:
+        url    : https://downloads.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+        tmptar : /tmp/kafka.tar.gz
+    install:
+      dir      : /opt/
+      tar_dir  : /opt/kafka_2.13-3.7.0
+      root_dir : /opt/kafka
+    config:
+      certs:
+        src : /etc/ca-ctlabs
+        dir : /etc/kibana/certs
+        crt : "{{ ansible_nodename }}.crt"
+        key : "{{ ansible_nodename }}.prv"
+        ca  : ca-ctlabs.crt
+      dirs:
+        main: /opt/kafka/config
+    service:
+      user : kafka
+      group: kafka
+      zookeeper:
+        name     : kafka-zookeeper.service
+        template : kafka-zookeeper.service.j2
+      kafka:
+        name     : kafka-server.service
+        template : kafka-server.service.j2
+  os:
+    - centos9

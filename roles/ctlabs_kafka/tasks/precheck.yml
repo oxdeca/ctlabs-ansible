@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kafka/tasks/precheck.yml
+# Description : ctlabs_kafka prechecks
+# ------------------------------------------------------------------------------
+
+- debug: var=os
+- debug: var=ctlabs_kafka.os
+
+- name: ctlabs_kafka.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_kafka.os
+    fail_msg : "OS[{{os}}] is not supported!"
