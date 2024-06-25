@@ -1,0 +1,33 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_jenkins/tasks/package.yml
+# Description : main ctlabs_jenkins tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_grafana.tasks.yum.repo
+  yum_repository:
+    name        : {{ ctlabs_jenkins.defaults.repo[os_family].name }}
+    description : {{ ctlabs_jenkins.defaults.repo[os_family].name }}
+    baseurl     : {{ ctlabs_jenkins.defaults_repo[os_family].url  }}
+    gpgkey      : {{ ctlabs_jenkins.defaults.repo[os_family].gpg  }}
+    gpgcheck    : true
+    sslverify   : true
+    sslcacert   : /etc/pki/tls/certs/ca-bundle.crt
+
+- name: ctlabs_jenkins.tasks.package.gpg.import
+  rpm_key:
+    key   : "{{ ctlabs_jenkins.defaults.repo[os_family].gpg }}"
+    state : present
+    
+- name: ctlabs_jenkins.tasks.package.repo.install
+  dnf:
+    name              : "{{ ctlabs_jenkins.defaults.repo[os_family].url }}"
+    disable_gpg_check : false
+    state             : present
+
+- name: ctlabs_jenkins.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop : "{{ ctlabs_jenkins.defaults.pkgs }}"
