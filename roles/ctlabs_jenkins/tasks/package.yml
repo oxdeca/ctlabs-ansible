@@ -14,13 +14,7 @@
   rpm_key:
     key  : "{{ ctlabs_jenkins.defaults.repo[os_family].key }}"
 
-- name: ctlabs_jenkins.tasks.package.repo.install
-  dnf:
-    name              : "{{ ctlabs_jenkins.defaults.repo[os_family].url }}"
-    disable_gpg_check : false
-    state             : present
-
-- name: ctlabs_jenkins.tasks.package.installed
+- name: ctlabs_jenkins.tasks.package.install
   package:
     name  : "{{ item.name }}"
     state : present
