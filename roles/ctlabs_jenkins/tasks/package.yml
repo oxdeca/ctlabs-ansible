@@ -24,4 +24,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop : "{{ ctlabs_jenkins.defaults.pkgs }}"
+  loop : "{{ ctlabs_jenkins.defaults.pkgs[os_family] }}"
