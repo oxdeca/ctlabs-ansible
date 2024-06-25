@@ -7,10 +7,10 @@
 
 - name: ctlabs_grafana.tasks.yum.repo
   yum_repository:
-    name        : {{ ctlabs_jenkins.defaults.repo[os_family].name }}
-    description : {{ ctlabs_jenkins.defaults.repo[os_family].name }}
-    baseurl     : {{ ctlabs_jenkins.defaults_repo[os_family].url  }}
-    gpgkey      : {{ ctlabs_jenkins.defaults.repo[os_family].gpg  }}
+    name        : "{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
+    description : "{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
+    baseurl     : "{{ ctlabs_jenkins.defaults_repo[os_family].url  }}"
+    gpgkey      : "{{ ctlabs_jenkins.defaults.repo[os_family].gpg  }}"
     gpgcheck    : true
     sslverify   : true
     sslcacert   : /etc/pki/tls/certs/ca-bundle.crt
