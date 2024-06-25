@@ -10,9 +10,3 @@
     name    : "{{ ctlabs_jenkins.defaults.service.name }}"
     enabled : yes
     state   : started
-
-- name: ctlabs_jenkins.tasks.service.restarted
-  service:
-    name    : "{{ ctlabs_jenkins.defaults.service.name }}"
-    enabled : yes
-    state   : restarted

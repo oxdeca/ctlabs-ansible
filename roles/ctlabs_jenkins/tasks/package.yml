@@ -14,6 +14,14 @@
   rpm_key:
     key  : "{{ ctlabs_jenkins.defaults.repo[os_family].key }}"
 
+- name: ctlabs_jenkins.tasks.package.java.unsupported.remove
+  package:
+    name: "{{ item }}"
+    state: absent
+  loop: 
+    - java-11-openjdk*
+    - java-22-openjdk*
+
 - name: ctlabs_jenkins.tasks.package.install
   package:
     name  : "{{ item.name }}"
