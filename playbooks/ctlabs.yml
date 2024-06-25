@@ -528,3 +528,12 @@
   tags  : k3s
   roles :
     - roles/ctlabs_k3s
+
+# -----------------------------------------------------------------------------
+# ctlabs_jenkins
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.jenkins
+  hosts : ansible
+  tags  : jenkins
+  roles :
+    - roles/ctlabs_jenkins
