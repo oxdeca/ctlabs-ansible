@@ -9,9 +9,9 @@ ctlabs_jenkins:
   defaults:
     repo:
       redhat:
-        name : jenkins
+        name : jenkins.repo
         url  : https://pkg.jenkins.io/redhat/jenkins.repo
-        pgp  : https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+        key  : https://pkg.jenkins.io/redhat/jenkins.io-2023.key
     pkgs:
       redhat:
         - name: fontconfig

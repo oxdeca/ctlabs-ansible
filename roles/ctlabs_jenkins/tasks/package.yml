@@ -5,21 +5,15 @@
 # Description : main ctlabs_jenkins tasks file.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_grafana.tasks.yum.repo
-  yum_repository:
-    name        : "{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
-    description : "{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
-    baseurl     : "{{ ctlabs_jenkins.defaults_repo[os_family].url  }}"
-    gpgkey      : "{{ ctlabs_jenkins.defaults.repo[os_family].gpg  }}"
-    gpgcheck    : true
-    sslverify   : true
-    sslcacert   : /etc/pki/tls/certs/ca-bundle.crt
+- name: ctlabs_jenkins.tasks.package.yum.repo.file
+  get_url:
+    url  : "{{ ctlabs_jenkins.defaults.repo[os_family].url }}"
+    dest : "{{ ctlabs_jenkins.defaults.repo[os_family].dir }}/{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
 
-- name: ctlabs_jenkins.tasks.package.gpg.import
+- name: ctlabs_jenkins.tasks.package.yum.repo.key
   rpm_key:
-    key   : "{{ ctlabs_jenkins.defaults.repo[os_family].gpg }}"
-    state : present
-    
+    key  : "{{ ctlabs_jenkins.defaults.repo[os_family].key }}"
+
 - name: ctlabs_jenkins.tasks.package.repo.install
   dnf:
     name              : "{{ ctlabs_jenkins.defaults.repo[os_family].url }}"
