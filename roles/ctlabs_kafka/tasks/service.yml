@@ -5,13 +5,13 @@
 # Description : main ctlabs_kafka service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_kafka.taka.service.zookeeper.install
+- name: ctlabs_kafka.tasks.service.zookeeper.install
   template:
     src  : "{{ ctlabs_kafka.defaults.service.zookeeper.template }}"
     dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.zookeeper.name }}"
   notify: ctlabs_kafka.handlers.service.zookeeper.restart
 
-- name: ctlabs_kafka.taka.service.kafka.install
+- name: ctlabs_kafka.tasks.service.kafka.install
   template:
     src  : "{{ ctlabs_kafka.defaults.service.kafka.template }}"
     dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.kafka.name }}"

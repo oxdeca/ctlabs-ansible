@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_jenkins/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_jenkins.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_jenkins.defaults.service.name }}"
+    enabled : true
+    state   : restarted

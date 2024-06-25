@@ -1,0 +1,36 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_jenkins/defaults/main.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+ctlabs_jenkins:
+  defaults:
+    repo:
+      redhat:
+        - url: https://pkg.jenkins.io/redhat/jenkins.repo
+        - pgp: https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+        - dir: /etc/yum.repos.d
+    pkgs:
+      redhat:
+        - name: fontconfig
+        - name: java-17-openjdk
+        - name: jenkins
+      debian:
+        - name: openjdk-17-jre-headless
+    config:
+      certs:
+        src : /etc/ca-ctlabs
+        dir : /etc/kibana/certs
+        crt : "{{ ansible_nodename }}.crt"
+        key : "{{ ansible_nodename }}.prv"
+        ca  : ca-ctlabs.crt
+      dirs:
+        main: /etc/jenkins
+    service:
+      user : jenkins
+      group: jenkins
+      name : jenkins.service
+  os:
+    - centos9
