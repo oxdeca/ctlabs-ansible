@@ -5,6 +5,9 @@
 # Description : Variables used for all hosts
 # -----------------------------------------------------------------------------
 
+# gcp_project : "{{ lookup('pipe', 'gcloud info --format=\"value(config.project)\"') }}"
+# gcp_env     : "{{ lookup('pipe', 'gcloud info --format=\"value(config.project)\" | cut -d- -f2') }}"
+
 # os           : "{{ ansible_os_family|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
 virt_type    : "{{ ansible_virtualization_type | lower }}"
 os           : "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"

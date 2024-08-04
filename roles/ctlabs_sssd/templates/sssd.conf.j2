@@ -17,6 +17,7 @@
 
   ad_server                      = {{ hosts }}
   ad_domain                      = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  dyndns_update                  = false
 
   krb5_realm                     = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
   krb5_store_password_if_offline = true
