@@ -10,6 +10,10 @@ ctlabs_k3s:
     pkgs:
       name : k3s
       uri  : https://github.com/k3s-io/k3s/releases/download/v1.29.2+k3s1/k3s
+    config:
+      profile:
+        template: k3s.profile.j2
+        file    : /etc/profile.d/k3s.sh
     service:
       name     : k3s.service
       template : k3s.service.j2
@@ -17,6 +21,6 @@ ctlabs_k3s:
       path: /usr/bin/k3s
       mode: '0750'
   os:
-    - rhel8
     - centos8
     - centos9
+    - debian11

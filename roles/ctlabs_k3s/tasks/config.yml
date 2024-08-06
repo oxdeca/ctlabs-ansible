@@ -2,6 +2,10 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs_k3s/tasks/config.yml
-# Description : main configurations
+# Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_k3s.tasks.config.profile
+  template:
+    src  : "{{ ctlabs_k3s.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_k3s.defaults.config.profile.file     }}"
