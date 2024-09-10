@@ -15,6 +15,7 @@ domain_users:
     lastname  : Smith
     uid       : 5001
     ou        : ou=users
+    pass      : secret123!
 
   - firstname : Andrew
     lastname  : Brown

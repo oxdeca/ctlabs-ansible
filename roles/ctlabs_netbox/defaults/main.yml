@@ -27,6 +27,7 @@ ctlabs_netbox:
         - name : redhat-rpm-config
         - name : openldap-devel
         - name : python3-devel
+        - name : "@postgresql:15/client"
       nb:
         url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz

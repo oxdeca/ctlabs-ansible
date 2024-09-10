@@ -62,7 +62,7 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
 AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
 
 # Define a group required to login.
-AUTH_LDAP_REQUIRE_GROUP = "cn=netbox,ou=netbox,ou=netbox,dc=ctlabs,dc=internal"
+AUTH_LDAP_REQUIRE_GROUP = "cn=netbox,ou=netbox,ou=apps,dc=ctlabs,dc=internal"
 
 # Mirror LDAP group assignments.
 AUTH_LDAP_MIRROR_GROUPS = True
