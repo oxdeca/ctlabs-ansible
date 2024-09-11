@@ -28,9 +28,11 @@ ctlabs_postgresql:
         template: gai.conf.j2
         file    : /etc/gai.conf
       db:
-        name: postgres
-        user: postgres
-        pass: secret123!
+        postgres:
+          template: db_postgres.sh.j2
+          file    : db_postgres.sh
+          user    : postgres
+          pass    : secret123!
   os:
     - redhat8
     - redhat9

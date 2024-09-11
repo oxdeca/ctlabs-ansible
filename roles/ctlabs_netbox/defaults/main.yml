@@ -107,6 +107,9 @@ ctlabs_netbox:
         host: 192.168.50.5
         port: 5432
         cons: 300
+        pguser: postgres
+        pgpass: secret123!
+        pgdb  : postgres
       redis:
         host: 192.168.50.5
         port: 6379
