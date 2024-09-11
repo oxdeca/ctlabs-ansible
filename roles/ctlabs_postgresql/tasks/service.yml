@@ -16,4 +16,4 @@
   script: files/db_netbox.sh
 
 - name: ctlabs_postgresql.tasks.service.db_postgres.config
-  cmd: psql -h127.0.0.1 -Upostgres -d postgres < <( echo "alter user postgres with password secret123!" )
+  shell: psql -h127.0.0.1 -Upostgres -d postgres < <( echo "alter user postgres with password secret123!" )
