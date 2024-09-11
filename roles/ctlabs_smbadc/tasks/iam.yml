@@ -42,13 +42,13 @@
 # TODO: Fix that hack
 - name: ctlabs_smbadc.tasks.iam.domain.admins
   when: item[0].roles is defined and 'admins' in item[0].roles
-  command: /usr/bin/samba-tool group addmembers 'Domain Admins' {{ item[0].name }}
-  loop: "{{ domain_services | product(domain_role.admins.groups) | list }}"
+  command: /usr/bin/samba-tool group addmembers '{{ item[1] }}' {{ item[0].name }}
+  loop: "{{ domain_services | product(domain_roles.admins.groups) | list }}"
   ignore_errors: true
 
 # TODO: Fix that hack
 - name: ctlabs_smbadc.tasks.iam.domain.admins
   when: item[0].roles is defined and 'netbox_admin' in item[0].roles
-  command: /usr/bin/samba-tool group addmembers item[1] {{ (item[0].lastname[0:5]+item[0].firstname[0:2]|lower) }} 
-  loop: "{{ domain_users | product(domain_role.netbox_admin.groups) | list }}"
+  command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
+  loop: "{{ domain_users | product(domain_roles.netbox_admin.groups) | list }}"
   ignore_errors: true
