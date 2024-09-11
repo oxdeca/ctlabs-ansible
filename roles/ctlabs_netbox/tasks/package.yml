@@ -79,3 +79,9 @@
         owner  : "{{ ctlabs_netbox.defaults.service.user  }}"
         group  : "{{ ctlabs_netbox.defaults.service.group }}"
       loop: "{{ files_to_change.results[0].files + files_to_change.results[1].files + files_to_change.results[2].files }}"
+
+- name: ctlabs_netbox.tasks.package.scripts.backrest
+  template:
+    src  : "{{ ctlabs_netbox.defaults.scripts.backrest.template }}"
+    dest : "{{ ctlabs_netbox.defaults.scripts.backrest.file     }}"
+    mode : '0750'

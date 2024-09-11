@@ -48,6 +48,9 @@ ctlabs_netbox:
       housekeeping:
         src : /opt/netbox/contrib/netbox-housekeeping.sh
         dst : /etc/cron.daily/netbox-housekeeping
+      backrest:
+        template: backrest.sh.j2
+        file    : /usr/bin/backrest.sh
     service:
       user     : netbox
       group    : netbox
