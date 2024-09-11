@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postgresql/files/backup.sh
+# Description : create backup (db and files)
+# ------------------------------------------------------------------------------
+
+
+backup {
+  # db
+  # systemctl stop netbox netbox-rq
+  # PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pass }}' pg_dump    -h{{ ctlabs_netbox.defaults.config.db.host }} -U{{ ctlabs_netbox.defaults.config.db.user }} -d{{ ctlabs_netbox.defaults.config.db.name }} -Fc > {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.dmpfile }}
+  # systemctl start netbox netbox-rq
+  
+  # files
+  # cd {{ ctlabs_netbox.defaults.install.app_dir }} && tar cvf {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.tarfile }} {{ ctlabs_netbox.defaults.backup.media_dirs | join(' ') }}
+}
+
+restore {
+  # systemct stop netbox netbox-rq
+  # PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pgpass }}' psql -h{{ ctlabs_netbox.defaults.config.db.host }} -U{{ ctlabs_netbox.defaults.config.db.pguser }} {{ ctlabs_netbox.defaults.config.db.pgdb }} < <(echo -en "drop database {{ ctlabs_netbox.defaults.config.db.name }}; create database {{ ctlabs_netbox.defaults.config.db.name }}; alter database {{ ctlabs_netbox.defaults.config.db.name }} owner to {{ ctlabs_netbox.defaults.config.db.user }};") 
+  # PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pass }}' pg_restore -h{{ ctlabs_netbox.defaults.config.db.host }} -U{{ ctlabs_netbox.defaults.config.db.user }} -d{{ ctlabs_netbox.defaults.config.db.name }} -Fc   {{ ctlabs_netbox.defaults.backup.dir }}/{ ctlabs_netbox.defaults.backup.dmpfile }}
+  # . {{ ctlabs_netbox.defaults.install.venv_dir }}/bin/activate python3 ./manage.py migrate
+  # systemctl start netbox netbox-rq
+}
+
+case $1 in
+  'backup')
+    backup ;;
+
+  'restore')
+    restore ;;
+esac

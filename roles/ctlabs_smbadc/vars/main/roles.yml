@@ -10,6 +10,13 @@
   # Administrators
   # ---------------------------------------------------------------------------
 domain_roles:
-  - name: admins
+  admins:
     groups:
       - Domain Admins
+
+  netbox_admin:
+    groups:
+      - netbox
+      - staff
+      - superuser
+      - active

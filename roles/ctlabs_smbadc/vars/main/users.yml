@@ -16,6 +16,8 @@ domain_users:
     uid       : 5001
     ou        : ou=users
     pass      : secret123!
+    roles     :
+      - netbox_admin
 
   - firstname : Andrew
     lastname  : Brown

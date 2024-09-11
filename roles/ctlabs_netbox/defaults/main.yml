@@ -35,6 +35,7 @@ ctlabs_netbox:
       dir      : /opt
       tar_dir  : /opt/netbox-3.7.6
       root_dir : /opt/netbox
+      venv_dir : /opt/netbox/venv
       app_dir  : /opt/netbox/netbox
       web_dirs : [ media, reports, scripts]
     scripts:
@@ -63,6 +64,11 @@ ctlabs_netbox:
       httpd:
         debian: apache2.service
         redhat: httpd.service
+    backup:
+      dir    : /backups
+      dmpfile: nbdb.dmp
+      tarfile: nbmedia.tar
+      media_dirs: [ media, scripts, reports ]
     config:
       update:
         url: http://nb1:8080
