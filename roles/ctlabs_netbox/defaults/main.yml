@@ -26,14 +26,16 @@ ctlabs_netbox:
         - name : openssl-devel
         - name : redhat-rpm-config
         - name : openldap-devel
-        - name : python3-devel
+        - name : python3.11
+        - name : python3.11-devel
         - name : "@postgresql:15/client"
       nb:
-        url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
+        url    : https://github.com/netbox-community/netbox/archive/refs/tags/v4.0.11.tar.gz
+        #url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
     install:
       dir      : /opt
-      tar_dir  : /opt/netbox-3.7.6
+      tar_dir  : /opt/netbox-4.0.11
       root_dir : /opt/netbox
       venv_dir : /opt/netbox/venv
       app_dir  : /opt/netbox/netbox
@@ -43,8 +45,8 @@ ctlabs_netbox:
         template: netbox.sh.j2
         file    : /usr/bin/netbox
         cmd:
-          upgrade: /usr/sbin/ip vrf exec default /usr/bin/netbox update
-          admin  : /usr/sbin/ip vrf exec default /usr/bin/netbox admin
+          upgrade: PYTHON=/usr/bin/python3.11 /usr/sbin/ip vrf exec default /usr/bin/netbox update
+          admin  : PYTHON=/usr/bin/python3.11 /usr/sbin/ip vrf exec default /usr/bin/netbox admin
       housekeeping:
         src : /opt/netbox/contrib/netbox-housekeeping.sh
         dst : /etc/cron.daily/netbox-housekeeping
