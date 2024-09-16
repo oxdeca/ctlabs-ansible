@@ -47,8 +47,15 @@
   ignore_errors: true
 
 # TODO: Fix that hack
-- name: ctlabs_smbadc.tasks.iam.domain.admins
+- name: ctlabs_smbadc.tasks.iam.domain.netbox
   when: item[0].roles is defined and 'netbox_admin' in item[0].roles
   command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
   loop: "{{ domain_users | product(domain_roles.netbox_admin.groups) | list }}"
+  ignore_errors: true
+
+# TODO: Fix that hack
+- name: ctlabs_smbadc.tasks.iam.domain.rundeck
+  when: item[0].roles is defined and 'rundeck_admin' in item[0].roles
+  command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
+  loop: "{{ domain_users | product(domain_roles.rundeck_admin.groups) | list }}"
   ignore_errors: true

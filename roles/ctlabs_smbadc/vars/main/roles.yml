@@ -20,3 +20,7 @@ domain_roles:
       - staff
       - superuser
       - active
+
+  rundeck_admins:
+    groups:
+      - admin

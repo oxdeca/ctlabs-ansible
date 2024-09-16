@@ -537,3 +537,12 @@
   tags  : jenkins
   roles :
     - roles/ctlabs_jenkins
+
+# -----------------------------------------------------------------------------
+# ctlabs_guacamole
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.guacamole
+  hosts : [gua1, gua2]
+  tags  : guacamole
+  roles :
+    - roles/ctlabs_guacamole
