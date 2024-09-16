@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/tasks/package.yml
+# Description : main ctlabs_guacamole tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_guacamole.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_guacamole.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_guacamole.tasks.package.webapp.installed
+  get_url:
+    url  : "{{ ctlabs_guacamole.defaults.webapp.url  }}"
+    dest : "{{ ctlabs_guacamole.defaults.webapp.file }}"
+  delegate_to: localhost

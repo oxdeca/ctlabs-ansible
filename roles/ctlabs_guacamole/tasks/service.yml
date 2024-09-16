@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_guacamole.tasks.service.client.start
+  service:
+    name  : "{{ ctlabs_guacamole.defaults.service.client.name }}"
+    state : started
+
+- name: ctlabs_guacamole.tasks.service.server.start
+  service:
+    name  : "{{ ctlabs_guacamole.defaults.service.server.name }}"
+    state : started

@@ -1,0 +1,38 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_ansible/roles/ctlabs_guacamole/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_guacamole:
+  defaults:
+    pkgs:
+      redhat:
+        - name : guacd
+        - name : libguacd-client-rdp
+        - name : libguacd-client-ssh
+        - name : libguacd-client-vnc
+        - name : java
+        - name : tomcat
+    webapp:
+      file : /var/lib/tomcat/webapps/guacamole.war
+      url  : https://apache.org/dyn/closer.lua/guacamole/1.5.5/binary/guacamole-1.5.5.war?action=download
+    config:
+      dir      : /etc/guacamole/
+      server:
+        template : guacd.conf.j2
+        file     : guacd.conf
+      client:
+        template : guacamole.properties.j2
+        file     : guacamole.properties
+      user_mapping:
+        template : user-mapping.xml.j2
+        file     : user-mapping.xml
+    service:
+      server:
+        name : guacd.service
+      client:
+        name : tomcat.service
+  os:
+    - centos9

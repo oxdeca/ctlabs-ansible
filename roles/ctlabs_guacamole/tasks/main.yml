@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_guacamole
+    - ctlabs_guacamole.precheck
+    - ctlabs_guacamole.package
+    - ctlabs_guacamole.config
+    - ctlabs_guacamole.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_guacamole
+    - ctlabs_guacamole.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_guacamole
+    - ctlabs_guacamole.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_guacamole
+    - ctlabs_guacamole.service
