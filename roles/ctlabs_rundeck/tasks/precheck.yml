@@ -24,4 +24,4 @@
 
 - name: ctlabs_rundeck.tasks.precheck.auth_provider.local_fact
   set_fact:
-    ctlabs_rundeck_server_url: "{{ ansible_local.ctlabs_rundeck.rundeck.auth_provider | default(ctlabs_rundeck_auth_provider) }}"
+    ctlabs_rundeck_auth_provider: "{{ ansible_local.ctlabs_rundeck.rundeck.auth_provider | default(ctlabs_rundeck_auth_provider) }}"

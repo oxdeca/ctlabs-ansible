@@ -21,6 +21,6 @@ domain_roles:
       - superuser
       - active
 
-  rundeck_admins:
+  rundeck_admin:
     groups:
       - admin
