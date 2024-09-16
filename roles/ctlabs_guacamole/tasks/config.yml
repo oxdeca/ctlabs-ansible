@@ -9,23 +9,22 @@
   file:
     path  : "{{ ctlabs_guacamole.defaults.config.dir }}"
     state : directory
-    
 
 - name: ctlabs_guacamole.tasks.config.server.installed
   template:
     src  : "{{ ctlabs_guacamole.defaults.config.server.template }}"
     dest : "{{ ctlabs_guacamole.defaults.config.dir }}{{ ctlabs_guacamole.defaults.config.server.file }}"
-  notify: ctlabs_guacamole.handlers.server.service.restart
+  notify: ctlabs_guacamole.handlers.service.server.restart
 
-- name: ctlabs_guacamole.tasks.config.client.installed
-  template:
-    src  : "{{ ctlabs_guacamole.defaults.config.client.template }}"
-    dest : "{{ ctlabs_guacamole.defaults.config.dir }}{{ ctlabs_guacamole.defaults.config.client.file }}"
-  notify: ctlabs_guacamole.handlers.client.service.restart
+#- name: ctlabs_guacamole.tasks.config.client.installed
+#  template:
+#    src  : "{{ ctlabs_guacamole.defaults.config.client.template }}"
+#    dest : "{{ ctlabs_guacamole.defaults.config.dir }}{{ ctlabs_guacamole.defaults.config.client.file }}"
+#  notify: ctlabs_guacamole.handlers.service.client.restart
 
 - name: ctlabs_guacamole.tasks.config.user_mapping
   template:
     src  : "{{ ctlabs_guacamole.defaults.config.user_mapping.template }}"
     dest : "{{ ctlabs_guacamole.defaults.config.dir }}/{{ ctlabs_guacamole.defaults.config.user_mapping.file }}"
-
+  notify: ctlabs_guacamole.handlers.service.client.restart
   
