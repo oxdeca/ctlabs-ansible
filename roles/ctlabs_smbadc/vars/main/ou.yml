@@ -12,9 +12,6 @@ domain_ou:
   - name : services
   - name : apps
 
-  - name : slapd
-    path : ou=services
-
   - name : netbox
     path : ou=apps
 

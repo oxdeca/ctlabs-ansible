@@ -20,6 +20,9 @@ domain_groups:
   - name: ssh_users
     ou: ou=groups
 
+  # ---------------------------------------------------------------------------
+  # ou=netbox,ou=apps,dc=ctlabs,dc=internal
+  # ---------------------------------------------------------------------------
   - name: netbox
     ou: ou=netbox,ou=apps
 
@@ -32,5 +35,8 @@ domain_groups:
   - name: superuser
     ou: ou=netbox,ou=apps
 
+  # ---------------------------------------------------------------------------
+  # ou=rundeck,ou=apps,dc=ctlabs,dc=internal
+  # ---------------------------------------------------------------------------
   - name: admin
     ou: ou=rundeck,ou=apps
