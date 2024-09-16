@@ -57,3 +57,9 @@ domain_services:
     pass : secret123!
     roles:
       - admins
+
+  - name : rundeck
+    uid  : 4005
+    gid  : 4005
+    ou   : ou=services
+    pass : secret123!

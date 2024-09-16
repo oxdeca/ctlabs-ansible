@@ -31,3 +31,6 @@ domain_groups:
 
   - name: superuser
     ou: ou=netbox,ou=apps
+
+  - name: admin
+    ou: ou=rundeck,ou=apps

@@ -7,10 +7,15 @@
 
 ctlabs_rundeck:
   defaults:
+    repo:
+      redhat:
+        file     : /etc/yum.repos.d/rundeck.repo
+        template : rundeck.repo.j2
     pkgs:
       redhat:
         - name: java-latest-openjdk-headless
-        - url : https://packagecloud.io/pagerduty/rundeck/packages/rpm_any/rpm_any/rundeck-5.3.0.20240520-1.noarch.rpm/download.rpm?distro_version_id=227
+        - name: rundeck
+        #- url : https://packagecloud.io/pagerduty/rundeck/packages/rpm_any/rpm_any/rundeck-5.3.0.20240520-1.noarch.rpm/download.rpm?distro_version_id=227
       debian:
         - name: openjdk-17-jre-headless
         - url : https://packagecloud.io/pagerduty/rundeck/packages/any/any/rundeck_5.3.0.20240520-1_all.deb/download.deb?distro_version_id=35
@@ -25,14 +30,26 @@ ctlabs_rundeck:
         keystore   : keystore
         truststore : truststore
       rundeck:
-        file      : /etc/rundeck/rundeck-config.properties
-        template  : rundeck-config.properties.j2
-        server_url: http://192.168.100.193:8200
-        admin_user: admin
-        admin_pass: "secret123!"
+        file          : /etc/rundeck/rundeck-config.properties
+        template      : rundeck-config.properties.j2
+        server_url    : https://192.168.100.193:8200
+        admin_user    : admin
+        admin_pass    : "secret123!"
+        auth_provider : login
       sysconfig:
         file     : /etc/sysconfig/rundeckd
         template : rundeckd.sysconfig.j2
+      auth_provider:
+        ad:
+          template  : jaas-activedirectory.conf.j2
+          file      : /etc/rundeck/jaas-activedirectory.conf
+          ldap_auth : simple
+          ldap_url  : ldaps://slapd1.ctlabs.internal
+          user_base : ou=services,dc=ctlabs,dc=internal
+          role_base : ou=rundeck,ou=apps,dc=ctlabs,dc=internal
+          ldap_bind :
+            user: rundeck
+            pass: secret123!
       realm:
         file     : /etc/rundeck/realm.properties
         template : realm.properties.j2

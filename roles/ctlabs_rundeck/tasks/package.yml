@@ -7,13 +7,27 @@
 
 - name: ctlabs_rundeck.tasks.package
   block:
-    - name: ctlabs_rundeck.tasks.package.install.redhat
+    - name: ctlabs_rundeck.tasks.package.repo
       when: os_family == 'redhat'
-      yum:
-        name              : "{{ item.url if item.url is defined else item.name }}"
-        disable_gpg_check : true
-        state             : present
-      loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
+      template:
+        src  : "{{ ctlabs_rundeck.defaults.repo[os_family].template }}"
+        dest : "{{ ctlabs_rundeck.defaults.repo[os_family].file     }}"
+
+    - name: ctlabs_rundeck.tasks.package.install
+      package:
+        name    : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_postgresql.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_rundeck.tasks.package
+  block:
+#    - name: ctlabs_rundeck.tasks.package.install.redhat
+#      when: os_family == 'redhat'
+#      yum:
+#        name              : "{{ item.url if item.url is defined else item.name }}"
+#        disable_gpg_check : true
+#        state             : present
+#      loop: "{{ ctlabs_rundeck.defaults.pkgs[os_family] }}"
 
     - name: ctlabs_rundeck.tasks.package.url.install.debian
       when: os_family == 'debian' and item.url is defined

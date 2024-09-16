@@ -1,0 +1,26 @@
+# ------------------------------------------------------------------------------
+# File        : /etc/rundeck/jaas-activedirectory.conf
+# Template    : ctlabs_rundeck/templates/jaas-activedirectory.conf.j2
+# ------------------------------------------------------------------------------
+
+activedirectory {
+  com.dtolabs.rundeck.jetty.jaas.JettyCachingLdapLoginModule required
+  debug="true"
+  contextFactory="com.sun.jndi.ldap.LdapCtxFactory"
+  providerUrl="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.ldap_url }}"
+  bindDn="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.ldap_bind.user }}"
+  bindPassword="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.ldap_bind.pass }}"
+  authenticationMethod="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.ldap_auth }}"
+  forceBindingLogin="true"
+  userBaseDn="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.user_base }}"
+  userRdnAttribute="sAMAccountName"
+  userIdAttribute="sAMAccountName"
+  userPasswordAttribute="unicodePwd"
+  userObjectClass="user"
+  roleBaseDn="{{ ctlabs.rundeck.defaults.config.auth_provider.ad.role_base }}"
+  roleNameAttribute="cn"
+  roleMemberAttribute="member"
+  roleObjectClass="group"
+  cacheDurationMillis="300000"
+  reportStatistics="true";
+};

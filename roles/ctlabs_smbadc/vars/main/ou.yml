@@ -17,3 +17,6 @@ domain_ou:
 
   - name : netbox
     path : ou=apps
+
+  - name : rundeck
+    path : ou=apps

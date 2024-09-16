@@ -7,3 +7,9 @@ export RUNDECK_WITH_SSL={{ ctlabs_rundeck.defaults.config.server.ssl_enable |low
 
 export RDECK_HTTP_PORT={{ ctlabs_rundeck.defaults.config.server.tcp_port    }}
 export RDECK_HTTPS_PORT={{ ctlabs_rundeck.defaults.config.server.ssl_port   }}
+
+{% if ctlabs_rundeck_auth_provider == 'ad' %}
+JAAS_LOGIN=true
+LOGIN_MODULE=activedirectory
+JAAS_CONF={{ ctlabs_rundeck.defaults.config.auth_provider.ad.file }}
+{% endif %}

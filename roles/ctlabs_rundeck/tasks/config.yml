@@ -37,3 +37,8 @@
 
 - name: ctlabs_rundeck.tasks.config.truststore.jks
   shell: "cd {{ ctlabs_rundeck.defaults.config.certs.dir }} && keytool -importkeystore -deststorepass {{ ctlabs_rundeck.defaults.config.certs.pass }} -destkeystore truststore -srcstorepass {{ ctlabs_rundeck.defaults.config.certs.pass }} -srckeystore keystore.p12 -srcstoretype pkcs12 -noprompt"
+
+- name: ctlabs_rundeck.tasks.config.auth_provider.ad
+  template:
+    src  : "{{ ctlabs_rundeck.defaults.config.auth_provider.ad.template }}"
+    dest : "{{ ctlabs_rundeck.defaults.config.auth_provider.ad.file     }}"
