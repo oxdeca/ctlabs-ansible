@@ -15,4 +15,3 @@
   get_url:
     url  : "{{ ctlabs_guacamole.defaults.webapp.url  }}"
     dest : "{{ ctlabs_guacamole.defaults.webapp.file }}"
-  delegate_to: localhost

@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_guacamole.handlers.service.server.restart
+  service:
+    name    : "{{ ctlabs_guacamole.defaults.service.server.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_guacamole.handlers.service.client.restart
+  service:
+    name  : "{{ ctlabs_guacamole.defaults.service.client.name }}"
+    state : restarted

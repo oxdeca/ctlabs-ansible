@@ -10,9 +10,9 @@ ctlabs_guacamole:
     pkgs:
       redhat:
         - name : guacd
-        - name : libguacd-client-rdp
-        - name : libguacd-client-ssh
-        - name : libguacd-client-vnc
+        - name : libguac-client-rdp
+        - name : libguac-client-ssh
+        - name : libguac-client-vnc
         - name : java
         - name : tomcat
     webapp:
