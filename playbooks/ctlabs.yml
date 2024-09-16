@@ -231,7 +231,8 @@
         content: |
           {
             "rundeck" : {
-              "server_url" : "https://192.168.100.166:8192"
+              "server_url"    : "https://192.168.100.166:8192",
+              "auth_provider" : "ad"
             }
           }
 
@@ -250,8 +251,7 @@
 # -----------------------------------------------------------------------------
     
 - name  : ctlabs.playbooks.ctlabs.semaphore
-  hosts :
-    - localhost
+  hosts : localhost
   tags  : semaphore
   roles :
     - roles/ctlabs_semaphore
@@ -271,9 +271,7 @@
 # -----------------------------------------------------------------------------
     
 - name  : ctlabs.playbooks.ctlabs.vault
-  hosts :
-    - vdb1
-    - vdb2
+  hosts : [vdb1, vdb2]
   tags  : vault
   roles :
     - roles/ctlabs_vault
@@ -282,8 +280,7 @@
 # ctlabs_rundeck
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.rundeck
-  hosts :
-    - ansible
+  hosts : ansible
   tags  : rundeck
   roles :
     - roles/ctlabs_rundeck
@@ -292,9 +289,7 @@
 # ctlabs_openvpn
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.openvpn
-  hosts :
-    - ro1
-    - ro2
+  hosts : [ro1, ro2]
   tags  : openvpn
   roles :
     - roles/ctlabs_openvpn
@@ -303,11 +298,7 @@
 # ctlabs_frr
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.frr
-  hosts :
-    - ro1
-    - ro2
-    - ro3
-    - ro4
+  hosts : [ro1, ro2, ro3, ro4]
   tags  : frr
   roles :
     - roles/ctlabs_frr
@@ -316,9 +307,7 @@
 # ctlabs_bind
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.bind
-  hosts :
-    - ns1
-    - ns2
+  hosts : [ns1, ns2]
   tags  : bind
   roles :
     - roles/ctlabs_bind
@@ -327,9 +316,7 @@
 # ctlabs_smbadc
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.smbadc
-  hosts :
-    - dc1
-    - dc2
+  hosts : [dc1, dc2]
   tags  : smbadc
   roles :
     - roles/ctlabs_smbadc
@@ -347,9 +334,7 @@
 # ctlabs_slapd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.slapd
-  hosts :
-    - slapd1
-    - slapd2
+  hosts : [slapd1, slapd2]
   tags  : slapd
   roles :
     - roles/ctlabs_slapd
@@ -358,9 +343,7 @@
 # ctlabs_haproxy
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.haproxy
-  hosts :
-    - slapd1
-    - slapd2
+  hosts : [slapd1, slapd2]
   tags  : haproxy
   roles :
     - roles/ctlabs_haproxy
@@ -369,11 +352,7 @@
 # ctlabs_httpd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.httpd
-  hosts :
-    - www1
-    - www2
-    - nb1
-    - nb2
+  hosts : [www1, www2, nb1, nb2]
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
@@ -382,8 +361,7 @@
 # ctlabs_syslog
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.syslog
-  hosts :
-    - ns1
+  hosts : ns1
   tags  : syslog
   roles :
     - roles/ctlabs_syslog
@@ -392,8 +370,7 @@
 # ctlabs_prometheus
 # -----------------------------------------------------------------------------
 - name   : ctlabs.playbooks.ctlabs.prometheus
-  hosts  :
-    - prometheus
+  hosts  : prometheus
   tags   : prometheus
   roles  :
     - roles/ctlabs_prometheus
@@ -402,8 +379,7 @@
 # ctlabs_grafana
 # -----------------------------------------------------------------------------
 - name   : ctlabs.playbooks.ctlabs.grafana
-  hosts  :
-    - grafana
+  hosts  : grafana
   tags   : grafana
   roles :
     - roles/ctlabs_grafana
@@ -421,8 +397,7 @@
 # ctlabs_mimir
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.mimir
-  hosts :
-    - mimir
+  hosts : mimir
   tags  : mimir
   roles :
     - roles/ctlabs_mimir
@@ -440,8 +415,7 @@
 # ctlabs_loki
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.loki
-  hosts :
-    - loki
+  hosts : loki
   tags  : loki
   roles :
     - roles/ctlabs_loki
@@ -450,9 +424,7 @@
 # ctlabs_postgresql
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.postgresql
-  hosts :
-    - db1
-    - db2
+  hosts : [db1, db2]
   tags  : postgresql
   roles :
     - roles/ctlabs_postgresql
@@ -461,9 +433,7 @@
 # ctlabs_redis
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.redis
-  hosts :
-    - db1
-    - db2
+  hosts : [db1, db2]
   tags  : redis
   roles :
     - roles/ctlabs_redis
@@ -472,9 +442,7 @@
 # ctlabs_netbox
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.netbox
-  hosts :
-    - nb1
-    - nb2
+  hosts : [nb1, nb2]
   tags  : netbox
   roles :
     - roles/ctlabs_netbox
@@ -483,8 +451,7 @@
 # ctlabs_auditbeat
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.auditbeat
-  hosts :
-    - ns1
+  hosts : ns1
   tags  : auditbeat
   roles :
     - roles/ctlabs_auditbeat
@@ -493,9 +460,7 @@
 # ctlabs_elasticsearch
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.elasticsearch
-  hosts :
-    - es1
-    - es2
+  hosts : [es1, es2]
   tags  : elasticsearch
   roles :
     - roles/ctlabs_elasticsearch
@@ -504,9 +469,7 @@
 # ctlabs_kibana
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.kibana
-  hosts :
-    - kba1
-    - kba2
+  hosts : [kba1, kba2]
   tags  : kibana
   roles :
     - roles/ctlabs_kibana
