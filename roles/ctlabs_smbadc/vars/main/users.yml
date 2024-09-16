@@ -18,6 +18,7 @@ domain_users:
     pass      : secret123!
     roles     :
       - netbox_admin
+      - rundeck_admin
 
   - firstname : Andrew
     lastname  : Brown
@@ -63,3 +64,4 @@ domain_services:
     gid  : 4005
     ou   : ou=services
     pass : secret123!
+

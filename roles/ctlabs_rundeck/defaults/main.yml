@@ -44,11 +44,11 @@ ctlabs_rundeck:
           template  : jaas-activedirectory.conf.j2
           file      : /etc/rundeck/jaas-activedirectory.conf
           ldap_auth : simple
-          ldap_url  : ldaps://slapd1.ctlabs.internal
-          user_base : ou=services,dc=ctlabs,dc=internal
+          ldap_url  : ldap://slapd1.ctlabs.internal
+          user_base : ou=users,dc=ctlabs,dc=internal
           role_base : ou=rundeck,ou=apps,dc=ctlabs,dc=internal
           ldap_bind :
-            user: rundeck
+            user: cn=rundeck,ou=services,dc=ctlabs,dc=internal
             pass: secret123!
       realm:
         file     : /etc/rundeck/realm.properties
