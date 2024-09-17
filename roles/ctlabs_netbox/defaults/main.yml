@@ -70,7 +70,7 @@ ctlabs_netbox:
         debian: apache2.service
         redhat: httpd.service
     backup:
-      dir    : /backups
+      dir    : /backup
       dmpfile: nbdb.dmp
       tarfile: nbmedia.tar
       media_dirs: [ media, scripts, reports ]

@@ -41,7 +41,7 @@
 backup {
   local dumpfile=${1:-''}
 
-  if [ -e "{{ ctlabs_netbox.defaults.config.back.dir }}/${dumpfile}" ]; then
+  if [ -e "{{ ctlabs_netbox.defaults.backup.dir }}/${dumpfile}" ]; then
     printf "Dumpfile '${dumpfile}' already exists!\n"
     printf "Aborting ...\n"
     exit 1
