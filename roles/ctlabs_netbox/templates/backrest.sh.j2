@@ -2,15 +2,54 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_postgresql/files/backup.sh
-# Description : create backup (db and files)
+# Description : create backup (db, config- and media-files)
 # ------------------------------------------------------------------------------
 
+# backup {
+#   # db
+#   # systemctl stop netbox netbox-rq
+#   # PGPASSWORD='secret123!' pg_dump    -h192.168.50.5 -Unetbox -dnetbox -Fc > /backups/nbdb.dmp
+#   # systemctl start netbox netbox-rq
+# 
+#   # files
+#   # cd /opt/netbox/netbox && tar cvf /backups/nbmedia.tar media scripts reports
+#   # cd /opt/netbox        && tar cvf /backups/nbreqs.tar local_requirements.txt gunicorn.py
+#   # cd /opt/netbox        && tar cvf /backups/nbconf.tar configuration.py ldap_config.py
+# }
+# 
+# restore {
+#   # systemct stop netbox netbox-rq
+#   # PGPASSWORD='secret123!' psql -h192.168.50.5 -Upostgres postgres < <(echo -en "drop database netbox; create database netbox; # alter database netbox owner to netbox;")
+#   # PGPASSWORD='secret123!' pg_restore -h192.168.50.5 -Unetbox -dnetbox -Fc   /root/2024-09-11-01.netbox.dmp
+#   # cd /opt/netbox/netbox && tar xvf /root/2024-09-10-01.netbox.files.tar
+#   # . /opt/netbox/venv/bin/activate python3 ./manage.py migrate
+#   # systemctl start netbox netbox-rq
+# }
+# 
+# upgrade {
+#   # cd /opt
+#   # curl -LO https://github.com/netbox-community/netbox/archive/refs/tags/v4.0.11.tar.gz
+#   # tar xvf v4.0.11.tar.gz
+#   # ln -svfn /opt/netbox-4.0.11/ /opt/netbox
+#   # cd /opt/netbox-3.7.8               && cp -a local_requirements.txt gunicorn.py /opt/netbox/
+#   # cd /opt/netbox-3.7.8/netbox/netbox && cp -a configuration.py ldap_config.py    /opt/netbox/netbox/netbox/
+#   # cd /opt/netbox-3.7.8/netbox        && cp -a media scripts reports              /opt/netbox/netbox/ 
+#   # cd /opt/netbox                     && PYTHON=/usr/bin/python3.11 ./upgrade.sh
+#   systemctl restart netbox netbox-rq
+# }
 
 backup {
-  # db
-  # systemctl stop netbox netbox-rq
-  # PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pass }}' pg_dump    -h{{ ctlabs_netbox.defaults.config.db.host }} -U{{ ctlabs_netbox.defaults.config.db.user }} -d{{ ctlabs_netbox.defaults.config.db.name }} -Fc > {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.dmpfile }}
-  # systemctl start netbox netbox-rq
+  local dumpfile=${1:-''}
+
+  if [ -e "{{ ctlabs_netbox.defaults.config.back.dir }}/${dumpfile}" ]; then
+    printf "Dumpfile '${dumpfile}' already exists!\n"
+    printf "Aborting ...\n"
+    exit 1
+  fi
+
+  systemctl stop netbox netbox-rq
+   PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pass }}' pg_dump -h{{ ctlabs_netbox.defaults.config.db.host }} -Upostgres -dnetbox -Fc > {{ ctlabs_netbox.defaults.backup.dir }}/${dumpfile}
+  systemctl start netbox netbox-rq
   
   # files
   # cd {{ ctlabs_netbox.defaults.install.app_dir }} && tar cvf {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.tarfile }} {{ ctlabs_netbox.defaults.backup.media_dirs | join(' ') }}
@@ -48,14 +87,14 @@ restore_files() {
 
 case $1 in
   'backup')
-    backup
+    if [ "${2}" == "db" ]; then
+      backup ${3}
+    fi
     ;;
 
-  'restore_db')
-    restore_db $2
-    ;;
-
-  'restore_files')
-    restore_files $2
+  'restore')
+    if [ "${2}" == "db" ]; then
+      restore ${3}
+    fi
     ;;
 esac
