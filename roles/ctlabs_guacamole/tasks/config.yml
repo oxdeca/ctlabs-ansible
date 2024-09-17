@@ -28,3 +28,8 @@
     dest : "{{ ctlabs_guacamole.defaults.config.dir }}/{{ ctlabs_guacamole.defaults.config.user_mapping.file }}"
   notify: ctlabs_guacamole.handlers.service.client.restart
   
+- name: ctlabs_guacamole.tasks.config.httpd
+  template:
+    src  : "{{ ctlabs_guacamole.defaults.config.httpd.template        }}"
+    dest : "{{ ctlabs_guacamole.defaults.config.httpd.file[os_family] }}"
+  notify: ctlabs_guacamole.handlers.httpd.reload
