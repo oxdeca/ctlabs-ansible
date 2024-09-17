@@ -38,7 +38,7 @@
 #   systemctl restart netbox netbox-rq
 # }
 
-backup {
+backup() {
   local dumpfile=${1:-''}
 
   if [ -e "{{ ctlabs_netbox.defaults.backup.dir }}/${dumpfile}" ]; then
@@ -55,7 +55,7 @@ backup {
   # cd {{ ctlabs_netbox.defaults.install.app_dir }} && tar cvf {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.tarfile }} {{ ctlabs_netbox.defaults.backup.media_dirs | join(' ') }}
 }
 
-restore_db() {
+restore() {
   local dumpfile=${1:-''}
 
   if [ ! -e "${dumpfile}" ]; then
@@ -65,8 +65,8 @@ restore_db() {
   fi
 
   systemctl stop netbox netbox-rq
-   PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pgpass }}' psql -h{ ctlabs_netbox.defaults.config.db.host }} -Upostgres postgres < <(echo -en "drop database netbox; create database netbox; alter database netbox owner to netbox;")
-   PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pgpass }}' pg_restore -h{ ctlabs_netbox.defaults.config.db.host }} -Unetbox -dnetbox -Fc   ${dumpfile}
+  PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pgpass }}' psql       -h{{ ctlabs_netbox.defaults.config.db.host }} -Upostgres postgres < <(echo -en "drop database netbox; create database netbox; alter database netbox owner to netbox;")
+  PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pgpass }}' pg_restore -h{{ ctlabs_netbox.defaults.config.db.host }} -Unetbox -dnetbox -Fc ${dumpfile}
   cd /opt/netbox/netbox && /opt/netbox/venv/bin/python ./manage.py migrate
   systemctl start netbox netbox-rq
 }
