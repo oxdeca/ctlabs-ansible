@@ -29,6 +29,15 @@ ctlabs_guacamole:
       user_mapping:
         template : user-mapping.xml.j2
         file     : user-mapping.xml
+      httpd:
+        template: guacamole.conf.j2
+        file:
+          debian: /etc/apache2.conf.d/guacamole.conf
+          redhat: /etc/httpd/conf.d/guacamole.conf
+    handlers:
+      httpd:
+        debian: apache2.service
+        redhat: httpd.service
     service:
       server:
         name : guacd.service

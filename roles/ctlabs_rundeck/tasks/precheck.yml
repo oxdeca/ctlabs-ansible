@@ -12,7 +12,7 @@
 
 - name: ctlabs_rundeck.tasks.precheck.rundeck.server_url.var
   set_fact:
-    ctlabs_rundeck_server_url: "{{ ctlabs_rundeck_server_url | default(ctlabs_rundeck.defaults.config.rundeck.server_url) }}"
+    ctlabs_rundeck_server_url: "{{ CTLABS_RUNDECK_SERVER_URL | default(ctlabs_rundeck.defaults.config.rundeck.server_url) }}"
 
 - name: ctlabs_rundeck.tasks.precheck.rundeck.server_url.local_fact
   set_fact:
@@ -20,7 +20,7 @@
 
 - name: ctlabs_rundeck.tasks.precheck.auth_provider.var
   set_fact:
-    ctlabs_rundeck_auth_provider: "{{ ctlabs_rundeck_auth_provider | default(ctlabs_rundeck.defaults.config.rundeck.auth_provider) }}"
+    ctlabs_rundeck_auth_provider: "{{ CTLABS_RUNDECK_AUTH_PROVIDER | default(ctlabs_rundeck.defaults.config.rundeck.auth_provider) }}"
 
 - name: ctlabs_rundeck.tasks.precheck.auth_provider.local_fact
   set_fact:

@@ -15,3 +15,11 @@
   service:
     name  : "{{ ctlabs_guacamole.defaults.service.client.name }}"
     state : restarted
+
+# !!!!
+# TODO: Find a better way to include ctlabs_httpd.handlers.
+#
+- name: ctlabs_guacamole.handlers.httpd.reload
+  service:
+    name : "{{ ctlabs_guacamole.defaults.handlers.httpd[os_family] }}"
+    state: reloaded

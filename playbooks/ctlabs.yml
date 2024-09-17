@@ -352,7 +352,7 @@
 # ctlabs_httpd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.httpd
-  hosts : [www1, www2, nb1, nb2]
+  hosts : [www1, www2, nb1, nb2, gua1, gua2]
   tags  : httpd
   roles :
     - roles/ctlabs_httpd

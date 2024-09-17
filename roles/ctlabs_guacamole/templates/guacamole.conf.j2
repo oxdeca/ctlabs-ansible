@@ -1,0 +1,8 @@
+# -------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/templates/guacamole.conf.j2
+# Description : guacamole httpd configurations
+# -------------------------------------------------------------------------------------
+
+RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
+ProxyPass        / http://127.0.0.1:8080/
+ProxyPassReverse / http://127.0.0.1:8080/
