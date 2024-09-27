@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kind/tasks/main.yml
+# Description : main ctlabs_kind tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.precheck
+    - ctlabs_kind.package
+    - ctlabs_kind.config
+    - ctlabs_kind.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.service

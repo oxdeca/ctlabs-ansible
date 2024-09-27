@@ -1,0 +1,48 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_docker/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_docker:
+  defaults:
+    repos:
+      redhat:
+        - name    : epel
+          desc    : EPEL YUM repo
+          baseurl : https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+        - name    : docker-ce-stable
+          desc    : Docker CE Stable - $basearch
+          baseurl : https://download.docker.com/linux/centos/$releasever/$basearch/stable
+          gpgkey  : https://download.docker.com/linux/centos/gpg
+      debian:
+    pkgs_absent:
+      redhat:
+        - name : docker
+        - name : docker-common
+        #- name : docker-selinux
+        - name : docker-engine
+        - name : buildah
+        - name : runc
+      debian:
+    pkgs:
+      redhat:
+        - name : docker-ce
+        - name : docker-ce-cli
+        - name : containerd.io
+        - name : docker-compose-plugin
+      debian:
+    pip_modules:
+      - name : pip
+      - name : docker-compose
+    service:
+      - name : docker
+    virt_types:
+      - kvm
+      - vmware
+    os:
+      - redhat8
+      - redhat9
+      - centos8
+      - centos9

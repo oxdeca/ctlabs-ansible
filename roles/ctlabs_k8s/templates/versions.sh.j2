@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/templates/k8s-ver.j2
+# Description : 
+# ------------------------------------------------------------------------------
+
+export K8SV="{{ ctlabs_k8s.defaults.cluster.k8s.version }}"
+export calico_url="{{ ctlabs_k8s.defaults.cluster.calico.url }}"
+export longhorn_url="{{ ctlabs_k8s.defaults.cluster.longhorn.url }}"
+export metrics_url="{{ ctlabs_k8s.defaults.cluster.longhorn.url }}"
+export ingress_url="{{ ctlabs_k8s.defaults.cluster.ingress.url }}"
+export prometheus_url="{{ ctlabs_k8s.defaults.cluster.prometheus.url }}"

@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_k8s/tasks/config.yml
+# Description : main configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_k8s.tasks.config.dirs
+  file:
+    path : "{{ item.value }}"
+    state: directory
+    mode : '0755'
+  loop: "{{ ctlabs_k8s.defaults.config.dirs | dict2items }}"
+
+- name: ctlabs_k8s.tasks.config.kubeadm
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}"
+    mode : '0600'
+  loop: "{{ ctlabs_k8s.defaults.config.kubeadm }}"
+
+- name: ctlabs_k8s.tasks.config.manifests
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.manifests }}/{{item.file }}"
+    mode : '0644'
+  loop: "{{ ctlabs_k8s.defaults.config.manifests }}"
+
+- name: ctlabs_k8s.tasks.config.components
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/{{item.file }}"
+    mode : '0644'
+  loop: "{{ ctlabs_k8s.defaults.config.components }}"

@@ -30,12 +30,13 @@ ctlabs_netbox:
         - name : python3.11-devel
         - name : "@postgresql:15/client"
       nb:
-        url    : https://github.com/netbox-community/netbox/archive/refs/tags/v4.0.11.tar.gz
+        version: 4.0.11
+        url    : "https://github.com/netbox-community/netbox/archive/refs/tags/v{{ ctlabs_netbox.defatuls.pkgs.nb.version }}.tar.gz"
         #url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
     install:
       dir      : /opt
-      tar_dir  : /opt/netbox-4.0.11
+      tar_dir  : "/opt/netbox-{{ ctlabs_netbox.defaults.pkgs.nb.version }}"
       root_dir : /opt/netbox
       venv_dir : /opt/netbox/venv
       app_dir  : /opt/netbox/netbox

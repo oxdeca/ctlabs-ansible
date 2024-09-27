@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_docker/tasks/main.yml
+# Description : main ctlabs_docker tasks file.
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_docker
+    - ctlabs_docker.precheck
+    - ctlabs_docker.package
+    - ctlabs_docker.config
+    - ctlabs_docker.service
+    - ctlabs_docker.logrotate
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_docker
+    - ctlabs_docker.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_docker
+    - ctlabs_docker.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_docker
+    - ctlabs_docker.service
+
+- import_tasks: deploy.yml
+  tags:
+    - ctlabs_docker.deploy
+    - never

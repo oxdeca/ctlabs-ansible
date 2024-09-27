@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_k8s/tasks/main.yml
+# Description : main ctlabs_k8s tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_k8s
+    - ctlabs_k8s.precheck
+    - ctlabs_k8s.package
+    - ctlabs_k8s.config
+    - ctlabs_k8s.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_k8s
+    - ctlabs_k8s.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_k8s
+    - ctlabs_k8s.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_k8s
+    - ctlabs_k8s.service

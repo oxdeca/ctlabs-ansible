@@ -1,0 +1,103 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_k8s/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_k8s:
+  defaults:
+    cluster:
+      k8s: 
+        version: 1.28.0
+      calico:
+        version: 3.27.2
+        url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ ctlabs_k8s.defaults.cluster.calico.version }}/manifests/tigera-operator.yaml"
+      longhorn:
+        version: 1.6.0
+        url    : "https://raw.githubusercontent.com/longhorn/longhorn/v{{ ctlabs_k8s.defaults.cluster.longhorn.version }}/deploy/longhorn.yaml"
+      metrics_server:
+        version: 0.7.0
+        url    : "https://github.com/kubernetes-sigs/metrics-server/releases/download/v{{ ctlabs_k8s.defaults.cluster.metrics_server.version }}/components.yaml"
+      ingress:
+        version: 1.10.0
+        url    : "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ ctlabs_k8s.defaults.cluster.ingress.version }}/deploy/static/provider/cloud/deploy.yaml" 
+      prometheus:
+        version: 0.10
+        url    : "https://github.com/prometheus-operator/kube-prometheus/archive/refs/heads/release-{{ ctlabs_k8s.defaults.cluster.prometheus.version }}.zip"
+    repos:
+      debian:
+        - name: kubernetes
+          type: deb
+          url : https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
+          key : https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+      redhat:
+    pkgs:
+      redhat:
+      debian:
+        - name : apt-transport-https
+        - name : python3-pip
+        - name : open-iscsi
+        - name : nfs-common
+        - name : etcd-client
+        - name : protobuf-compiler
+        - name : kubelet="{{ ctlabs_k8s.defaults.versions.k8s }}-*"
+        - name : kubeadm="{{ ctlabs_k8s.defaults.versions.k8s }}-*"
+        - name : kubectl="(( ctlabs_k8s.defaults.versions.k8s }}-*"
+      python:
+        pips:
+          - openshift
+    scripts:
+      versions:
+        template: versions.sh.j2
+        file    : /opt/k8sver
+      k8sall:
+        template: k8sall.sh.j2
+        file    : /usr/local/bin/k8s-all
+    config:
+      dirs:
+        main      : /etc/kubernetes
+        manifests : /etc/kubernetes/manifests
+        components: /etc/kubernetes/components
+      kubeadm:
+        - name    : init
+          file    : kubeadm-init.yml
+          template: kubeadm-init.yml.j2
+        - name    : join
+          file    : kubeadm-join.yml
+          template: kubeadm-join.yml.j2
+      manifests:
+        - name    : kube-vip
+          file    : kube-vip.yml
+          template: kube-vip.yml.j2
+      components:
+        - name    : calico
+          file    : custom-resources.yml
+          template: calico-custom-resources.yml.j2
+        - name    : flannel
+          file    : flannel.yml
+          template: flannel.yml.j2
+        - name    : weave
+          file    : weave.yml
+          teplate : weabe.yml.j2
+        - name    : ingress
+          file    : ingress-patch.yml
+          template: ingress-patch.yml.j2
+
+      pid_cidr        : 172.31.0.0/16
+      kube_vip        : false
+      schedule_master : false
+      network         : calico
+      prometheus      : false
+      pgsql_op        : none
+      pgsql_opns      : default
+    service:
+      name     : k3s.service
+      template : k3s.service.j2
+    bin:
+      path: /usr/bin/k3s
+      mode: '0750'
+  os:
+    - rhel8
+    - centos8
+    - centos9

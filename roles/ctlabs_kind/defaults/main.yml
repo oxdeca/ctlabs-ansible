@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kind/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_kind:
+  defaults:
+    pkgs:
+      debian:
+      redhat:
+      kind:
+        version: 0.24.0
+        url    : "https://kind.sigs.k8s.io/dl/v{{ ctlabs_kind.defaults.pkgs.kind.version }}/kind-linux-amd64"
+#    config:
+#      profile:
+#        template: k3s.profile.j2
+#        file    : /etc/profile.d/k3s.sh
+#    service:
+#      name     : k3s.service
+#      template : k3s.service.j2
+    bin:
+      path: /usr/bin/kind
+      mode: '0750'
+  os:
+    - centos8
+    - centos9
+    - debian11

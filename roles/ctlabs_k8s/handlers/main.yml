@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_k8s/handlers/main.yml
+# Description : main handler
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_k8s.handlers.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_k8s.defaults.service.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_k8s.handlers.service.started
+  service:
+    name  : "{{ ctlabs_k8s.defaults.service.name }}"
+    state : started

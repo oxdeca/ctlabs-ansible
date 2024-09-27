@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_docker/tasks/service.yml
+# Description : main service file
+# ------------------------------------------------------------------------------
+
+- name : ctlabs_docker.tasks.service.docker.running
+  service:
+    name    : "{{ item.name }}"
+    state   : started
+    enabled : true
+  loop : "{{ ctlabs_docker.defaults.service }}"

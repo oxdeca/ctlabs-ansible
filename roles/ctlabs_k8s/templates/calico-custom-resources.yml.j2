@@ -1,0 +1,33 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : /etc/kubernetes/components/custom-resources.yml
+# Template    : ctlabs_k8s/templates/calico-custom-resources.yml.j2
+# ------------------------------------------------------------------------------
+
+kind      : Installation
+apiVersion: operator.tigera.io/v1
+metadata  :
+  name: default
+spec:
+  # Configures Calico networking.
+  calicoNetwork:
+    ipPools:
+      - blockSize    : 26
+        cidr         : {{ k8s_pod_cidr }}
+        encapsulation: VXLANCrossSubnet
+        natOutgoing  : Enabled
+        nodeSelector : all()
+    nodeAddressAutodetectionV4:
+      canReach: {{ k8s_initial_master }}
+{% if k8s_prometheus %}
+
+---
+
+kind      : FelixConfiguration
+apiVersion: crd.projectcalico.org/v1
+metadata  :
+  name: default
+spec:
+  prometheusMetricsEnabled: true
+{% endif %}

@@ -1,0 +1,36 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_docker/tasks/package.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_docker.tasks.package
+  when: os_family == 'redhat'
+  block:
+    - name: ctlabs_docker.tasks.package.repos.setup
+      yum_repository:
+        name        : "{{ item.name    }}"
+        baseurl     : "{{ item.baseurl }}"
+        description : "{{ item.desc    }}"
+        gpgkey      : "{{ item.gpgkey  }}"
+        state       : present
+      loop: "{{ ctlabs_docker.defaults.repos[os_family] }}"
+    
+    - name: ctlabs_docker.tasks.package.resolve_conflicts
+      yum:
+        name  : "{{ item.name }}"
+        state : absent
+      loop: "{{ ctlabs_docker.defaults.pkgs_absent[os_family] }}"
+    
+    - name: ctlabs_docker.tasks.package.installed
+      yum:
+        name  : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_docker.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_docker.tasks.package.pip_modules.installed
+  pip:
+    name  : "{{ item.name }}"
+    state : latest
+  loop: "{{ ctlabs_docker.defaults.pip_modules }}"

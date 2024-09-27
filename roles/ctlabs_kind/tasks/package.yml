@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_kind/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.package.k3s.installed
+  get_url:
+    url  : "{{ ctlabs_kind.defaults.pkgs.uri }}"
+    dest : "{{ ctlabs_kind.defaults.bin.path }}"
+    mode : "{{ ctlabs_kind.defaults.bin.mode }}"
