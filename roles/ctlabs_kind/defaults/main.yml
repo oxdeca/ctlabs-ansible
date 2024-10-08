@@ -9,10 +9,28 @@ ctlabs_kind:
   defaults:
     pkgs:
       debian:
+        - name: podman
       redhat:
       kind:
         version: 0.24.0
-        url    : "https://kind.sigs.k8s.io/dl/v{{ ctlabs_kind.defaults.pkgs.kind.version }}/kind-linux-amd64"
+        #url    : "https://kind.sigs.k8s.io/dl/v{{ ctlabs_kind.defaults.pkgs.kind.version }}/kind-linux-amd64"
+        url    : https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
+        path   : /usr/bin/kind
+        mode   : '0750'
+      kubectl:
+        version:
+        url    : https://dl.k8s.io/release/v1.31.1/bin/linux/amd64/kubectl
+        path   : /usr/bin/kubectl
+        mode   : '0750'
+      helm:
+        version: 
+        url    : https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz
+        tmptar : /tmp/helm.tar.gz
+        tmpdir : /tmp
+        tardir : /tmp/linux-amd64
+        path   : /usr/bin/helm
+        mode   : '0750'
+
 #    config:
 #      profile:
 #        template: k3s.profile.j2
@@ -20,9 +38,6 @@ ctlabs_kind:
 #    service:
 #      name     : k3s.service
 #      template : k3s.service.j2
-    bin:
-      path: /usr/bin/kind
-      mode: '0750'
   os:
     - centos8
     - centos9

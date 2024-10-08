@@ -5,8 +5,39 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_kind.tasks.package.k3s.installed
+- name: ctlabs_kind.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_kind.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_kind.tasks.package.kindinstall
   get_url:
-    url  : "{{ ctlabs_kind.defaults.pkgs.uri }}"
-    dest : "{{ ctlabs_kind.defaults.bin.path }}"
-    mode : "{{ ctlabs_kind.defaults.bin.mode }}"
+    url  : "{{ ctlabs_kind.defaults.pkgs.kind.url  }}"
+    dest : "{{ ctlabs_kind.defaults.pkgs.kind.path }}"
+    mode : "{{ ctlabs_kind.defaults.pkgs.kind.mode }}"
+
+- name: ctlabs_kind.tasks.package.kubectl.install
+  get_url:
+    url  : "{{ ctlabs_kind.defaults.pkgs.kubectl.url  }}"
+    dest : "{{ ctlabs_kind.defaults.pkgs.kubectl.path }}"
+    mode : "{{ ctlabs_kind.defaults.pkgs.kubectl.mode }}"
+
+- name: ctlabs_kind.tasks.package.helm
+  block:
+    - name: ctlabs_kind.tasks.package.helm.download
+      get_url:
+        url   : "{{ ctlabs_kind.defaults.pkgs.helm.url }}"
+        dest  : "{{ ctlabs_kind.defaults.pkgs.helm.tmptar }}"
+        #force : no
+    - name: ctlabs_kind.tasks.package.helm.untar
+      unarchive:
+        src  : "{{ ctlabs_kind.defaults.pkgs.helm.tmptar }}"
+        dest : "{{ ctlabs_kind.defaults.pkgs.helm.tmpdir }}/"
+        remote_src: true
+    - name: ctlabs_kind.tasks.package.helm.install
+      copy:
+        src  : "{{ ctlabs_kind.defaults.pkgs.helm.tardir }}/helm"
+        dest : "{{ ctlabs_kind.defaults.pkgs.helm.path   }}"
+        mode : '0750'
+        remote_src: true
