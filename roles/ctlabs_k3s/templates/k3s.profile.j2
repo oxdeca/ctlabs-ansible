@@ -1,5 +1,7 @@
 # /etc/profile.d/k3.sh
 
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
 alias kubectl="/usr/bin/k3s kubectl"
 alias kc=kubectl
 alias kcw="kubectl -o wide"
