@@ -8,8 +8,18 @@
 ctlabs_k3s:
   defaults:
     pkgs:
-      name : k3s
-      uri  : https://github.com/k3s-io/k3s/releases/download/v1.29.2+k3s1/k3s
+      k3s:
+        uri  : https://github.com/k3s-io/k3s/releases/download/v1.29.2+k3s1/k3s
+        path : /usr/bin/k3s
+        mode : '0750'
+      helm:
+        version: 
+        url    : https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz
+        tmptar : /tmp/helm.tar.gz
+        tmpdir : /tmp
+        tardir : /tmp/linux-amd64
+        path   : /usr/bin/helm
+        mode   : '0750'
     config:
       profile:
         template: k3s.profile.j2

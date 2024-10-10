@@ -8,7 +8,7 @@ Type=simple
 
 User=root
 
-ExecStart={{ ctlabs_k3s.defaults.bin.path }} server
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server
 
 Restart=always
 RestartSec=5

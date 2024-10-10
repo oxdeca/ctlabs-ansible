@@ -7,6 +7,25 @@
 
 - name: ctlabs_k3s.tasks.package.k3s.installed
   get_url:
-    url  : "{{ ctlabs_k3s.defaults.pkgs.uri }}"
-    dest : "{{ ctlabs_k3s.defaults.bin.path }}"
-    mode : "{{ ctlabs_k3s.defaults.bin.mode }}"
+    url  : "{{ ctlabs_k3s.defaults.pkgs.k3s.uri }}"
+    dest : "{{ ctlabs_k3s.defaults.pkgs.k3s.path }}"
+    mode : "{{ ctlabs_k3s.defaults.pkgs.k3s.mode }}"
+
+- name: ctlabs_k3s.tasks.package.helm
+  block:
+    - name: ctlabs_k3s.tasks.package.helm.download
+      get_url:
+        url   : "{{ ctlabs_k3s.defaults.pkgs.helm.url }}"
+        dest  : "{{ ctlabs_k3s.defaults.pkgs.helm.tmptar }}"
+        #force : no
+    - name: ctlabs_k3s.tasks.package.helm.untar
+      unarchive:
+        src  : "{{ ctlabs_k3s.defaults.pkgs.helm.tmptar }}"
+        dest : "{{ ctlabs_k3s.defaults.pkgs.helm.tmpdir }}/"
+        remote_src: true
+    - name: ctlabs_k3s.tasks.package.helm.install
+      copy:
+        src  : "{{ ctlabs_k3s.defaults.pkgs.helm.tardir }}/helm"
+        dest : "{{ ctlabs_k3s.defaults.pkgs.helm.path   }}"
+        mode : '0750'
+        remote_src: true
