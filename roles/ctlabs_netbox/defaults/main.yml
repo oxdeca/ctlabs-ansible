@@ -5,6 +5,8 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+__nb_version__: 4.0.11
+
 ctlabs_netbox:
   defaults:
     pkgs:
@@ -30,13 +32,13 @@ ctlabs_netbox:
         - name : python3.11-devel
         - name : "@postgresql:15/client"
       nb:
-        version: 4.0.11
-        url    : "https://github.com/netbox-community/netbox/archive/refs/tags/v{{ ctlabs_netbox.defatuls.pkgs.nb.version }}.tar.gz"
+        version: "{{ __nb_version__ }}"
+        url    : "https://github.com/netbox-community/netbox/archive/refs/tags/v{{ __nb_version__ }}.tar.gz"
         #url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
     install:
       dir      : /opt
-      tar_dir  : "/opt/netbox-{{ ctlabs_netbox.defaults.pkgs.nb.version }}"
+      tar_dir  : "/opt/netbox-{{ __nb_version__ }}"
       root_dir : /opt/netbox
       venv_dir : /opt/netbox/venv
       app_dir  : /opt/netbox/netbox
