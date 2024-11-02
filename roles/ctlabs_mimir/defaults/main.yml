@@ -5,13 +5,16 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
+versions: 
+  mimir: 2.8.0
+
 ctlabs_mimir:
   defaults:
     pkgs:
-      name    : mimir-2.8.0_amd64.rpm
-      version : 2.8.0
+      name    : "mimir-{{ versions.mimir }}_amd64.rpm"
+      version : "{{ versions.mimir }}"
       chkgpg  : false
-      url     : https://github.com/grafana/mimir/releases/download/mimir-2.8.0/mimir-2.8.0_amd64.rpm
+      url     : "https://github.com/grafana/mimir/releases/download/mimir-{{ versions.mimir }}/mimir-{{ versions.mimir }}_amd64.rpm"
     config:
       cfgdir   : /etc/mimir
       file     : mimir.conf

@@ -5,12 +5,15 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
+versions:
+  node_exporter: 1.5.0
+
 ctlabs_node_exporter:
   defaults:
     pkgs:
       name    : node_exporter
-      version : 1.5.0.linux-amd64
-      url     : https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
+      version : "{{ versions.node_exporter }}.linux-amd64"
+      url     : "https://github.com/prometheus/node_exporter/releases/download/v{{ versions.node_exporter }}/node_exporter-{{ versions.node_exporter }}.linux-amd64.tar.gz"
       tmptar  : /tmp/node_exporter.tar.gz
     config:
       bin      : /opt/node_exporter/node_exporter

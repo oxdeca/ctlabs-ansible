@@ -5,12 +5,15 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+versions : 
+  loki: 2.8.0
+
 ctlabs_loki:
   defaults:
     pkgs:
       - name    : loki
-        version : 2.8.0.x86_64
-        url     : https://github.com/grafana/loki/releases/download/v2.8.0/loki-2.8.0.x86_64.rpm
+        version : "{{ versions.loki }}.x86_64"
+        url     : "https://github.com/grafana/loki/releases/download/v{{ versions.loki }}/loki-{{ versions.loki }}.x86_64.rpm"
     config:
       bin       : /opt/loki/loki
       bindir    : /opt

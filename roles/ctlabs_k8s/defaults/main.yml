@@ -5,32 +5,35 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
+versions :
+  k8s            : 1.28.0
+  calico         : 3.27.2
+  longhorn       : 1.6.0
+  ingress        : 1.10.0
+  prometheus     : 0.10
+  metrics_server : 0.7.0
+
 ctlabs_k8s:
   defaults:
     cluster:
       k8s: 
-        version: 1.28.0
+        version: "{{ versions.k8s }}"
       calico:
-        version: 3.27.2
-        url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ ctlabs_k8s.defaults.cluster.calico.version }}/manifests/tigera-operator.yaml"
+        url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ versions.calico}}/manifests/tigera-operator.yaml"
       longhorn:
-        version: 1.6.0
-        url    : "https://raw.githubusercontent.com/longhorn/longhorn/v{{ ctlabs_k8s.defaults.cluster.longhorn.version }}/deploy/longhorn.yaml"
+        url    : "https://raw.githubusercontent.com/longhorn/longhorn/v{{ versions.longhorn }}/deploy/longhorn.yaml"
       metrics_server:
-        version: 0.7.0
-        url    : "https://github.com/kubernetes-sigs/metrics-server/releases/download/v{{ ctlabs_k8s.defaults.cluster.metrics_server.version }}/components.yaml"
+        url    : "https://github.com/kubernetes-sigs/metrics-server/releases/download/v{{ versions.metrics_server }}/components.yaml"
       ingress:
-        version: 1.10.0
-        url    : "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ ctlabs_k8s.defaults.cluster.ingress.version }}/deploy/static/provider/cloud/deploy.yaml" 
+        url    : "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.ingress }}/deploy/static/provider/cloud/deploy.yaml" 
       prometheus:
-        version: 0.10
-        url    : "https://github.com/prometheus-operator/kube-prometheus/archive/refs/heads/release-{{ ctlabs_k8s.defaults.cluster.prometheus.version }}.zip"
+        url    : "https://github.com/prometheus-operator/kube-prometheus/archive/refs/heads/release-{{ versions.prometheus }}.zip"
     repos:
       debian:
         - name: kubernetes
           type: deb
-          url : https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
-          key : https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+          url : "https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+          key : "https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key"
       redhat:
     pkgs:
       redhat:
@@ -41,9 +44,9 @@ ctlabs_k8s:
         - name : nfs-common
         - name : etcd-client
         - name : protobuf-compiler
-        - name : kubelet="{{ ctlabs_k8s.defaults.versions.k8s }}-*"
-        - name : kubeadm="{{ ctlabs_k8s.defaults.versions.k8s }}-*"
-        - name : kubectl="(( ctlabs_k8s.defaults.versions.k8s }}-*"
+        - name : "kubelet=\"{{ versions.k8s }}-*\""
+        - name : "kubeadm=\"{{ versions.k8s }}-*\""
+        - name : "kubectl=\"(( versions.k8s }}-*\""
       python:
         pips:
           - openshift

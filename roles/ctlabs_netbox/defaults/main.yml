@@ -5,7 +5,9 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
-__nb_version__: 4.0.11
+versions: 
+  netbox: 4.0.11
+  python: 3.11
 
 ctlabs_netbox:
   defaults:
@@ -28,28 +30,28 @@ ctlabs_netbox:
         - name : openssl-devel
         - name : redhat-rpm-config
         - name : openldap-devel
-        - name : python3.11
-        - name : python3.11-devel
+        - name : "python{{ versions.python }}"
+        - name : "python{{ versions.python }}-devel"
         - name : "@postgresql:15/client"
       nb:
-        version: "{{ __nb_version__ }}"
-        url    : "https://github.com/netbox-community/netbox/archive/refs/tags/v{{ __nb_version__ }}.tar.gz"
+        version: "{{ versions.netbox }}"
+        url    : "https://github.com/netbox-community/netbox/archive/refs/tags/v{{ versions.netbox }}.tar.gz"
         #url    : https://github.com/netbox-community/netbox/archive/refs/tags/v3.7.6.tar.gz
         tmptar : /tmp/netbox.tar.gz
     install:
       dir      : /opt
-      tar_dir  : "/opt/netbox-{{ __nb_version__ }}"
+      tar_dir  : "/opt/netbox-{{ versions.netbox }}"
       root_dir : /opt/netbox
       venv_dir : /opt/netbox/venv
       app_dir  : /opt/netbox/netbox
-      web_dirs : [ media, reports, scripts]
+      web_dirs : [media, reports, scripts]
     scripts:
       netbox:
         template: netbox.sh.j2
         file    : /usr/bin/netbox
         cmd:
-          upgrade: PYTHON=/usr/bin/python3.11 /usr/sbin/ip vrf exec default /usr/bin/netbox update
-          admin  : PYTHON=/usr/bin/python3.11 /usr/sbin/ip vrf exec default /usr/bin/netbox admin
+          upgrade: "PYTHON=/usr/bin/python{{ versions.python }} /usr/sbin/ip vrf exec default /usr/bin/netbox update"
+          admin  : "PYTHON=/usr/bin/python{{ versions.python }} /usr/sbin/ip vrf exec default /usr/bin/netbox admin"
       housekeeping:
         src : /opt/netbox/contrib/netbox-housekeeping.sh
         dst : /etc/cron.daily/netbox-housekeeping

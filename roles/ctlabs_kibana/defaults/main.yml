@@ -5,11 +5,14 @@
 # Description : default variables
 # ------------------------------------------------------------------------------
 
+versions:
+  kibana: 8.13.4
+
 ctlabs_kibana:
   defaults:
     pkgs:
       redhat:
-        url: https://artifacts.elastic.co/downloads/kibana/kibana-8.13.4-x86_64.rpm
+        url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ versions.kibana }}-x86_64.rpm"
         gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
       debian:
         url:
