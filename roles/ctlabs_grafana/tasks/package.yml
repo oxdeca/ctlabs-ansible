@@ -19,6 +19,11 @@
   package:
     name  : "{{ ctlabs_grafana.defaults.pkgs.name }}"
     state : present
+    
+- name: ctlabs_grafana.tasks.package.sysv.remove
+  file:
+    path : /etc/rc.d/init.d/grafana-server
+    state: absent
 
 - name: ctlabs_grafana.tasks.package.group.certs.member
   user:
