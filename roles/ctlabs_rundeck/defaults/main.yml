@@ -33,7 +33,7 @@ ctlabs_rundeck:
         file          : /etc/rundeck/rundeck-config.properties
         template      : rundeck-config.properties.j2
         server_url    : https://192.168.100.193:8200
-        admin_user    : admin
+        admin_user    : ctlabs
         admin_pass    : "secret123!"
         auth_provider : login
       sysconfig:

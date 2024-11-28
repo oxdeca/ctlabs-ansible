@@ -1,10 +1,10 @@
-# ------------------------------------------------------------------------------
-# File        : /etc/rundeck/jaas-loginmodule.conf
-# Template    : ctlabs_rundeck/templates/jaas-loginmodule.conf.j2
-# ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
+// File        : /etc/rundeck/jaas-loginmodule.conf
+// Template    : ctlabs_rundeck/templates/jaas-loginmodule.conf.j2
+// ------------------------------------------------------------------------------
 
 RDpropertyfilelogin {
-org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
-debug="true"
-file="/etc/rundeck/realm.properties";
+  org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+  debug="true"
+  file="/etc/rundeck/realm.properties";
 };

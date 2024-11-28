@@ -109,6 +109,8 @@ ctlabs_netbox:
           - name : netmiko
           - name : rq==1.14.0
           - name : dulwich
+          - name : netbox-topology-views
+          - name : netbox-plugin-dns
       db:
         name: netbox
         user: netbox

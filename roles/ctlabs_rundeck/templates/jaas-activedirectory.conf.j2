@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------------
 
 activedirectory {
-  com.dtolabs.rundeck.jetty.jaas.JettyCachingLdapLoginModule required
+  com.dtolabs.rundeck.jetty.jaas.JettyCachingLdapLoginModule sufficient
   debug="true"
   contextFactory="com.sun.jndi.ldap.LdapCtxFactory"
   providerUrl="{{ ctlabs_rundeck.defaults.config.auth_provider.ad.ldap_url }}"
@@ -23,4 +23,9 @@ activedirectory {
   roleObjectClass="group"
   cacheDurationMillis="300000"
   reportStatistics="true";
+
+  // Fallback to File Authentication
+  org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+  debug="true"
+  file="/etc/rundeck/realm.properties";
 };
