@@ -1,0 +1,36 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_juicefs/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  juicefs: 1.2.2
+
+ctlabs_juicefs:
+  defaults:
+    pkgs:
+      debian:
+        - name: sqlite3
+      redhat:
+        - name: sqlite3
+      jfs:
+        version: "{{ versions.juicefs }}"
+        url    : "https://d.juicefs.com/juicefs/releases/download/v{{ versions.juicefs }}/juicefs-{{ versions.juicefs }}-linux-amd64.tar.gz"
+        tmptar : /tmp/juicefs.tar.gz
+    install:
+      dir      : /opt
+      tar_dir  : "/opt/juicefs-{{ versions.juicefs }}"
+      root_dir : /opt/juicefs
+    service:
+      name : juicefs-client.service
+      user : juicefs
+      group: juicefs
+    config:
+      mount:
+        src:
+        dst:
+  os:
+    - centos9
+    - debian11

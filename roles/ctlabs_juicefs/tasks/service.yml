@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_juicefs/tasks/service.yml
+# Description : services
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_juicefs.tasks.service.httpd.running
+  service:
+    name    : "{{ ctlabs_juicefs.defaults.service[os_family].name }}"
+    state   : started
+    enabled : true

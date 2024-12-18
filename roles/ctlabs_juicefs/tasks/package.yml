@@ -1,0 +1,46 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_juicefs/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_juicefs.tasks.package.dependencies.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_juicefs.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_juicefs.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_juicefs.defaults.pkgs.jfs.url    }}" 
+    dest : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_juicefs.tasks.package.copy
+  copy:
+    src  : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
+    dest : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
+
+- name: ctlabs_juicefs.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
+    dest : "{{ ctlabs_juicefs.defaults.install.dir    }}"
+    remote_src: true
+
+- name: ctlabs_juicefs.tasks.package.link
+  file:
+    src   : "{{ ctlabs_juicefs.defaults.install.tar_dir  }}"
+    dest  : "{{ ctlabs_juicefs.defaults.install.root_dir }}"
+    state : link
+
+- name: ctlabs_juicefs.tasks.package.group
+  group:
+    name  : "{{ ctlabs_juicefs.defaults.service.group }}"
+    system: true
+
+- name: ctlabs_juicefs.tasks.package.user
+  user:
+    name   : "{{ ctlabs_juicefs.defaults.service.user  }}"
+    group  : "{{ ctlabs_juicefs.defaults.service.group }}"
+    system : true

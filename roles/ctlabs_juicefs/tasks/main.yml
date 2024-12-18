@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_juicefs/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - 
+    - ctlabs_juicefs.precheck
+    - ctlabs_juicefs.package
+    - ctlabs_juicefs.config
+    - ctlabs_juicefs.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_juicefs
+    - ctlabs_juicefs.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_juicefs
+    - ctlabs_juicefs.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_juicefs
+    - ctlabs_juicefs.service
