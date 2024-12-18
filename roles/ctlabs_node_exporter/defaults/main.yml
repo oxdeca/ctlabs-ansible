@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  node_exporter: 1.5.0
+  node_exporter: 1.8.2
 
 ctlabs_node_exporter:
   defaults:
@@ -24,12 +24,12 @@ ctlabs_node_exporter:
       agentdir : /data-agent
       file     : node_exporter.conf
       template : node_exporter.conf.j2
-      user     : node_exporter
-      group    : node_exporter
       listen   : 9100
     service:
       name     : node_exporter.service
       template : node_exporter.service.j2
+      user     : node_exporter
+      group    : node_exporter
     logrotate:
   os:
     - redhat7

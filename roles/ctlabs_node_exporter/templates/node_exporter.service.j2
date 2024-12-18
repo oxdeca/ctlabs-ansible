@@ -4,8 +4,8 @@
   After= network-online.target
 
 [Service]
-  User=node_exporter
-  Group=node_exporter
+  User={{ ctlabs_node_exporter.defaults.service.user }}
+  Group={{ ctlabs_node_exporter.defaults.service.group }}
   Restart=on-failure
   ExecStart="{{ ctlabs_node_exporter.defaults.config.bin }}"
 

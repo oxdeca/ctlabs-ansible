@@ -12,15 +12,21 @@
     owner: "{{ ctlabs_vault.defaults.service.user  }}"
     group: "{{ ctlabs_vault.defaults.service.group }}"
 
-- name: ctlabs_vault.tasks.config.vault.data.dir
-  file:
-    path : "{{ ctlabs_vault.defaults.config.data }}"
-    state: directory
-    owner: "{{ ctlabs_vault.defaults.service.user  }}"
-    group: "{{ ctlabs_vault.defaults.service.group }}"
+#
+# Server
+#
+- name: ctlabs_vault.tasks.config.server
+  when: CTLABS_VAULT_INSTALL_TYPE == "server"
+  block:
+    - name: ctlabs_vault.tasks.config.server.vault.data.dir
+      file:
+        path : "{{ ctlabs_vault.defaults.config.data }}"
+        state: directory
+        owner: "{{ ctlabs_vault.defaults.service.user  }}"
+        group: "{{ ctlabs_vault.defaults.service.group }}"
 
-- name: ctlabs_vault.tasks.config.vault
-  template:
-    src  : "{{ ctlabs_vault.defaults.config.template }}"
-    dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.file }}"
-  notify: ctlabs_vault.handlers.service.vault.reload
+    - name: ctlabs_vault.tasks.config.server.vault
+      template:
+        src  : "{{ ctlabs_vault.defaults.config.template }}"
+        dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.file }}"
+      notify: ctlabs_vault.handlers.service.vault.reload

@@ -5,10 +5,18 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+# env vars
+CTLABS_VAULT_INSTALL_TYPE: client
+
+# role defaults
 ctlabs_vault:
   defaults:
     repos:
       redhat:
+        - name: hashicorp
+          type: main
+          url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if os in ['redhat7'] else '$releasever' }}/$basearch/stable"
+          key : https://rpm.releases.hashicorp.com/gpg
       debian:
         - name: hashicorp
           type: main
@@ -20,18 +28,22 @@ ctlabs_vault:
       debian:
         - name: vault
     config:
-      dir     : /etc/vault.d
-      gui      : true
-      data     : /opt/vault/data
-      file     : vault.hcl
-      template : vault.hcl.j2
-      port     : 8200
-      cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
-      key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+      dir   : /etc/vault.d
+      server:
+        gui      : true
+        data     : /opt/vault/data
+        file     : vault.hcl
+        template : vault.hcl.j2
+        port     : 8200
+        cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
+        key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+      client:
     service:
       name  : vault.service
       user  : vault
       group : vault
       groups: [certs]
   os:
+    - centos9
     - debian11
+    - debian12

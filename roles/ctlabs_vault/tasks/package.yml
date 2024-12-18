@@ -5,25 +5,36 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
+# yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+# root@vdb1:/# cat /etc/apt/sources.list.d/hashicorp.list
+# deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com bullseye main
 
-#root@vdb1:/# cat /etc/apt/sources.list.d/hashicorp.list
-#deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com bullseye main
+- name: ctlabs_vault.tasks.package.redhat
+  when: os_family == "redhat"
+  block:
+    - name: ctlabs_grafana.tasks.package.redhat.repo.file
+      yum_repository:
+        name        : "{{ item.name }}"
+        description : "{{ item.name }}"
+        baseurl     : "{{ item.url  }}"
+        gpgkey      : "{{ item.key  }}"
+        gpgcheck    : true
+        sslverify   : true
+      loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
 
-- name: ctlabs_vault.tasks.package.deb.repo.key
-  apt_key:
-    url: "{{ item.key }}"
-  loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
+- name: ctlabs_vault.tasks.package.debian
+  when: os_family == "debian"
+  block:
+    - name: ctlabs_vault.tasks.package.debian.repo.key
+      apt_key:
+        url: "{{ item.key }}"
+      loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
 
-- name: ctlabs_vault.tasks.package.deb.repo.file
-  apt_repository:
-    repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}" 
-  loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
+    - name: ctlabs_vault.tasks.package.debian.repo.file
+      apt_repository:
+        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
 
-- name: ctlabs_vault.tasks.package.install
-  package:
-    name  : "{{ item.name }}"
-    state : present
-  loop: "{{ ctlabs_vault.defaults.pkgs[os_family] }}"
 
 - name: ctlabs_vault.tasks.package.group.certs.member
   user:
