@@ -5,6 +5,39 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_atlantis.tasks.package.redhat
+  when: os_family == "redhat"
+  block:
+    - name: ctlabs_atlantis.tasks.package.redhat.repo.file
+      yum_repository:
+        name        : "{{ item.name }}"
+        description : "{{ item.name }}"
+        baseurl     : "{{ item.url  }}"
+        gpgkey      : "{{ item.key  }}"
+        gpgcheck    : true
+        sslverify   : true
+      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+
+- name: ctlabs_atlantis.tasks.package.debian
+  when: os_family == "debian"
+  block:
+    - name: ctlabs_atlantis.tasks.package.debian.repo.key
+      apt_key:
+        url: "{{ item.key }}"
+      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+
+    - name: ctlabs_atlantis.tasks.package.debian.repo.file
+      apt_repository:
+        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+
+- name: ctlabs_atlantis.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_atlantis.defaults.pkgs[os_family] }}"
+
+# atlantis
 - name: ctlabs_atlantis.tasks.package.bindir
   file:
     path  : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.bindir }}"

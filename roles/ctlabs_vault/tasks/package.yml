@@ -12,7 +12,7 @@
 - name: ctlabs_vault.tasks.package.redhat
   when: os_family == "redhat"
   block:
-    - name: ctlabs_grafana.tasks.package.redhat.repo.file
+    - name: ctlabs_vault.tasks.package.redhat.repo.file
       yum_repository:
         name        : "{{ item.name }}"
         description : "{{ item.name }}"
