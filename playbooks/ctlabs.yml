@@ -518,3 +518,21 @@
   tags  : juicefs
   roles :
     - roles/ctlabs_juicefs
+
+# -----------------------------------------------------------------------------
+# ctlabs_gitea
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.gitea
+  hosts : [git1,git2]
+  tags  : gitea
+  roles :
+    - roles/ctlabs_gitea
+
+# -----------------------------------------------------------------------------
+# ctlabs_atlantis
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.atlantis
+  hosts : [ats1,ats2]
+  tags  : atlantis
+  roles :
+    - roles/ctlabs_atlantis
