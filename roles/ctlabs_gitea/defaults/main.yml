@@ -25,7 +25,7 @@ ctlabs_gitea:
       cfgdir   : /etc/gitea
       datadir  : /data
       file     : app.ini
-      template : gitea.ini.j2
+      template : app.ini.j2
       listen   : 3000
     service:
       name     : gitea
