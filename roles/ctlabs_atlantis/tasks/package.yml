@@ -7,31 +7,31 @@
 
 - name: ctlabs_atlantis.tasks.package.bindir
   file:
-    path  : "{{ ctlabs_atlantis.defaults.config.bindir }}"
+    path  : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.bindir }}"
     state : directory
 
 - name: ctlabs_atlantis.tasks.package.download
   get_url:
-    url  : "{{ ctlabs_atlantis.defaults.pkgs.url    }}"
-    dest : "{{ ctlabs_atlantis.defaults.pkgs.tmptar }}"
+    url  : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.url    }}"
+    dest : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.tmpzip }}"
   delegate_to: localhost
 
-- name: ctlabs_atlantis.tasks.package.copy
-  copy:
-    src : "{{ ctlabs_atlantis.defaults.pkgs.tmptar }}"
-    dest: "{{ ctlabs_atlantis.defaults.pkgs.tmptar }}"
+#- name: ctlabs_atlantis.tasks.package.copy
+#  copy:
+#    src : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.tmpzip }}"
+#    dest: "{{ ctlabs_atlantis.defaults.pkgs.atlantis.tmpzip }}"
 
-- name: ctlabs_atlantis.tasks.package.untar
+- name: ctlabs_atlantis.tasks.package.unzip
   unarchive:
-    src  : "{{ ctlabs_atlantis.defaults.pkgs.tmptar   }}"
-    dest : "{{ ctlabs_atlantis.defaults.config.bindir }}"
-    remote_src: true
+    src  : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.tmpzip }}"
+    dest : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.bindir }}"
+#    remote_src: true
 
-- name: ctlabs_atlantis.tasks.package.install
-  file:
-    src   : "{{ ctlabs_atlantis.defaults.config.bindir + '/' + ctlabs_atlantis.defaults.pkgs.name + '-' + ctlabs_atlantis.defaults.pkgs.version }}"
-    dest  : "{{ ctlabs_atlantis.defaults.config.bindir + '/' + ctlabs_atlantis.defaults.pkgs.name }}"
-    state : link
+#- name: ctlabs_atlantis.tasks.package.install
+#  file:
+#    src   : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.dir + '/' + ctlabs_atlantis.defaults.pkgs.name + '-' + ctlabs_atlantis.defaults.pkgs.version }}"
+#    dest  : "{{ ctlabs_atlantis.defaults.pkgs.atlantis.dir + '/' + ctlabs_atlantis.defaults.pkgs.name }}"
+#    state : link
 
 - name: ctlabs_atlantis.tasks.package.group
   group:

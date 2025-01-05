@@ -17,16 +17,16 @@ ctlabs_atlantis:
       redhat:
         - name : git
         - name : terraform
-      gitea:
+      atlantis:
         version : "{{ versions.atlantis }}"
         url     : "https://github.com/runatlantis/atlantis/releases/download/v{{ versions.atlantis }}/atlantis_linux_amd64.zip"
-        dir     : /opt/atlantis
+        bindir  : /opt/atlantis
+        tmpzip  : /tmp/atlantis.zip
     config:
       cfgdir   : /etc/atlantis
       datadir  : /data
-      file     : app.ini
-      template : app.ini.j2
-      listen   : 3000
+      file     : atlantis.yml
+      template : atlantis.yml
     service:
       name     : atlantis.service
       template : atlantis.service.j2
