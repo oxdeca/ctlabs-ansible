@@ -12,7 +12,7 @@
 
 - name: ctlabs_gitea.tasks.package.download
   get_url:
-    url  : "{{ ctlabs_gitea.defaults.pkgs.url          }}"
+    url  : "{{ ctlabs_gitea.defaults.pkgs.gitea.url    }}"
     dest : "{{ ctlabs_gitea.defaults.pkgs.gitea.tmpdir }}"
   delegate_to: localhost
 
