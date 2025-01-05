@@ -15,11 +15,3 @@
     src  : "{{ ctlabs_atlantis.defaults.config.template }}"
     dest : "{{ ctlabs_atlantis.defaults.config.cfgdir }}/{{ ctlabs_atlantis.defaults.config.file }}"
   notify: ctlabs_atlantis.handlers.atlantis.service.restart
-
-#- name: ctlabs_atlantis.tasks.config.datadir.ownership
-#  file:
-#    dest    : "{{ ctlabs_atlantis.defaults.config.datadir }}"
-#    owner   : "{{ ctlabs_atlantis.defaults.config.user    }}"
-#    group   : "{{ ctlabs_atlantis.defaults.config.group   }}"
-#    recurse : true
-

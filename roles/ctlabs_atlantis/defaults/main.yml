@@ -19,6 +19,7 @@ ctlabs_atlantis:
         - name : terraform
       atlantis:
         version : "{{ versions.atlantis }}"
+        bin     : atlantis
         url     : "https://github.com/runatlantis/atlantis/releases/download/v{{ versions.atlantis }}/atlantis_linux_amd64.zip"
         bindir  : /opt/atlantis
         tmpzip  : /tmp/atlantis.zip
