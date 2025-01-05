@@ -1,29 +1,29 @@
 ;
 APP_NAME = Gitea: Git with a cup of tea
-RUN_USER = gitea
-WORK_PATH = /home/gitea
+RUN_USER = git
+WORK_PATH = /opt/gitea
 RUN_MODE = prod
 
 [database]
 DB_TYPE = sqlite3
 HOST = 127.0.0.1:3306
-NAME = gitea
-USER = gitea
+NAME = git
+USER = git
 PASSWD =
 SCHEMA =
 SSL_MODE = disable
-PATH = /home/gitea/data/gitea.db
+PATH = /opt/gitea/data/gitea.db
 LOG_SQL = false
 
 [repository]
-ROOT = /home/gitea/data/gitea-repositories
+ROOT = /opt/gitea/data/gitea-repositories
 
 [server]
 SSH_DOMAIN = h1.ctlabs.internal
 DOMAIN = h1.ctlabs.internal
 HTTP_PORT = 3000
 ROOT_URL = http://h1.ctlabs.internal:3000/
-APP_DATA_PATH = /home/gitea/data
+APP_DATA_PATH = /opt/gitea/data
 DISABLE_SSH = false
 SSH_PORT = 22
 LFS_START_SERVER = true
@@ -31,7 +31,7 @@ LFS_JWT_SECRET = Sn-CxGIXwsujAWmkzygbE6JqjCPPDC4hR1Nl_j9Mskc
 OFFLINE_MODE = true
 
 [lfs]
-PATH = /home/gitea/data/lfs
+PATH = /opt/gitea/data/lfs
 
 [mailer]
 ENABLED = false
@@ -61,7 +61,7 @@ PROVIDER = file
 [log]
 MODE = console
 LEVEL = info
-ROOT_PATH = /home/gitea/log
+ROOT_PATH = /opt/gitea/log
 
 [repository.pull-request]
 DEFAULT_MERGE_STYLE = merge

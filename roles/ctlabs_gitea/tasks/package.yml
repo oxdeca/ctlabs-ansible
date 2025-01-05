@@ -5,9 +5,23 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_gitea.tasks.package.group
+  group:
+    name   : "{{ ctlabs_gitea.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_gitea.tasks.package.user
+  user:
+    name   : "{{ ctlabs_gitea.defaults.service.user  }}"
+    group  : "{{ ctlabs_gitea.defaults.service.group }}"
+    system : true
+
 - name: ctlabs_gitea.tasks.package.bindir
   file:
     path  : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir }}"
+    owner : "{{ ctlabs_gitea.defaults.service.user      }}"
+    group : "{{ ctlabs_gitea.defaults.service.group     }}"
+    mode : '0750'
     state : directory
 
 - name: ctlabs_gitea.tasks.package.download
@@ -27,14 +41,3 @@
     src   : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
     dest  : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin  }}"
     state : link
-
-- name: ctlabs_gitea.tasks.package.group
-  group:
-    name   : "{{ ctlabs_gitea.defaults.service.group }}"
-    system : true
-
-- name: ctlabs_gitea.tasks.package.user
-  user:
-    name   : "{{ ctlabs_gitea.defaults.service.user  }}"
-    group  : "{{ ctlabs_gitea.defaults.service.group }}"
-    system : true
