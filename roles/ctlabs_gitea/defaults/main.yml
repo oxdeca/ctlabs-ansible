@@ -16,9 +16,11 @@ ctlabs_gitea:
       redhat:
         - name : git
       gitea:
-        version : "{{ versions.gitea }}"
-        url     : "https://dl.gitea.com/gitea/{{ versions.gitea }}/gitea-{{ versions.gitea }}-linux-amd64"
-        dir     : /opt/gitea
+        obin   : "gitea-{{ versions.gitea }}-linux-amd64"
+        bin    : gitea
+        url    : "https://dl.gitea.com/gitea/{{ versions.gitea }}/gitea-{{ versions.gitea }}-linux-amd64"
+        bindir : /opt/gitea
+        tmpdir : /tmp
     config:
       cfgdir   : /etc/gitea
       datadir  : /data

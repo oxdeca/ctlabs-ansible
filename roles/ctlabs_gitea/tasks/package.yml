@@ -7,30 +7,25 @@
 
 - name: ctlabs_gitea.tasks.package.bindir
   file:
-    path  : "{{ ctlabs_gitea.defaults.config.bindir }}"
+    path  : "{{ ctlabs_gitea.defaults.pkgs.gitea.dir }}"
     state : directory
 
 - name: ctlabs_gitea.tasks.package.download
   get_url:
-    url  : "{{ ctlabs_gitea.defaults.pkgs.url    }}"
-    dest : "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
+    url  : "{{ ctlabs_gitea.defaults.pkgs.url          }}"
+    dest : "{{ ctlabs_gitea.defaults.pkgs.gitea.tmpdir }}"
   delegate_to: localhost
 
 - name: ctlabs_gitea.tasks.package.copy
   copy:
-    src : "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
-    dest: "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
-
-- name: ctlabs_gitea.tasks.package.untar
-  unarchive:
-    src  : "{{ ctlabs_gitea.defaults.pkgs.tmptar   }}"
-    dest : "{{ ctlabs_gitea.defaults.config.bindir }}"
-    remote_src: true
+    src  : "{{ ctlabs_gitea.defaults.pkgs.gitea.tmpdir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
+    dest : "{{ ctlabs_gitea.defaults.pkgs.gitea.dir    + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
+    mode : '0750'
 
 - name: ctlabs_gitea.tasks.package.install
   file:
-    src   : "{{ ctlabs_gitea.defaults.config.bindir + '/' + ctlabs_gitea.defaults.pkgs.name + '-' + ctlabs_gitea.defaults.pkgs.version }}"
-    dest  : "{{ ctlabs_gitea.defaults.config.bindir + '/' + ctlabs_gitea.defaults.pkgs.name }}"
+    src   : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
+    dest  : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin  }}"
     state : link
 
 - name: ctlabs_gitea.tasks.package.group
