@@ -26,7 +26,7 @@ ctlabs_atlantis:
       cfgdir   : /etc/atlantis
       datadir  : /data
       file     : atlantis.yml
-      template : atlantis.yml
+      template : atlantis.yml.j2
     service:
       name     : atlantis.service
       template : atlantis.service.j2
