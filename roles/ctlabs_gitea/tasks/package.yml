@@ -7,7 +7,7 @@
 
 - name: ctlabs_gitea.tasks.package.bindir
   file:
-    path  : "{{ ctlabs_gitea.defaults.pkgs.gitea.dir }}"
+    path  : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir }}"
     state : directory
 
 - name: ctlabs_gitea.tasks.package.download
