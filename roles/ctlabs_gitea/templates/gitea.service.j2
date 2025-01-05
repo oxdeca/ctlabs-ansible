@@ -7,7 +7,7 @@
   User={{ ctlabs_gitea.defaults.service.user }}
   Group={{ ctlabs_gitea.defaults.service.group }}
   Restart=on-failure
-  ExecStart="{{ ctlabs_gitea.defaults.config.bin }}"
+  ExecStart="{{ ctlabs_gitea.defaults.pkgs.gitea.bin }} -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}"
 
 [Install]
   WantedBy=multi-user.target
