@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_gitea/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  gitea: 1.22.6
+
+ctlabs_gitea:
+  defaults:
+    pkgs:
+      debian:
+        - name : git
+      redhat:
+        - name : git
+      gitea:
+        version : "{{ versions.gitea }}"
+        url     : "https://dl.gitea.com/gitea/{{ versions.gitea }}/gitea-{{ versions.gitea }}-linux-amd64"
+        dir     : /opt/gitea
+    config:
+      cfgdir   : /etc/gitea
+      datadir  : /data
+      file     : app.ini
+      template : gitea.ini.j2
+      listen   : 3000
+    service:
+      name     : gitea
+      template : gitea.service.j2
+      user     : git
+      group    : git
+    logrotate:
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+    - debian11
+    - kali2024

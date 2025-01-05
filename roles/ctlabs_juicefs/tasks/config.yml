@@ -5,12 +5,12 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_juicefs.tasks.config.httpd
+- name: ctlabs_juicefs.tasks.config.juicefs
   template:
     src  : "{{ ctlabs_juicefs.defaults.config[os_family].template }}"
     dest : "{{ ctlabs_juicefs.defaults.config[os_family].file     }}"
-  notify: ctlabs_juicefs.handlers.httpd.service.reload
+  notify: ctlabs_juicefs.handlers.juicefs.service.reload
 
-- name: ctlabs_juicefs.tasks.config.httpd.passwd
+- name: ctlabs_juicefs.tasks.config.juicefs.passwd
   shell:
     cmd: htpasswd -bc {{ ctlabs_juicefs.defaults.config[os_family].passwd }} {{ ctlabs_juicefs.defaults.config.auth_user }} {{ ctlabs_juicefs.defaults.config.auth_pass }}

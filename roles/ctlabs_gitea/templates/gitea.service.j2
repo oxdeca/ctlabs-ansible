@@ -1,0 +1,14 @@
+[Unit]
+  Description= Gitea Server
+  Documentation= https://docs.gitea.com/
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_gitea.defaults.service.user }}
+  Group={{ ctlabs_gitea.defaults.service.group }}
+  Restart=on-failure
+  ExecStart="{{ ctlabs_gitea.defaults.config.bin }}"
+
+[Install]
+  WantedBy=multi-user.target
+

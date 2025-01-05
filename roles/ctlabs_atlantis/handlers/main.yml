@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_atlantis/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_atlantis.handlers.atlantis.service.restart
+  service:
+    name    : "{{ ctlabs_atlantis.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_atlantis.handlers.atlantis.service.reload
+  service:
+    name  : "{{ ctlabs_atlantis.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_atlantis.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

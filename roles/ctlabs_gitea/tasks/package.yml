@@ -1,0 +1,45 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_gitea/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_gitea.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_gitea.defaults.config.bindir }}"
+    state : directory
+
+- name: ctlabs_gitea.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_gitea.defaults.pkgs.url    }}"
+    dest : "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_gitea.tasks.package.copy
+  copy:
+    src : "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
+    dest: "{{ ctlabs_gitea.defaults.pkgs.tmptar }}"
+
+- name: ctlabs_gitea.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_gitea.defaults.pkgs.tmptar   }}"
+    dest : "{{ ctlabs_gitea.defaults.config.bindir }}"
+    remote_src: true
+
+- name: ctlabs_gitea.tasks.package.install
+  file:
+    src   : "{{ ctlabs_gitea.defaults.config.bindir + '/' + ctlabs_gitea.defaults.pkgs.name + '-' + ctlabs_gitea.defaults.pkgs.version }}"
+    dest  : "{{ ctlabs_gitea.defaults.config.bindir + '/' + ctlabs_gitea.defaults.pkgs.name }}"
+    state : link
+
+- name: ctlabs_gitea.tasks.package.group
+  group:
+    name   : "{{ ctlabs_gitea.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_gitea.tasks.package.user
+  user:
+    name   : "{{ ctlabs_gitea.defaults.service.user  }}"
+    group  : "{{ ctlabs_gitea.defaults.service.group }}"
+    system : true

@@ -1,0 +1,43 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_atlantis/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  atlantis: 0.32.0
+
+ctlabs_atlantis:
+  defaults:
+    pkgs:
+      debian:
+        - name : git
+        - name : terraform
+      redhat:
+        - name : git
+        - name : terraform
+      gitea:
+        version : "{{ versions.atlantis }}"
+        url     : "https://github.com/runatlantis/atlantis/releases/download/v{{ versions.atlantis }}/atlantis_linux_amd64.zip"
+        dir     : /opt/atlantis
+    config:
+      cfgdir   : /etc/atlantis
+      datadir  : /data
+      file     : app.ini
+      template : app.ini.j2
+      listen   : 3000
+    service:
+      name     : atlantis.service
+      template : atlantis.service.j2
+      user     : atlantis
+      group    : atlantis
+    logrotate:
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+    - debian11
+    - kali2024

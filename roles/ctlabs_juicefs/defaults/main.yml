@@ -20,7 +20,7 @@ ctlabs_juicefs:
         url    : "https://d.juicefs.com/juicefs/releases/download/v{{ versions.juicefs }}/juicefs-{{ versions.juicefs }}-linux-amd64.tar.gz"
         tmptar : /tmp/juicefs.tar.gz
     install:
-      dir      : /opt
+      dir      : "/opt/juicefs-{{ versions.juicefs }}"
       tar_dir  : "/opt/juicefs-{{ versions.juicefs }}"
       root_dir : /opt/juicefs
     service:

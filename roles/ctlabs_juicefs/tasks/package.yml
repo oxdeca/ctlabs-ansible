@@ -22,13 +22,18 @@
     src  : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
     dest : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
 
+- name: ctlabs_juicefs.tasks.package.dir
+  file:
+    path  : "{{ ctlabs_juicefs.defaults.install.dir }}"
+    state : directory
+
 - name: ctlabs_juicefs.tasks.package.untar
   unarchive:
     src  : "{{ ctlabs_juicefs.defaults.pkgs.jfs.tmptar }}"
     dest : "{{ ctlabs_juicefs.defaults.install.dir    }}"
     remote_src: true
 
-- name: ctlabs_juicefs.tasks.package.link
+- name: ctlabs_juicefs.tasks.package.link.dir
   file:
     src   : "{{ ctlabs_juicefs.defaults.install.tar_dir  }}"
     dest  : "{{ ctlabs_juicefs.defaults.install.root_dir }}"

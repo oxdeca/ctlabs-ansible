@@ -509,3 +509,12 @@
   tags  : guacamole
   roles :
     - roles/ctlabs_guacamole
+
+# -----------------------------------------------------------------------------
+# ctlabs_juicefs
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.juicefs
+  hosts : localhost
+  tags  : juicefs
+  roles :
+    - roles/ctlabs_juicefs

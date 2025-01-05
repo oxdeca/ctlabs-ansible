@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_atlantis/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_atlantis
+    - ctlabs_atlantis.precheck
+    - ctlabs_atlantis.package
+    - ctlabs_atlantis.config
+    - ctlabs_atlantis.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_atlantis
+    - ctlabs_atlantis.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_atlantis
+    - ctlabs_atlantis.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_atlantis
+    - ctlabs_atlantis.service
+

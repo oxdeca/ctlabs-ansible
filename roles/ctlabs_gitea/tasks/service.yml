@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_gitea/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_gitea.tasks.service.create
+  template:
+    src  : "{{ ctlabs_gitea.defaults.service.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_gitea.defaults.service.name }}"
+  notify: ctlabs_gitea.handlers.systemd.reload
+
+- name: ctlabs_gitea.tasks.service.start
+  service:
+    name  : "{{ ctlabs_gitea.defaults.service.name }}"
+    state : started

@@ -1,0 +1,14 @@
+[Unit]
+  Description= Atlantis Server
+  Documentation= https://www.runatlantis.io/docs.html
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_atlantis.defaults.service.user }}
+  Group={{ ctlabs_atlantis.defaults.service.group }}
+  Restart=on-failure
+  ExecStart="{{ ctlabs_atlantis.defaults.config.bin }}"
+
+[Install]
+  WantedBy=multi-user.target
+

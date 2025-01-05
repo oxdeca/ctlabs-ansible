@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_gitea/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_gitea
+    - ctlabs_gitea.precheck
+    - ctlabs_gitea.package
+    - ctlabs_gitea.config
+    - ctlabs_gitea.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_gitea
+    - ctlabs_gitea.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_gitea
+    - ctlabs_gitea.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_gitea
+    - ctlabs_gitea.service
+
