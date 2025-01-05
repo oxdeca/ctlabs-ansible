@@ -5,6 +5,12 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_gitea.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_gitea.defaults.pkgs[os_family] }}"
+
 - name: ctlabs_gitea.tasks.package.group
   group:
     name   : "{{ ctlabs_gitea.defaults.service.group }}"

@@ -1,36 +1,15 @@
 ---
 
-{# ------------------------------------------------------------------------------ #}
-{# File        : ctlabs_atlantis/templates/atlantis.yml.j2                        #}
-{# Description : atlantis configuration file                                      #}
-{# ------------------------------------------------------------------------------ #}
+# ------------------------------------------------------------------------------
+# File        : ctlabs_atlantis/templates/atlantis.yml.j2
+# Description : atlantis configuration file
+# ------------------------------------------------------------------------------
 
-atlantis:
-  url: http://localhost:4141 # Replace with your Atlantis server URL
-  git:
-    provider: "gitea"
-    host     : "https://your-gitea-server.com"
-    token    : "your_gitea_access_token" 
-    username : "your_username" 
-  repos:
-    - owner     : "your-organization"
-      repository: "your-repository"
-      branches  :
-        - "main"
-  secrets:
-    # Configure secrets for your Terraform configurations (optional)
-    - name: AWS_ACCESS_KEY_ID
-      value: "your_aws_access_key_id"
-    - name: AWS_SECRET_ACCESS_KEY
-      value: "your_aws_secret_access_key" 
-  # Optional: Configure webhooks
-  webhooks:
-    enabled: true
-    secret: "your_webhook_secret" # Generate a random secret
-
-# Optional: Configure Terraform settings
-terraform:
-  version: "1.3.7" # Specify the desired Terraform version 
-
-# Optional: Configure Atlantis behavior
-atlantis:
+#
+# gitea
+#
+gitea-user     : ctlabs
+gitea-token    : 27da3ef97998e2f8769c71914a78a7e7c9c5739e
+gitea-base-url : http://git1.ctlabs.internal:3000
+repo-allowlist : git1.ctlabs.internal/ctlabs/labs
+automerge      : true
