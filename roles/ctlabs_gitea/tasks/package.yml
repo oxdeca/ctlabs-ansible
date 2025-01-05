@@ -19,7 +19,7 @@
 - name: ctlabs_gitea.tasks.package.copy
   copy:
     src  : "{{ ctlabs_gitea.defaults.pkgs.gitea.tmpdir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
-    dest : "{{ ctlabs_gitea.defaults.pkgs.gitea.dir    + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
+    dest : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
     mode : '0750'
 
 - name: ctlabs_gitea.tasks.package.install
