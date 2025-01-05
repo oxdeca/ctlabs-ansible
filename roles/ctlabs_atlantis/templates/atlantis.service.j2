@@ -7,7 +7,7 @@
   User={{ ctlabs_atlantis.defaults.service.user }}
   Group={{ ctlabs_atlantis.defaults.service.group }}
   Restart=on-failure
-  ExecStart={{ ctlabs_atlantis.defaults.pkgs.atlantis.bindir + '/' + ctlabs_atlantis.defaults.config.bin }} --config {{ ctlabs_atlantis.defaults.config.cfgdir + '/' + ctlabs_atlantis.defaults.config.file }}
+  ExecStart={{ ctlabs_atlantis.defaults.pkgs.atlantis.bindir + '/' + ctlabs_atlantis.defaults.pkgs.atlantis.bin }} --config {{ ctlabs_atlantis.defaults.config.cfgdir + '/' + ctlabs_atlantis.defaults.config.file }}
 
 [Install]
   WantedBy=multi-user.target
