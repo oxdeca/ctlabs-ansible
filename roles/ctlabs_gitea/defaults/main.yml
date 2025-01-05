@@ -28,7 +28,7 @@ ctlabs_gitea:
       template : app.ini.j2
       listen   : 3000
     service:
-      name     : gitea
+      name     : gitea.service
       template : gitea.service.j2
       user     : git
       group    : git
