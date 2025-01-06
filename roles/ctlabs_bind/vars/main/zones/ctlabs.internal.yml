@@ -171,3 +171,10 @@ zone_ctlabs_internal:
     type  : A
     value : 192.168.30.12
 
+  - name  : git1
+    type  : A
+    value : 192.168.30.32
+
+  - name  : ats1
+    type  : A
+    value : 192.168.30.33
