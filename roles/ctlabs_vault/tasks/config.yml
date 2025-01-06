@@ -20,13 +20,13 @@
   block:
     - name: ctlabs_vault.tasks.config.server.vault.data.dir
       file:
-        path : "{{ ctlabs_vault.defaults.config.data }}"
-        state: directory
+        path : "{{ ctlabs_vault.defaults.config.server.data }}"
         owner: "{{ ctlabs_vault.defaults.service.user  }}"
         group: "{{ ctlabs_vault.defaults.service.group }}"
+        state: directory
 
     - name: ctlabs_vault.tasks.config.server.vault
       template:
-        src  : "{{ ctlabs_vault.defaults.config.template }}"
-        dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.file }}"
+        src  : "{{ ctlabs_vault.defaults.config.server.template }}"
+        dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.server.file }}"
       notify: ctlabs_vault.handlers.service.vault.reload

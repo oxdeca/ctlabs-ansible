@@ -31,6 +31,7 @@ ctlabs_vault:
       dir   : /etc/vault.d
       server:
         gui      : true
+        bin      : /usr/bin/vault
         data     : /opt/vault/data
         file     : vault.hcl
         template : vault.hcl.j2

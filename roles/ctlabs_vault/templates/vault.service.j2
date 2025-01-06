@@ -1,0 +1,13 @@
+[Unit]
+  Description= Vault Server
+  Documentation= https://www.vaultproject.io/community
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_vault.defaults.service.user }}
+  Group={{ ctlabs_vault.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_vault.defaults.config.server.bin }} server -config {{ ctlabs_vault.defaults.config.dir + '/' + ctlabs_vault.defaults.config.server.file }}
+
+[Install]
+  WantedBy=multi-user.target
