@@ -64,3 +64,9 @@
     name   : "{{ ctlabs_atlantis.defaults.service.user  }}"
     group  : "{{ ctlabs_atlantis.defaults.service.group }}"
     system : true
+
+- name: ctlabs_atlantis.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_atlantis.defaults.service.user   }}"
+    group : "{{ ctlabs_atlantis.defaults.service.group  }}"
+    groups: "{{ ctlabs_atlantis.defaults.service.groups }}"

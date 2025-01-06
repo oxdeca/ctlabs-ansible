@@ -44,6 +44,7 @@ ctlabs_atlantis:
       template : atlantis.service.j2
       user     : atlantis
       group    : atlantis
+      groups   : [certs]
     logrotate:
   os:
     - redhat7
