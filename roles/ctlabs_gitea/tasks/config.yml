@@ -23,10 +23,13 @@
          -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}     \
          admin user create                                                                          \
          --must-change-password=false                                                               \
-         --username atlantis                                                                        \
-         --password 'secret123!'                                                                    \
-         --email    atlantis@ctlabs.internal                                                        \
-         --admin
+         --username "{{ item.user  }}"                                                              \
+         --password "{{ item.pass  }}"                                                              \
+         --email    "{{ item.email }}"                                                              \
+         "{{ '--admin' if item.admin == true else '' }}"
+  loop:
+    - { "user" : "atlantis", "pass" : "secret123!", "email" : "atlantis@ctlabs.internal", "admin" : false }
+    - { "user" : "ctlabs",   "pass" : "secret123!", "email" : "ctlabs@ctlabs.internal",   "admin" : true  }
 
 - name: ctlabs_gitea.tasks.config.user.atlantis.token
   register: __ctlabs_gitea_atlantis_token__
