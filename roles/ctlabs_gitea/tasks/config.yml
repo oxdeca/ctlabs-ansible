@@ -16,18 +16,28 @@
     dest : "{{ ctlabs_gitea.defaults.config.cfgdir }}/{{ ctlabs_gitea.defaults.config.file }}"
   notify: ctlabs_gitea.handlers.gitea.service.restart
 
-- name: ctlabs_gitea.tasks.config.user.ctlabs.create
+- name: ctlabs_gitea.tasks.config.users.create
   command: |
-    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                               \
-         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }}               \
-         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }} admin user create \
-         --must-change-password=false                                                                             \
-         --username atlantis                                                                                      \
-         --password 'secret123!'                                                                                  \
-         --email    atlantis@ctlabs.internal                                                                      \
-         --access-token                                                                                           \
+    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
+         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
+         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}     \
+         admin user create                                                                          \
+         --must-change-password=false                                                               \
+         --username atlantis                                                                        \
+         --password 'secret123!'                                                                    \
+         --email    atlantis@ctlabs.internal                                                        \
          --admin
+
+- name: ctlabs_gitea.tasks.config.user.atlantis.token
   register: __ctlabs_gitea_atlantis_token__
+  command: |
+    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
+         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
+         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}     \
+         admin user generate-access-token                                                           \
+         --username   atlantis                                                                      \
+         --token-name atlantis                                                                      \
+         --scopes 'write:issue,write:repository'
 
 #- debug: "msg={{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"
 
