@@ -35,6 +35,11 @@
         repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
       loop: "{{ ctlabs_vault.defaults.repos[os_family] }}"
 
+- name: ctlabs_vault.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_vault.defaults.pkgs[os_family] }}"
 
 - name: ctlabs_vault.tasks.package.group.certs.member
   user:
