@@ -32,6 +32,7 @@ ctlabs_gitea:
       template : gitea.service.j2
       user     : git
       group    : git
+      groups   : [certs]
     logrotate:
   os:
     - redhat7

@@ -49,3 +49,9 @@
     src   : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.obin }}"
     dest  : "{{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin  }}"
     state : link
+
+- name: ctlabs_gitea.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_gitea.defaults.service.user   }}"
+    group : "{{ ctlabs_gitea.defaults.service.group  }}"
+    groups: "{{ ctlabs_gitea.defaults.service.groups }}"
