@@ -15,3 +15,37 @@
   service:
     name  : "{{ ctlabs_gitea.defaults.service.name }}"
     state : started
+
+- name: ctlabs_gitea.tasks.service.users.create
+  command: |
+    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
+         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
+         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}     \
+         admin user create                                                                          \
+         --must-change-password=false                                                               \
+         --username "{{ item.user  }}"                                                              \
+         --password "{{ item.pass  }}"                                                              \
+         --email    "{{ item.email }}"                                                              \
+         "{{ '--admin' if item.admin == true else '' }}"
+  loop:
+    - { "user" : "atlantis", "pass" : "secret123!", "email" : "atlantis@ctlabs.internal", "admin" : false }
+    - { "user" : "ctlabs",   "pass" : "secret123!", "email" : "ctlabs@ctlabs.internal",   "admin" : true  }
+
+- name: ctlabs_gitea.tasks.service.user.atlantis.token
+  register: __ctlabs_gitea_atlantis_token__
+  command: |
+    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
+         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
+         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }}     \
+         admin user generate-access-token                                                           \
+         --username   atlantis                                                                      \
+         --token-name atlantis                                                                      \
+         --scopes 'write:issue,write:repository'
+
+#- debug: "msg={{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"
+
+- name: ctlabs_gitea.tasks.service.token.atlantis.fact
+  delegate_to: localhost
+  delegate_facts: true
+  set_fact:
+    ctlabs_gitea_atlantis_token: "{{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"
