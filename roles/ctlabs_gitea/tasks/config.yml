@@ -16,10 +16,23 @@
     dest : "{{ ctlabs_gitea.defaults.config.cfgdir }}/{{ ctlabs_gitea.defaults.config.file }}"
   notify: ctlabs_gitea.handlers.gitea.service.restart
 
-#- name: ctlabs_gitea.tasks.config.datadir.ownership
-#  file:
-#    dest    : "{{ ctlabs_gitea.defaults.config.datadir }}"
-#    owner   : "{{ ctlabs_gitea.defaults.config.user    }}"
-#    group   : "{{ ctlabs_gitea.defaults.config.group   }}"
-#    recurse : true
+- name: ctlabs_gitea.tasks.config.user.ctlabs.create
+  command: |
+    sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                               \
+         {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }}               \
+         -c {{ ctlabs_gitea.defaults.config.cfgdir + '/' + ctlabs_gitea.defaults.config.file }} admin user create \
+         --must-change-password=false                                                                             \
+         --username atlantis                                                                                      \
+         --password 'secret123!'                                                                                  \
+         --email    atlantis@ctlabs.internal                                                                      \
+         --access-token                                                                                           \
+         --admin
+  register: __ctlabs_gitea_atlantis_token__
 
+#- debug: "msg={{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"
+
+- name: ctlabs_gitea.tasks.config.token.atlantis.fact
+  delegate_to: localhost
+  delegate_facts: true
+  set_fact:
+    ctlabs_gitea_atlantis_token: "{{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"

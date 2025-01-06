@@ -23,10 +23,13 @@ LOG_SQL                           = false
 ROOT                              = /opt/gitea/data/gitea-repositories
 
 [server]
-SSH_DOMAIN                        = git1.ctlabs.internal
-DOMAIN                            = git1.ctlabs.internal
+SSH_DOMAIN                        = {{ ansible_nodename }}
+DOMAIN                            = {{ ansible_nodename }}
 HTTP_PORT                         = 3000
-ROOT_URL                          = http://git1.ctlabs.internal:3000/
+PROTOCOL                          = https
+ROOT_URL                          = https://{{ ansible_nodename }}:3000/
+CERT_FILE                         = /etc/ca-ctlabs/{{ ansible_nodename }}.crt
+KEY_FILE                          = /etc/ca-ctlabs/{{ ansible_nodename }}.prv
 APP_DATA_PATH                     = /opt/gitea/data
 DISABLE_SSH                       = false
 SSH_PORT                          = 22
