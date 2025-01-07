@@ -12,6 +12,7 @@
     - ctlabs_gitea.package
     - ctlabs_gitea.config
     - ctlabs_gitea.service
+    - ctlabs_gitea.setup
 
 - import_tasks: package.yml
   tags:
@@ -28,3 +29,7 @@
     - ctlabs_gitea
     - ctlabs_gitea.service
 
+- import_tasks: setup.yml
+  tags:
+    - ctlabs_gitea
+    - ctlabs_gitea.setup

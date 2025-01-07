@@ -16,6 +16,11 @@ ctlabs_atlantis:
           type: main
           url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if os in ['redhat7'] else '$releasever' }}/$basearch/stable"
           key : https://rpm.releases.hashicorp.com/gpg
+        - name: gcp-sdk
+          type: main
+          desc: GCP SDK
+          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if os in ['redhat7'] else '$releasever' }}-$basearch"
+          key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
       debian:
         - name: hashicorp
           type: main
@@ -28,6 +33,7 @@ ctlabs_atlantis:
       redhat:
         - name : git
         - name : terraform
+        - name : google-cloud-cli
       atlantis:
         version : "{{ versions.atlantis }}"
         bin     : atlantis
