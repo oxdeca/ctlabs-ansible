@@ -15,3 +15,7 @@ repo-allowlist : git1.ctlabs.internal/ctlabs/labs
 automerge      : true
 ssl-cert-file  : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
 ssl-key-file   : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+
+web-basic-auth : true
+web-username   : ctlabs
+web-password   : secret123!
