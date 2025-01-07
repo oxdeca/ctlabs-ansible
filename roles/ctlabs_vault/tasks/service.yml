@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_vault.tasks.service.vault.start
-  when: CTLABS_VAULT_INSTALL_TYPE == "server"
+  when: CTLABS_VAULT_SERVER == 'true'
   service:
     name    : "{{ ctlabs_vault.defaults.service.name }}"
     enabled : true

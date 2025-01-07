@@ -16,7 +16,7 @@
 # Server
 #
 - name: ctlabs_vault.tasks.config.server
-  when: CTLABS_VAULT_INSTALL_TYPE == "server"
+  when: CTLABS_VAULT_SERVER == 'true'
   block:
     - name: ctlabs_vault.tasks.config.server.vault.data.dir
       file:
