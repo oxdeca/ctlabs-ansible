@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 # env vars
-CTLABS_VAULT_INSTALL_TYPE: client
+CTLABS_VAULT_SERVER: 'false'
 
 # role defaults
 ctlabs_vault:
