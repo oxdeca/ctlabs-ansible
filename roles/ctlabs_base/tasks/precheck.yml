@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_base.tasks.precheck.supported_os
+  assert:
+    that     : os is in ctlabs_base.os
+    fail_msg : "OS[{{os}}] is not supported!"
+
+- name: ctlabs_base.tasks.precheck.virt_type
+  assert:
+    that     : virt_type is in ( 'kvm' )
+    fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+
+- name: ctlabs_base.tasks.precheck.local_fact
+  template:
+    src  : "{{ ctlabs_base.defaults.config.local_fact.template }}"
+    dest : "{{ ctlabs_base.defaults.config.local_fact.file     }}"
+    mode : '0750'
+    owner: root
+    group: root
+
+- name: ctlabs_base.tasks.precheck.reread_facts
+  setup:
+
+- name: ctlabs_base.tasks.precheck.disks
+  set_fact:
+    ctlabs_base_disks: "{{ ansible_local.ctlabs_base_disks if ansible_local.ctlabs_base_disks is defined else [] }}"

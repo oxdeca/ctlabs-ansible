@@ -9,4 +9,3 @@
   assert:
     that: os is in ctlabs_gitea.os
     fail_msg: "OS [{{ os }}] is not supported!"
-

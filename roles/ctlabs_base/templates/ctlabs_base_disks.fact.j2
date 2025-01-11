@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/templates/ctlabs_base_disks.fact.j2
+# Description : dynamic local facts for ctlabs_base
+# ------------------------------------------------------------------------------
+
+import requests
+
+URL    = "http://metadata.google.internal/computeMetadata/v1/instance/attributes/ctlabs_base_disks"
+HEADER = {"Metadata-Flavor": "Google"}
+
+try:
+    response = requests.get(URL, headers=HEADER)
+    data     = response.text
+    response.raise_for_status()  # Raise an exception for unsuccessful requests
+except requests.exceptions.RequestException as e:
+    data = "[]"  # Empty array
+
+print(data)

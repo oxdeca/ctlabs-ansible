@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+# attached block disks
+
+- name: ctlabs_base.tasks.config.disk.format
+  filesystem:
+    dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+    fstype   : "{{ item.fstype }}"
+    resizefs : false
+  loop: "{{ ctlabs_base_disks }}"
+
+- name: ctlabs_base.tasks.config.disk.mount
+  mount:
+    src   : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+    path  : "{{ item.path }}"
+    fstype: "{{ item.fstype }}"
+    opts  : "{{ item.opts | default('defaults') }}"
+    state : mounted
+  loop: "{{ ctlabs_base_disks }}"
+
+- name: ctlabs_base.tasks.config.disk.resize
+  filesystem:
+    dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+    fstype   : "{{ item.fstype }}"
+    resizefs : true
+  loop: "{{ ctlabs_base_disks }}"

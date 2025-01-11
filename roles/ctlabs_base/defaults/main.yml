@@ -1,0 +1,44 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ar_plugin_redhat: "{{ 'yum-plugin-artifact-registry' if ansible_distribution_major_version == '7' else 'dnf-plugin-artifact-registry' }}"
+
+# role defaults
+ctlabs_base:
+  defaults:
+    repos:
+      redhat:
+        - name: ar-plugin
+          desc: Artifact Registry Plugin
+          type: main
+          url : "https://packages.cloud.google.com/yum/repos/{{ ar_plugin_redhat }}-stable"
+          key : |-
+            https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      debian:
+    pkgs:
+      redhat:
+        - name: "{{ ar_plugin_redhat }}"
+      debian:
+        - name : xfsprogs
+        - name : apt-transport-artifact-registry
+    config:
+      gce_disk_prefix: /dev/disk/by-id/google-
+      local_fact:
+        template: ctlabs_base_disks.fact.j2
+        file    : /etc/ansible/facts.d/ctlabs_base_disks.fact
+    sysconfig:
+    service:
+  os:
+    - redhat7
+    - redhat8
+    - redhat9
+    - centos7
+    - centos8
+    - centos9
+    - debian11
+    - debian12
