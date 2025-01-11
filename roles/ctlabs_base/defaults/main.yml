@@ -23,6 +23,24 @@ ctlabs_base:
     pkgs:
       redhat:
         - name: "{{ ar_plugin_redhat }}"
+        - name: lvm2
+        - name: tmux
+        - name: vim
+        - name: graphviz
+        - name: epel-release
+        - name: htop
+        - name: ruby
+        - name: irb
+        - name: podman-docker
+        - name: nc
+        - name: perf
+        - name: bpftrace
+        - name: wireshark-cli
+        - name: tcpdump
+        - name: ipvsadm
+        - name: qemu-img
+        - name: cloud-utils-growpart
+        - name: make
       debian:
         - name : xfsprogs
         - name : apt-transport-artifact-registry
@@ -31,6 +49,12 @@ ctlabs_base:
       local_fact:
         template: ctlabs_base_disks.fact.j2
         file    : /etc/ansible/facts.d/ctlabs_base_disks.fact
+      profiled:
+        template: bashrc_kali.sh.j2
+        file    : /etc/profile.d/bashrc_kali.sh
+      tmux:
+        template: tmux.conf.j2
+        file    : /etc/tmux.conf
     sysconfig:
     service:
   os:

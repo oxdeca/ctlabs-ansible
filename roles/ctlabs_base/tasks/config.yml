@@ -29,3 +29,17 @@
     fstype   : "{{ item.fstype }}"
     resizefs : true
   loop: "{{ ctlabs_base_disks }}"
+
+
+# system configs
+
+- name: ctlabs_base.tasks.config.tmux
+  template:
+    src  : "{{ ctlabs_base.defaults.config.tmux.template }}"
+    dest : "{{ ctlabs_base.defaults.config.tmux.file     }}"
+    
+- name: ctlabs_base.tasks.config.profiled
+  template:
+    src  : "{{ ctlabs_base.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_base.defaults.config.profile.file }}"
+
