@@ -1,0 +1,16 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/templates/bashrc_ctlabs.sh.j2
+# Description : aliases and functions used by ctlabs
+# ------------------------------------------------------------------------------
+
+alias vi="/usr/bin/vim"
+alias pva=". ~/virtenv/bin/activate"
+alias pve="deactivate"
+alias kubectl="/usr/bin/k3s kubectl"
+alias crictl="/usr/bin/k3s crictl"
+alias ctr="/usr/bin/k3s ctr"
+alias kc=kubectl
+
+function enter() {
+  docker exec -it -w ~/ ${1} bash
+}

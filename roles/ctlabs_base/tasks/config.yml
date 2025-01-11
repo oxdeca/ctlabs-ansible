@@ -40,6 +40,6 @@
 
 - name: ctlabs_base.tasks.config.profiled
   template:
-    src  : "{{ ctlabs_base.defaults.config.profiled.template }}"
-    dest : "{{ ctlabs_base.defaults.config.profiled.file }}"
-
+    src  : "{{ item.template }}"
+    dest : "{{ item.file     }}"
+  loop: "{{ ctlabs_base.defaults.config.profild }}"

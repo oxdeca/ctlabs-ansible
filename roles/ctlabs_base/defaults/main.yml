@@ -50,8 +50,10 @@ ctlabs_base:
         template: ctlabs_base_disks.fact.j2
         file    : /etc/ansible/facts.d/ctlabs_base_disks.fact
       profiled:
-        template: bashrc_kali.sh.j2
-        file    : /etc/profile.d/bashrc_kali.sh
+        - template: bashrc_kali.sh.j2
+          file    : /etc/profile.d/bashrc_kali.sh
+        - template: bashrc_ctlabs.j2
+          file    : /etc/profile.d/bashrc_ctlabs.sh
       tmux:
         template: tmux.conf.j2
         file    : /etc/tmux.conf
