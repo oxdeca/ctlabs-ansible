@@ -1,0 +1,54 @@
+---
+
+# -----------------------------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/playbooks/init.yml
+# Description : post-provision GCE-VMs
+# -----------------------------------------------------------------------------------------------------------
+
+- name  : ctlabs-ansible.playbooks.init.setup
+  hosts : localhost
+  tags  : setup
+  tasks :
+    - name: ctlabs-ansible.playbooks.init.setup.local_facts.dir
+      file:
+        owner: root
+        group: root
+        mode : '0640'
+        path : /etc/ansible/facts.d
+        state: directory
+
+- name  : ctlabs-ansible.playbooks.init.base
+  hosts : localhost
+  tags  : base
+  roles :
+    - role : roles/ctlabs_base
+
+- name  : ctlabs-ansible.playbooks.init.vault
+  hosts : localhost
+  tags  : vault
+  roles :
+    - role : roles/ctlabs_vault
+
+- name  : ctlabs-ansible.playbooks.init.sssd
+  hosts : localhost
+  tags  : sssd
+  roles :
+    - roles/ctlabs_sssd
+
+- name  : ctlabs-ansible.playbooks.init.sshd
+  hosts : localhost
+  tags  : sshd
+  roles :
+    - roles/ctlabs_sshd
+
+- name  : ctlabs-ansible.playbooks.init.sudo
+  hosts : localhost
+  tags  : sudo
+  roles :
+    - roles/ctlabs_sudo
+
+- name  : ctlabs-ansible.playbooks.init.node_exporter
+  hosts : localhost
+  tags  : node_exporter
+  roles :
+    - roles/ctlabs_node_exporter
