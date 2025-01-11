@@ -37,9 +37,9 @@
   template:
     src  : "{{ ctlabs_base.defaults.config.tmux.template }}"
     dest : "{{ ctlabs_base.defaults.config.tmux.file     }}"
-    
+
 - name: ctlabs_base.tasks.config.profiled
   template:
-    src  : "{{ ctlabs_base.defaults.config.profile.template }}"
-    dest : "{{ ctlabs_base.defaults.config.profile.file }}"
+    src  : "{{ ctlabs_base.defaults.config.profiled.template }}"
+    dest : "{{ ctlabs_base.defaults.config.profiled.file }}"
 
