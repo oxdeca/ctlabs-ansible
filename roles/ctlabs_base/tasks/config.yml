@@ -42,4 +42,4 @@
   template:
     src  : "{{ item.template }}"
     dest : "{{ item.file     }}"
-  loop: "{{ ctlabs_base.defaults.config.profild }}"
+  loop: "{{ ctlabs_base.defaults.config.profiled }}"
