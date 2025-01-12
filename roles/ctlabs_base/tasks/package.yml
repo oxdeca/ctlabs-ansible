@@ -38,6 +38,6 @@
   loop: "{{ ctlabs_base.defaults.pkgs[os_family] }}"
 
 - name: ctlabs.tasks.package.gems.installed
-  gems:
+  gem:
     name: "{{ item.name }}"
   loop: "{{ ctlabs_base.defaults.pkgs.gems }}"
