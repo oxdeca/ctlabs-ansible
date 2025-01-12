@@ -44,6 +44,10 @@ ctlabs_base:
       debian:
         - name : xfsprogs
         - name : apt-transport-artifact-registry
+      gems:
+        - name: webrick
+        - name: rackup
+        - name: sinatra
     config:
       gce_disk_prefix: /dev/disk/by-id/google-
       local_fact:

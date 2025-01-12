@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_gitea.tasks.setup.users.create
+  ignore_errors: true
   command: |
     sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
          {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
@@ -21,6 +22,7 @@
     - { "user" : "ctlabs",   "pass" : "secret123!", "email" : "ctlabs@ctlabs.internal",   "admin" : true  }
 
 - name: ctlabs_gitea.tasks.setup.user.atlantis.token
+  ignore_errors: true
   register: __ctlabs_gitea_atlantis_token__
   command: |
     sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
@@ -34,6 +36,7 @@
 #- debug: "msg={{ __ctlabs_gitea_atlantis_token__.stdout_lines[0].split(' ')[5] }}"
 
 - name: ctlabs_gitea.tasks.setup.token.atlantis.fact
+  ignore_errors: true
   delegate_to: localhost
   delegate_facts: true
   set_fact:
@@ -42,3 +45,8 @@
 #- name: ctlabs_gitea.tasks.setup.repository.create
 
 #- name: ctlabs_gitea.tasks.setup.repository.config
+
+- name: ctlabs_gitea.tasks.setup.script
+  script:
+    cmd       : setup.py
+    executable: /usr/sbin/ip vrf exec default python3

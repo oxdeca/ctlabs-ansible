@@ -21,6 +21,8 @@ ctlabs_gitea:
         url    : "https://dl.gitea.com/gitea/{{ versions.gitea }}/gitea-{{ versions.gitea }}-linux-amd64"
         bindir : /opt/gitea
         tmpdir : /tmp
+      pips:
+        - requests
     config:
       cfgdir   : /etc/gitea
       datadir  : /data

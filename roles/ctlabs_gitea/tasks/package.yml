@@ -55,3 +55,8 @@
     name  : "{{ ctlabs_gitea.defaults.service.user   }}"
     group : "{{ ctlabs_gitea.defaults.service.group  }}"
     groups: "{{ ctlabs_gitea.defaults.service.groups }}"
+
+- name: ctlabs_gitea.tasks.package.pips.installed
+  pip:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_gitea.defaults.pkgs.pips }}"
