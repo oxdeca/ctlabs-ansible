@@ -11,7 +11,7 @@
 gitea-user     : atlantis
 gitea-token    : {{ ctlabs_gitea_atlantis_token }}
 gitea-base-url : https://git1.ctlabs.internal:3000
-repo-allowlist : git1.ctlabs.internal/ctlabs/labs
+repo-allowlist : git1.ctlabs.internal/ctlabs/*
 automerge      : true
 ssl-cert-file  : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
 ssl-key-file   : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
