@@ -16,7 +16,7 @@ def send(method, url, headers, json):
 
 host     = "192.168.30.32:3000"
 headers  = { "accept" : "application/json", "Content-Type" : "application/json" }
-reponame = "myreqpo"
+reponame = "labs"
 
 url     = f"https://{host}/api/v1/user/repos"
 data    = {
