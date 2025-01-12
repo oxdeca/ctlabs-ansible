@@ -39,5 +39,6 @@
 
 - name: ctlabs.tasks.package.gems.installed
   gem:
-    name: "{{ item.name }}"
+    name        : "{{ item.name }}"
+    user_install: false
   loop: "{{ ctlabs_base.defaults.pkgs.gems }}"
