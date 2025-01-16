@@ -35,12 +35,12 @@
 
 - name: ctlabs_node_exporter.tasks.package.group
   group:
-    name   : "{{ ctlabs_node_exporter.defaults.config.group }}"
+    name   : "{{ ctlabs_node_exporter.defaults.service.group }}"
     system : true
 
 - name: ctlabs_node_exporter.tasks.package.user
   user:
-    name   : "{{ ctlabs_node_exporter.defaults.config.user  }}"
-    group  : "{{ ctlabs_node_exporter.defaults.config.group }}"
+    name   : "{{ ctlabs_node_exporter.defaults.service.user  }}"
+    group  : "{{ ctlabs_node_exporter.defaults.service.group }}"
     system : true
 

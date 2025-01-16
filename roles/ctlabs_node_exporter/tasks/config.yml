@@ -15,11 +15,3 @@
     src  : "{{ ctlabs_node_exporter.defaults.config.template }}"
     dest : "{{ ctlabs_node_exporter.defaults.config.cfgdir }}/{{ ctlabs_node_exporter.defaults.config.file }}"
   notify: ctlabs_node_exporter.handlers.node_exporter.service.restart
-
-#- name: ctlabs_node_exporter.tasks.config.datadir.ownership
-#  file:
-#    dest    : "{{ ctlabs_node_exporter.defaults.config.datadir }}"
-#    owner   : "{{ ctlabs_node_exporter.defaults.config.user    }}"
-#    group   : "{{ ctlabs_node_exporter.defaults.config.group   }}"
-#    recurse : true
-
