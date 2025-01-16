@@ -26,11 +26,11 @@ if [ -n "${RCPT}" ]; then
   if [ -f "${FILE}" ]; then
     ${CAT} -  >> ${FILE}
   else
-    ${INSTALL} -D -m 0640 -o mail -g splunk <( ${CAT} - ) "${FILE}"
+    ${INSTALL} -D -m 0640 -o mail -g promtail <( ${CAT} - ) "${FILE}"
 
-    ${CHOWN} mail.splunk ${BASEDIR}/${YEAR}
-    ${CHOWN} mail.splunk ${BASEDIR}/${YEAR}/${MONTH}
-    ${CHOWN} mail.splunk ${BASEDIR}/${YEAR}/${MONTH}/${DAY}
+    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}
+    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}/${MONTH}
+    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}/${MONTH}/${DAY}
 
     ${CHMOD} 0750 ${BASEDIR}/${YEAR}
     ${CHMOD} 0750 ${BASEDIR}/${YEAR}/${MONTH}

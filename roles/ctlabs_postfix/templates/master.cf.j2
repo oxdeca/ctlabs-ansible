@@ -60,3 +60,7 @@ virtual     unix  -       n       n       -       -       virtual
 lmtp        unix  -       -       n       -       -       lmtp
 anvil       unix  -       -       n       -       1       anvil
 scache      unix  -       -       n       -       1       scache
+
+archivemail unix  -       n       n       -       -       pipe
+  flags=BDRhu user=mail:promtail argv=/usr/bin/email_archive.sh ${recipient}
+#  flags=BDRhu user=mail argv=/usr/sbin/cronolog /var/email_archive/{{ ansible_nodename }}/%Y/%m/%d/${recipient}

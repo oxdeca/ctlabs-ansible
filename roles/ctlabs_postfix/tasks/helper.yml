@@ -18,6 +18,12 @@
     dest : /root/mailer.rb
     mode : 0750
 
+- name: ctlabs_postfix.tasks.helper.archive.install
+  copy:
+    src  : email_archive.sh
+    dest : /usr/bin/email_archive.rb
+    mode : 0755
+
 - name: ctlabs_postfix.tasks.logdirs.exist
   file:
     path  : "{{ item }}"
