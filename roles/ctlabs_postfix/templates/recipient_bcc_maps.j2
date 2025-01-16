@@ -1,0 +1,3 @@
+# /etc/postfix/recipient_bcc_maps
+/([^ ]+)@((?![^ ]*(ctlabs\.com))[^ ]*)/   ${1}_at_${2}@bcchost.ctlabs.com
+#/(.*)@((?!.*(ctlabs\.com)).*)/           ${1}_at_${2}@bcchost.ctlabs.com

@@ -1,0 +1,36 @@
+{# ------------------------------------------------------------------------- #}
+{# File: ctlabs_promtail/templates/20_email_archive.job.j2                   #}
+{# ------------------------------------------------------------------------- #}
+
+
+{% if ansible_local.ctlabs_promtail.config.email_archive is defined %}
+# -----------------------------------------------------------------------------
+# Email Archive
+# -----------------------------------------------------------------------------
+- job_name: email
+  pipeline_stages:
+  - multiline:
+      firstline: '^Return-Path:.*$'
+      max_lines: 1000
+  - regex:
+      expression: "\\nDate:\\s+(?P<time>[^\\n]+).*\\nFrom:\\s+(?P<from>[^ \\n]+).*\\nTo:\\s+(?P<rcpt>[^ \\n]+).*\\nSubject:\\s+(?P<subject>[^\\n]+).*\\nMessage-ID:\\s+<(?P<msgid>[^\\n]+)>"
+  - labels:
+      from:
+      rcpt:
+      subject:
+  - labeldrop:
+      - filename
+  - timestamp:
+      source: time
+      format: RFC1123Z
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job        : email_archive
+      host       : {{ ansible_fqdn }}
+      site       :
+      site_group :
+      __path__   : /var/email_archive/{{ ansible_fqdn }}/**/*
+#      __path__   : /var/email_archive/{{ ansible_fqdn }}/*/*/*/*
+{% endif %}

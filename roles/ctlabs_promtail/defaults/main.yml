@@ -36,6 +36,7 @@ ctlabs_promtail:
       templates :
         - 01_forwarder.job.j2
         - 01_syslog.job.j2
+        - 20_email_archive.job.j2
     service:
       name      : promtail.service
       template  : promtail.service.j2
