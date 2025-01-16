@@ -1,0 +1,27 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_postfix/tasks/helper.yml
+# Description : helper scripts
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_postfix.tasks.helper.logger.install
+  copy:
+    src  : logger.rb
+    dest : /root/logger.rb
+    mode : 0750
+
+- name: ctlabs_postfix.tasks.helper.mailer.install
+  copy:
+    src  : mailer.rb
+    dest : /root/mailer.rb
+    mode : 0750
+
+- name: ctlabs_postfix.tasks.logdirs.exist
+  file:
+    path  : "{{ item }}"
+    state : directory
+  loop:
+    - /var/email_archive
+    - /var/apps/logs

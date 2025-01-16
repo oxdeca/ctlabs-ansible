@@ -9,7 +9,7 @@ ctlabs_postfix:
   defaults:
     pkgs:
       - name : postfix
-      - name : mailx
+      - name : "{{ 's-nail' if ansible_distribution_major_version == '9' else 'mailx' }}" 
       - name : postfix-pcre # for RHEL8
     config:
       dir     : /etc/postfix
@@ -33,8 +33,10 @@ ctlabs_postfix:
     service:
       name      : postfix.service
       templates : postfix.service.j2
-    os:
-      - rhel7
-      - rhel8
-      - centos7
-      - centos8
+  os:
+    - redhat7
+    - redhat8
+    - redhat9
+    - centos7
+    - centos8
+    - centos9
