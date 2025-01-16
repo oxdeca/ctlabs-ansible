@@ -94,7 +94,7 @@
           }
 
     - name: ctlabs.playbooks.ctlabs.promtail.local_facts
-      when: ansible_hostname in [h1, h2]
+      when: ansible_hostname in ['h1', 'h2']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_promtail.fact
         content: |
