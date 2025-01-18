@@ -7,7 +7,7 @@
   User={{ ctlabs_node_exporter.defaults.service.user }}
   Group={{ ctlabs_node_exporter.defaults.service.group }}
   Restart=on-failure
-  ExecStart="{{ ctlabs_node_exporter.defaults.config.bin }} --web.config.file={{ ctlabs_node_exporter.defaults.config.server.file }}"
+  ExecStart={{ ctlabs_node_exporter.defaults.config.bin }} --web.config.file={{ ctlabs_node_exporter.defaults.config.server.file }}
 
 [Install]
   WantedBy=multi-user.target
