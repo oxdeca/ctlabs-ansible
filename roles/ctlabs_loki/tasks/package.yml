@@ -5,11 +5,6 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_loki.tasks.package.bindir
-  file:
-    path  : "{{ ctlabs_loki.defaults.config.bindir }}"
-    state : directory
-
 - name: ctlabs_loki.tasks.package.install
   yum:
     name              : "{{ item.url }}"
