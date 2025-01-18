@@ -26,7 +26,7 @@ ctlabs_mimir:
         template : mimir.conf.j2
         tls      :
           crt : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
-          key : "/etc/ca-ctlabs/{{ ansible_nodename }}.key"
+          key : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       alertmanager:
         file     : /etc/mimir/alertmanager.conf
         template : alertmanager.conf.j2

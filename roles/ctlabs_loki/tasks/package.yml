@@ -17,14 +17,9 @@
     state             : present
   loop: "{{ ctlabs_loki.defaults.pkgs }}"
 
-- name: ctlabs_loki.tasks.package.group
-  group:
-    name   : "{{ ctlabs_loki.defaults.config.group }}"
-    system : true
-
-- name: ctlabs_loki.tasks.package.user
+- name: ctlabs_loki.tasks.package.group.certs.member
   user:
-    name   : "{{ ctlabs_loki.defaults.config.user  }}"
-    group  : "{{ ctlabs_loki.defaults.config.group }}"
-    system : true
+    name   : "{{ ctlabs_loki.defaults.service.user  }}"
+    group  : "{{ ctlabs_loki.defaults.service.group }}"
+    groups : "{{ ctlabs_loki.defaults.service.groups}}"
 

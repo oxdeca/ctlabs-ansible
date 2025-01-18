@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions : 
-  loki: 2.8.0
+  loki: 3.3.2
 
 ctlabs_loki:
   defaults:
@@ -19,13 +19,18 @@ ctlabs_loki:
       bindir    : /opt
       tmpdir    : /tmp
       cfgdir    : /etc/loki
-      file      : loki.conf
-      template  : loki.conf.j2
-      user      : loki
-      group     : loki
+      server:
+        file    : loki.conf
+        template: loki.conf.j2
+        tls     :
+          crt: "/etc/ca-ctlabs{{ ansible_nodename }}.crt"
+          key: "/etc/ca-ctlabs{{ ansible_nodename }}.prv"
     service:
       name      : loki.service
       template  : loki.service.j2
+      user      : loki
+      group     : loki
+      groups    : [certs]
   os:
     - rhel7
     - rhel8
