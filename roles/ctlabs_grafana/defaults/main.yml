@@ -21,7 +21,7 @@ ctlabs_grafana:
       ds:
         dir : /etc/grafana/provisioning/datasources
         loki:
-          url     : http://loki.ctlabs.internal:3100
+          url     : https://loki.ctlabs.internal:3100
           file    : loki.yml
           template: loki.yml.j2
         mimir:
