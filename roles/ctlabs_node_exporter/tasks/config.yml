@@ -20,4 +20,4 @@
   template:
     src  : "{{ ctlabs_node_exporter.defaults.config.server.template }}"
     dest : "{{ ctlabs_node_exporter.defaults.config.server.file     }}"
-  notify: ctlabs_node_exporter.handlers.prometheus.service.restart
+  notify: ctlabs_node_exporter.handlers.node_exporter.service.restart
