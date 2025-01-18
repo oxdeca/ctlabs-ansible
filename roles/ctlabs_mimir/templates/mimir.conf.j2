@@ -44,6 +44,9 @@ ruler_storage:
 server:
   http_listen_port: 9009
   log_level: error
+  http_tls_config:
+    cert_file: {{ ctlabs_mimir.defaults.config.server.tls.crt }}
+    key_file : {{ ctlabs_mimir.defaults.config.server.tls.key }}
 
 store_gateway:
   sharding_ring:
@@ -51,7 +54,7 @@ store_gateway:
 
 alertmanager:
   data_dir: /tmp/mimir/alertmanager
-  fallback_config_file: /etc/mimir/alertmanager.conf
+  fallback_config_file: {{ ctlabs_mimir.defaults.config.alertmanager.file }}
   sharding_ring:
     kvstore:
       store: memberlist

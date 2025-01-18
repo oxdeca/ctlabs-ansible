@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions: 
-  mimir: 2.8.0
+  mimir: 2.15.0
 
 ctlabs_mimir:
   defaults:
@@ -17,20 +17,24 @@ ctlabs_mimir:
       url     : "https://github.com/grafana/mimir/releases/download/mimir-{{ versions.mimir }}/mimir-{{ versions.mimir }}_amd64.rpm"
     config:
       cfgdir   : /etc/mimir
-      file     : mimir.conf
-      template : mimir.conf.j2
-      user     : mimir
-      group    : mimir
       listen   : 9090
-      remwruri : http://192.168.20.22:9090/api/v1/write
+      remwruri : "https://{{ ansible_nodename }}:9090/api/v1/write"
       storage  :
         bucket : ctlabs.lab07.mimir
+      server:
+        file     : /etc/mimir/mimir.conf
+        template : mimir.conf.j2
+        tls      :
+          crt : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key : "/etc/ca-ctlabs/{{ ansible_nodename }}.key"
       alertmanager:
-        cfgdir   : /etc/mimir
-        file     : alertmanager.conf
+        file     : /etc/mimir/alertmanager.conf
         template : alertmanager.conf.j2
     service:
       name     : mimir.service
+      user     : mimir
+      group    : mimir
+      groups   : [certs]
     sysconfig:
       file     : /etc/sysconfig/mimir
       template : mimir.sysconfig.j2

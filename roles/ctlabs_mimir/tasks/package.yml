@@ -11,3 +11,8 @@
     disable_gpg_check : "{{ not ctlabs_mimir.defaults.pkgs.chkgpg }}"
     state             : present
 
+- name: ctlabs_mimir.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_mimir.defaults.service.user   }}"
+    group : "{{ ctlabs_mimir.defaults.service.group  }}"
+    groups: "{{ ctlabs_mimir.defaults.service.groups }}"

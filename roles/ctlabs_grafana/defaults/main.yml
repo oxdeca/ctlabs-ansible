@@ -25,15 +25,15 @@ ctlabs_grafana:
           file    : loki.yml
           template: loki.yml.j2
         mimir:
-          url     : http://mimir.ctlabs.internal:9009/prometheus
+          url     : https://mimir.ctlabs.internal:9009/prometheus
           file    : mimir.yml
           template: mimir.yml.j2
       server:
         file     : /etc/grafana/grafana.ini
         template : grafana.ini.j2
         proto    : https
-        cert     : /etc/ca-ctlabs/grafana.ctlabs.internal.crt
-        key      : /etc/ca-ctlabs/grafana.ctlabs.internal.prv
+        cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+        key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       smtp:
         host     : 
         user     :

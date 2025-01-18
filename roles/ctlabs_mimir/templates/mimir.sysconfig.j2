@@ -9,7 +9,7 @@
 LOG_LEVEL="info"
 
 # Custom user defined arguments.
-CUSTOM_ARGS="-target=all,alertmanager --config.file {{ ctlabs_mimir.defaults.config.cfgdir}}/{{ ctlabs_mimir.defaults.config.file }}"
+CUSTOM_ARGS="-target=all,alertmanager --config.file {{ ctlabs_mimir.defaults.config.server.file }}"
 
 # Restart on system upgrade. Default: "true".
 RESTART_ON_UPGRADE="true"
