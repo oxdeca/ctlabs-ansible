@@ -16,9 +16,10 @@
     name  : "{{ ctlabs_gitea.defaults.service.name }}"
     state : started
 
-- name: ctlabs_gitea.tasks.service.up
+- name: ctlabs_gitea.tasks.service.up.wait
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   wait_for:
-    timeout: 5
+    timeout: 30
+    delay  : 2
     port   : 3000
