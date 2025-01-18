@@ -18,8 +18,8 @@ ctlabs_loki:
       tmpdir    : /tmp
       cfgdir    : /etc/loki
       server:
-        file    : loki.conf
-        template: loki.conf.j2
+        file    : config.yml
+        template: config.yml.j2
         tls     :
           crt: "/etc/ca-ctlabs{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs{{ ansible_nodename }}.prv"

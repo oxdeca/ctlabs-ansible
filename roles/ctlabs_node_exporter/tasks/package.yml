@@ -44,3 +44,8 @@
     group  : "{{ ctlabs_node_exporter.defaults.service.group }}"
     system : true
 
+- name: ctlabs_node_exporter.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_node_exporter.defaults.service.user   }}"
+    group : "{{ ctlabs_node_exporter.defaults.service.group  }}"
+    groups: "{{ ctlabs_node_exporter.defaults.service.groups }}"
