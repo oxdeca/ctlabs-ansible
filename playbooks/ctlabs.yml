@@ -114,7 +114,7 @@
             "config" : {
               "node_exporter" : true,
               "remote_write"  : {
-                "uri" : "http://mimir.ctlabs.internal:9009/api/v1/push"
+                "uri" : "https://mimir.ctlabs.internal:9009/api/v1/push"
               }
             }
           }

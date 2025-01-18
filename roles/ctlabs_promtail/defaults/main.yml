@@ -5,17 +5,20 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+versions:
+  promtail: 3.3.2
+
 ctlabs_promtail:
   defaults:
     pkgs:
       redhat:
         - name    : promtail
-          version : 2.9.1.x86_64
-          url     : https://github.com/grafana/loki/releases/download/v2.9.1/promtail-2.9.1.x86_64.rpm
+          version : "{{ versions.promtail }}.x86_64"
+          url     : "https://github.com/grafana/loki/releases/download/v{{ versions.promtail }}/promtail-{{ versions.promtail }}.x86_64.rpm"
       debian:
         - name    : promtail
-          version : 2.9.1_amd64
-          url     : https://github.com/grafana/loki/releases/download/v2.9.1/promtail_2.9.1_amd64.deb
+          version : "{{ versions.promtail }}_amd64"
+          url     : "https://github.com/grafana/loki/releases/download/v{{ versions.promtail }}/promtail_{{ versions.promtail }}_amd64.deb"
     config:
       journald:
         dir  : /var/log/journal
@@ -32,7 +35,7 @@ ctlabs_promtail:
       user      : promtail
       group     : promtail
       groups    : [syslog,systemd-journal]
-      loki_url  : http://192.168.20.23:3100/loki/api/v1/push
+      loki_url  : https://loki.ctlabs.internal:3100/loki/api/v1/push
       templates :
         - 01_forwarder.job.j2
         - 01_syslog.job.j2

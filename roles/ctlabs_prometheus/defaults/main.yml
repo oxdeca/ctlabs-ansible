@@ -26,7 +26,7 @@ ctlabs_prometheus:
       template     : prometheus.conf.j2
       listen       : 9090
       remote_write :
-        uri : https://mimir.ctlabs.internal:9090/api/v1/write
+        uri : https://mimir.ctlabs.internal:9009/api/v1/write
       targets  :
         - localhost:9090
       server :

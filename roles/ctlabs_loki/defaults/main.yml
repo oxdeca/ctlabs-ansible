@@ -15,8 +15,6 @@ ctlabs_loki:
         version : "{{ versions.loki }}.x86_64"
         url     : "https://github.com/grafana/loki/releases/download/v{{ versions.loki }}/loki-{{ versions.loki }}.x86_64.rpm"
     config:
-      bin       : /opt/loki/loki
-      bindir    : /opt
       tmpdir    : /tmp
       cfgdir    : /etc/loki
       server:
@@ -25,6 +23,8 @@ ctlabs_loki:
         tls     :
           crt: "/etc/ca-ctlabs{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs{{ ansible_nodename }}.prv"
+      alertmanager:
+        url: https://mimir.ctlabs.internal:9009/alertmanager
     service:
       name      : loki.service
       template  : loki.service.j2

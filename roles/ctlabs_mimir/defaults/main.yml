@@ -18,7 +18,7 @@ ctlabs_mimir:
     config:
       cfgdir   : /etc/mimir
       listen   : 9090
-      remwruri : "https://{{ ansible_nodename }}:9090/api/v1/write"
+      remwruri : "https://{{ ansible_nodename }}:9009/api/v1/write"
       storage  :
         bucket : ctlabs.lab07.mimir
       server:

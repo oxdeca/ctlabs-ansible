@@ -10,3 +10,8 @@
     path  : "{{ ctlabs_loki.defaults.config.cfgdir }}"
     state : directory
 
+- name: ctlabs_loki.tasks.config.server.installed
+  template:
+    src  : "{{ ctlabs_loki.defaults.config.server.template }}"
+    dest : "{{ ctlabs_loki.defaults.config.server.file }}"
+  notify: ctlabs_loki.handlers.loki.service.restart
