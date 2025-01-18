@@ -435,7 +435,7 @@
 # ctlabs_postfix
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.postfix
-  hosts : [h1, h2]
+  hosts : [mail1, mail2]
   tags  : postfix
   roles :
     - roles/ctlabs_postfix

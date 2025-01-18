@@ -25,11 +25,18 @@ ctlabs_node_exporter:
       file     : node_exporter.conf
       template : node_exporter.conf.j2
       listen   : 9100
+      server:
+        file     : /etc/node_exporter/web-config.yml
+        template : web-config.yml.j2
+        tls:
+          crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
     service:
       name     : node_exporter.service
       template : node_exporter.service.j2
       user     : node_exporter
       group    : node_exporter
+      groups   : [certs]
     logrotate:
   os:
     - redhat7
