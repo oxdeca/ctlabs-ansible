@@ -17,6 +17,8 @@
     state : started
 
 - name: ctlabs_gitea.tasks.service.up
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   wait_for:
     timeout: 5
     port   : 3000
