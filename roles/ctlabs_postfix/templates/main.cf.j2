@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 myhostname          = {{ ansible_nodename }}
-mydomain            = {{ ansible_nodename.split('.')[1:] }}
+mydomain            = {{ ansible_nodename.split('.')[1:] | join('.') }}
 myorigin            = $mydomain
 
 inet_interfaces     = localhost
