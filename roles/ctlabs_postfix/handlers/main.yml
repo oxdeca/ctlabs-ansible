@@ -11,10 +11,14 @@
 - name: ctlabs_postfix.handlers.postmap.virtual
   command: "{{ ctlabs_postfix.defaults.config.postmap }} {{ ctlabs_postfix.defaults.config.dir }}/virtual"
 
-- name: ctlabs_postfix.handlers.postmap.recipient_bcc_maps
+- name: ctlabs_postfix.handlers.postmap.recipient_bcc
   assert:
     that: true
 
+- name: ctlabs_postfix.handlers.postmap.recipient_canonical
+  assert:
+    that: true
+    
 - name: ctlabs_postfix.handlers.service.restart
   service:
     name    : "{{ ctlabs_postfix.defaults.service.name }}"
