@@ -7,6 +7,7 @@
 
 versions : 
   loki: 3.3.2
+  #loki: 2.9.11
 
 ctlabs_loki:
   defaults:
@@ -21,8 +22,8 @@ ctlabs_loki:
         file    : config.yml
         template: config.yml.j2
         tls     :
-          crt: "/etc/ca-ctlabs{{ ansible_nodename }}.crt"
-          key: "/etc/ca-ctlabs{{ ansible_nodename }}.prv"
+          crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       alertmanager:
         url: https://mimir.ctlabs.internal:9009/alertmanager
     service:
