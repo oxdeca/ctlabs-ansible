@@ -32,7 +32,7 @@ scrape_configs:
   scheme: https
   static_configs:
     - targets: 
-      - localhost:9090
+      - {{ ansible_nodename }}:9090
 
 
 # -----------------------------------------------------------------------------
