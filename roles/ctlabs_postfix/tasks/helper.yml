@@ -21,7 +21,7 @@
 - name: ctlabs_postfix.tasks.helper.archive.install
   copy:
     src  : email_archive.sh
-    dest : /usr/bin/email_archive.rb
+    dest : /usr/bin/email_archive.sh
     mode : 0755
 
 - name: ctlabs_postfix.tasks.logdirs.exist

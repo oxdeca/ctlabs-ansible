@@ -2,10 +2,19 @@
 # File : /etc/postfix/main.cf
 # -----------------------------------------------------------------------------
 
-mydomain            = localdomain
-myhostname          = localhost
-relayhost           = [localhost]
+myhostname          = {{ ansible_nodename }}
+mydomain            = {{ ansible_domain   }}
+myorigin            = $mydomain
 
-recipient_bcc_maps  = pcre:/etc/postfix/recipient_bcc_maps
-transport_maps      = hash:/etc/postfix/transport
+inet_interfaces     = localhost
+inet_protocols      = ipv4
+
+relayhost           =
+mydestination       = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+mailbox_size_limit  = 0
+home_mailbox        = mail/
+
+#recipient_bcc_maps  = pcre:/etc/postfix/recipient_bcc_maps
+#transport_maps      = hash:/etc/postfix/transport
 
