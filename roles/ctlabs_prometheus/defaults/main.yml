@@ -39,11 +39,11 @@ ctlabs_prometheus:
         targets :
       node_exporter:
         targets :
-          - 192.168.10.11:9100
-          - 192.168.20.11:9100
-          - 192.168.10.21:9100
-          - 192.168.20.22:9100
-          - 192.168.20.23:9100
+          - h1.ctlabs.internal:9100
+          - h2.ctlabs.internal:9100
+          - grafana.ctlabs.internal:9100
+          - mimir.ctlabs.internal:9100
+          - loki.ctlabs.internal:9100
       templates:
         - 10_node_exporter.job.j2
     service:
