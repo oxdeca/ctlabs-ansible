@@ -9,8 +9,9 @@ ctlabs_postfix:
   defaults:
     pkgs:
       - name : postfix
-      - name : "{{ 's-nail' if ansible_distribution_major_version == '9' else 'mailx' }}" 
-      - name : postfix-pcre # for RHEL8
+      - name : "{{ 's-nail'       if ansible_distribution_major_version == '9' else 'mailx' }}" 
+      - name : "{{ 'postfix-pcre' if ansible_distribution_major_version != '7' }}"
+      - name : ruby
     config:
       dir     : /etc/postfix
       datadir : /var/email_archive
