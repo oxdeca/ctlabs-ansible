@@ -7,7 +7,6 @@
 
 versions : 
   loki: 3.3.2
-  #loki: 2.9.11
 
 ctlabs_loki:
   defaults:
@@ -19,7 +18,7 @@ ctlabs_loki:
       tmpdir    : /tmp
       cfgdir    : /etc/loki
       server:
-        file    : config.yml
+        file    : /etc/loki/config.yml
         template: config.yml.j2
         tls     :
           crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"

@@ -8,12 +8,14 @@
 auth_enabled: false
 
 server:
-  http_listen_port: 3100
-  grpc_listen_port: 9096
   log_level       : info
+
+  http_listen_port: 3100
   http_tls_config:
     cert_file: {{ ctlabs_loki.defaults.config.server.tls.crt }}
     key_file : {{ ctlabs_loki.defaults.config.server.tls.key }}
+
+  grpc_listen_port: 9096
   grpc_server_max_concurrent_streams: 1000
 
 common:
@@ -49,10 +51,9 @@ schema_config:
         period: 24h
 
 pattern_ingester:
-  enabled: true
   metric_aggregation:
     #enabled: true
-    loki_address: localhost:3100
+    loki_address: {{ ansible_nodename }}:3100
 
 ruler:
   alertmanager_url: {{ ctlabs_loki.defaults.config.alertmanager.url }}
