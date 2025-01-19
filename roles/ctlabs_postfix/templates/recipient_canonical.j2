@@ -1,0 +1,5 @@
+# -----------------------------------------------------------------------------
+# File : /etc/postfix/recipient_canonical
+# -----------------------------------------------------------------------------
+
+/^mailer([0-9]+)@ctlabs\.internal$/ mailer${1}_at_ctlabs.internal@bcchost.ctlabs.internal

@@ -2,19 +2,19 @@
 # File : /etc/postfix/main.cf
 # -----------------------------------------------------------------------------
 
-myhostname          = {{ ansible_nodename }}
-mydomain            = {{ ansible_nodename.split('.')[1:] | join('.') }}
-myorigin            = $mydomain
+myhostname               = {{ ansible_nodename }}
+mydomain                 = {{ ansible_nodename.split('.')[1:] | join('.') }}
+myorigin                 = $mydomain
 
-inet_interfaces     = localhost
-inet_protocols      = ipv4
+inet_interfaces          = localhost
+inet_protocols           = ipv4
 
-relayhost           =
-mydestination       = $myhostname, localhost.$mydomain, localhost, $mydomain
+relayhost                =
+mydestination            = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
 
-mailbox_size_limit  = 0
-home_mailbox        = mail/
+mailbox_size_limit       = 0
+home_mailbox             = mail/
 
-#recipient_bcc_maps  = pcre:/etc/postfix/recipient_bcc_maps
-#transport_maps      = hash:/etc/postfix/transport
-
+recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+recipient_bcc_maps       = regexp:/etc/postfix/recipient_bcc
+transport_maps           = hash:/etc/postfix/transport

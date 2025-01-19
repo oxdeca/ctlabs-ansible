@@ -26,8 +26,10 @@ ctlabs_postfix:
           template : virtual.j2
         - name     : transport
           template : transport.j2
-        - name     : recipient_bcc_maps
-          template : recipient_bcc_maps.j2
+        - name     : recipient_bcc
+          template : recipient_bcc.j2
+        - name     : recipient_canonical
+          template : recipient_canonical.j2
       template :
       user     : mail
       group    : syslog
