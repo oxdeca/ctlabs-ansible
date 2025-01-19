@@ -1,9 +1,9 @@
 zone_ctlabs_internal:
 # -----------------------------------------------------------------------------
-# name server
+# required records
 # -----------------------------------------------------------------------------
   - type  : COMMENT
-    value : define name server
+    value : define name server for the domain
 
   - name  : '@'
     type  : NS
@@ -14,7 +14,21 @@ zone_ctlabs_internal:
     value : ns2.ctlabs.internal.
 
   - type  : COMMENT
-    value : nameservers need an A-record
+    value : define mail exchangers for the domain
+
+  - name  : '@'
+    type  : MX
+    value : 10 mail1.ctlabs.internal.
+
+  - name  : '@'
+    type  : MX
+    value : 20 mail2.ctlabs.internal.
+
+# -----------------------------------------------------------------------------
+# name server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : name server need A-records
 
   - name  : ns1
     type  : A
@@ -24,13 +38,19 @@ zone_ctlabs_internal:
     type  : A
     value : 192.168.20.11
 
-  - name  : mail
-    type  : mx
-    value : 10 mail1.ctlabs.internal.
+# -----------------------------------------------------------------------------
+# mail server
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : mail server need A-records
 
-  - name  : mail
-    type  : mx
-    value : 20 mail2.ctlabs.internal.
+  - name  : mail1
+    type  : A
+    value : 192.168.10.14
+
+  - name  : mail2
+    type  : A
+    value : 192.168.20.14
 
 # -----------------------------------------------------------------------------
 # web server
@@ -52,7 +72,7 @@ zone_ctlabs_internal:
 
 
 # -----------------------------------------------------------------------------
-# Other Hosts
+# other hosts
 # -----------------------------------------------------------------------------
   - type  : COMMENT
     value : other hosts
@@ -76,7 +96,7 @@ zone_ctlabs_internal:
     value: cn=wer,ou=user,dc=me,dc=internal
 
 # -----------------------------------------------------------------------------
-# Active Directory
+# active directory
 # -----------------------------------------------------------------------------
   - type  : COMMENT
     value : Active Directory
@@ -98,7 +118,7 @@ zone_ctlabs_internal:
     value : 10 50  88 dc1
 
 # -----------------------------------------------------------------------------
-# slapd Server
+# slapd server
 # -----------------------------------------------------------------------------
   - type  : COMMENT
     value : slapd server
@@ -110,21 +130,6 @@ zone_ctlabs_internal:
   - name  : slapd2
     type  : A
     value : 192.168.20.13
-
-
-# -----------------------------------------------------------------------------
-# mail Server
-# -----------------------------------------------------------------------------
-  - type  : COMMENT
-    value : mail server
-
-  - name  : mail1
-    type  : A
-    value : 192.168.10.14
-
-  - name  : mail2
-    type  : A
-    value : 192.168.20.14
 
 # -----------------------------------------------------------------------------
 # grafana / prometheus
