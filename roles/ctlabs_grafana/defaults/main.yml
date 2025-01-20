@@ -33,7 +33,7 @@ ctlabs_grafana:
         template: dashboards.yml.j2
         node_exporter:
           url : https://grafana.com/api/dashboards/1860/revisions/37/download
-          file: 1860_rev37.json
+          file: /etc/grafana/provisioning/dashboards/1860_rev37.json
       server:
         file     : /etc/grafana/grafana.ini
         template : grafana.ini.j2
