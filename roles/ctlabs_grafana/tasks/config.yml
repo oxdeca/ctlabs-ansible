@@ -22,3 +22,13 @@
     src  : "{{ ctlabs_grafana.defaults.config.ds.mimir.template }}"
     dest : "{{ ctlabs_grafana.defaults.config.ds.dir }}/{{ ctlabs_grafana.defaults.config.ds.mimir.file }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
+
+- name: ctlabs_grafana.tasks.config.dashboards.conf
+  template:
+    src  : "{{ ctlabs_grafana.defaults.config.dashboards.template }}"
+    dest : "{{ ctlabs_grafana.defaults.config.dashboards.file     }}"
+
+- name: ctlabs_grafana.tasks.config.dashboards.json
+  get_url:
+    url  : "{{ ctlabs_grafana.defaults.config.dashboards.node_exporter.url  }}"
+    dest : "{{ ctlabs_grafana.defaults.config.dashboards.node_exporter.file }}"

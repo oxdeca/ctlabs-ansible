@@ -1,0 +1,17 @@
+---
+
+# -----------------------------------------------------------------------------
+# File : /etc/grafana/provisioning/dashboards/dashboards.yml
+# -----------------------------------------------------------------------------
+apiVersion: 1
+
+providers:
+  - name: 'Node Exporter Full'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeleteion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      allowwUiUpdates: false

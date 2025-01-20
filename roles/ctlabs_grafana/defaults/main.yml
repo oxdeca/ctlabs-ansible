@@ -29,6 +29,8 @@ ctlabs_grafana:
           file    : mimir.yml
           template: mimir.yml.j2
       dashboards:
+        file    : /etc/grafana/provisioning/dashboards/dashboards.yml
+        template: dashboards.yml.j2
         node_exporter:
           url : https://grafana.com/api/dashboards/1860/revisions/37/download
           file: 1860_rev37.json
