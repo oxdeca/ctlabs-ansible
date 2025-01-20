@@ -19,25 +19,35 @@
   loop: "{{ ctlabs_postfix.defaults.config.maps }}"
   notify: "ctlabs_postfix.handlers.postmap.{{ item.name }}"
 
-- name: ctlabs_postfix.tasks.config.group.syslog.exists
-  group:
-    name   : "{{ ctlabs_postfix.defaults.config.group }}"
-    system : true
-
-- name: ctlabs_postfix.tasks.config.datadir.exists
+- name: ctlabs_postfix.tasks.config.archive.dir.exists
   file:
-    path  : "{{ ctlabs_postfix.defaults.config.datadir }}"
-    owner : "{{ ctlabs_postfix.defaults.config.user  }}"
-    group : "{{ ctlabs_postfix.defaults.config.group }}"
+    path  : "{{ ctlabs_postfix.defaults.config.archive.dir   }}"
+    owner : "{{ ctlabs_postfix.defaults.config.archive.user  }}"
+    group : "{{ ctlabs_postfix.defaults.config.archive.group }}"
     mode  : '2750'
     state : directory
 
-- name: ctlabs_postfix.tasks.config.datadir.perms
+- name: ctlabs_postfix.tasks.config.archive.perms
   acl:
-    path    : "{{ ctlabs_postfix.defaults.config.datadir }}"
+    path    : "{{ ctlabs_postfix.defaults.config.archive.dir }}"
     entry   : "{{ item }}"
     default : true
     state   : present
   loop:
-    - "default:group:{{ ctlabs_postfix.defaults.config.group }}:rx"
+    - "default:group:{{ ctlabs_postfix.defaults.config.archive.group }}:rx"
 
+- name: ctlabs_postfix.tasks.config.mailbox.group
+  group:
+    name   : "{{ ctlabs_postfix.defaults.config.mailbox.group }}"
+
+- name: ctlabs_postfix.tasks.config.mailbox.user
+  user:
+    name   : "{{ ctlabs_postfix.defaults.config.mailbox.user  }}"
+    group  : "{{ ctlabs_postfix.defaults.config.mailbox.group }}"
+
+- name: ctlabs_postfix.tasks.config.mailbox.muttrc
+  template:
+    src  : "{{ ctlabs_postfix.defaults.config.mailbox.template }}"
+    dest : "{{ ctlabs_postfix.defaults.config.mailbox.file     }}"
+    owner: "{{ ctlabs_postfix.defaults.config.mailbox.user     }}"
+    group: "{{ ctlabs_postfix.defaults.config.mailbox.group    }}"

@@ -12,9 +12,9 @@ ctlabs_postfix:
       - name : "{{ 's-nail'       if ansible_distribution_major_version == '9' else 'mailx' }}" 
       - name : "{{ 'postfix-pcre' if ansible_distribution_major_version != '7' }}"
       - name : ruby
+      - name : mutt
     config:
       dir     : /etc/postfix
-      datadir : /var/email_archive
       postmap : /usr/sbin/postmap
       files :
         - name     : main.cf
@@ -30,9 +30,15 @@ ctlabs_postfix:
           template : recipient_bcc.j2
         - name     : recipient_canonical
           template : recipient_canonical.j2
-      template :
-      user     : mail
-      group    : syslog
+      archive:
+        dir  : /var/email_archive
+        user : mail
+        group: syslog
+      mailbox:
+        user    : ctlabs
+        group   : ctlabs
+        template: muttrc.j2
+        file    : /home/ctlabs/.muttrc
     service:
       name      : postfix.service
       templates : postfix.service.j2

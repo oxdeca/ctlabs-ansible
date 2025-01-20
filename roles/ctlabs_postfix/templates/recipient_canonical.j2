@@ -1,5 +1,8 @@
 # -----------------------------------------------------------------------------
 # File : /etc/postfix/recipient_canonical
+# Description: test the map with
+#    postmap -q "test123@ctlabs.internal" regexp:/etc/postfix/recipient_canonical
 # -----------------------------------------------------------------------------
 
 /^mailer([0-9]+)@ctlabs\.internal$/ mailer${1}_at_ctlabs.internal@bcchost.ctlabs.internal
+/^test([0-9]+)@ctlabs\.internal$/ ctlabs@ctlabs.internal
