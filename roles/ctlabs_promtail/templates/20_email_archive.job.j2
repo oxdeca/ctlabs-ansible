@@ -28,9 +28,9 @@
       - localhost
     labels:
       job        : email_archive
-      host       : {{ ansible_fqdn }}
+      host       : {{ ansible_nodename }}
       site       :
       site_group :
-      __path__   : /var/email_archive/{{ ansible_fqdn }}/**/*
-#      __path__   : /var/email_archive/{{ ansible_fqdn }}/*/*/*/*
+      __path__   : /var/email_archive/{{ ansible_nodename }}/**/*
+#      __path__   : /var/email_archive/{{ ansible_nodename }}/*/*/*/*
 {% endif %}
