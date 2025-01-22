@@ -1,3 +1,4 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
 ---
 
 # ------------------------------------------------------------------------------
@@ -57,6 +58,6 @@ scrape_configs:
 # -----------------------------------------------------------------------------
 # Includes
 # -----------------------------------------------------------------------------
-{%- for template in ctlabs_promtail.defaults.config.templates -%}
-{%-   include template -%}
-{%- endfor -%}
+{%- for template in ctlabs_promtail.defaults.config.templates %}
+{%   include template %}
+{% endfor -%}

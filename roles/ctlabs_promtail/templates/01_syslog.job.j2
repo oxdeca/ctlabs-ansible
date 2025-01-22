@@ -2,7 +2,8 @@
 {# File: ctlabs_promtail/templates/01_syslog.job.j2                          #}
 {# ------------------------------------------------------------------------- #}
 
-{% if ansible_local.ctlabs_promtail.config.syslog is defined %}
+
+{%- if ansible_local.ctlabs_promtail.config.syslog is defined %}
 # -----------------------------------------------------------------------------
 # syslog - File Tailing
 # -----------------------------------------------------------------------------
@@ -17,9 +18,9 @@
         ctlabs   : {{ ansible_local.ctlabs.site_group    | default('') }}
         __path__ : {{ ctlabs_promtail.defaults.logs.syslog.dir }}/{{ file }}
 {%    endfor %}
-{%  endif %}
+{%  endif -%}
 
-{% if ansible_local.ctlabs_promtail.config.syslog_socket is defined %}
+{%- if ansible_local.ctlabs_promtail.config.syslog_socket is defined %}
 # -----------------------------------------------------------------------------
 # syslog - TCP Socket
 # -----------------------------------------------------------------------------
@@ -29,5 +30,5 @@
     labels:
       job      : syslog
       host     : {{ ansible_hostname }}
-{% endif %}
+{% endif -%}
 
