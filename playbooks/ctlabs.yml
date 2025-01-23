@@ -119,6 +119,17 @@
             }
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.promtail.local_facts
+      when: ansible_hostname == 'prometheus'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_promtail.fact
+        content: |
+          {
+            "config" : {
+              "goflow2" : true
+            }
+          }
+
     - name: ctlabs.playbooks.ctlabs.setup.openvpn.server.local_facts
       when: ansible_hostname == 'ro1'
       copy:
