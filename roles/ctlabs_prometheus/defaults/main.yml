@@ -52,11 +52,11 @@ ctlabs_prometheus:
         - 10_node_exporter.job.j2
         - 10_goflow2.job.j2
     service:
-      - name     : prometheus.service
-        template : prometheus.service.j2
-        user     : prometheus
-        group    : prometheus
-        groups   : [certs]
+      name     : prometheus.service
+      template : prometheus.service.j2
+      user     : prometheus
+      group    : prometheus
+      groups   : [certs]
     logrotate:
   os:
     - redhat7
