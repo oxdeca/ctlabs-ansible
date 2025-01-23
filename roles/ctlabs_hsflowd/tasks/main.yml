@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_hsflowd/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_hsflowd
+    - ctlabs_hsflowd.precheck
+    - ctlabs_hsflowd.package
+    - ctlabs_hsflowd.config
+    - ctlabs_hsflowd.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_hsflowd
+    - ctlabs_hsflowd.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_hsflowd
+    - ctlabs_hsflowd.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_hsflowd
+    - ctlabs_hsflowd.service

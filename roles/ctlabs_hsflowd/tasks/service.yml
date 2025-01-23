@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_hsflowd/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_hsflowd.tasks.service.start
+  service:
+    name  : "{{ ctlabs_hsflowd.defaults.service.name }}"
+    state : started

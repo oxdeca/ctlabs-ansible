@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_hsflowd/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  hsflowd: 2.0.53-1
+
+ctlabs_hsflowd:
+  defaults:
+    pkgs:
+      redhat:
+        - url: "https://github.com/sflow/host-sflow/releases/download/v{{ versions.hsflowd }}/hsflowd-redhat9-{{ versions.hsflowd }}.x86_64.rpm"
+      debian:
+        - url: "https://github.com/sflow/host-sflow/releases/download/v{{ versions.hsflowd }}/hsflowd-debian12_{{ versions.hsflowd }}_amd64.deb"
+    config:
+      dir     : /etc/hsflowd.d
+      file    : /etc/hsflowd.conf
+      template: hsflowd.conf.j2
+    service:
+      name  : hsflowd.service
+      user  : hsflowd
+      group : hsflowd
+      groups: [certs]
+  os:
+    - redhat9
+    - centos9

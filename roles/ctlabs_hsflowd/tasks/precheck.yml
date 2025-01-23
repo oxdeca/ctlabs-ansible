@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_hsflowd/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_hsflowd.tasks.precheck.supported_os
+  assert:
+    that: os is in ctlabs_hsflowd.os
+    fail_msg: "OS [{{ os }}] is not supported!"

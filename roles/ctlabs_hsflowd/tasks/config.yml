@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : hsflowd/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: hsflowd.tasks.config.installed
+  template:
+    src  : "{{ hsflowd.defaults.config.template }}"
+    dest : "{{ hsflowd.defaults.config.file     }}"
+  notify: hsflowd.handlers.hsflowd.service.restart
