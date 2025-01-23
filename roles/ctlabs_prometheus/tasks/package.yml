@@ -29,7 +29,7 @@
 
 - name: ctlabs_prometheus.tasks.package.install
   file:
-    src   : "{{ ctlabs_prometheus.defaults.config.bindir + '/' + ctlabs_prometheus.defaults.pkgs.prometheus.name + '-' + ctlabs_prometheus.defaults.pkgs.version }}"
+    src   : "{{ ctlabs_prometheus.defaults.config.bindir + '/' + ctlabs_prometheus.defaults.pkgs.prometheus.name + '-' + ctlabs_prometheus.defaults.pkgs.prometheus.version }}"
     dest  : "{{ ctlabs_prometheus.defaults.config.bindir + '/' + ctlabs_prometheus.defaults.pkgs.prometheus.name }}"
     state : link
 
