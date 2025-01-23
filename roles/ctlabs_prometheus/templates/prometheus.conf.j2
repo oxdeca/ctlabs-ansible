@@ -37,9 +37,7 @@ scrape_configs:
     - targets: 
       - {{ ansible_nodename }}:9090
 
-# -----------------------------------------------------------------------------
-# Includes
-# -----------------------------------------------------------------------------
+{# -------- INCLUDES -------- #}
 {%- for template in ctlabs_prometheus.defaults.config.templates %}
 {%   include template %}
 {% endfor -%}
