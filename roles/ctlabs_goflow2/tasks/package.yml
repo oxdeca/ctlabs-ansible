@@ -9,5 +9,5 @@
   when: os_family == 'redhat'
   dnf:
     name              : "{{ item.url if item.url is defined else item.name }}"
-    disable_gpg_check : false
+    disable_gpg_check : true
   loop: "{{ ctlabs_goflow2.defaults.pkgs[os_family] }}"
