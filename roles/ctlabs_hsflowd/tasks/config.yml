@@ -1,12 +1,12 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : hsflowd/tasks/config.yml
+# File        : ctlabs_hsflowd/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: hsflowd.tasks.config.installed
+- name: ctlabs_hsflowd.tasks.config.installed
   template:
-    src  : "{{ hsflowd.defaults.config.template }}"
-    dest : "{{ hsflowd.defaults.config.file     }}"
-  notify: hsflowd.handlers.hsflowd.service.restart
+    src  : "{{ ctlabs_hsflowd.defaults.config.template }}"
+    dest : "{{ ctlabs_hsflowd.defaults.config.file     }}"
+  notify: ctlabs_hsflowd.handlers.hsflowd.service.restart
