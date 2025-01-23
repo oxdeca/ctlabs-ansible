@@ -4,7 +4,7 @@
 
 {%- if ansible_local.ctlabs_prometheus.config.node_exporter is defined %}
 # -----------------------------------------------------------------------------
-# node_exporter
+# job: node_exporter
 # -----------------------------------------------------------------------------
 - job_name: node_exporter
   scheme: https
