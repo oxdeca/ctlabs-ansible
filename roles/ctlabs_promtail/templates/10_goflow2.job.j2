@@ -1,0 +1,18 @@
+{# ------------------------------------------------------------------------- #}
+{# File: ctlabs_promtail/templates/10_goflow2.job.j2                         #}
+{# ------------------------------------------------------------------------- #}
+
+
+{%- if ansible_local.ctlabs_promtail.config.goflow2 is defined %}
+# -----------------------------------------------------------------------------
+# Promtail Goflow2 Job
+# -----------------------------------------------------------------------------
+- job_name: goflow2
+  static_configs:
+    - targets: [localhost]
+      labels:
+        job     : goflow2
+        __path__: /var/log/goflow2.log
+{% endif -%}
+
+
