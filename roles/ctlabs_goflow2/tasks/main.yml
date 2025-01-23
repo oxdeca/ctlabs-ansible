@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_goflow2/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_goflow2
+    - ctlabs_goflow2.precheck
+    - ctlabs_goflow2.package
+    - ctlabs_goflow2.config
+    - ctlabs_goflow2.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_goflow2
+    - ctlabs_goflow2.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_goflow2
+    - ctlabs_goflow2.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_goflow2
+    - ctlabs_goflow2.service
+

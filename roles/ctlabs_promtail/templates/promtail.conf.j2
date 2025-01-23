@@ -55,9 +55,7 @@ scrape_configs:
       - labels:
           unit: merged_scope_unit
 
-# -----------------------------------------------------------------------------
-# Includes
-# -----------------------------------------------------------------------------
+{# -------- INCLUDES -------- #}
 {%- for template in ctlabs_promtail.defaults.config.templates %}
 {%   include template %}
 {% endfor -%}

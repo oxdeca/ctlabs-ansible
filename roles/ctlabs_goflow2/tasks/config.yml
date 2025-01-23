@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_goflow2/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_goflow2.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_goflow2.defaults.config.cfgdir }}"
+    state : directory
+
+- name: ctlabs_goflow2.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_goflow2.defaults.config.template }}"
+    dest : "{{ ctlabs_goflow2.defaults.config.cfgdir }}/{{ ctlabs_goflow2.defaults.config.file }}"
+  notify: ctlabs_goflow2.handlers.prometheus.service.restart

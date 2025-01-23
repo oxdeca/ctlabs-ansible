@@ -1,16 +1,16 @@
 {# ------------------------------------------------------------------------- #}
-{# File: ctlabs_prometheus/templates/10_node_exporter.job.j2                 #}
+{# File: ctlabs_prometheus/templates/10_goflow2.job.j2                       #}
 {# ------------------------------------------------------------------------- #}
 
-{%- if ansible_local.ctlabs_prometheus.config.node_exporter is defined %}
+{%- if ansible_local.ctlabs_prometheus.config.goflow2 is defined %}
 # -----------------------------------------------------------------------------
-# node_exporter
+# goflow2
 # -----------------------------------------------------------------------------
-- job_name: node_exporter
-  scheme: https
+- job_name: goflow2
+#  scheme: https
   static_configs:
     - targets:
-{%   for target in ctlabs_prometheus.defaults.config.node_exporter.targets %}
+{%   for target in ctlabs_prometheus.defaults.config.goflow2.targets %}
       - {{ target }}
 {%    endfor %}
 {%  endif -%}

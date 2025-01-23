@@ -3,7 +3,7 @@
 {# ------------------------------------------------------------------------- #}
 
 
-{% if ansible_local.ctlabs_promtail.config.email_archive is defined %}
+{%- if ansible_local.ctlabs_promtail.config.email_archive is defined %}
 # -----------------------------------------------------------------------------
 # Email Archive
 # -----------------------------------------------------------------------------
@@ -32,4 +32,4 @@
       site       :
       site_group :
       __path__   : /var/email_archive/{{ ansible_nodename }}/**/*
-{% endif %}
+{% endif -%}

@@ -11,10 +11,11 @@ versions:
 ctlabs_prometheus:
   defaults:
     pkgs:
-      name    : prometheus
-      version : "{{ versions.prometheus }}.linux-amd64"
-      url     : "https://github.com/prometheus/prometheus/releases/download/v{{ versions.prometheus }}/prometheus-{{ versions.prometheus }}.linux-amd64.tar.gz"
-      tmptar  : /tmp/prometheus.tar.gz
+      prometheus:
+        name    : prometheus
+        version : "{{ versions.prometheus }}.linux-amd64"
+        url     : "https://github.com/prometheus/prometheus/releases/download/v{{ versions.prometheus }}/prometheus-{{ versions.prometheus }}.linux-amd64.tar.gz"
+        tmptar  : /tmp/prometheus.tar.gz
     config:
       bin          : /opt/prometheus/prometheus
       bindir       : /opt
@@ -44,14 +45,18 @@ ctlabs_prometheus:
           - grafana.ctlabs.internal:9100
           - mimir.ctlabs.internal:9100
           - loki.ctlabs.internal:9100
+      goflow2:
+        targets :
+          - prometheus.ctlabs.internal:8080
       templates:
         - 10_node_exporter.job.j2
+        - 10_goflow2.job.j2
     service:
-      name     : prometheus.service
-      template : prometheus.service.j2
-      user     : prometheus
-      group    : prometheus
-      groups   : [certs]
+      - name     : prometheus.service
+        template : prometheus.service.j2
+        user     : prometheus
+        group    : prometheus
+        groups   : [certs]
     logrotate:
   os:
     - redhat7
