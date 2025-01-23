@@ -17,7 +17,7 @@ ctlabs_goflow2:
         - url: "https://github.com/netsampler/goflow2/releases/download/v{{ versions.goflow2 }}/goflow2_{{ versions.goflow2 }}_amd64.deb"
     config:
       workdir : /usr/share/goflow2
-      name    : /etc/default/goflow2
+      file    : /etc/default/goflow2
       template: goflow2.default.j2
       args    : -transport.file /var/log/goflow2.log
     service:
