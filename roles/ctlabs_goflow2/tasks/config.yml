@@ -5,13 +5,13 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_goflow2.tasks.config.dir
+- name: ctlabs_goflow2.tasks.config.workdir
   file:
-    path  : "{{ ctlabs_goflow2.defaults.config.cfgdir }}"
+    path  : "{{ ctlabs_goflow2.defaults.config.workdir }}"
     state : directory
 
 - name: ctlabs_goflow2.tasks.config.installed
   template:
     src  : "{{ ctlabs_goflow2.defaults.config.template }}"
-    dest : "{{ ctlabs_goflow2.defaults.config.cfgdir }}/{{ ctlabs_goflow2.defaults.config.file }}"
-  notify: ctlabs_goflow2.handlers.prometheus.service.restart
+    dest : "{{ ctlabs_goflow2.defaults.config.file     }}"
+  notify: ctlabs_goflow2.handlers.goflow2.service.restart

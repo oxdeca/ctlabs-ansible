@@ -16,9 +16,9 @@ ctlabs_goflow2:
       debian:
         - url: "https://github.com/netsampler/goflow2/releases/download/v{{ versions.goflow2 }}/goflow2_{{ versions.goflow2 }}_amd64.deb"
     config:
-      bin          : /opt/prometheus/prometheus
-      bindir       : /opt
-      cfgdir       : /etc/prometheus
+      name    : /etc/default/goflow2
+      template: goflow2.default.j2
+      args    : -transport.file /var/log/goflow2.log
     service:
       name  : goflow2.service
       user  : goflow2
