@@ -43,6 +43,9 @@ scrape_configs:
 {% endfor -%}
 
 
+# -----------------------------------------------------------------------------
+# Remote Write
+# -----------------------------------------------------------------------------
 {%- if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
 remote_write:
   - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri | default(ctlabs_prometheus.defaults.config.remote_write.uri) }}
