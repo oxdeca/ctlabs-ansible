@@ -1,12 +1,12 @@
 ---
 
 # -----------------------------------------------------------------------------------------------------------
-# File        : ctlabs-ansible/playbooks/lab07.yml
-# Description : setup monitoring stack (prometheus, grafana, node_exporter, syslogng, loki)
+# File        : ctlabs-ansible/playbooks/ctlabs.yml
+# Description : ctlabs roles
 # -----------------------------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# ctlabs check that all nodes are up
+# check that all nodes are up
 # -----------------------------------------------------------------------------
 - name        : ctlabs.playbook.nodes.up
   hosts       : all
@@ -586,3 +586,12 @@
   tags  : atlantis
   roles :
     - roles/ctlabs_atlantis
+
+# -----------------------------------------------------------------------------
+# ctlabs_opa
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.opa
+  hosts : [opa1,opa2]
+  tags  : opa
+  roles :
+    - roles/ctlabs_opa
