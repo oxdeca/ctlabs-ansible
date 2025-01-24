@@ -12,7 +12,7 @@ ctlabs_opa:
   defaults:
     pkgs:
       name    : opa
-      url     : "https://github.com/open-policy-agent/opa/releases/download/v{{ vesions.opa }}/opa_linux_amd64"
+      url     : "https://github.com/open-policy-agent/opa/releases/download/v{{ versions.opa }}/opa_linux_amd64"
       tmptar  : /tmp/
     config:
       bin      : /opt/opa/opa
