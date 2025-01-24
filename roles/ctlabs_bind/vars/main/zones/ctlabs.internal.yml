@@ -46,11 +46,11 @@ zone_ctlabs_internal:
 
   - name  : mail1
     type  : A
-    value : 192.168.10.14
+    value : 192.168.10.15
 
   - name  : mail2
     type  : A
-    value : 192.168.20.14
+    value : 192.168.20.15
 
 # -----------------------------------------------------------------------------
 # web server
