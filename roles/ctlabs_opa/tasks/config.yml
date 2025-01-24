@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opa.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_opa.defaults.config.cfgdir }}"
+    state : directory
+
+- name: ctlabs_opa.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_opa.defaults.config.template }}"
+    dest : "{{ ctlabs_opa.defaults.config.cfgdir }}/{{ ctlabs_opa.defaults.config.file }}"
+  notify: ctlabs_opa.handlers.gitea.service.restart

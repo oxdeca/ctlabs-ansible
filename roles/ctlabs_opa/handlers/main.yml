@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opa.handlers.gitea.service.restart
+  service:
+    name    : "{{ ctlabs_opa.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_opa.handlers.gitea.service.reload
+  service:
+    name  : "{{ ctlabs_opa.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_opa.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

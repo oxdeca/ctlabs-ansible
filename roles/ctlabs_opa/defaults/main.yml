@@ -1,0 +1,40 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  opa: 1.0.1
+
+ctlabs_opa:
+  defaults:
+    pkgs:
+      name    : opa
+      url     : "https://github.com/open-policy-agent/opa/releases/download/v{{ vesions.opa }}/opa_linux_amd64"
+      tmptar  : /tmp/
+    config:
+      bin      : /opt/opa/opa
+      bindir   : /opt/opa
+      tmpdir   : /tmp
+      cfgdir   : /etc/opa
+      datadir  : /data
+      agentdir : /data-agent
+      file     : opa.conf
+      template : opa.conf.j2
+      listen   : 9100
+    service:
+      name     : opa.service
+      template : opa.service.j2
+      user     : opa
+      group    : opa
+    logrotate:
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+    - debian11
+    - kali2024

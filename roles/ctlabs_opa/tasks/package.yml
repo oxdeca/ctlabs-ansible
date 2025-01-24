@@ -1,0 +1,57 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opa.tasks.package.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_opa.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_opa.tasks.package.group
+  group:
+    name   : "{{ ctlabs_opa.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_opa.tasks.package.user
+  user:
+    name   : "{{ ctlabs_opa.defaults.service.user  }}"
+    group  : "{{ ctlabs_opa.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_opa.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir }}"
+    owner : "{{ ctlabs_opa.defaults.service.user      }}"
+    group : "{{ ctlabs_opa.defaults.service.group     }}"
+    mode : '0750'
+    state : directory
+
+- name: ctlabs_opa.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_opa.defaults.pkgs.gitea.url    }}"
+    dest : "{{ ctlabs_opa.defaults.pkgs.gitea.tmpdir }}"
+  delegate_to: localhost
+
+- name: ctlabs_opa.tasks.package.copy
+  copy:
+    src  : "{{ ctlabs_opa.defaults.pkgs.gitea.tmpdir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
+    dest : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
+    owner : "{{ ctlabs_opa.defaults.service.user  }}"
+    group : "{{ ctlabs_opa.defaults.service.group }}"
+    mode : '0750'
+
+- name: ctlabs_opa.tasks.package.install
+  file:
+    src   : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
+    dest  : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.bin  }}"
+    state : link
+
+- name: ctlabs_opa.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_opa.defaults.service.user   }}"
+    group : "{{ ctlabs_opa.defaults.service.group  }}"
+    groups: "{{ ctlabs_opa.defaults.service.groups }}"

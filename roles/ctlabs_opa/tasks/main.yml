@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_opa
+    - ctlabs_opa.precheck
+    - ctlabs_opa.package
+    - ctlabs_opa.config
+    - ctlabs_opa.service
+    - ctlabs_opa.setup
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_opa
+    - ctlabs_opa.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_opa
+    - ctlabs_opa.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_opa
+    - ctlabs_opa.service
+
+- import_tasks: setup.yml
+  tags:
+    - ctlabs_opa
+    - ctlabs_opa.setup

@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_opa/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opa.tasks.service.create
+  template:
+    src  : "{{ ctlabs_opa.defaults.service.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_opa.defaults.service.name }}"
+  notify: ctlabs_opa.handlers.systemd.reload
+
+- name: ctlabs_opa.tasks.service.start
+  service:
+    name  : "{{ ctlabs_opa.defaults.service.name }}"
+    state : started
