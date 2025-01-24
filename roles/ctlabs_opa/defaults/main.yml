@@ -11,13 +11,16 @@ versions:
 ctlabs_opa:
   defaults:
     pkgs:
-      name    : opa
-      url     : "https://github.com/open-policy-agent/opa/releases/download/v{{ versions.opa }}/opa_linux_amd64"
-      tmptar  : /tmp/
+      redhat: []
+      debian: []
+      opa:
+        obin   : opa_linux_amd64
+        dbin   : "opa-{{ versions.opa }}"
+        bin    : opa
+        url    : "https://github.com/open-policy-agent/opa/releases/download/v{{ versions.opa }}/opa_linux_amd64"
+        bindir : /opt/opa
+        tmpdir : /tmp
     config:
-      bin      : /opt/opa/opa
-      bindir   : /opt/opa
-      tmpdir   : /tmp
       cfgdir   : /etc/opa
       datadir  : /data
       agentdir : /data-agent
@@ -29,6 +32,7 @@ ctlabs_opa:
       template : opa.service.j2
       user     : opa
       group    : opa
+      groups   : [certs]
     logrotate:
   os:
     - redhat7

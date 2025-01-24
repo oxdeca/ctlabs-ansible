@@ -24,7 +24,7 @@
 
 - name: ctlabs_opa.tasks.package.bindir
   file:
-    path  : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir }}"
+    path  : "{{ ctlabs_opa.defaults.pkgs.opa.bindir }}"
     owner : "{{ ctlabs_opa.defaults.service.user      }}"
     group : "{{ ctlabs_opa.defaults.service.group     }}"
     mode : '0750'
@@ -32,22 +32,22 @@
 
 - name: ctlabs_opa.tasks.package.download
   get_url:
-    url  : "{{ ctlabs_opa.defaults.pkgs.gitea.url    }}"
-    dest : "{{ ctlabs_opa.defaults.pkgs.gitea.tmpdir }}"
+    url  : "{{ ctlabs_opa.defaults.pkgs.opa.url    }}"
+    dest : "{{ ctlabs_opa.defaults.pkgs.opa.tmpdir }}"
   delegate_to: localhost
 
 - name: ctlabs_opa.tasks.package.copy
   copy:
-    src  : "{{ ctlabs_opa.defaults.pkgs.gitea.tmpdir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
-    dest : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
+    src  : "{{ ctlabs_opa.defaults.pkgs.opa.tmpdir + '/' + ctlabs_opa.defaults.pkgs.opa.obin }}"
+    dest : "{{ ctlabs_opa.defaults.pkgs.opa.bindir + '/' + ctlabs_opa.defaults.pkgs.opa.dbin }}"
     owner : "{{ ctlabs_opa.defaults.service.user  }}"
     group : "{{ ctlabs_opa.defaults.service.group }}"
     mode : '0750'
 
 - name: ctlabs_opa.tasks.package.install
   file:
-    src   : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.obin }}"
-    dest  : "{{ ctlabs_opa.defaults.pkgs.gitea.bindir + '/' + ctlabs_opa.defaults.pkgs.gitea.bin  }}"
+    src   : "{{ ctlabs_opa.defaults.pkgs.opa.bindir + '/' + ctlabs_opa.defaults.pkgs.opa.dbin }}"
+    dest  : "{{ ctlabs_opa.defaults.pkgs.opa.bindir + '/' + ctlabs_opa.defaults.pkgs.opa.bin  }}"
     state : link
 
 - name: ctlabs_opa.tasks.package.group.certs.member
