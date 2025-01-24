@@ -12,7 +12,6 @@
     - ctlabs_opa.package
     - ctlabs_opa.config
     - ctlabs_opa.service
-    - ctlabs_opa.setup
 
 - import_tasks: package.yml
   tags:
@@ -28,8 +27,3 @@
   tags:
     - ctlabs_opa
     - ctlabs_opa.service
-
-- import_tasks: setup.yml
-  tags:
-    - ctlabs_opa
-    - ctlabs_opa.setup
