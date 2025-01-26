@@ -6,13 +6,13 @@
 -->
 
 <user-mapping>
-  <authorize username="ctlabs" password="secret">
-    <connection name="192.168.100.163">
+  <authorize username="ctlabs" password="secret123!">
+
+    <connection name="{{ ansible_nodename }}">
       <protocol>ssh</protocol>
-      <param name="hostname">192.168.100.163</param>
+      <param name="hostname">{{ ansible_nodename }}</param>
       <param name="port">22</param>
       <param name="username">root</param>
-      <param name="password">secret</param>
       <param name="font-size">12</param>
       <param name="color-scheme">
         foreground: rgb:ff/ff/ff;
@@ -20,34 +20,37 @@
       </param>
     </connection>
 
-    <connection name="192.168.100.166">
-      <protocol>ssh</protocol>
-      <param name="hostname">192.168.100.166</param>
-      <param name="port">22</param>
-      <param name="username">root</param>
-      <param name="password">secret</param>
-      <param name="font-size">12</param>
-      <param name="color-scheme">
-        foreground: rgb:ff/ff/ff;
-        background: rgb:2e/07/24;
-      </param>
+    <connection name="dc1-vnc">
+      <protocol>vnc</protocol>
+      <param name="hostname">192.168.30.13</param>
+      <param name="port">5900</param>
+      <param name="ignore-cert">true</param>
+      <param name="color-depth">24</param>
+      <param name="width">1920</param>
+      <param name="height">1200</param>
     </connection>
-
-    <connection name="rpi-5">
-      <protocol>ssh</protocol>
-      <param name="hostname">192.168.100.55</param>
-      <param name="port">22</param>
-      <param name="username">schaewo</param>
-      <param name="font-size">12</param>
-      <param name="color-scheme">
-        foreground: rgb:ff/ff/ff;
-        background: rgb:2e/07/24;
-      </param>
-    </connection>
-
-    <connection name="172.20.4.120">
+    <connection name="dc01">
       <protocol>rdp</protocol>
-      <param name="hostname">172.20.4.120</param>
+      <param name="hostname">192.168.30.14</param>
+      <param name="port">3389</param>
+      <param name="ignore-cert">true</param>
+      <param name="color-depth">24</param>
+      <param name="width">1920</param>
+      <param name="height">1200</param>
+    </connection>
+
+    <connection name="dc2-vnc">
+      <protocol>vnc</protocol>
+      <param name="hostname">192.168.30.23</param>
+      <param name="port">5900</param>
+      <param name="ignore-cert">true</param>
+      <param name="color-depth">24</param>
+      <param name="width">1920</param>
+      <param name="height">1200</param>
+    </connection>
+    <connection name="dc02">
+      <protocol>rdp</protocol>
+      <param name="hostname">192.168.30.24</param>
       <param name="port">3389</param>
       <param name="ignore-cert">true</param>
       <param name="color-depth">24</param>
