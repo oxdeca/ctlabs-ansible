@@ -31,6 +31,7 @@ ctlabs_k3s:
       role: server
       server:
         url: "https://{{ ansible_nodename }}:6443"
+        token: /var/lib/rancher/k3s/server/token
       profile:
         template: k3s.profile.j2
         file    : /etc/profile.d/k3s.sh

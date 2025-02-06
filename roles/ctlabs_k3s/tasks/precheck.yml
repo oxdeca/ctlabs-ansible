@@ -39,7 +39,7 @@
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.get
       slurp:
-        path: "{{ ctlabs_k3s.defaults.config.token.file }}"
+        path: "{{ ctlabs_k3s.defaults.config.server.token }}"
       register: file_content
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
