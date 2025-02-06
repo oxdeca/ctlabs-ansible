@@ -8,7 +8,12 @@
 - debug: var=os
 - debug: var=ctlabs_kafka.os
 
-- name: ctlabs_kafka.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_kafka.os
-    fail_msg : "OS[{{os}}] is not supported!"
+- name: ctlabs_kafka.tasks.precheck
+  blocK:
+    - name: ctlabs_kafka.tasks.precheck.os.supported
+      assert:
+        that     : os is in ctlabs_kafka.os
+        fail_msg : "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_kafka.tasks.precheck.skip.unsupported
+      meta: end_host

@@ -1,0 +1,38 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_wireguard/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+# env vars
+CTLABS_WIREGUARD_SERVICE: 'false'
+
+# role defaults
+ctlabs_wireguard:
+  defaults:
+    repos:
+      redhat:
+      debian:
+    pkgs:
+      redhat:
+        - name: wireguard-tools
+      debian:
+        - name: wireguard
+    config:
+      dir      : /etc/wireguard
+      bin      : /usr/bin/wg
+      file     : wireguard.conf
+      template : wireguard.conf.j2
+      port     : 58200
+      keyprv   : /etc/wireguard/key.prv
+      keypub   : /etc/wireguard/key.pub
+    service:
+      name  : wireguard.service
+      user  : root
+      group : root
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

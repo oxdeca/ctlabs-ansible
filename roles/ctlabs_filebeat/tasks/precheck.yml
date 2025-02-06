@@ -8,7 +8,12 @@
 - debug: var=os
 - debug: var=ctlabs_filebeat.os
 
-- name: ctlabs_filebeat.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_filebeat.os
-    fail_msg : "OS[{{os}}] is not supported!"
+- name: ctlabs_filebeat.tasks.precheck
+  block:
+    - name: ctlabs_filebeat.tasks.precheck.supported_os
+      assert:
+        that     : os is in ctlabs_filebeat.os
+        fail_msg : "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_filebeat.tasks.precheck.skip.unsupported
+      meta: end_host

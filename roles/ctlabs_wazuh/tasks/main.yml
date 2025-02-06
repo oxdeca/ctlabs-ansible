@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_wazuh/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_wazuh
+    - ctlabs_wazuh.precheck
+    - ctlabs_wazuh.package
+    - ctlabs_wazuh.config
+    - ctlabs_wazuh.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_wazuh
+    - ctlabs_wazuh.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_wazuh
+    - ctlabs_wazuh.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_wazuh
+    - ctlabs_wazuh.service

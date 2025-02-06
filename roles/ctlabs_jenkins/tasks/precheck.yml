@@ -8,7 +8,12 @@
 - debug: var=os
 - debug: var=ctlabs_jenkins.os
 
-- name: ctlabs_jenkins.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_jenkins.os
-    fail_msg : "OS[{{os}}] is not supported!"
+- name: ctlabs_jenkins.tasks.precheck
+  block:
+    - name: ctlabs_jenkins.tasks.precheck.os.supported
+      assert:
+        that     : os is in ctlabs_jenkins.os
+        fail_msg : "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_jenkins.tasks.precheck.skip.unsupported
+      meta: end_host

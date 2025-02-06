@@ -8,10 +8,15 @@
 - debug: var=os
 - debug: var=ctlabs_kibana.os
 
-- name: ctlabs_kibana.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_kibana.os
-    fail_msg : "OS[{{os}}] is not supported!"
+- name: ctlabs_kibana.tasks.precheck
+  block:
+    - name: ctlabs_kibana.tasks.precheck.os.supported
+      assert:
+        that     : os is in ctlabs_kibana.os
+        fail_msg : "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_kibana.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_kibana.tasks.precheck.kibana_token
   set_fact:

@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_wireguard/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wireguard.tasks.config.dir
+  file:
+    path : "{{ ctlabs_wireguard.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_wireguard.defaults.service.user  }}"
+    group: "{{ ctlabs_wireguard.defaults.service.group }}"
+
+#
+# Server
+#
+- name: ctlabs_wireguard.tasks.config.server
+  when: CTLABS_WIREGUARD_SERVICE == 'true'
+  block:
+    - name: ctlabs_wireguard.tasks.config.server.vault.data.dir
+      file:
+        path : "{{ ctlabs_wireguard.defaults.config.server.data }}"
+        owner: "{{ ctlabs_wireguard.defaults.service.user  }}"
+        group: "{{ ctlabs_wireguard.defaults.service.group }}"
+        state: directory
+
+    - name: ctlabs_wireguard.tasks.config.server.vault
+      template:
+        src  : "{{ ctlabs_wireguard.defaults.config.server.template }}"
+        dest : "{{ ctlabs_wireguard.defaults.config.dir }}/{{ ctlabs_wireguard.defaults.config.server.file }}"
+      notify: ctlabs_wireguard.handlers.service.vault.reload

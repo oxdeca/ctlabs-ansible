@@ -5,8 +5,12 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_loki.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_loki.os
-    fail_msg: "OS [{{ os }}] is not supported!"
-
+- name: ctlabs_loki.tasks.precheck
+  block:
+    - name: ctlabs_loki.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_loki.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_loki.tasks.precheck.skip.unsupported
+      meta: end_host

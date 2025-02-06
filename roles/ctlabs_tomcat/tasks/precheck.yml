@@ -5,12 +5,15 @@
 # Description : ctlabs_tomcat prechecks
 # ------------------------------------------------------------------------------
 
-
-- name: ctlabs_tomcat.precheck.os.supported
-  fail:
-    msg: "OS[{{os}}] is not supported!"
-  when: ( os not in ctlabs_tomcat.defaults.os )
-
+- name: ctlabs_tomcat.tasks.precheck
+  block:
+    - name: ctlabs_tomcat.precheck.os.supported
+      assert:
+        that: os is in ctlabs_tomcat.defaults.os
+        fail_msg: "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_tomcat.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_tomcat.precheck.config.group.present
   group:
@@ -25,17 +28,14 @@
     home  : "{{ ctlabs_tomcat.defaults.config.data_dir }}"
     state : present
 
-
 - name: ctlabs_tomcat.precheck.instances_to_restart.fact.present
   set_fact:
     instances_to_restart : []
-
 
 - name: ctlabs_tomcat.check.package.sw_install.defined
   assert:
     that:
       - sw_install is defined
-
 
 - name: ctlabs_tomcat.check.package.software_dir.defined
   assert:

@@ -5,13 +5,17 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openvpn.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_openvpn.os
-    fail_msg: "OS [{{ os }}] is not supported!"
-
-- name: ctlabs_openvpn.tasks.precheck.type.check
-  assert:
-    that: ansible_local.ctlabs_openvpn.type in [ 'server', 'client' ]
-    fail_msg: "No type specified. ['server', 'client']"
-
+- name: ctlabs_openvpn.tasks.precheck
+  block:
+    - name: ctlabs_openvpn.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_openvpn.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+    
+    - name: ctlabs_openvpn.tasks.precheck.type.check
+      assert:
+        that: ansible_local.ctlabs_openvpn.type in [ 'server', 'client' ]
+        fail_msg: "No type specified. ['server', 'client']"
+  rescue:
+    - name: ctlabs_openvpn.tasks.precheck.skip.unsupported
+      meta: end_host

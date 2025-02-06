@@ -5,7 +5,12 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_haproxy.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_haproxy.os
-    fail_msg : "OS[{{os}}] is not supported!"
+- name: ctlabs_haproxy.tasks.precheck
+  block:
+    - name: ctlabs_haproxy.tasks.precheck.os.supported
+      assert:
+        that     : os is in ctlabs_haproxy.os
+        fail_msg : "OS[{{os}}] is not supported!"
+  rescue:
+    - name: ctlabs_haproxy.tasks.precheck.skip.unsupported
+      meta: end_host

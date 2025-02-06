@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_wireguard/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_wireguard
+    - ctlabs_wireguard.precheck
+    - ctlabs_wireguard.package
+    - ctlabs_wireguard.config
+    - ctlabs_wireguard.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_wireguard
+    - ctlabs_wireguard.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_wireguard
+    - ctlabs_wireguard.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_wireguard
+    - ctlabs_wireguard.service

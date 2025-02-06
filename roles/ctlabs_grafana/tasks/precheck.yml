@@ -5,10 +5,15 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_grafana.tasks.precheck.os.supported
-  assert:
-    that: os is in ctlabs_grafana.os
-    fail_msg: "OS [{{ os }}] is not supported!"
+- name: ctlabs_grafana.tasks.precheck
+  block:
+    - name: ctlabs_grafana.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_grafana.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_grafana.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_grafana.tasks.precheck.loki_url.var
   set_fact:

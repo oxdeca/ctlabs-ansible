@@ -5,10 +5,15 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_atlantis.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_atlantis.os
-    fail_msg: "OS [{{ os }}] is not supported!"
+- name: ctlabs_atlantis.tasks.precheck
+  block:
+    - name: ctlabs_atlantis.tasks.precheck.os.supported
+      assert:
+      that: os is in ctlabs_atlantis.os
+      fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_atlantis.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_atlantis.tasks.precheck.ctlabs_gitea_atlantis_token
   set_fact:

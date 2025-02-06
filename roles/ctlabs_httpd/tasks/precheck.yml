@@ -5,8 +5,12 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_httpd.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_httpd.os
-    fail_msg: "OS [{{ os }}] is not supported!"
-
+- name: ctlabs_httpd.tasks.precheck
+  block:
+    - name: ctlabs_httpd.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_httpd.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_httpd.tasks.precheck.skip.unsupported
+      meta: end_host

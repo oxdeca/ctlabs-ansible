@@ -5,15 +5,20 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_base.tasks.precheck.supported_os
-  assert:
-    that     : os is in ctlabs_base.os
-    fail_msg : "OS[{{os}}] is not supported!"
-
-- name: ctlabs_base.tasks.precheck.virt_type
-  assert:
-    that     : virt_type is in ( 'kvm' )
-    fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+- name: ctlabs_base.tasks.precheck
+  block:
+    - name: ctlabs_base.tasks.precheck.os.supported
+      assert:
+        that     : os is in ctlabs_base.os
+        fail_msg : "OS[{{os}}] is not supported!"
+    
+    - name: ctlabs_base.tasks.precheck.virt_type
+      assert:
+        that     : virt_type is in ( 'kvm' )
+        fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+  rescue:
+    - name: ctlabs_base.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_base.tasks.precheck.local_fact
   template:

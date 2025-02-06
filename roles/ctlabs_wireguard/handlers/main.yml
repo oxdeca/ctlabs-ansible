@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_wireguard/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wireguard.handlers.service.vault.restart
+  service:
+    name    : "{{ ctlabs_wireguard.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_wireguard.handlers.service.vault.reload
+  systemd:
+    daemon_reload: true

@@ -5,7 +5,12 @@
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_opa.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_opa.os
-    fail_msg: "OS [{{ os }}] is not supported!"
+- name: ctlabs_opa.tasks.precheck
+  block:
+    - name: ctlabs_opa.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_opa.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_opa.tasks.precheck.skip.unsupported
+      meta: end_host

@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wireguard/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wireguard.tasks.service.vault.start
+  when: CTLABS_WIREGUARD_SERVICE == 'true'
+  service:
+    name    : "{{ ctlabs_wireguard.defaults.service.name }}"
+    enabled : true
+    state   : started

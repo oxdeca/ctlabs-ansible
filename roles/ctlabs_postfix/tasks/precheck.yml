@@ -5,7 +5,12 @@
 # Description : tasks prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_postfix.tasks.precheck.supported_os
-  assert:
-    that: os is in ctlabs_postfix.os
-    fail_msg: "OS [{{ os }}] is not supported!"
+- name: ctlabs_postfix.tasks.precheck
+  block:
+    - name: ctlabs_postfix.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_postfix.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_postfix.tasks.precheck.skip.unsupported
+      meta: end_host
