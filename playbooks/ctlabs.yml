@@ -554,10 +554,21 @@
     - roles/ctlabs_filebeat
 
 # -----------------------------------------------------------------------------
-# ctlabs_k3s
+# ctlabs_k3s server
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.k3s
   hosts : ['k3s1', 'k3s2', 'k3s3', 'k3s4']
+  tags  : k3s
+  roles :
+    - roles/ctlabs_k3s
+
+# -----------------------------------------------------------------------------
+# ctlabs_k3s agent
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.k3s
+  hosts : ['k3s1', 'k3s2', 'k3s3', 'k3s4']
+  vars  :
+    CTLABS_K3S_MODE: agent
   tags  : k3s
   roles :
     - roles/ctlabs_k3s
