@@ -5,6 +5,11 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
+#
+# environment vars
+#
+CTLABS_K3S_ROLE: server
+
 versions:
   k3s  : 1.29.2
   helm : 3.16.1
@@ -29,8 +34,12 @@ ctlabs_k3s:
         template: k3s.profile.j2
         file    : /etc/profile.d/k3s.sh
     service:
-      name     : k3s.service
-      template : k3s.service.j2
+      server:
+        name     : k3s-server.service
+        template : k3s-server.service.j2
+      agent:
+        name     : k3s-agent.service
+        template : k3s-agent.service.j2
     bin:
       path: /usr/bin/k3s
       mode: '0750'

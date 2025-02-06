@@ -5,13 +5,31 @@
 # Description : service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_k3s.tasks.service.present
-  template:
-    src  : "{{ ctlabs_k3s.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_k3s.defaults.service.name }}"
-  notify: ctlabs_k3s.handlers.systemd.reload
-
-- name: ctlabs_k3s.tasks.service.started
-  service:
-    name  : "{{ ctlabs_k3s.defaults.service.name }}"
-    state : started
+- name: ctlabs_k3s.tasks.service.server
+  when: CTLABS_K3S_ROLE == "server"
+  block:
+    - name: ctlabs_k3s.tasks.service.server.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.service.server.template }}"
+        dest : "{{ systemd_dir + '/' + ctlabs_k3s.defaults.service.server.name }}"
+      notify: ctlabs_k3s.handlers.server.systemd.reload
+    
+    - name: ctlabs_k3s.tasks.service.server.started
+      service:
+        name  : "{{ ctlabs_k3s.defaults.service.server.name }}"
+        state : started
+    
+- name: ctlabs_k3s.tasks.service.agent
+  when: CTLABS_K3S_ROLE == "agent"
+  block:
+    - name: ctlabs_k3s.tasks.service.agent.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.service.agent.template }}"
+        dest : "{{ systemd_dir + '/' + ctlabs_k3s.defaults.service.agent.name }}"
+      notify: ctlabs_k3s.handlers.agent.systemd.reload
+    
+    - name: ctlabs_k3s.tasks.service.agent.started
+      service:
+        name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
+        state : started
+    

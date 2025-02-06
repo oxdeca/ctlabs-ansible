@@ -5,13 +5,24 @@
 # Description : main handler
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_k3s.handlers.systemd.reload
+- name: ctlabs_k3s.handlers.server.systemd.reload
   systemd:
-    name          : "{{ ctlabs_k3s.defaults.service.name }}" 
+    name          : "{{ ctlabs_k3s.defaults.service.server.name }}" 
     enabled       : true
     daemon_reload : true
 
-- name: ctlabs_k3s.handlers.service.started
+- name: ctlabs_k3s.handlers.service.server.started
   service:
-    name  : "{{ ctlabs_k3s.defaults.service.name }}"
+    name  : "{{ ctlabs_k3s.defaults.service.server.name }}"
+    state : started
+
+- name: ctlabs_k3s.handlers.agent.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_k3s.defaults.service.agent.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_k3s.handlers.service.agent.started
+  service:
+    name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
     state : started

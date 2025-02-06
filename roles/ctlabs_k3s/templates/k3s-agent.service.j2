@@ -1,0 +1,17 @@
+[Unit]
+Description=k3s agent
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+
+User=root
+
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} agent
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
