@@ -37,6 +37,11 @@
       set_fact:
         ctlabs_k3s_server_url: "{{ ansible_local.ctlabs_k3s.server_url | default(ctlabs_k3s.defaults.config.server.url) }}"
 
+    - name: ctlabs_k3s.tasks.precheck.k3s_token.get
+      slurp:
+        path: "{{ ctlabs_k3s.defaults.config.token.file }}"
+      register: file_content
+
     - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
       set_fact:
-        ctlabs_k3s_server_token: "{{ lookup('file', ctlabs_k3s.defaults.config.token.file) | trim }}"
+        ctlabs_k3s_server_token: "{{ file_content.content | b64decode | trim }}"
