@@ -5,12 +5,38 @@
 # Description : tasks prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_k3s.tasks.precheck.os.supported
-  assert:
-    that: os is in ctlabs_k3s.os
-    fail_msg: "OS [{{ os }}] is not supported!"
+- name: ctlabs_k3s.tasks.precheck.os
+  block:
+    - name: ctlabs_k3s.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_k3s.os
+        fail_msg: "OS [{{ os }}] is not supported!"
 
-- name: ctlabs_k3s.tasks.precheck.virt_type
-  assert:
-    that     : virt_type is in ( 'kvm' )
-    fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+    - name: ctlabs_k3s.tasks.precheck.virt_type
+      assert:
+        that     : virt_type is in ( 'kvm' )
+        fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+
+  rescue:
+    - name: ctlabs_k3s.tasks.precheck.skip.unsupported
+      meta: end_host
+
+
+- name: ctlabs_k3s.tasks.precheck.k3s_role.var
+  set_fact:
+    ctlabs_k3s_role: "{{ ctlabs_k3s_role | default(ctlabs_k3s.defaults.config.role) }}"
+
+- name: ctlabs_k3s.tasks.precheck.k3s_role.local_fact
+  set_fact:
+    ctlabs_k3s_role: "{{ ansible_local.ctlabs_k3s_role | default(ctlabs_k3s_role) }}"
+
+- name: ctlabs_k3s.tasks.precheck.agent.vars
+  when: CTLABS_K3S_MODE == "agent" && ctlabs_k3s_role == "agent"
+  block:
+    - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
+      set_fact:
+        ctlabs_k3s_server_url: "{{ ansible_nodename }}"
+
+    - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
+      set_fact:
+        ctlabs_k3s_server_token: "{{ lookup('file', ctlabs_k3s.defaults.config.token.file) | trim }}"

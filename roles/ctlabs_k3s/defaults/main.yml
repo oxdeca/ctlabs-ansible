@@ -5,10 +5,8 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
-#
 # environment vars
-#
-CTLABS_K3S_ROLE: server
+CTLABS_K3S_MODE: server
 
 versions:
   k3s  : 1.29.2
@@ -30,6 +28,7 @@ ctlabs_k3s:
         path   : /usr/bin/helm
         mode   : '0750'
     config:
+      role: server
       profile:
         template: k3s.profile.j2
         file    : /etc/profile.d/k3s.sh
