@@ -28,14 +28,14 @@
 
 - name: ctlabs_k3s.tasks.precheck.k3s_role.local_fact
   set_fact:
-    ctlabs_k3s_role: "{{ ansible_local.ctlabs_k3s_role | default(ctlabs_k3s_role) }}"
+    ctlabs_k3s_role: "{{ ansible_local.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
 - name: ctlabs_k3s.tasks.precheck.agent.vars
   when: CTLABS_K3S_MODE == "agent" and ctlabs_k3s_role == "agent"
   block:
     - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
       set_fact:
-        ctlabs_k3s_server_url: "{{ ansible_nodename }}"
+        ctlabs_k3s_server_url: "{{ ansible_local.ctlabs_k3s.server_url | default(ctlabs_k3s.defaults.config.server.url) }}"
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
       set_fact:

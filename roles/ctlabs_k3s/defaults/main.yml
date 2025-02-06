@@ -29,6 +29,8 @@ ctlabs_k3s:
         mode   : '0750'
     config:
       role: server
+      server:
+        url: "https://{{ ansible_nodename }}:6443"
       profile:
         template: k3s.profile.j2
         file    : /etc/profile.d/k3s.sh
