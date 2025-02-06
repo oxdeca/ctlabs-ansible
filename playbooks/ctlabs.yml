@@ -259,13 +259,24 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.k3s.local_facts
-      when: ansible_hostname in ['k3s1', 'k3s2', 'k3s3', 'k3s4']
+    - name: ctlabs.playbooks.ctlabs.setup.k3s.server.local_facts
+      when: ansible_hostname in ['k3s1', 'k3s3']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_k3s
         content: |
           {
-            "node" : "control-plane"
+            "node" : "control-plane",
+            "role" : "server"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.local_facts
+      when: ansible_hostname in ['k3s2', 'k3s4']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_k3s
+        content: |
+          {
+            "node" : "control-plane",
+            "role" : "agent"
           }
 
 
