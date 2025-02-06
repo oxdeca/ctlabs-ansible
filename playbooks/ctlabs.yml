@@ -262,7 +262,7 @@
     - name: ctlabs.playbooks.ctlabs.setup.k3s.server.local_facts
       when: ansible_hostname in ['k3s1', 'k3s3']
       copy:
-        dest: /etc/ansible/facts.d/ctlabs_k3s
+        dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
           {
             "node" : "control-plane",
@@ -272,7 +272,7 @@
     - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.local_facts
       when: ansible_hostname in ['k3s2', 'k3s4']
       copy:
-        dest: /etc/ansible/facts.d/ctlabs_k3s
+        dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
           {
             "node" : "control-plane",

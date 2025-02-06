@@ -30,6 +30,8 @@
   set_fact:
     ctlabs_k3s_role: "{{ ansible_local.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
+#- debug: "msg={{ ctlabs_k3s_role }}"
+
 - name: ctlabs_k3s.tasks.precheck.agent.vars
   when: CTLABS_K3S_MODE == "agent" and ctlabs_k3s_role == "agent"
   block:
