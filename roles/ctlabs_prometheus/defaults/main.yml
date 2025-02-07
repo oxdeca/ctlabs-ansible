@@ -39,12 +39,8 @@ ctlabs_prometheus:
       receiver:
         targets :
       node_exporter:
-        targets :
-          - h1.ctlabs.internal:9100
-          - h2.ctlabs.internal:9100
-          - grafana.ctlabs.internal:9100
-          - mimir.ctlabs.internal:9100
-          - loki.ctlabs.internal:9100
+        domain : ctlabs.internal
+        targets: "{{ groups['hosts'] }}"
       goflow2:
         targets :
           - prometheus.ctlabs.internal:8080
