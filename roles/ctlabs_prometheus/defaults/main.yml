@@ -41,6 +41,7 @@ ctlabs_prometheus:
       node_exporter:
         domain : ctlabs.internal
         targets: "{{ groups['hosts'] }}"
+        port: 9100
       goflow2:
         targets :
           - prometheus.ctlabs.internal:8080
