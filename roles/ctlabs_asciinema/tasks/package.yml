@@ -21,3 +21,9 @@
 #    name  : "{{ ctlabs_asciinema.defaults.service.user   }}"
 #    group : "{{ ctlabs_asciinema.defaults.service.group  }}"
 #    groups: "{{ ctlabs_asciinema.defaults.service.groups }}"
+
+- name: ctlabs_asciinema.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_asciinema.defaults.pkgs[os_family] }}"

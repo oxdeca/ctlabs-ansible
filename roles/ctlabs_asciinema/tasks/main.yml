@@ -17,10 +17,10 @@
     - ctlabs_asciinema
     - ctlabs_asciinema.package
 
- - import_tasks: config.yml
-   tags:
-     - ctlabs_asciinema
-     - ctlabs_asciinema.config
+- import_tasks: config.yml
+  tags:
+    - ctlabs_asciinema
+    - ctlabs_asciinema.config
 
 # - import_tasks: service.yml
 #   tags:

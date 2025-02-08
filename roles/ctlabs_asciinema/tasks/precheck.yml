@@ -10,11 +10,10 @@
     - name: ctlabs_asciinema.tasks.precheck.os.supported
       assert:
         that: os is in ctlabs_asciinema.os
-        fail_msg: "OS [{{ os }}] is not supported"
-
+        fail_msg: "OS [{{ os }}] is not supported!"
     - name: ctlabs_asciinema.tasks.precheck.virt_type
       assert:
-        that     : virt_type is in ( 'docker', 'kvm' )
+        that     : virt_type is in ( 'kvm' )
         fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
   rescue:
     - name: ctlabs_asciinema.tasks.precheck.skip.unsupported
