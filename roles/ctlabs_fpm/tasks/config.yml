@@ -7,5 +7,5 @@
 
 - name: ctlabs_fpm.tasks.config.profile
   template:
-    src : "{{ ctlabs_fpm.defaults.config.profile.templates }}"
-    dest: "{{ ctlabs_fpm.defaults.config.profile.file      }}"
+    src : "{{ ctlabs_fpm.defaults.config.profile.template }}"
+    dest: "{{ ctlabs_fpm.defaults.config.profile.file     }}"
