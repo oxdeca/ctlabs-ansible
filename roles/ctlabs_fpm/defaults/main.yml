@@ -20,7 +20,7 @@ ctlabs_fpm:
         - name: fpm
     config:
       profile:
-        template: fpm.profile.j2
+        template: fpm.sh.j2
         file    : /etc/profile.d/fpm.sh
     service:
       user  : fpm
