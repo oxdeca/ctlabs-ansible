@@ -18,12 +18,10 @@ ctlabs_asciinema:
       #asciinema:
       #  url: "https://github.com/asciinema/asciinema/releases/download/v{{ versions.asciinema }}/asciinema-linux-amd64"
     config:
+      binary: /usr/bin/asciinema
       profile:
         template: asciinema.sh.j2
         file    : /etc/profile.d/asciinema.sh
     service:
-      user  : asciinema
-      group : asciinema
-      groups: []
   os:
     - centos9

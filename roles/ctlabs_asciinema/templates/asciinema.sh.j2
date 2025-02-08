@@ -8,8 +8,8 @@
 function arec() {
 	local castfile=${1:-/tmp/out.cast}
 
-	/usr/bin/asciinema rec -i1 -c /bin/bash ${castfile}
+	{{ ctlabs_asciinema.defaults.config.binary }} rec -i1 -c /bin/bash ${castfile}
 }
 
-alias aplay="/usr/bin/asciinema play "
-alias acat="/usr/bin/asciinema cat "
+alias aplay="{{ ctlabs_asciinema.defaults.config.binary }} play "
+alias acat="{{ ctlabs_asciinema.defaults.config.binary }} cat "
