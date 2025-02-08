@@ -12,14 +12,18 @@ ctlabs_asciinema:
   defaults:
     pkgs:
       redhat:
-        - asciinema
+        - name: asciinema
       debian:
-        - asciinema
+        - name: asciinema
       #asciinema:
       #  url: "https://github.com/asciinema/asciinema/releases/download/v{{ versions.asciinema }}/asciinema-linux-amd64"
     config:
       profile:
-        template:
-        file    :
+        template: asciinema.sh.j2
+        file    : /etc/profile.d/asciinema.sh
+    service:
+      user  : asciinema
+      group : asciinema
+      groups: []
   os:
     - centos9

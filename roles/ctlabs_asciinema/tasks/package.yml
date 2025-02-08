@@ -5,23 +5,6 @@
 # Description : Package installation tasks for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_asciinema.tasks.package.group
-  group:
-    name   : "{{ ctlabs_asciinema.defaults.service.group }}"
-    system : true
-
-- name: ctlabs_asciinema.tasks.package.user
-  user:
-    name   : "{{ ctlabs_asciinema.defaults.service.user  }}"
-    group  : "{{ ctlabs_asciinema.defaults.service.group }}"
-    system : true
-
-#- name: ctlabs_asciinema.tasks.package.group.certs.member
-#  user:
-#    name  : "{{ ctlabs_asciinema.defaults.service.user   }}"
-#    group : "{{ ctlabs_asciinema.defaults.service.group  }}"
-#    groups: "{{ ctlabs_asciinema.defaults.service.groups }}"
-
 - name: ctlabs_asciinema.tasks.package.install
   package:
     name  : "{{ item.name }}"

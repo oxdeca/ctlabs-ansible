@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_asciinema/templates/asciinema.sh.j2
+# Description : Template for ctlabs_asciinema bash profile
+# ------------------------------------------------------------------------------
+
+function arec() {
+	local castfile=${1:-/tmp/out.cast}
+
+	/usr/bin/asciinema -i1 -c /bin/bash ${castfile}
+}
