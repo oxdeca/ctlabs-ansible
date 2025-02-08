@@ -5,11 +5,3 @@
 # Description : Template for ctlabs_fpm bash profile
 # ------------------------------------------------------------------------------
 
-function arec() {
-	local castfile=${1:-/tmp/out.cast}
-
-	{{ ctlabs_fpm.defaults.config.binary }} rec -i1 -c /bin/bash ${castfile}
-}
-
-alias aplay="{{ ctlabs_fpm.defaults.config.binary }} play "
-alias acat="{{ ctlabs_fpm.defaults.config.binary }} cat "
