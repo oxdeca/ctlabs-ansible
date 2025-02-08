@@ -17,7 +17,7 @@ ctlabs_fpm:
       debian:
         - ruby
       gems:
-        - fpm
+        - name: fpm
     config:
       profile:
         template: fpm.profile.j2
