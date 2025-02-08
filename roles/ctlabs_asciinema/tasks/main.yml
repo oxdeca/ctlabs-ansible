@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : roles/ctlabs_asciinema/tasks/main.yml
+# Description : Main tasks file for the ctlabs_asciinema role
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_asciinema
+    - ctlabs_asciinema.precheck
+    - ctlabs_asciinema.package
+    - ctlabs_asciinema.config
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_asciinema
+    - ctlabs_asciinema.package
+
+ - import_tasks: config.yml
+   tags:
+     - ctlabs_asciinema
+     - ctlabs_asciinema.config
+
+# - import_tasks: service.yml
+#   tags:
+#     - ctlabs_asciinema
+#     - ctlabs_asciinema.service

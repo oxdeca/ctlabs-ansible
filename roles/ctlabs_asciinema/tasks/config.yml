@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : roles/ctlabs_asciinema/tasks/config.yml
+# Description : Configuration tasks for the ctlabs_asciinema role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_asciinema.tasks.config.create_aliases_file
+  template:
+    src: "ctlabs_asciinema_aliases.sh.j2"
+    dest: "{{ ctlabs_asciinema.defaults.aliases_file }}"
+    mode: 0644
+
+- name: ctlabs_asciinema.tasks.config.source_aliases_in_bashrc
+  blockinfile:
+    path: "/home/{{ ctlabs_asciinema.defaults.user }}/.bashrc" # Or appropriate shell config file
+    create: yes
+    block: |
+      source {{ ctlabs_asciinema.defaults.aliases_file }}

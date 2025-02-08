@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : roles/ctlabs_asciinema/handlers/main.yml
+# Description : Handlers for the ctlabs_asciinema role
+# ------------------------------------------------------------------------------
+# Example:
+# - name: ctlabs_asciinema.handlers.main.restart_service
+#   service:
+#     name: ctlabs_asciinema  # If you have a service
+#     state: restarted
+#   listen: "ctlabs_asciinema service changed"
+

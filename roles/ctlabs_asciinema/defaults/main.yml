@@ -1,0 +1,36 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : roles/ctlabs_asciinema/defaults/main.yml
+# Description : Default variables for the ctlabs_asciinema role
+# ------------------------------------------------------------------------------
+
+versions:
+  asciinema: "2.6.1"
+
+ctlabs_asciinema:
+  defaults:
+    pkgs:
+      redhat:
+        - asciinema
+      debian:
+        - asciinema
+      #asciinema:
+      #  url: "https://github.com/asciinema/asciinema/releases/download/v{{ versions.asciinema }}/asciinema-linux-amd64"
+    config:
+      install_dir: /usr/local  # Or /opt/ctlabs_asciinema
+      binary_name: asciinema
+      aliases_file: /etc/profile.d/ctlabs_asciinema.sh
+      aliases:
+        cascii: "{{ ctlabs_asciinema.defaults.config.install_dir }}/{{ ctlabs_asciinema.defaults.config.binary_name }}"
+        ascrec: "{{ ctlabs_asciinema.defaults.config.install_dir }}/{{ ctlabs_asciinema.defaults.config.binary_name }} rec"
+    service:
+      name    : asciinema.service
+      template: asciinema.service.j2
+      user    : asciinema
+      group   : asciinema
+    version: "{{ versions.asciinema }}" # Use the version defined above
+  os:
+    - centos9
+    - ubuntu2204
+    - ubuntu2004  # Add other supported OSs here
