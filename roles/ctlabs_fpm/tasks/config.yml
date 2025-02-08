@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_fpm/tasks/config.yml
+# Description : Configuration tasks for the ctlabs_fpm role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_fpm.tasks.config.profile
+  template:
+    src : "{{ ctlabs_fpm.defaults.config.profile.templates }}"
+    dest: "{{ ctlabs_fpm.defaults.config.profile.file      }}"

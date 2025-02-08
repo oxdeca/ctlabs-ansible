@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_fpm/handlers/main.yml
+# Description : Handlers for the ctlabs_fpm role
+# ------------------------------------------------------------------------------
+
+# - name: ctlabs_fpm.handlers.main.restart_service
+#   service:
+#     name: ctlabs_fpm  # If you have a service
+#     state: restarted
+#   listen: "ctlabs_fpm service changed"

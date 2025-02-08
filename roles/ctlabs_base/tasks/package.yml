@@ -37,7 +37,7 @@
     state : present
   loop: "{{ ctlabs_base.defaults.pkgs[os_family] }}"
 
-- name: ctlabs.tasks.package.gems.installed
+- name: ctlabs_base.tasks.package.gems.installed
   gem:
     name        : "{{ item.name }}"
     user_install: false

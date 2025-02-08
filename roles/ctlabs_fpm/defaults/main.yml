@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_fpm/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  ruby : 3.1
+
+ctlabs_fpm:
+  defaults:
+    pkgs:
+      redhat:
+        - name: "@ruby:{{ versions.ruby }}"
+        - name: rpm-build
+      debian:
+        - ruby
+      gems:
+        - fpm
+    config:
+      profile:
+        template: fpm.profile.j2
+        file    : /etc/profile.d/fpm.sh
+    service:
+      user  : fpm
+      group : fpm
+      groups: []
+  os:
+    - centos9

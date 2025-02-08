@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_fpm/tasks/main.yml
+# Description : Main tasks file for the ctlabs_fpm role
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_fpm
+    - ctlabs_fpm.precheck
+    - ctlabs_fpm.package
+    - ctlabs_fpm.config
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_fpm
+    - ctlabs_fpm.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_fpm
+    - ctlabs_fpm.config
+
+# - import_tasks: service.yml
+#   tags:
+#     - ctlabs_fpm
+#     - ctlabs_fpm.service

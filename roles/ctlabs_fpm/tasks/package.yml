@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_fpm/tasks/package.yml
+# Description : Package installation tasks for the ctlabs_fpm role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_fpm.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_fpm.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_fpm.tasks.package.gems.installed
+  gem:
+    name        : "{{ item.name }}"
+    user_install: false
+  loop: "{{ ctlabs_fpm.defaults.pkgs.gems }}"

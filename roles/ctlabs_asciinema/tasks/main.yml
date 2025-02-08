@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : roles/ctlabs_asciinema/tasks/main.yml
+# File        : ctlabs_asciinema/tasks/main.yml
 # Description : Main tasks file for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 

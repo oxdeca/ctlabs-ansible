@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : roles/ctlabs_asciinema/tasks/package.yml
+# File        : ctlabs_asciinema/tasks/package.yml
 # Description : Package installation tasks for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 

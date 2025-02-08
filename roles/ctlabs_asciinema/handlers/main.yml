@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : roles/ctlabs_asciinema/handlers/main.yml
+# File        : ctlabs_asciinema/handlers/main.yml
 # Description : Handlers for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 
