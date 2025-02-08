@@ -8,5 +8,8 @@
 function arec() {
 	local castfile=${1:-/tmp/out.cast}
 
-	/usr/bin/asciinema -i1 -c /bin/bash ${castfile}
+	/usr/bin/asciinema rec -i1 -c /bin/bash ${castfile}
 }
+
+alias aplay="/usr/bin/asciinema play "
+alias acat="/usr/bin/asciinema cat "
