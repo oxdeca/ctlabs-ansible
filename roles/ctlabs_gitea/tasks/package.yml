@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_gitea/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_gitea/tasks/package.yml
 # Description : packages
 # ------------------------------------------------------------------------------
 

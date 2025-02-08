@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_node_exporter/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_node_exporter/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 

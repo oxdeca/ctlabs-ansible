@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_sssd/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_sssd/handlers/main.yml
 # Description : ctlabs_sssd handlers
 # ------------------------------------------------------------------------------
 

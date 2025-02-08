@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/tasks/service.yml
 # Description : main ctlabs_kafka service
 # ------------------------------------------------------------------------------
 

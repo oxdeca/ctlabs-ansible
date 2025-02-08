@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kibana/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_kibana/tasks/precheck.yml
 # Description : ctlabs_kibana prechecks
 # ------------------------------------------------------------------------------
 

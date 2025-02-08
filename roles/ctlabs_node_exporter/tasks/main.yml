@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_node_exporter/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_node_exporter/tasks/main.yml
 # Description : main tasks file
 # ------------------------------------------------------------------------------
 

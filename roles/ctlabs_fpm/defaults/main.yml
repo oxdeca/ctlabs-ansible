@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_fpm/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_fpm/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 

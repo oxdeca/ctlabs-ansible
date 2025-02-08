@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_atlantis/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_atlantis/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

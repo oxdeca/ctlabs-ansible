@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_docker/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_docker/tasks/service.yml
 # Description : main service file
 # ------------------------------------------------------------------------------
 

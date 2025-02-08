@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_mimir/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_mimir/tasks/service.yml
 # Description : default service
 # ------------------------------------------------------------------------------
 

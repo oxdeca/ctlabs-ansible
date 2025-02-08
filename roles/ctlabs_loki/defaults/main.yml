@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_loki/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_loki/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 

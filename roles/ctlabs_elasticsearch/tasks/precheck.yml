@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_elasticsearch/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_elasticsearch/tasks/precheck.yml
 # Description : ctlabs_elasticsearch prechecks
 # ------------------------------------------------------------------------------
 

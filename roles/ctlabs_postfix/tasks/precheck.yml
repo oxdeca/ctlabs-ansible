@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_postfix/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_postfix/tasks/precheck.yml
 # Description : tasks prechecks
 # ------------------------------------------------------------------------------
 

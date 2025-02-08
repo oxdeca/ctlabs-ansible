@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kind/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/main.yml
 # Description : main ctlabs_kind tasks file
 # ------------------------------------------------------------------------------
 

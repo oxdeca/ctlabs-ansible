@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_opa/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_opa/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 

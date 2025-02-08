@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_opa/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_opa/tasks/service.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

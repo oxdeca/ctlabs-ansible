@@ -1,11 +1,11 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_jenkins/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_jenkins/tasks/main.yml
 # Description : main ctlabs_jenkins tasks file.
 # ------------------------------------------------------------------------------
 
-- include: precheck.yml
+- import_tasks: precheck.yml
   tags:
     - ctlabs_jenkins
     - ctlabs_jenkins.precheck
@@ -13,17 +13,17 @@
     - ctlabs_jenkins.config
     - ctlabs_jenkins.service
     
-- include: package.yml
+- import_tasks: package.yml
   tags:
     - ctlabs_jenkins
     - ctlabs_jenkins.package
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - ctlabs_jenkins
     - ctlabs_jenkins.config
 
-- include: service.yml
+- import_tasks: service.yml
   tags:
     - ctlabs_jenkins
     - ctlabs_jenkins.service

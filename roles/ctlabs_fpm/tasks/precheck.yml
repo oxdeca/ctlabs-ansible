@@ -1,16 +1,16 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_node_exporter/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_fpm/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_node_exporter.tasks.precheck
+- name: ctlabs_fpm.tasks.precheck
   block:
-    - name: ctlabs_node_exporter.tasks.precheck.os.supported
+    - name: ctlabs_fpm.tasks.precheck.os.supported
       assert:
-        that: os is in ctlabs_node_exporter.os
+        that: os is in ctlabs_fpm.os
         fail_msg: "OS [{{ os }}] is not supported!"
   rescue:
-    - name: ctlabs_node_exporter.tasks.precheck.skip.unsupported
+    - name: ctlabs_fpm.tasks.precheck.skip.unsupported
       meta: end_host

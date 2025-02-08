@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_semaphore/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_semaphore/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 

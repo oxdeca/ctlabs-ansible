@@ -1,13 +1,13 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_tomcat/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/main.yml
 # Description : main ctlabs_tomcat tasks file.
 # ------------------------------------------------------------------------------
 
 # tasks file for ctlabs_tomcat
 
-- include: precheck.yml
+- import_tasks: precheck.yml
   tags:
     - ctlabs_tomcat
     - ctlabs_tomcat.precheck
@@ -17,17 +17,17 @@
     - ctlabs_tomcat.service
     - ctlabs_tomcat.deploy
 
-- include: package.yml
+- import_tasks: package.yml
   tags:
     - ctlabs_tomcat
     - ctlabs_tomcat.package
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - ctlabs_tomcat
     - ctlabs_tomcat.config
 
-- include: instance.yml
+- import_tasks: instance.yml
   loop: "{{ ctlabs_tomcat.instances|dict2items }}"
   loop_control:
     loop_var: instances
@@ -36,12 +36,12 @@
     - ctlabs_tomcat
     - ctlabs_tomcat.instance
 
-- include: service.yml
+- import_tasks: service.yml
   tags:
     - ctlabs_tomcat
     - ctlabs_tomcat.service
 
-- include: deploy.yml
+- import_tasks: deploy.yml
   tags:
     - ctlabs_tomcat
     - ctlabs_tomcat.deploy

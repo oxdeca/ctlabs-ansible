@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_elasticsearch/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_elasticsearch/tasks/service.yml
 # Description : main ctlabs_elasticsearch service
 # ------------------------------------------------------------------------------
 

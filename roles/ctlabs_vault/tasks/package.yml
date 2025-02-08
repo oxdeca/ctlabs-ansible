@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_vault/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/package.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

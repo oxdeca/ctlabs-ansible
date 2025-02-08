@@ -1,11 +1,11 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kibana/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_kibana/tasks/main.yml
 # Description : main ctlabs_kibana tasks file.
 # ------------------------------------------------------------------------------
 
-- include: precheck.yml
+- import_tasks: precheck.yml
   tags:
     - ctlabs_kibana
     - ctlabs_kibana.precheck
@@ -13,17 +13,17 @@
     - ctlabs_kibana.config
     - ctlabs_kibana.service
     
-- include: package.yml
+- import_tasks: package.yml
   tags:
     - ctlabs_kibana
     - ctlabs_kibana.package
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - ctlabs_kibana
     - ctlabs_kibana.config
 
-- include: service.yml
+- import_tasks: service.yml
   tags:
     - ctlabs_kibana
     - ctlabs_kibana.service

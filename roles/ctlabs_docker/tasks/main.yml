@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_docker/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_docker/tasks/main.yml
 # Description : main ctlabs_docker tasks file.
 # ------------------------------------------------------------------------------
 

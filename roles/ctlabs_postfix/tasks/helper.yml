@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_postfix/tasks/helper.yml
+# File        : ctlabs-ansible/roles/ctlabs_postfix/tasks/helper.yml
 # Description : helper scripts
 # ------------------------------------------------------------------------------
 

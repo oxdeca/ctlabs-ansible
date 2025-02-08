@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_mimir/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_mimir/tasks/main.yml
 # Description : main tasks file
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_syslog/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_syslog/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 

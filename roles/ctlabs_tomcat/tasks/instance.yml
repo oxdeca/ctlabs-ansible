@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_tomcat/tasks/instance.yml
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/instance.yml
 # Description : creates instance configuration files instance.<id>
 #               - expects a dictionary 'item' which looks like this
 #

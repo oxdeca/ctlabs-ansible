@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_asciinema/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_asciinema/tasks/precheck.yml
 # Description : Pre-check tasks for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 

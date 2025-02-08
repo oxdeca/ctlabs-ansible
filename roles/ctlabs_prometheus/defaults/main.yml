@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_prometheus/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_prometheus/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 

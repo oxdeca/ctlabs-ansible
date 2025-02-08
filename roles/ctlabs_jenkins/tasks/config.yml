@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_jenkins/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_jenkins/tasks/config.yml
 # Description : create default configuration user/directories
 # ------------------------------------------------------------------------------
 

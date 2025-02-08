@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/tasks/precheck.yml
 # Description : ctlabs_kafka prechecks
 # ------------------------------------------------------------------------------
 

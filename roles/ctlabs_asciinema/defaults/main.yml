@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_asciinema/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_asciinema/defaults/main.yml
 # Description : Default variables for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 

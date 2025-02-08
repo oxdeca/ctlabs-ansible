@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_semaphore/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_semaphore/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 

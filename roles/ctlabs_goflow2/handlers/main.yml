@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_goflow2/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_goflow2/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

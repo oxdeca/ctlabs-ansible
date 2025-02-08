@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_wireguard/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_wireguard/tasks/main.yml
 # Description : main task file
 # ------------------------------------------------------------------------------
 

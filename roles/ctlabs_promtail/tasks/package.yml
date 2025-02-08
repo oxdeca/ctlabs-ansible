@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_promtail/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_promtail/tasks/package.yml
 # Description : packages
 # ------------------------------------------------------------------------------
 

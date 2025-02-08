@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_mimir/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_mimir/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 

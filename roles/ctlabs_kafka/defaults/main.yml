@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/defaults/main.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_node_exporter/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_node_exporter/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 

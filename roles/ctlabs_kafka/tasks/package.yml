@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/tasks/package.yml
 # Description : install kibana
 # ------------------------------------------------------------------------------
 

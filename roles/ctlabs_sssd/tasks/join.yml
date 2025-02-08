@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_sssd/tasks/join.yml
+# File        : ctlabs-ansible/roles/ctlabs_sssd/tasks/join.yml
 # Description : join domain
 # ------------------------------------------------------------------------------
 
@@ -25,7 +25,8 @@
 - name: ctlabs_sssd.tasks.join.dc.realm_join
   when: testjoin.rc != 0
   expect:
-    command: "ip vrf exec default realm  join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    #command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+    command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ (ansible_hostname|truncate(10)) +  '-'  + 'random' }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     responses:
       (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
 

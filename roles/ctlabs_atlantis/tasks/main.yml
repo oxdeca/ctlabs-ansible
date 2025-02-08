@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_atlantis/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_atlantis/tasks/main.yml
 # Description : main tasks file
 # ------------------------------------------------------------------------------
 

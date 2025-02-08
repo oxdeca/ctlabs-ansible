@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/tasks/config.yml
 # Description : create default configuration user/directories
 # ------------------------------------------------------------------------------
 

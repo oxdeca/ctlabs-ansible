@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kibana/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_kibana/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

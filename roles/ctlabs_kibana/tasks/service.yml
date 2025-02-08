@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kibana/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_kibana/tasks/service.yml
 # Description : main ctlabs_kibana service
 # ------------------------------------------------------------------------------
 

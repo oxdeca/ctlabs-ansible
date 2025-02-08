@@ -5,7 +5,7 @@
 # Description : main ctlabs_filebeat tasks file.
 # ------------------------------------------------------------------------------
 
-- include: precheck.yml
+- import_tasks: precheck.yml
   tags:
     - ctlabs_filebeat
     - ctlabs_filebeat.precheck
@@ -13,17 +13,17 @@
     - ctlabs_filebeat.config
     - ctlabs_filebeat.service
     
-- include: package.yml
+- import_tasks: package.yml
   tags:
     - ctlabs_filebeat
     - ctlabs_filebeat.package
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - ctlabs_filebeat
     - ctlabs_filebeat.config
 
-- include: service.yml
+- import_tasks: service.yml
   tags:
     - ctlabs_filebeat
     - ctlabs_filebeat.service

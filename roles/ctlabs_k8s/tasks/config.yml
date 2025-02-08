@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_k8s/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_k8s/tasks/config.yml
 # Description : main configurations
 # ------------------------------------------------------------------------------
 

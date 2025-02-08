@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_goflow2/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_goflow2/tasks/package.yml
 # Description : packages
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_ansible/roles/ctlabs_guacamole/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_guacamole/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 

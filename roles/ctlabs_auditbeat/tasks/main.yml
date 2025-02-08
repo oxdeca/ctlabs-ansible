@@ -1,11 +1,11 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_auditbeat/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_auditbeat/tasks/main.yml
 # Description : main ctlabs_auditbeat tasks file.
 # ------------------------------------------------------------------------------
 
-- include: precheck.yml
+- import_tasks: precheck.yml
   tags:
     - ctlabs_auditbeat
     - ctlabs_auditbeat.precheck
@@ -13,17 +13,17 @@
     - ctlabs_auditbeat.config
     - ctlabs_auditbeat.service
     
-- include: package.yml
+- import_tasks: package.yml
   tags:
     - ctlabs_auditbeat
     - ctlabs_auditbeat.package
 
-- include: config.yml
+- import_tasks: config.yml
   tags:
     - ctlabs_auditbeat
     - ctlabs_auditbeat.config
 
-- include: service.yml
+- import_tasks: service.yml
   tags:
     - ctlabs_auditbeat
     - ctlabs_auditbeat.service

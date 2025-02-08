@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_asciinema/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_asciinema/tasks/config.yml
 # Description : Configuration tasks for the ctlabs_asciinema role
 # ------------------------------------------------------------------------------
 

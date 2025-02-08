@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_semaphore/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_semaphore/tasks/service.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

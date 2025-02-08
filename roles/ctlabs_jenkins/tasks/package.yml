@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_jenkins/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_jenkins/tasks/package.yml
 # Description : main ctlabs_jenkins tasks file.
 # ------------------------------------------------------------------------------
 

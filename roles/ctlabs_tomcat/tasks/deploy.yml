@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_tomcat/tasks/deploy.yml
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/deploy.yml
 # Description : deploys an application for an instance
 #
 # called by ctlabs_tomcat/tasks/main.yml as loop

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_loki/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_loki/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

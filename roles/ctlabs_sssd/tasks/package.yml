@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_sssd/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_sssd/tasks/package.yml
 # Description : main ctlabs_sssd tasks file.
 # ------------------------------------------------------------------------------
 

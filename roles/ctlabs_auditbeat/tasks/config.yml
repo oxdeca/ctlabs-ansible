@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_auditbeat/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_auditbeat/tasks/config.yml
 # Description : create default configuration user/directories
 # ------------------------------------------------------------------------------
 

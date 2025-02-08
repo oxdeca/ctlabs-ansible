@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_prometheus/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_prometheus/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

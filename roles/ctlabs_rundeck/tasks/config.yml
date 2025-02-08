@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_rundeck/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_rundeck/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_elasticsearch/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_elasticsearch/defaults/main.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

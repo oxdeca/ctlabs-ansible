@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_loki/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_loki/tasks/main.yml
 # Description : main tasks file
 # ------------------------------------------------------------------------------
 

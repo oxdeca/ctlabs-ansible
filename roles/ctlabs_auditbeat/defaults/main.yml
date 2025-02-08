@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_auditbeat/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_auditbeat/defaults/main.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

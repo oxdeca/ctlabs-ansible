@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_postfix/handler/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_postfix/handler/config.yml
 # Description : default handler
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_grafana/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_grafana/tasks/service.yml
 # Description : default service
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_kafka/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_kafka/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_gitea/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_gitea/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 

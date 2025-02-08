@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_opa/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_opa/handlers/main.yml
 # Description : description
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_gitea/tasks/setup.yml
+# File        : ctlabs-ansible/roles/ctlabs_gitea/tasks/setup.yml
 # Description : setup after successfull install
 # ------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_tomcat/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/service.yml
 # Description : main ctlabs_tomcat service
 # ------------------------------------------------------------------------------
 

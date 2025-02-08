@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_wireguard/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_wireguard/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 

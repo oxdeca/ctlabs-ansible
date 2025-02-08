@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_sssd/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_sssd/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 

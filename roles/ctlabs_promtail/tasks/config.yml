@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_promtail/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_promtail/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
 

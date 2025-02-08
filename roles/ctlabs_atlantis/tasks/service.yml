@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_atlantis/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_atlantis/tasks/service.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 

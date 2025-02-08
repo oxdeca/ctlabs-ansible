@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_tomcat/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_tomcat/tasks/package.yml
 # Description : install tomcat's and jdk's
 # ------------------------------------------------------------------------------
 

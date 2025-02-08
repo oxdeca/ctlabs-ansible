@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_opa/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_opa/tasks/main.yml
 # Description : main tasks file
 # ------------------------------------------------------------------------------
 

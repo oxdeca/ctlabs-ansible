@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_k8s/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_k8s/handlers/main.yml
 # Description : main handler
 # ------------------------------------------------------------------------------
 
