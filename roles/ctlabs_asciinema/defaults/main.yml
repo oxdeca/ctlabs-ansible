@@ -18,7 +18,7 @@ ctlabs_asciinema:
       #asciinema:
       #  url: "https://github.com/asciinema/asciinema/releases/download/v{{ versions.asciinema }}/asciinema-linux-amd64"
     config:
-      profile
+      profile:
         template:
         file    :
   os:
