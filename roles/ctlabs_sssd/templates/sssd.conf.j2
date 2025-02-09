@@ -1,22 +1,24 @@
 # ------------------------------------------------------------------------------
 # File        : {{ ctlabs_sssd.defaults.config.sssd.file }}
 # Template    : ctlabs-ansible/roles/ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.sssd.template }}
-# Description :
 # ------------------------------------------------------------------------------
 {%- set tmp = [] -%}
-{%- set host = "" %}
-{%- for host in ctlabs_sssd.defaults.config.dc.hosts -%}
+{%- for host in ctlabs_sssd_ad_server -%}
 {%-   set _ = tmp.append(host + '.' + ctlabs_sssd.defaults.config.dc.domain) -%}
 {%- endfor -%}
-{%- set hosts = (tmp|join(', ')) %}
+{%- set ad_server = (tmp|join(', ')) %}
 
 
 [domain/{{ ctlabs_sssd.defaults.config.dc.domain }}]
   access_provider                = ad
+  auth_provider                  = ad
   id_provider                    = ad
 
-  ad_server                      = {{ hosts }}
+  ldap_sasl_authid               = {{ ctlabs_sssd_computer_name }}@{{ ctlabs_sssd.defaults.config.dc.realm }}
+
+  ad_server                      = {{ ad_server }}
   ad_domain                      = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  ad_hostname                    = {{ ansible_fqdn }}
   dyndns_update                  = false
 
   krb5_realm                     = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}

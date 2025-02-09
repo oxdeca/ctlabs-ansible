@@ -12,18 +12,8 @@
 
 #- debug: "msg={{ adcli_available }}"
 
-- name: ctlabs_sssd.tasks.join.is_joined
-  when: adcli_available.stat.exists
-  command       : "ip vrf exec default adcli testjoin -D {{ ctlabs_sssd.defaults.config.dc.domain }}"
-  ignore_errors : true
-  failed_when   : testjoin.rc != 0
-  changed_when  : false
-  register      : testjoin
-
-#- debug: "msg={{ testjoin }}"
-
-- name: ctlabs_sssd.tasks.join.dc.realm_join
-  when: testjoin.rc != 0
+- name: ctlabs_sssd.tasks.join.dc.realm
+  when: when not ctlabs_sssd_domain_joined
   expect:
     #command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ (ansible_hostname|truncate(10)) +  '-'  + 'random' }} {{ ctlabs_sssd.defaults.config.dc.domain }}"

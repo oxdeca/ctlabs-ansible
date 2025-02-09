@@ -22,6 +22,7 @@ ctlabs_sssd:
     python:
       pips:
         - pexpect
+        - hvac
     config:
       dc:
         realm  : CTLABS.INTERNAL
