@@ -47,6 +47,7 @@ ctlabs_sssd:
   os:
     - redhat7
     - redhat8
+    - redhat9
     - centos7
     - centos8
     - centos9
