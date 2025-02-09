@@ -22,7 +22,3 @@
 - name: ctlabs_smbadc.tasks.precheck.domain.local_fact
   set_fact:
     ctlabs_smbadc_domain: "{{ ansible_local.ctlabs_smbadc.domain | default(ctlabs_smbadc_domain) }}"
-    
-- name: ctlabs_smbadc.tasks.precheck.type.check
-  assert:
-    that : 1 == 1
