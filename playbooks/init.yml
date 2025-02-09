@@ -22,3 +22,15 @@
   tags  : base
   roles :
     - role : roles/ctlabs_base
+
+- name  : ctlabs-ansible.playbooks.init.asciinema
+  hosts : localhost
+  tags  : asciinema
+  roles :
+    - role : roles/ctlabs_asciinema
+
+- name  : ctlabs-ansible.playbooks.init.fpm
+  hosts : localhost
+  tags  : fpm
+  roles :
+    - role : roles/ctlabs_fpm

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_ansible/roles/ctlabs_ca/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_ca/tasks/config.yml
 # Description : configuration
 # ------------------------------------------------------------------------------
 
