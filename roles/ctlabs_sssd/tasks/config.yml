@@ -5,9 +5,13 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.config.computer.domain.joined
+- name: ctlabs_sssd.tasks.config.computer.joined.check
+  command: /usr/sbin/realm list -v
+  register: joined
+
+- name: ctlabs_sssd.tasks.config.computer.joined.fact
   set_fact:
-    ctlabs_sssd_domain_joined: "{{ True if (lookup('pipe', '/usr/sbin/realm list -v')|split('\n'))[0] == ctlabs_sssd.defaults.config.dc.domain else False }}"
+    ctlabs_sssd_domain_joined: "{{ True if joined.stdout == ctlabs_sssd.defaults.config.dc.domain else False }}"
 
 - name: ctlabs_sssd.tasks.config.dc.ad_server
   set_fact:

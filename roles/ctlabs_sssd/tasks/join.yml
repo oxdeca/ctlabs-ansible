@@ -13,9 +13,8 @@
 #- debug: "msg={{ adcli_available }}"
 
 - name: ctlabs_sssd.tasks.join.dc.realm
-  when: when not ctlabs_sssd_domain_joined
+  when: not ctlabs_sssd_domain_joined
   expect:
-    #command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ (ansible_hostname|truncate(10)) +  '-'  + 'random' }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
     responses:
       (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
