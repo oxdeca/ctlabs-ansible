@@ -14,7 +14,7 @@
     
     - name: ctlabs_base.tasks.precheck.virt_type
       assert:
-        that     : virt_type is in ( 'kvm' )
+        that     : virt_type is in [ 'kvm', 'vmware' ]
         fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
   rescue:
     - name: ctlabs_base.tasks.precheck.skip.unsupported
