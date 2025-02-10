@@ -24,11 +24,13 @@ domain_users:
     lastname  : Brown
     uid       : 5002
     ou        : ou=users
+    pass      : secret123!
 
   - firstname : Michael
     lastname  : Jones
     uid       : 5003
     ou        : ou=users
+    pass      : secret123!
 
 domain_services:
 
