@@ -41,6 +41,7 @@
       slurp:
         path: "{{ ctlabs_k3s.defaults.config.server.token }}"
       register: file_content
+      delegate_to: "{{ ansible_local.ctlabs_k3s.server_node }}"
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
       set_fact:

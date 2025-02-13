@@ -7,6 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 
 User=root
+EnvironmentFile=/etc/sysconfig/k3s
 ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} agent
 
 Restart=always

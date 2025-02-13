@@ -39,6 +39,10 @@ ctlabs_k3s:
       agent:
         name     : k3s-agent.service
         template : k3s-agent.service.j2
+    sysconfig:
+      agent:
+        name     : /etc/sysconfig/k3s
+        template : k3s-agent.sysconfig.j2
     bin:
       path: /usr/bin/k3s
       mode: '0750'
