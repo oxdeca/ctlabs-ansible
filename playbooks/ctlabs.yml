@@ -275,8 +275,9 @@
         dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
           {
-            "node" : "control-plane",
-            "role" : "agent"
+            "node"       : "control-plane",
+            "role"       : "agent",
+            "server_url" : "https://k3s1.ctlabs.internal:6443"
           }
 
 

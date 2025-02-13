@@ -13,7 +13,7 @@
         fail_msg: "OS [{{ os }}] is not supported!"
     - name: ctlabs_k3s.tasks.precheck.virt_type
       assert:
-        that     : virt_type is in ( 'kvm' )
+        that     : virt_type is in [ 'kvm' ]
         fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
   rescue:
     - name: ctlabs_k3s.tasks.precheck.skip.unsupported
@@ -31,7 +31,7 @@
 #- debug: "msg={{ ctlabs_k3s_role }}"
 
 - name: ctlabs_k3s.tasks.precheck.agent.vars
-  when: CTLABS_K3S_MODE == "agent" and ctlabs_k3s_role == "agent"
+  when: ctlabs_k3s_role == "agent"
   block:
     - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
       set_fact:

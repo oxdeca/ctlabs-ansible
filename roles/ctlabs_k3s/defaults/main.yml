@@ -5,9 +5,6 @@
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
-# environment vars
-CTLABS_K3S_MODE: server
-
 versions:
   k3s  : 1.29.2
   helm : 3.16.1
