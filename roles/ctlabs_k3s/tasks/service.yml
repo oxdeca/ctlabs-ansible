@@ -32,4 +32,7 @@
       service:
         name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
         state : started
+        environment: 
+          K3S_URL: "{{ ctlabs_k3s_server_url }}"
+          K3S_TOKEN: "{{ ctlabs_k3s_server_token }}"
     
