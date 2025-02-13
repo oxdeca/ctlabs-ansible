@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_k3s.tasks.service.server
-  when: CTLABS_K3S_MODE == "server" and ctlabs_k3s_role == "server"
+  when: ctlabs_k3s_role == "server"
   block:
     - name: ctlabs_k3s.tasks.service.server.present
       template:
@@ -20,7 +20,7 @@
         state : started
     
 - name: ctlabs_k3s.tasks.service.agent
-  when: CTLABS_K3S_MODE == "agent" and ctlabs_k3s_role == "agent"
+  when: ctlabs_k3s_role == "agent"
   block:
     - name: ctlabs_k3s.tasks.service.agent.present
       template:
