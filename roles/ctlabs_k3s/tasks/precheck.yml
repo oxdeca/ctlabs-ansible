@@ -31,7 +31,7 @@
 #- debug: "msg={{ ctlabs_k3s_role }}"
 
 - name: ctlabs_k3s.tasks.precheck.agent.vars
-  when: ctlabs_k3s_role == "agent"
+  when: CTLABS_K3S_MODE == "agent" and ctlabs_k3s_role == "agent"
   block:
     - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
       set_fact:
