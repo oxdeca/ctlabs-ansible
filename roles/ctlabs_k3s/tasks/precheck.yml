@@ -37,6 +37,12 @@
       set_fact:
         ctlabs_k3s_server_url: "{{ ansible_local.ctlabs_k3s.server_url | default(ctlabs_k3s.defaults.config.server.url) }}"
 
+    - name: ctlabs_k3s.tasks.precheck.k3s_server_node.up
+      wait_for:
+        port: 6443
+        host: "{{ ansible_local.ctlabs_k3s.server_node }}"
+        delay: 5
+
     - name: ctlabs_k3s.tasks.precheck.k3s_token.get
       slurp:
         path: "{{ ctlabs_k3s.defaults.config.server.token }}"
