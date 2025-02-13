@@ -40,6 +40,7 @@ ctlabs_k3s:
         name     : k3s-agent.service
         template : k3s-agent.service.j2
     sysconfig:
+      dir  : /etc/sysconfig
       agent:
         name     : /etc/sysconfig/k3s
         template : k3s-agent.sysconfig.j2

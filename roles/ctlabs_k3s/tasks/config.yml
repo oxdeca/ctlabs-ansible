@@ -9,3 +9,8 @@
   template:
     src  : "{{ ctlabs_k3s.defaults.config.profile.template }}"
     dest : "{{ ctlabs_k3s.defaults.config.profile.file     }}"
+
+- name: ctlabs_k3s.tasks.config.sysconfig.dir
+  file:
+    path : "{{ ctlabs_k3s.defaults.sysconfig.dir }}"
+    state: directory
