@@ -67,13 +67,23 @@
             "masters" : [ "192.168.10.11" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.smbadc.local_facts
-      when: ansible_hostname in [ 'dc1', 'dc2' ]
+    - name: ctlabs.playbooks.ctlabs.smbadc.master.local_facts
+      when: ansible_hostname == 'dc1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
         content: |
           {
             "type"   : "master",
+            "domain" : "{{ CTLABS_DOMAIN }}"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.smbadc.slave.local_facts
+      when: ansible_hostname == 'dc2'
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
+        content: |
+          {
+            "type"   : "slave",
             "domain" : "{{ CTLABS_DOMAIN }}"
           }
 
