@@ -3,8 +3,9 @@
 # Template    : ctlabs-ansible/roles/ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.krb5.template }}
 # ------------------------------------------------------------------------------
 
-
+{% if os_family    == "redhat" %}  
 includedir /etc/krb5.conf.d/
+{% endif %}
 
 [logging]
   default              = FILE:/var/log/krb5libs.log
