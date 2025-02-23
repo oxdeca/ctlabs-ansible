@@ -12,3 +12,9 @@
     enabled : true
     state   : started
 
+- name: ctlabs_sssd.tasks.service.oddjobd
+  service:
+    name    : "{{ item }}"
+    enabled : true
+    state   : started
+  loop: "{{ ctlabs_sssd.defaults.services }}"

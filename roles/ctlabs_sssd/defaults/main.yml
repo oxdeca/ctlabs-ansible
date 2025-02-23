@@ -60,6 +60,8 @@ ctlabs_sssd:
     service:
       name     : sssd.service
       template : sssd.service.j2
+    services:
+      - oddjobd
   os:
     - redhat7
     - redhat8
