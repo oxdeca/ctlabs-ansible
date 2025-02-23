@@ -1,0 +1,16 @@
+{# ----------------------------------------------------------------------------- #}
+{# File     : ctlabs_vault/templates/ldap.json.j2                                #}
+{# ----------------------------------------------------------------------------- #}
+
+{
+  "url"               : "ldap://slapd1.ctlabs.internal",
+  "userdn"            : "ou=users,dc=ctlabs,dc=internal",
+  "userattr"          : "uid",
+  "upndomain"         : "ctlabs.internal",
+  "groupdn"           : "ou=groups,dc=ctlabs,dc=internal",
+  "groupattr"         : "cn",
+  "groupfilter"       : "(|(memberUid={{.Username}})(member={{.UserDN}})(uniqueMember={{.UserDN}}))",
+  "insecure_tls"      : true,
+  "discoverdn"        : true,
+  "username_as_alias" : true
+}

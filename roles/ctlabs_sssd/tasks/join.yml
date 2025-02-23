@@ -27,3 +27,9 @@
     src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
     dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
   notify: ctlabs_sssd.handlers.service.restart
+
+- name ctlabs_sssd.tasks.join.pam.account.debian
+  when: os_family == 'debian'
+  template:
+    src  : "{{ ctlabs_sssd.defaults.config.pam[os_family].account.template }}"
+    dest : "{{ ctlabs_sssd.defaults.config.pam[os_family].account.file     }}"

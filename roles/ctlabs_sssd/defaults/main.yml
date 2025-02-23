@@ -46,6 +46,11 @@ ctlabs_sssd:
         mode     : '0600'
         file     : /etc/sssd/sssd.conf
         template : sssd.conf.j2
+      pam:
+        debian:
+          account:
+            template: pam-account.deb.j2
+            file    : /etc/pam.d/common-account
       krb5 :
         file     : /etc/krb5.conf
         template : krb5.conf.j2
