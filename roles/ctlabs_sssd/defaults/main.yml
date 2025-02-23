@@ -18,7 +18,14 @@ ctlabs_sssd:
         - name : adcli
         - name : samba-common-tools
       debian:
-        - name: sssd
+        - name: sssd-ad
+        - name: sssd-tools
+        - name: realmd
+        - name: krb5-user
+        - name: oddjob
+        - name: oddjob-mkhomedir
+        - name: adcli
+        - name: packagekit
     python:
       pips:
         - pexpect
