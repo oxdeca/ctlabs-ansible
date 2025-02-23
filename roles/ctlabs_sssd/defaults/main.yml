@@ -51,6 +51,9 @@ ctlabs_sssd:
           account:
             template: pam-account.deb.j2
             file    : /etc/pam.d/common-account
+          session:
+            template: pam-session.deb.j2
+            file    : /etc/pam.d/common-session
       krb5 :
         file     : /etc/krb5.conf
         template : krb5.conf.j2
