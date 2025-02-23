@@ -58,6 +58,8 @@ ctlabs_sssd:
     - centos7
     - centos8
     - centos9
+    - kali2024
+    - debian11
   env:
     - gcp-use1-dev
 

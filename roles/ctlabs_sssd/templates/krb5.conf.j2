@@ -21,7 +21,7 @@ includedir /etc/krb5.conf.d/
   forwardable          = true
 {% if os_family    == "redhat" %}  
   pkinit_anchors       = FILE:/etc/pki/tls/certs/ca-bundle.crt
-{% elsif os_family == "debian" %}
+{% elif os_family == "debian" %}
   pkinit_anchors       = FILE:/etc/ssl/certs/ca-certificates.crt
 {% endif %}
   spake_preauth_groups = edwards25519
