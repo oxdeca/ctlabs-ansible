@@ -24,7 +24,9 @@ ctlabs_smbadc:
       krb5_realm : CTLABS.INTERNAL
       ad_domain  : CTLABS
       dns_domain : ctlabs.internal
-      adminpass  : secret123!
+      admin:
+        user : Administrator
+        pass : secret123!
       role       : master
       dns        :
         - "{{ ansible_default_ipv4.address }}"

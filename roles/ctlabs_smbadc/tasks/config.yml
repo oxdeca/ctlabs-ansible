@@ -31,7 +31,7 @@
   block:
     - name: ctlabs_smbadc.tasks.config.master.domain.provision
       when: ansible_facts.services['samba-ad-dc'].state != 'running'
-      command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc_domain|upper }}" --domain="{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
+      command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc_domain|upper }}" --domain="{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" --adminpass="{{ ctlabs_smbadc.defaults.config.admin.pass }}"
       #command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm }}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
 
 - name: ctlabs_smbadc.tasks.config.slave
@@ -39,7 +39,7 @@
   block:
     - name: ctlabs_smbadc.tasks.config.slave.domain.join
       when: ansible_facts.services['samba-ad-dc'].state != 'running'
-      command: /usr/bin/samba-tool domain join "{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" DC --server="{{ ansible_local.ctlabs_smbadc.master }}" --username="{{ ctlabs_smbadc.config.admin }}" --password="{{ ctlabs_smbadc.config.adminpass }}" --dns-backend=SAMBA_INTERNAL --option='idmap_ldb:use rfc2307 = yes'
+      command: /usr/bin/samba-tool domain join "{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" DC --server="{{ ansible_local.ctlabs_smbadc.master }}" --username="{{ ctlabs_smbadc.defaults.config.admin.user }}" --password="{{ ctlabs_smbadc.defaults.config.admin.pass }}" --dns-backend=SAMBA_INTERNAL --option='idmap_ldb:use rfc2307 = yes'
     
 - name: ctlabs_smbadc.tasks.config.master.krb5
   copy:
