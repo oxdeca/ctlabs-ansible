@@ -132,11 +132,35 @@ zone_ctlabs_internal:
 
   - name  : _ldap._tcp
     type  : SRV
-    value : 10 50 389 dc1
+    value : 10 50  389 dc1
 
   - name  : _kerberos._tcp
     type  : SRV
-    value : 10 50  88 dc1
+    value : 10 50   88 dc1
+
+  - name  : _kpasswd._tcp
+    type  : SRV
+    value : 10 50  464 dc1
+
+  - name  : _gc._tcp
+    type  : SRV
+    value : 10 50 3268 dc1
+
+  - name  : _ldap._tcp
+    type  : SRV
+    value : 10 50  389 dc2
+
+  - name  : _kerberos._tcp
+    type  : SRV
+    value : 10 50   88 dc2
+
+  - name  : _kpasswd._tcp
+    type  : SRV
+    value : 10 50  464 dc2
+
+  - name  : _gc._tcp
+    type  : SRV
+    value : 10 50 3268 dc2
 
 # -----------------------------------------------------------------------------
 # slapd server
