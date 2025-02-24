@@ -360,11 +360,20 @@
     - roles/ctlabs_bind
 
 # -----------------------------------------------------------------------------
-# ctlabs_smbadc
+# ctlabs_smbadc (master)
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.smbadc
-  hosts : [dc1, dc2]
-  tags  : smbadc
+  hosts : [dc1]
+  tags  : smbadc-master
+  roles :
+    - roles/ctlabs_smbadc
+
+# -----------------------------------------------------------------------------
+# ctlabs_smbadc (slave)
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.smbadc
+  hosts : [dc2]
+  tags  : smbadc-slave
   roles :
     - roles/ctlabs_smbadc
 
