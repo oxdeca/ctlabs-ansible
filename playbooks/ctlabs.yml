@@ -84,7 +84,7 @@
         content: |
           {
             "role"   : "slave",
-            "domain" : "{{ CTLABS_DOMAIN }}"
+            "domain" : "{{ CTLABS_DOMAIN }}",
             "master" : "dc1.{{ CTLABS_DOMAIN }}"
           }
 
