@@ -22,3 +22,11 @@
 - name: ctlabs_smbadc.tasks.precheck.domain.local_fact
   set_fact:
     ctlabs_smbadc_domain: "{{ ansible_local.ctlabs_smbadc.domain | default(ctlabs_smbadc_domain) }}"
+
+- name: ctlabs_smbadc.tasks.precheck.role.var
+  set_fact:
+    ctlabs_smbadc_role: "{{ ctlabs_smbadc_role | default(ctlabs_smbadc.defaults.config.role) }}"
+
+- name: ctlabs_smbadc.tasks.precheck.role.local_fact
+  set_fact:
+    ctlabs_smbadc_role: "{{ ansible_local.ctlabs_smbadc.role | default(ctlabs_smbadc_role) }}"

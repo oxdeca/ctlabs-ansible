@@ -17,8 +17,6 @@ ctlabs_smbadc:
       - name : libnss-winbind
       - name : libpam-krb5
       - name : libpam-winbind
-    user  : samba
-    group : samba
     config:
       ca_ctlabs:
         certdir : /etc/ca-ctlabs/
@@ -27,6 +25,7 @@ ctlabs_smbadc:
       ad_domain  : CTLABS
       dns_domain : ctlabs.internal
       adminpass  : secret123!
+      role       : master
       dns        :
         - "{{ ansible_default_ipv4.address }}"
         - 127.0.0.11
@@ -44,7 +43,9 @@ ctlabs_smbadc:
         src : /var/lib/samba/private/krb5.conf
         dst : /etc/krb5.conf
     service:
-      name : samba-ad-dc.service
+      name  : samba-ad-dc.service
+      user  : samba
+      group : samba
       disable:
         - winbind
   os:

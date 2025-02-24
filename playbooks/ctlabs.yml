@@ -73,7 +73,7 @@
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
         content: |
           {
-            "type"   : "master",
+            "role"   : "master",
             "domain" : "{{ CTLABS_DOMAIN }}"
           }
 
@@ -83,8 +83,9 @@
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
         content: |
           {
-            "type"   : "slave",
+            "role"   : "slave",
             "domain" : "{{ CTLABS_DOMAIN }}"
+            "master" : "dc1.{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.ctlabs.slapd.local_facts

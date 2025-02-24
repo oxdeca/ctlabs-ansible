@@ -26,17 +26,22 @@
   service_facts:
   register: service_states
 
-- name: ctlabs_smbadc.tasks.config.domain
-  when: ansible_facts.services['samba-ad-dc'].state != 'running'
-  command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc_domain|upper }}" --domain="{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
-  #command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm }}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
+- name: ctlabs_smbadc.tasks.config.master
+  when: ctlabs_smbadc_role == "master"
+  block:
+    - name: ctlabs_smbadc.tasks.config.master.domain.provision
+      when: ansible_facts.services['samba-ad-dc'].state != 'running'
+      command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc_domain|upper }}" --domain="{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
+      #command: /usr/bin/samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm="{{ ctlabs_smbadc.defaults.config.krb5_realm }}" --domain="{{ ctlabs_smbadc.defaults.config.ad_domain }}" --adminpass="{{ ctlabs_smbadc.defaults.config.adminpass }}"
 
-# - name: ctlabs_smbadc.tasks.config.resolver
-#  template:
-#    src  : "{{ ctlabs_smbadc.defaults.config.resolv.template }}"
-#    dest : "{{ ctlabs_smbadc.defaults.config.resolv.file     }}"
-
-- name: ctlabs_smbadc.tasks.config.krb5
+- name: ctlabs_smbadc.tasks.config.slave
+  when: ctlabs_smbadc_role == "slave"
+  block:
+    - name: ctlabs_smbadc.tasks.config.slave.domain.join
+      when: ansible_facts.services['samba-ad-dc'].state != 'running'
+      command: /usr/bin/samba-tool domain join "{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" DC --server="{{ ansible_local.ctlabs_smbadc.master }}" --username="{{ ctlabs_smbadc.config.admin }}" --password="{{ ctlabs_smbadc.config.adminpass }}" --dns-backend=SAMBA_INTERNAL
+    
+- name: ctlabs_smbadc.tasks.config.master.krb5
   copy:
     src        : "{{ ctlabs_smbadc.defaults.config.krb5.src }}"
     dest       : "{{ ctlabs_smbadc.defaults.config.krb5.dst }}"
