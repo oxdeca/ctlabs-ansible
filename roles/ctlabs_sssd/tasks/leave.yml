@@ -5,25 +5,29 @@
 # Description : leave domain
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.leave.adcli.available
-  stat:
-    path: /usr/sbin/adcli
-  register: adcli_available
-
-#- debug: "msg={{ adcli_available }}"
-
-- name: ctlabs_sssd.tasks.leave.dc.realm_leave
-  when: ctlabs_sssd_domain_joined
-  no_log: true
-  expect:
-    command: "ip vrf exec default realm leave -rU  {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
-    responses:
-      (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
-  notify: ctlabs_sssd.handlers.service.stop
-
-- name: ctlabs_sssd.tasks.leave.dc.host_delete
-  when: ctlabs_sssd_domain_joined
-  expect:
-    command: "ip vrf exed default adcli delete-computer -D {{ ctlabs_sssd.defaults.config.dc.domain }} -R {{ ctlabs_sssd.defaults.config.dc.realm }} -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} -vW {{ ctlabs_sssd_computer_name }}"
-    responses:
-      (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
+- name: ctlabs_sssd.tasks.leave.ad
+  when: ctlabs_sssd_backend == "AD"
+  block:
+    - name: ctlabs_sssd.tasks.leave.adcli.available
+      stat:
+        path: /usr/sbin/adcli
+      register: adcli_available
+    
+    #- debug: "msg={{ adcli_available }}"
+    
+    - name: ctlabs_sssd.tasks.leave.ad.dc.realm_leave
+      when: ctlabs_sssd_domain_joined
+      no_log: true
+      expect:
+        command: "ip vrf exec default realm leave -rU  {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+        responses:
+          (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
+      notify: ctlabs_sssd.handlers.ad.service.stop
+    
+    - name: ctlabs_sssd.tasks.leave.ad.dc.host_delete
+      when: ctlabs_sssd_domain_joined
+      expect:
+        command: "ip vrf exed default adcli delete-computer -D {{ ctlabs_sssd.defaults.config.dc.domain }} -R {{ ctlabs_sssd.defaults.config.dc.realm }} -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} -vW {{ ctlabs_sssd_computer_name }}"
+        responses:
+          (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
+    

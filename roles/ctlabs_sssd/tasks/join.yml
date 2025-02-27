@@ -5,38 +5,29 @@
 # Description : join domain
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.join.adcli.available
-  stat:
-    path: /usr/sbin/adcli
-  register: adcli_available
-
-#- debug: "msg={{ adcli_available }}"
-
-- name: ctlabs_sssd.tasks.join.dc.realm
-  when: not ctlabs_sssd_domain_joined
-  expect:
-    command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ ctlabs_sssd_computer_name }} {{ ctlabs_sssd_ad_server[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}"
-    responses:
-      (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
-
-- name: ctlabs_sssd.tasks.join.config.sssd
-  template:
-    owner: "{{ ctlabs_sssd.defaults.config.sssd.user     }}"
-    group: "{{ ctlabs_sssd.defaults.config.sssd.group     }}"
-    mode : "{{ ctlabs_sssd.defaults.config.sssd.mode     }}"
-    src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
-    dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
-  notify: ctlabs_sssd.handlers.service.restart
-
-- name: ctlabs_sssd.tasks.join.pam.debian
-  when: os_family == 'debian'
+- name: ctlabs_sssd.tasks.join.ad
+  when: ctlabs_sssd_backend == "AD"
   block:
-    - name: ctlabs_sssd.tasks.join.pam.debian.account
+    - name: ctlabs_sssd.tasks.join.ad.adcli.available
+      stat:
+        path: /usr/sbin/adcli
+      register: adcli_available
+    
+    #- debug: "msg={{ adcli_available }}"
+    
+    - name: ctlabs_sssd.tasks.join.ad.dc.realm
+      when: not ctlabs_sssd_domain_joined
+      expect:
+        command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ ctlabs_sssd_computer_name }} {{ ctlabs_sssd_ad_server[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}"
+        responses:
+          (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
+    
+    - name: ctlabs_sssd.tasks.join.ad.config.sssd
       template:
-        src  : "{{ ctlabs_sssd.defaults.config.pam[os_family].account.template }}"
-        dest : "{{ ctlabs_sssd.defaults.config.pam[os_family].account.file     }}"
+        owner: "{{ ctlabs_sssd.defaults.config.sssd.user     }}"
+        group: "{{ ctlabs_sssd.defaults.config.sssd.group     }}"
+        mode : "{{ ctlabs_sssd.defaults.config.sssd.mode     }}"
+        src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
+        dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
+      notify: ctlabs_sssd.handlers.service.restart
 
-    - name: ctlabs_sssd.tasks.join.pam.debian.session
-      template:
-        src  : "{{ ctlabs_sssd.defaults.config.pam[os_family].session.template }}"
-        dest : "{{ ctlabs_sssd.defaults.config.pam[os_family].session.file     }}"

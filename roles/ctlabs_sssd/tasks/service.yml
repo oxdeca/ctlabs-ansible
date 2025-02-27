@@ -6,15 +6,14 @@
 # ------------------------------------------------------------------------------
 
 
-- name: ctlabs_sssd.tasks.service.start
+- name: ctlabs_sssd.tasks.service.sssd.start
   service:
-    name    : "{{ ctlabs_sssd.defaults.service.name }}"
+    name    : "{{ ctlabs_sssd.defaults.service.sssd.name }}"
     enabled : true
     state   : started
 
-- name: ctlabs_sssd.tasks.service.oddjobd
+- name: ctlabs_sssd.tasks.service.oddjobd.start
   service:
-    name    : "{{ item }}"
+    name    : "{{ ctlabs_sssd.defaults.service.oddjobd.name }}"
     enabled : true
     state   : started
-  loop: "{{ ctlabs_sssd.defaults.services }}"

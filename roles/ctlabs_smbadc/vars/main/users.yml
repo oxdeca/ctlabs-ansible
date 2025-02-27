@@ -11,12 +11,17 @@ domain_users:
   # ---------------------------------------------------------------------------
   # Domain User
   # ---------------------------------------------------------------------------
-  - firstname : Scott
-    lastname  : Smith
-    uid       : 5001
-    ou        : ou=users
-    pass      : secret123!
-    roles     :
+  - firstname     : Scott
+    lastname      : Smith
+    uid           : 5001
+    uidNumber     : 5001
+    gidNumber     : 5001
+    homeDirectory : /home/smithsc
+    loginShell    : /bin/bash
+    objectClass   : posixAccount
+    ou            : ou=users
+    pass          : secret123!
+    roles         :
       - netbox_admin
       - rundeck_admin
 

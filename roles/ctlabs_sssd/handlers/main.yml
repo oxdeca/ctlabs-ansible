@@ -5,18 +5,18 @@
 # Description : ctlabs_sssd handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.handlers.service.restart
+- name: ctlabs_sssd.handlers.service.sssd.restart
   service:
-    name    : "{{ ctlabs_sssd.defaults.service.name }}"
+    name    : "{{ ctlabs_sssd.defaults.service.sssd.name }}"
     enabled : true
     state   : restarted
 
-- name: ctlabs_sssd.handlers.service.reload
+- name: ctlabs_sssd.handlers.service.sssd.reload
   service:
-    name  : "{{ ctlabs_sssd.defaults.service.name }}"
+    name  : "{{ ctlabs_sssd.defaults.service.sssd.name }}"
     state : reloaded
 
-- name: ctlabs_sssd.handlers.service.stop
+- name: ctlabs_sssd.handlers.service.sssd.stop
   service:
-    name  : "{{ ctlabs_sssd.defaults.service.name }}"
+    name  : "{{ ctlabs_sssd.defaults.service.sssd.name }}"
     state : stopped

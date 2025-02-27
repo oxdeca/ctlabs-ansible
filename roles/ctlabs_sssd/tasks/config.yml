@@ -5,41 +5,79 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.config.computer.joined.check
-  command: /usr/sbin/realm list -v
-  register: joined
+- name: ctlabs_sssd.tasks.config.pam.redhat
+  when: os_family == "redhat"
+  block:
+    - name: ctlabs_sssd.tasks.config.pam.redhat.authselect.sssd
+      command: authselect select sssd --force
 
-- name: ctlabs_sssd.tasks.config.computer.joined.fact
-  set_fact:
-    ctlabs_sssd_domain_joined: "{{ True if joined.stdout == ctlabs_sssd.defaults.config.dc.domain else False }}"
+    - name: ctlabs_sssd.tasks.config.pam.redhat.authselect.oddjob-mkhomedir
+      command: authselect enable-feature with-mkhomedir
 
-- name: ctlabs_sssd.tasks.config.dc.ad_server
-  set_fact:
-    ctlabs_sssd_ad_server: "{{ ctlabs_sssd.defaults.config.dc.hosts | shuffle }}"
+- name: ctlabs_sssd.tasks.config.pam.debian
+  when: os_family == 'debian'
+  block:
+    - name: ctlabs_sssd.tasks.config.pam.debian.auth-update.mkhomedir
+      command: pam-auth-update --enable mkhomedir
 
-# Get Credentials via prompt
-- pause:
-    prompt : "Enter domain join pass"
-    echo   : false
-  register: dc_join_pass
-  when: CTLABS_SSSD_JOINPASS_PROMPT is defined
+# -----------------------------------------------------------------------------
+# AD
+#
 
-- name: ctlabs.sssd.tasks.config.prompt.dc_join.credentials
-  when: CTLABS_SSSD_JOINPASS_PROMPT is defined
-  set_fact:
-    ctlabs_sssd_dc_join_pass: "{{ dc_join_pass.user_input }}"
+- name: ctlabs_sssd.tasks.config.ad
+  when: ctlabs_sssd_backend == "AD"
+  block:
+    - name: ctlabs_sssd.tasks.config.ad.computer.joined.check
+      command: /usr/sbin/realm list -v
+      register: joined
+    
+    - name: ctlabs_sssd.tasks.config.ad.computer.joined.fact
+      set_fact:
+        ctlabs_sssd_domain_joined: "{{ True if joined.stdout == ctlabs_sssd.defaults.config.dc.domain else False }}"
+    
+    - name: ctlabs_sssd.tasks.config.ad.dc.ad_server
+      set_fact:
+        ctlabs_sssd_ad_server: "{{ ctlabs_sssd.defaults.config.dc.hosts | shuffle }}"
+    
+    # Get Credentials via prompt
+    - pause:
+        prompt : "Enter domain join pass"
+        echo   : false
+      register: dc_join_pass
+      when: CTLABS_SSSD_JOINPASS_PROMPT is defined
+    
+    - name: ctlabs.sssd.tasks.config.prompt.ad.dc_join.credentials
+      when: CTLABS_SSSD_JOINPASS_PROMPT is defined
+      set_fact:
+        ctlabs_sssd_dc_join_pass: "{{ dc_join_pass.user_input }}"
+    
+    #- debug: "msg=ctlabs_sssd_dc_join_pass={{ ctlabs_sssd_dc_join_pass }}"
+    
+    # echo -en ansible_nodename | openssl sha512 | awk '{print toupper(substr($2, 11, 5)) }'
+    - name: ctlabs_sssd.tasks.config.ad.computer_name
+      set_fact:
+        ctlabs_sssd_computer_name: "{{ (ansible_hostname[:8] + '-' + ctlabs_env[:1] + ( ansible_nodename|hash('sha512') )[10:15])|upper }}"
+    
+    - debug: "msg=ctlabs_sssd_computer_name={{ ctlabs_sssd_computer_name }}"
+    
+    - name: ctlabs_sssd.tasks.config.ad.krb5
+      template:
+        src  : "{{ ctlabs_sssd.defaults.config.krb5.template }}"
+        dest : "{{ ctlabs_sssd.defaults.config.krb5.file     }}"
+      notify: "{{ 'ctlabs_sssd.handlers.service.stop' if CTLABS_DOMAIN_LEAVE is defined else 'ctlabs_sssd.handlers.service.restart' }}"
 
-#- debug: "msg=ctlabs_sssd_dc_join_pass={{ ctlabs_sssd_dc_join_pass }}"
+# -----------------------------------------------------------------------------
+# LDAP
+#
 
-# echo -en ansible_nodename | openssl sha512 | awk '{print toupper(substr($2, 11, 5)) }'
-- name: ctlabs_sssd.tasks.config.computer_name
-  set_fact:
-    ctlabs_sssd_computer_name: "{{ (ansible_hostname[:8] + '-' + ctlabs_env[:1] + ( ansible_nodename|hash('sha512') )[10:15])|upper }}"
-
-- debug: "msg=ctlabs_sssd_computer_name={{ ctlabs_sssd_computer_name }}"
-
-- name: ctlabs_sssd.tasks.config.krb5
-  template:
-    src  : "{{ ctlabs_sssd.defaults.config.krb5.template }}"
-    dest : "{{ ctlabs_sssd.defaults.config.krb5.file     }}"
-  notify: "{{ 'ctlabs_sssd.handlers.service.stop' if CTLABS_DOMAIN_LEAVE is defined else 'ctlabs_sssd.handlers.service.restart' }}"
+- name: ctlabs_sssd.tasks.config.ldap
+  when: ctlabs_sssd_backend == "LDAP"
+  block:
+    - name: ctlabs_sssd.tasks.config.ldap.sssd
+      template:
+        owner: "{{ ctlabs_sssd.defaults.config.sssd.user          }}"
+        group: "{{ ctlabs_sssd.defaults.config.sssd.group         }}"
+        mode : "{{ ctlabs_sssd.defaults.config.sssd.mode          }}"
+        src  : "{{ ctlabs_sssd.defaults.config.sssd.template.ldap }}"
+        dest : "{{ ctlabs_sssd.defaults.config.sssd.file          }}"
+      notify: ctlabs_sssd.handlers.service.sssd.restart

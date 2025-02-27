@@ -5,6 +5,9 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+CTLABS_SSSD_BACKEND : AD
+CTLABS_SSSD_DOMAIN  : ctlabs.internal
+
 ctlabs_sssd:
   defaults:
     pkgs:
@@ -17,8 +20,11 @@ ctlabs_sssd:
         - name : oddjob-mkhomedir
         - name : adcli
         - name : samba-common-tools
+        - name : openldap-clients
+        - name : authselect
       debian:
         - name: sssd-ad
+        - name: sssd-ldap
         - name: sssd-tools
         - name: realmd
         - name: krb5-user
@@ -31,9 +37,12 @@ ctlabs_sssd:
       pips:
         - pexpect
     config:
+      ldap:
+        uri  : "ldap://"
+        base : "dc={{ CTLABS_SSSD_DOMAIN.split('.') | join(dc=) }}"
       dc:
-        realm  : CTLABS.INTERNAL
-        domain : ctlabs.internal
+        realm  : "{{ CTLABS_SSSD_DOMAIN|upper }}"
+        domain : "{{ CTLABS_SSSD_DOMAIN }}"
         hosts  :
           - dc1
           #- dc2
@@ -45,9 +54,14 @@ ctlabs_sssd:
         group    : root
         mode     : '0600'
         file     : /etc/sssd/sssd.conf
-        template : sssd.conf.j2
+        template : 
+          ad   : sssd-ad.conf.j2
+          ldap : sssd-ldap.conf.j2
       pam:
+        redhat:
+          cmd: authselect select sssd --force && authselect enable-feature with-mkhomedir
         debian:
+          cmd: pam-auth-update 
           account:
             template: pam-account.deb.j2
             file    : /etc/pam.d/common-account
