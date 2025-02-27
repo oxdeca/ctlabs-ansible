@@ -1,0 +1,34 @@
+# ------------------------------------------------------------------------------
+# File        : sssd.conf
+# Template    : ctlabs_sssd/templates/sssd-ldap.conf.j2
+# ------------------------------------------------------------------------------
+
+[domain/ldap]
+  id_provider              = ldap
+  auth_provider            = ldap
+
+  ldap_uri                 = {{ ansible_local.ctlabs_sssd.uri  | default(ctlabs_sssd.defaults.config.ldap.uri)  }}
+  ldap_search_base         = {{ ansible_local.ctlabs_sssd.base | default(ctlabs_sssd.defaults.config.ldap.base) }}
+  ldap_id_use_start_tls    = true
+  ldap_pwd_policy          =
+
+  ldap_user_extra_attrs    = altSecurityIdentities
+  ldap_user_ssh_public_key = altSecurityIdentities
+
+  cache_credentials        = true
+  entry_cache_timeout      = 14440
+  cached_auth_timeout      = 600
+
+  default_shell            = /bin/bash
+  ldap_id_mapping          = false
+  fallback_homedir         = /home/%u
+
+  enumerate                = true
+
+[sssd]
+  config_file_version      = 2
+  domains                  = ldap
+  services                 = nss, pam, ssh
+
+[pam]
+  pam_verbosity            = 2
