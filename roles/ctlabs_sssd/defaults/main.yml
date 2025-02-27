@@ -73,10 +73,11 @@ ctlabs_sssd:
         file     : /etc/krb5.conf
         template : krb5.conf.j2
     service:
-      name     : sssd.service
-      template : sssd.service.j2
-    services:
-      - oddjobd
+      sssd:
+        name     : sssd.service
+        template : sssd.service.j2
+      oddjobd:
+        name : oddjobd.service
   os:
     - redhat7
     - redhat8
