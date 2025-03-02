@@ -5,68 +5,71 @@
 # Description : iam
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_smbadc.tasks.iam.domain.ou.created
-  command: /usr/bin/samba-tool ou create ou={{ item.name }}{{ (',' + item.path) if item.path is defined }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}
-  loop: "{{ domain_ou }}"
-  ignore_errors: true
-
-- name: ctlabs_smbadc.tasks.iam.domain.groups.created
-  command: >
-    /usr/bin/samba-tool group add {{ item.name }}
-      --groupou={{ item.ou }}
-  loop: "{{ domain_groups }}"
-  ignore_errors: true
-
-- name: ctlabs_smbadc.tasks.iam.domain.users.created
-  when: item.firstname and item.lastname
-  command: >
-    /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
-      --given-name={{ item.firstname }}
-      --surname={{ item.lastname }}
-      --userou={{ item.ou }}
-      --uid-number={{ item.uid }}
-      --gid-number={{ item.gid }}
-      --login-shell={{ ctlabs_smbadc.defaults.config.domain.user.shell }}
-      --home-directory=/home/{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
-      --random-password
-  loop: "{{ domain_users }}"
-  ignore_errors: true
-
-- name: ctlabs_smbadc.tasks.iam.domain.users.pass.set
-  when: item.firstname and item.lastname and item.pass is defined
-  command: /usr/bin/samba-tool user setpassword {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --newpassword="{{ item.pass }}"
-  loop: "{{ domain_users }}"
-  ignore_errors: true
-
-- name: ctlabs_smbadc.tasks.iam.domain.service.users.created
-  when: item.name
-  command: /usr/bin/samba-tool user create {{ item.name }} --userou={{ item.ou }} --random-password
-  loop: "{{ domain_services }}"
-  ignore_errors: true
-
-- name: ctlabs_smbadc.tasks.iam.domain.service.users.pass.set
-  when: item.name and item.pass is defined
-  command: /usr/bin/samba-tool user setpassword {{ item.name }} --newpassword="{{ item.pass }}"
-  loop: "{{ domain_services }}"
-  ignore_errors: true
-
-# TODO: Fix that hack
-- name: ctlabs_smbadc.tasks.iam.domain.admins
-  when: item[0].roles is defined and 'admins' in item[0].roles
-  command: /usr/bin/samba-tool group addmembers '{{ item[1] }}' {{ item[0].name }}
-  loop: "{{ domain_services | product(domain_roles.admins.groups) | list }}"
-  ignore_errors: true
-
-# TODO: Fix that hack
-- name: ctlabs_smbadc.tasks.iam.domain.netbox
-  when: item[0].roles is defined and 'netbox_admin' in item[0].roles
-  command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
-  loop: "{{ domain_users | product(domain_roles.netbox_admin.groups) | list }}"
-  ignore_errors: true
-
-# TODO: Fix that hack
-- name: ctlabs_smbadc.tasks.iam.domain.rundeck
-  when: item[0].roles is defined and 'rundeck_admin' in item[0].roles
-  command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
-  loop: "{{ domain_users | product(domain_roles.rundeck_admin.groups) | list }}"
-  ignore_errors: true
+- name: ctlabs_smbadc.tasks.iam
+  when: ctlabs_smbadc_role == "master"
+  block:
+    - name: ctlabs_smbadc.tasks.iam.domain.ou.created
+      command: /usr/bin/samba-tool ou create ou={{ item.name }}{{ (',' + item.path) if item.path is defined }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}
+      loop: "{{ domain_ou }}"
+      ignore_errors: true
+    
+    - name: ctlabs_smbadc.tasks.iam.domain.groups.created
+      command: >
+        /usr/bin/samba-tool group add {{ item.name }}
+          --groupou={{ item.ou }}
+      loop: "{{ domain_groups }}"
+      ignore_errors: true
+    
+    - name: ctlabs_smbadc.tasks.iam.domain.users.created
+      when: item.firstname and item.lastname
+      command: >
+        /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+          --given-name={{ item.firstname }}
+          --surname={{ item.lastname }}
+          --userou={{ item.ou }}
+          --uid-number={{ item.uid }}
+          --gid-number={{ item.gid }}
+          --login-shell={{ ctlabs_smbadc.defaults.config.domain.user.shell }}
+          --home-directory=/home/{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+          --random-password
+      loop: "{{ domain_users }}"
+      ignore_errors: true
+    
+    - name: ctlabs_smbadc.tasks.iam.domain.users.pass.set
+      when: item.firstname and item.lastname and item.pass is defined
+      command: /usr/bin/samba-tool user setpassword {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --newpassword="{{ item.pass }}"
+      loop: "{{ domain_users }}"
+      ignore_errors: true
+    
+    - name: ctlabs_smbadc.tasks.iam.domain.service.users.created
+      when: item.name
+      command: /usr/bin/samba-tool user create {{ item.name }} --userou={{ item.ou }} --random-password
+      loop: "{{ domain_services }}"
+      ignore_errors: true
+    
+    - name: ctlabs_smbadc.tasks.iam.domain.service.users.pass.set
+      when: item.name and item.pass is defined
+      command: /usr/bin/samba-tool user setpassword {{ item.name }} --newpassword="{{ item.pass }}"
+      loop: "{{ domain_services }}"
+      ignore_errors: true
+    
+    # TODO: Fix that hack
+    - name: ctlabs_smbadc.tasks.iam.domain.admins
+      when: item[0].roles is defined and 'admins' in item[0].roles
+      command: /usr/bin/samba-tool group addmembers '{{ item[1] }}' {{ item[0].name }}
+      loop: "{{ domain_services | product(domain_roles.admins.groups) | list }}"
+      ignore_errors: true
+    
+    # TODO: Fix that hack
+    - name: ctlabs_smbadc.tasks.iam.domain.netbox
+      when: item[0].roles is defined and 'netbox_admin' in item[0].roles
+      command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
+      loop: "{{ domain_users | product(domain_roles.netbox_admin.groups) | list }}"
+      ignore_errors: true
+    
+    # TODO: Fix that hack
+    - name: ctlabs_smbadc.tasks.iam.domain.rundeck
+      when: item[0].roles is defined and 'rundeck_admin' in item[0].roles
+      command: /usr/bin/samba-tool group addmembers {{ item[1] }} {{ (item[0].lastname[0:5]+item[0].firstname[0:2]) | lower }} 
+      loop: "{{ domain_users | product(domain_roles.rundeck_admin.groups) | list }}"
+      ignore_errors: true
