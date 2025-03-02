@@ -37,7 +37,8 @@
     
     - name: ctlabs_sssd.tasks.config.ad.dc.ad_server
       set_fact:
-        ctlabs_sssd_ad_server: "{{ ctlabs_sssd.defaults.config.dc.hosts | shuffle }}"
+        ctlabs_sssd_ad_server: "{{ ctlabs_sssd.defaults.config.dc.hosts }}"
+        #ctlabs_sssd_ad_server: "{{ ctlabs_sssd.defaults.config.dc.hosts | shuffle }}"
     
     # Get Credentials via prompt
     - pause:
