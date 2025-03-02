@@ -39,6 +39,20 @@ zone_ctlabs_internal:
     value : 192.168.20.11
 
 # -----------------------------------------------------------------------------
+# subdomain ad.ctlabs.internal
+# -----------------------------------------------------------------------------
+  - type  : COMMENT
+    value : subdomain ad.ctlabs.internal name server
+
+  - name  : ad.ctlabs.internal.
+    type  : NS
+    value : dc1.ctlabs.internal.
+
+  - name  : ad.ctlabs.internal.
+    type  : NS
+    value : dc2.ctlabs.internal.
+
+# -----------------------------------------------------------------------------
 # mail server
 # -----------------------------------------------------------------------------
   - type  : COMMENT

@@ -74,7 +74,7 @@
         content: |
           {
             "role"   : "master",
-            "domain" : "{{ CTLABS_DOMAIN }}"
+            "domain" : "ad.{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.ctlabs.smbadc.slave.local_facts
@@ -84,8 +84,8 @@
         content: |
           {
             "role"   : "slave",
-            "domain" : "{{ CTLABS_DOMAIN }}",
-            "master" : "dc1.{{ CTLABS_DOMAIN }}"
+            "domain" : "ad.{{ CTLABS_DOMAIN }}",
+            "master" : "dc1.ad.{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.ctlabs.slapd.local_facts
@@ -96,10 +96,10 @@
           {
             "dbs" : [{
               "type"        : "ldap",
-              "suffix"      : "dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
+              "suffix"      : "dc=ad,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
               "uri"         : "ldaps://dc2.{{ CTLABS_DOMAIN }} ldaps://dc1.{{ CTLABS_DOMAIN }}",
               "bind_method" : "simple",
-              "bind_user"   : "cn=slapd,ou=services,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
+              "bind_user"   : "cn=slapd,ou=services,dc=ad,dc={{ CTLABS_DOMAIN|split('.')|join(',dc=') }}",
               "bind_pass"   : "secret123!"
             }]
           }

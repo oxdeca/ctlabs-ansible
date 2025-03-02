@@ -58,9 +58,16 @@ include  "/etc/named.root.key";
 {% endif %}
 
 {% for zone in (ctlabs_bind_zones|unique) %}
+{%   set zone = zone | combine({'type': zone.type | default('slave')}) %}
 zone "{{ zone.name }}" IN {
-  type     slave;
+  type       {{ zone.type }};
+{%   if zone.type == "slave" %}  
   masters  { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
-  file     "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db";
+  file       "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db";
+{%   endif %}
+{%   if zone.type == "forward" %}
+  forwarders  { {{  zone.forwarders|join('; ') }}; };
+{%   endif %}
 };
+
 {%  endfor %}

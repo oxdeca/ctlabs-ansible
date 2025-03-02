@@ -23,6 +23,7 @@
         dest : "{{ ctlabs_bind.defaults.config[os_family].file }}"
 
     - name: ctlabs_bind.tasks.config.zones
+      when: zone.type|default('master') == 'master'
       template:
         src  : zone.db.j2
         dest : "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db"
