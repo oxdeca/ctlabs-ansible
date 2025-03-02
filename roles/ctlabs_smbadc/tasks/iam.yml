@@ -21,7 +21,7 @@
   when: item.firstname and item.lastname
   command: >
     /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
-      --given-name={{ firstname }}
+      --given-name={{ item.firstname }}
       --surname={{ item.lastname }}
       --userou={{ item.ou }}
       --uid-number={{ item.uid }}
