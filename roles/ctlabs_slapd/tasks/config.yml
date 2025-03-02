@@ -52,7 +52,7 @@
 - name: ctlabs_slapd.tasks.config.schemas
   copy:
     src  : "{{ item }}"
-    dest : "{{ ctlabs_slapd.defaults.config[os_family}.dir }}/schemas/{{ item }}"
+    dest : "{{ ctlabs_slapd.defaults.config[os_family].dir }}/schemas/{{ item }}"
   loop: "{{ ctlabs_slapd.defaults.config.schemas }}"
 
 - name: ctlabs_slapd.tasks.config.install
