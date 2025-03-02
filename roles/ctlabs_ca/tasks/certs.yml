@@ -36,4 +36,3 @@
     -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt" }
     -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.key" }
     -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.prv" }
-

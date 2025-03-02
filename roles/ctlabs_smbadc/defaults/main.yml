@@ -44,6 +44,9 @@ ctlabs_smbadc:
       krb5:
         src : /var/lib/samba/private/krb5.conf
         dst : /etc/krb5.conf
+      domain:
+        user:
+          shell: /bin/bash
     service:
       name  : samba-ad-dc.service
       user  : samba

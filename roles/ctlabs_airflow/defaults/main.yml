@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_airflow/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  python : 3.11
+
+ctlabs_airflow:
+  defaults:
+    pkgs:
+      redhat:
+        - name: "python{{ versions.python }}"
+      debian:
+        - name: python3
+      pips:
+        - airflow
+    config:
+    service:
+  os:
+    - centos9

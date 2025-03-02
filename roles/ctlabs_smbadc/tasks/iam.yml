@@ -11,13 +11,22 @@
   ignore_errors: true
 
 - name: ctlabs_smbadc.tasks.iam.domain.groups.created
-  command: /usr/bin/samba-tool group add {{ item.name }} --groupou={{ item.ou }}
+  command: >
+    /usr/bin/samba-tool group add {{ item.name }}
+      --groupou={{ item.ou }}
   loop: "{{ domain_groups }}"
   ignore_errors: true
 
 - name: ctlabs_smbadc.tasks.iam.domain.users.created
   when: item.firstname and item.lastname
-  command: /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }} --userou={{ item.ou }} --random-password
+  command: >
+    /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+      --userou={{ item.ou }}
+      --uid-number={{ item.uid }}
+      --gid-number={{ item.gid }}
+      --login-shell={{ ctlabs_smbadc.defaults.config.domain.user.shell }}
+      --homeDirectory=/home/{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+      --random-password
   loop: "{{ domain_users }}"
   ignore_errors: true
 
