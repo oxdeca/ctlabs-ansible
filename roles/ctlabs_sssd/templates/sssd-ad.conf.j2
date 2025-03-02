@@ -18,7 +18,7 @@
 
   ad_server                      = {{ ad_server }}
   ad_domain                      = {{ ctlabs_sssd.defaults.config.dc.domain }}
-  ad_hostname                    = {{ ansible_fqdn }}
+  ad_hostname                    = {{ ansible_nodename }}
   dyndns_update                  = false
 
   krb5_realm                     = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
