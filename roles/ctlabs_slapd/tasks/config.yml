@@ -49,8 +49,20 @@
     #src : "{{ ctlabs_slapd.defaults.config.slapd_dir }}"
     #dest: "{{ ctlabs_slapd.defaults.config.slapd_dir }}.bak"
 
-- name: ctlabs_slapd.tasks.config.installed
+- name: ctlabs_slapd.tasks.config.schemas
+  copy:
+    src  : "{{ item }}"
+    dest : "{{ ctlabs_slapd.defaults.config.dir }}/schemas/{{ item }}"
+  loop: "{{ ctlabs_slapd.defaults.config.schemas }}"
+
+- name: ctlabs_slapd.tasks.config.install
   template:
     src  : "{{ ctlabs_slapd.defaults.config[os_family].template }}"
     dest : "{{ ctlabs_slapd.defaults.config[os_family].file     }}"
   notify: ctlabs_slapd.handlers.service.restart
+
+- name: ctlabs_slapd.tasks.config.files
+  copy:
+    src  : "{{ item.src }}"
+    dest : "{{ item.dst }}"
+  loop: "{{ ctlabs_slapd.defaults.files }}"

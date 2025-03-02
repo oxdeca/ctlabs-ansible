@@ -43,10 +43,11 @@ ctlabs_slapd:
         lib_dir  : /usr/lib64/openldap
         template : slapd.conf.j2
         file     : /etc/openldap/slapd.conf
-
       default:
         template: slapd.default.j2
         file    : /etc/default/slapd
+      schemas:
+        - ad.schema
       dbs:
         ldap:
           suffix: dc=ctlabs,dc=internal
