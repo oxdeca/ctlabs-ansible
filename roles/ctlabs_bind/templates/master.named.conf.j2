@@ -18,7 +18,7 @@ options {
 
   notify                  yes;
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
-  dnssec-validation       yes;
+  dnssec-validation       auto;
 
   managed-keys-directory  "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}";
   geoip-directory         "/usr/share/GeoIP";
