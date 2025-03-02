@@ -16,8 +16,8 @@
     state : present
   loop: "{{ ctlabs_sssd.defaults.pkgs[os_family] }}"
 
-- name: ctlabs_sssd.tasks.package.python.pips.installed
+- name: ctlabs_sssd.tasks.package.python.pips.install
+  when: not os.startswith('kali')
   pip:
     name: "{{ item }}"
   loop: "{{ ctlabs_sssd.defaults.python.pips }}"
-
