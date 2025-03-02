@@ -24,10 +24,10 @@
     
     - name: ctlabs_sssd.tasks.join.ad.config.sssd
       template:
-        owner: "{{ ctlabs_sssd.defaults.config.sssd.user     }}"
-        group: "{{ ctlabs_sssd.defaults.config.sssd.group     }}"
-        mode : "{{ ctlabs_sssd.defaults.config.sssd.mode     }}"
-        src  : "{{ ctlabs_sssd.defaults.config.sssd.template }}"
-        dest : "{{ ctlabs_sssd.defaults.config.sssd.file     }}"
-      notify: ctlabs_sssd.handlers.service.restart
+        owner: "{{ ctlabs_sssd.defaults.config.sssd.user        }}"
+        group: "{{ ctlabs_sssd.defaults.config.sssd.group       }}"
+        mode : "{{ ctlabs_sssd.defaults.config.sssd.mode        }}"
+        src  : "{{ ctlabs_sssd.defaults.config.sssd.template.ad }}"
+        dest : "{{ ctlabs_sssd.defaults.config.sssd.file        }}"
+      notify: ctlabs_sssd.handlers.service.sssd.restart
 
