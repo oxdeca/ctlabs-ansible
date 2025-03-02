@@ -364,7 +364,7 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.smbadc
   hosts : [dc1]
-  tags  : smbadc-master
+  tags  : [smbadc-master, smbadc]
   roles :
     - roles/ctlabs_smbadc
 
@@ -373,7 +373,7 @@
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.smbadc
   hosts : [dc2]
-  tags  : smbadc-slave
+  tags  : [smbadc-slave, smbadc]
   roles :
     - roles/ctlabs_smbadc
 
