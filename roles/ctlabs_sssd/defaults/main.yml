@@ -35,8 +35,8 @@ ctlabs_sssd:
         - name: packagekit
         - name: python3-pip
     python:
-      pips:
-        - pexpect
+      pips: []
+        #- pexpect
     config:
       ldap:
         uri  : "ldap://slapd1.ctlabs.internal, ldap://slapd2.ctlabs.internal"
@@ -85,7 +85,8 @@ ctlabs_sssd:
     - centos7
     - centos8
     - centos9
-    #- kali2024
+    - kali2024
+    - kali2025
     - debian11
   env:
     - gcp-use1-dev

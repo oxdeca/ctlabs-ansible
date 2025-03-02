@@ -5,7 +5,12 @@
 # Description : main ctlabs_sssd tasks file.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_sssd.tasks.package.installed
+- name: ctlabs_sssd.tasks.package.debian.cache.update
+  when: os_family == "debian"
+  apt:
+    update_cache : true
+
+- name: ctlabs_sssd.tasks.package.install
   package:
     name    : "{{ item.name }}"
     state : present

@@ -5,15 +5,27 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+ctlabs_juicefs_storage: gcs
+ctlabs_juicefs_bucket : acedxo_ctlabs_bucket
+ctlabs_juicefs_db     : "sqlite3:///var/shared/juicefs/{{ctlabs_juicefs_bucket}}.db"
+
 versions:
   juicefs: 1.2.2
 
 ctlabs_juicefs:
   defaults:
+    repos:
+      redhat:
+        - name: gcp-sdk
+          type: main
+          desc: GCP SDK
+          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if os in ['redhat7'] else '$releasever' }}-$basearch"
+          key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     pkgs:
       debian:
         - name: sqlite3
       redhat:
+        - name: google-cloud-cli
         - name: sqlite3
       jfs:
         version: "{{ versions.juicefs }}"
@@ -28,6 +40,8 @@ ctlabs_juicefs:
       user : juicefs
       group: juicefs
     config:
+      template: juicefs.conf.j2
+      file    : /etc/juicefs.conf
       mount:
         src:
         dst:

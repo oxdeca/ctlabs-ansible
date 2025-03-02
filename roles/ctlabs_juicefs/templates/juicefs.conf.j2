@@ -5,6 +5,7 @@
 {# Description : juicefs config                                               #}
 {# -------------------------------------------------------------------------- #}
 
-storage: gcs
-bucket : 
-db     : sqlite3:///opt/juicefs/dbs/myjfs.db
+storage: {{ ctlabs_juicefs_storage }}
+bucket : {{ ctlabs_juicefs_bucket  }}
+db     : {{ ctlabs_juicefs_db      }} 
+# sqlite3:///media/jfs/{{ ctlabs_juicefs_bucket }}.db
