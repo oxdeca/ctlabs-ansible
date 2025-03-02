@@ -35,8 +35,8 @@ ctlabs_sssd:
         - name: packagekit
         - name: python3-pip
     python:
-      pips: []
-        #- pexpect
+      pips:
+        - pexpect
     config:
       ldap:
         uri  : "ldap://slapd1.ctlabs.internal, ldap://slapd2.ctlabs.internal"
