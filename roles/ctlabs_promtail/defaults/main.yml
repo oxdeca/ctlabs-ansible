@@ -61,4 +61,4 @@ ctlabs_promtail:
     - centos8
     - centos9
     - kali2024
-
+    - kali2025

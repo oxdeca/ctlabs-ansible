@@ -44,3 +44,4 @@ ctlabs_gitea:
     - centos9
     - debian11
     - kali2024
+    - kali2025

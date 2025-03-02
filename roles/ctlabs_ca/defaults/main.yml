@@ -38,4 +38,5 @@ ctlabs_ca:
     - debian11
     - debian12
     - kali2024
+    - kali2025
     - ubuntu24
