@@ -10,7 +10,7 @@ ctlabs_smbadc:
     pkgs:
       - name : samba
       - name : winbind
-      - name : ldap-account-manager
+      #- name : ldap-account-manager
       - name : krb5-config
       - name : krb5-user
       - name : ldap-utils

@@ -46,7 +46,7 @@ ctlabs_sssd:
         domain : "{{ CTLABS_SSSD_DOMAIN }}"
         hosts  :
           - dc1
-          #- dc2
+          - dc2
         join:
           user: sssd
           pass: secret123!
