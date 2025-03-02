@@ -7,7 +7,7 @@
 
 CTLABS_SSSD_BACKEND     : AD
 CTLABS_SSSD_DOMAIN      : ad.ctlabs.internal
-CTLABS_SSSD_DOMAIN_PATH : "dc=ad,dc={{ CTLABS_SSSD_DOMAIN.split('.')|join(',dc=') }}"
+CTLABS_SSSD_DOMAIN_PATH : "dc={{ CTLABS_SSSD_DOMAIN.split('.')|join(',dc=') }}"
 
 ctlabs_sssd:
   defaults:
