@@ -30,8 +30,8 @@ domain_users:
 
   - firstname : Michael
     lastname  : Jones
-    uidNumber : 5003
-    gidNumber : 5003
+    uid       : 5003
+    gid       : 5003
     ou        : ou=users
     pass      : secret123!
 

@@ -21,11 +21,13 @@
   when: item.firstname and item.lastname
   command: >
     /usr/bin/samba-tool user create {{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+      --given-name={{ firstname }}
+      --surname={{ item.lastname }}
       --userou={{ item.ou }}
       --uid-number={{ item.uid }}
       --gid-number={{ item.gid }}
       --login-shell={{ ctlabs_smbadc.defaults.config.domain.user.shell }}
-      --homeDirectory=/home/{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
+      --home-directory=/home/{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}
       --random-password
   loop: "{{ domain_users }}"
   ignore_errors: true
