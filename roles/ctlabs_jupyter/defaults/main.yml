@@ -1,0 +1,31 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_jupyter/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  python : 3.11
+
+ctlabs_jupyter:
+  defaults:
+    pkgs:
+      redhat:
+        - name: "python{{ versions.python }}"
+      debian:
+        - name: python3
+      pips:
+        - jupyterlab
+    config:
+      bin     : /usr/local/bin/jupyter
+      workdir : /srv/jupyter/work
+      cert    : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+      key     : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+    service:
+      user    : jupyter
+      group   : jupyter
+      template: jupyter.service.j2
+      name    : jupyter.service
+  os:
+    - centos9

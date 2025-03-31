@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_jupyter/tasks/main.yml
+# Description : Main tasks file for the ctlabs_jupyter role
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_jupyter
+    - ctlabs_jupyter.precheck
+    - ctlabs_jupyter.package
+    - ctlabs_jupyter.config
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_jupyter
+    - ctlabs_jupyter.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_jupyter
+    - ctlabs_jupyter.config
+
+ - import_tasks: service.yml
+   tags:
+     - ctlabs_jupyter
+     - ctlabs_jupyter.service

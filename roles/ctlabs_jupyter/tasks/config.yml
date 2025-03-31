@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_jupyter/tasks/config.yml
+# Description : Configuration tasks for the ctlabs_jupyter role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_jupyter.tasks.config.workdir
+  file:
+    path  : "{{ ctlabs_jupyter.defaults.config.workdir }}"
+    state : directory
+
+#- name: ctlabs_jupyter.tasks.config
+#  template:
+#    src : "{{ ctlabs_jupyter.defaults.config.template }}"
+#    dest: "{{ ctlabs_jupyter.defaults.config.file     }}"

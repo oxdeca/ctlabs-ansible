@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_jupyter/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_jupyter.handlers.jupyter.service.restart
+  service:
+    name    : "{{ ctlabs_jupyter.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_jupyter.handlers.jupyter.service.reload
+  service:
+    name  : "{{ ctlabs_jupyter.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_jupyter.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

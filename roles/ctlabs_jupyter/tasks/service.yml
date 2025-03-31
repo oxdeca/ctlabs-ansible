@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_jupyter/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_jupyter.tasks.service.present
+  template:
+    src  : "{{ ctlabs_jupyter.defaults.service.server.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_jupyter.defaults.service.name }}"
+  notify: ctlabs_jupyter.handlers.server.systemd.reload
+
+- name: ctlabs_jupyter.tasks.service.started
+  service:
+    name  : "{{ ctlabs_jupyter.defaults.service.name }}"
+    state : started
+    
