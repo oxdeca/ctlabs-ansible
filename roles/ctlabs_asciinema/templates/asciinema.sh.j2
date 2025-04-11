@@ -6,9 +6,10 @@
 # ------------------------------------------------------------------------------
 
 function arec() {
-	local castfile=${1:-/tmp/out.cast}
+  local castfile=${1:-/tmp/out.cast}
+  local size=${4:-$(stty size| sed -r 's@^([0-9]+)\s+([0-9]+)@--rows \1 --cols \2@')}
 
-	{{ ctlabs_asciinema.defaults.config.binary }} rec -i1 -c /bin/bash ${castfile}
+  {{ ctlabs_asciinema.defaults.config.binary }} rec -i1 $size -c /bin/bash ${castfile}
 }
 
 alias aplay="{{ ctlabs_asciinema.defaults.config.binary }} play "

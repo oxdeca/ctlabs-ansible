@@ -22,7 +22,7 @@
     - ctlabs_jupyter
     - ctlabs_jupyter.config
 
- - import_tasks: service.yml
-   tags:
-     - ctlabs_jupyter
-     - ctlabs_jupyter.service
+- import_tasks: service.yml
+  tags:
+    - ctlabs_jupyter
+    - ctlabs_jupyter.service

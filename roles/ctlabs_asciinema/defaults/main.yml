@@ -13,6 +13,7 @@ ctlabs_asciinema:
     pkgs:
       redhat:
         - name: asciinema
+        - name: liberation-mono-fonts
       debian:
         - name: asciinema
       #asciinema:

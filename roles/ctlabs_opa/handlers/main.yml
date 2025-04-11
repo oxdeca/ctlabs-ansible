@@ -5,13 +5,13 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_opa.handlers.gitea.service.restart
+- name: ctlabs_opa.handlers.opa.service.restart
   service:
     name    : "{{ ctlabs_opa.defaults.service.name }}"
     enabled : true
     state   : restarted
 
-- name: ctlabs_opa.handlers.gitea.service.reload
+- name: ctlabs_opa.handlers.opa.service.reload
   service:
     name  : "{{ ctlabs_opa.defaults.service.name }}"
     state : reloaded

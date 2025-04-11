@@ -28,3 +28,7 @@ ctlabs_fpm:
       groups: []
   os:
     - centos9
+  virtype:
+    - kvm
+    - vmware
+    - container

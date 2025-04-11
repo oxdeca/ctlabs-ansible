@@ -23,9 +23,10 @@ ctlabs_jupyter:
       cert    : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
       key     : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
     service:
+      name    : jupyter.service
+      template: jupyter.service.j2
       user    : jupyter
       group   : jupyter
-      template: jupyter.service.j2
-      name    : jupyter.service
+      groups  : [certs]
   os:
     - centos9

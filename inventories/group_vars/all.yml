@@ -10,7 +10,7 @@
 ctlabs_env    : lab
 
 # os           : "{{ ansible_os_family|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
-virt_type    : "{{ ansible_virtualization_type | lower }}"
+virtype      : "{{ ansible_virtualization_type | lower }}"
 os           : "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
 os_family    : "{{ ansible_os_family|lower }}"
 date         : "{{ ansible_date_time.date }}"
