@@ -27,7 +27,7 @@ includedir /etc/krb5.conf.d/
 {% endif %}
   spake_preauth_groups = edwards25519
   udp_preference_limit = 0
-{% if virt_type in ['kvm'] %}
+{% if virtype in ['kvm'] %}
   default_ccache_name  = KEYRING:persistent:%{uid}
 {% endif %}
   #default_ccache_name  = FILE:/tmp/krb5cc_%{uid}

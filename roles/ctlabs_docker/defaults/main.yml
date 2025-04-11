@@ -38,7 +38,7 @@ ctlabs_docker:
       - name : docker-compose
     service:
       - name : docker
-    virt_types:
+    virtypes:
       - kvm
       - vmware
     os:

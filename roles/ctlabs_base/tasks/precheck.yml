@@ -12,10 +12,10 @@
         that     : os is in ctlabs_base.os
         fail_msg : "OS[{{os}}] is not supported!"
     
-    - name: ctlabs_base.tasks.precheck.virt_type
+    - name: ctlabs_base.tasks.precheck.virtype
       assert:
-        that     : virt_type is in [ 'kvm', 'vmware' ]
-        fail_msg : "Virtualization Type '{{ virt_type }}' not supported!"
+        that     : virtype is in [ 'kvm', 'vmware' ]
+        fail_msg : "Virtualization Type '{{ virtype }}' not supported!"
   rescue:
     - name: ctlabs_base.tasks.precheck.skip.unsupported
       meta: end_host
