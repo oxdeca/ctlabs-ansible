@@ -30,3 +30,5 @@ ctlabs_jupyter:
       groups  : [certs]
   os:
     - centos9
+  virtype:
+    - container
