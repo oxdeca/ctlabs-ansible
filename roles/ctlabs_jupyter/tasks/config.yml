@@ -5,9 +5,28 @@
 # Description : Configuration tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_jupyter.tasks.package.group
+  group:
+    name   : "{{ ctlabs_jupyter.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_jupyter.tasks.package.user
+  user:
+    name   : "{{ ctlabs_jupyter.defaults.service.user  }}"
+    group  : "{{ ctlabs_jupyter.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_jupyter.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_jupyter.defaults.service.user   }}"
+    group : "{{ ctlabs_jupyter.defaults.service.group  }}"
+    groups: "{{ ctlabs_jupyter.defaults.service.groups }}"
+
 - name: ctlabs_jupyter.tasks.config.workdir
   file:
     path  : "{{ ctlabs_jupyter.defaults.config.workdir }}"
+    owner : "{{ ctlabs_jupyter.defaults.service.user   }}"
+    group : "{{ ctlabs_jupyter.defaults.service.group  }}"
     state : directory
 
 #- name: ctlabs_jupyter.tasks.config

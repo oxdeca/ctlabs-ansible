@@ -11,19 +11,3 @@
     state : latest
   loop: "{{ ctlabs_jupyter.defaults.pkgs.pips }}"
 
-- name: ctlabs_jupyter.tasks.package.group
-  group:
-    name   : "{{ ctlabs_jupyter.defaults.service.group }}"
-    system : true
-
-- name: ctlabs_jupyter.tasks.package.user
-  user:
-    name   : "{{ ctlabs_jupyter.defaults.service.user  }}"
-    group  : "{{ ctlabs_jupyter.defaults.service.group }}"
-    system : true
-
-- name: ctlabs_jupyter.tasks.package.group.certs.member
-  user:
-    name  : "{{ ctlabs_jupyter.defaults.service.user   }}"
-    group : "{{ ctlabs_jupyter.defaults.service.group  }}"
-    groups: "{{ ctlabs_jupyter.defaults.service.groups }}"
