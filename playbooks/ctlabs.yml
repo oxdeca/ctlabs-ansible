@@ -638,3 +638,12 @@
   tags  : opa
   roles :
     - roles/ctlabs_opa
+
+# -----------------------------------------------------------------------------
+# ctlabs_jupyter
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.jupyter
+  hosts : [ansible]
+  tags  : jupyter
+  roles :
+    - roles/ctlabs_jupyter
