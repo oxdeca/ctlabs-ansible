@@ -13,7 +13,7 @@
         fail_msg: "OS [{{ os }}] is not supported!"
     - name: ctlabs_jupyter.tasks.precheck.virttype
       assert:
-        that     : virt_type is in [ 'container' ]
+        that     : virtype is in [ 'container' ]
         fail_msg : "Virtualization Type '{{ virtype }}' not supported!"
   rescue:
     - name: ctlabs_jupyter.tasks.precheck.skip.unsupported
