@@ -26,7 +26,7 @@ ctlabs_jupyter:
       key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       pass     : secret123!
       settings :
-        dir     : /usr/local/share/jupyter
+        dir     : /usr/local/share/jupyter/lab/settings
         template: overrides.json.j2
         file    : overrides.json
     service:

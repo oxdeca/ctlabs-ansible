@@ -37,4 +37,4 @@
 - name: ctlabs_jupyter.tasks.config.overrides
   template:
     src : "{{ ctlabs_jupyter.defaults.config.settings.template }}"
-    dest: "{{ ctlabs_jupyter.defaults.config.settings.file     }}"
+    dest: "{{ ctlabs_jupyter.defaults.config.settings.dir }}/{{ ctlabs_jupyter.defaults.config.settings.file }}"
