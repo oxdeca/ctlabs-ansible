@@ -643,7 +643,7 @@
 # ctlabs_jupyter
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.jupyter
-  hosts : [ansible]
+  hosts : [ansible,h1,h2]
   tags  : jupyter
   roles :
     - roles/ctlabs_jupyter
