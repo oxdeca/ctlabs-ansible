@@ -29,7 +29,12 @@
     group : "{{ ctlabs_jupyter.defaults.service.group  }}"
     state : directory
 
-#- name: ctlabs_jupyter.tasks.config
-#  template:
-#    src : "{{ ctlabs_jupyter.defaults.config.template }}"
-#    dest: "{{ ctlabs_jupyter.defaults.config.file     }}"
+- name: ctlabs_jupyter.tasks.config.settings.dir
+  file:
+    name  : "{{ ctlabs_jupyter.defaults.config.settings.dir }}"
+    state : directory
+
+- name: ctlabs_jupyter.tasks.config.overrides
+  template:
+    src : "{{ ctlabs_jupyter.defaults.config.settings.template }}"
+    dest: "{{ ctlabs_jupyter.defaults.config.settings.file     }}"

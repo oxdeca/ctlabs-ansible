@@ -20,11 +20,15 @@ ctlabs_jupyter:
         - jupyterlab
         - pexpect
     config:
-      bin     : /usr/local/bin/jupyter
-      workdir : /srv/jupyter/work
-      cert    : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
-      key     : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
-      pass    : secret123!
+      bin      : /usr/local/bin/jupyter
+      workdir  : /srv/jupyter/work
+      cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+      key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+      pass     : secret123!
+      settings :
+        dir     : /usr/local/share/jupyter
+        template: overrides.json.j2
+        file    : overrides.json
     service:
       name    : jupyter.service
       template: jupyter.service.j2
