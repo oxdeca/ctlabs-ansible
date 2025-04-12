@@ -11,13 +11,13 @@
     dest : "{{ systemd_dir + '/' + ctlabs_jupyter.defaults.service.name }}"
   notify: ctlabs_jupyter.handlers.systemd.reload
 
-- name: ctlabs_jupyter.tasks.service.started
-  service:
-    name  : "{{ ctlabs_jupyter.defaults.service.name }}"
-    state : started
-
 - name: ctlabs_jupyter.tasks.service.password
   expect:
     command: sudo -u {{ ctlabs_jupyter.defaults.service.user }} /usr/local/bin/jupyter server password
     responses:
       (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
+
+- name: ctlabs_jupyter.tasks.service.started
+  service:
+    name  : "{{ ctlabs_jupyter.defaults.service.name }}"
+    state : started
