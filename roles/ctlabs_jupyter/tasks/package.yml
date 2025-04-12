@@ -10,3 +10,9 @@
   pip:
     name  : "{{ item }}"
   loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
+
+- name: ctlabs_jupyter.tasks.package.python.pips.install
+  when: os in ['kali2025']
+  pipx:
+    name  : "{{ item }}"
+  loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
