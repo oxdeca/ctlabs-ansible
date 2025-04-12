@@ -13,7 +13,7 @@
 
 - name: ctlabs_jupyter.tasks.service.password
   expect:
-    command: sudo -u {{ ctlabs_jupyter.defaults.service.user }} /usr/local/bin/jupyter server password
+    command: "sudo -u {{ ctlabs_jupyter.defaults.service.user }} {{ ctlabs_jupyter.defaults.config.bin }}{{ '-lab' if os in ['kali2025'] else '' }} server password"
     responses:
       (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
 
