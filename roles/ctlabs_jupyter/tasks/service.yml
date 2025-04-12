@@ -15,3 +15,9 @@
   service:
     name  : "{{ ctlabs_jupyter.defaults.service.name }}"
     state : started
+
+- name: ctlabs_jupyter.tasks.service.password
+  expect:
+    command: sudo -u {{ ctlabs_jupyter.defaults.config.service.user }} /usr/local/bin/jupyter server password
+    responses:
+      (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"

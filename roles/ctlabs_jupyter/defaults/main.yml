@@ -15,13 +15,16 @@ ctlabs_jupyter:
         - name: "python{{ versions.python }}"
       debian:
         - name: python3
+    python:
       pips:
         - jupyterlab
+        - pexpect
     config:
       bin     : /usr/local/bin/jupyter
       workdir : /srv/jupyter/work
       cert    : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
       key     : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+      pass    : secret123!
     service:
       name    : jupyter.service
       template: jupyter.service.j2
