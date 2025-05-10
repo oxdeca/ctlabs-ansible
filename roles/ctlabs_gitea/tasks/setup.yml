@@ -53,7 +53,7 @@
     url_username     : "{{ ctlabs_gitea.defaults.config.creds.user }}"
     url_password     : "{{ ctlabs_gitea.defaults.config.creds.pass }}"
     force_basic_auth : true
-    status_code      : [204, 409]
+    status_code      : [201, 204, 409]
     body:
       auto_init          : True
       default_branch     : main
@@ -79,7 +79,7 @@
     url_username     : "{{ ctlabs_gitea.defaults.config.creds.user }}"
     url_password     : "{{ ctlabs_gitea.defaults.config.creds.pass }}"
     force_basic_auth : true
-    status_code      : [204]
+    status_code      : [201, 204]
     body:
       permissions: labs:write
 
