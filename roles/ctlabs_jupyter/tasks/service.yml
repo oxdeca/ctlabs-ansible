@@ -18,11 +18,13 @@
       (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
 
 - name: ctlabs_jupyter.tasks.service.iruby.install
+  when: not os in ['kali2025']
   command    : "/usr/bin/gem install --user-install iruby"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
 
 - name: ctlabs_jupyter.tasks.service.iruby.register
+  when: not os in ['kali2025']
   command    : "/usr/local/bin/iruby register --force"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
