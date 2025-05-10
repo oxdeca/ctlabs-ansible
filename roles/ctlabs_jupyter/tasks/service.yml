@@ -18,12 +18,12 @@
       (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
 
 - name: ctlabs_jupyter.tasks.service.iruby.install
-  command    : "gem install --user-install iruby"
+  command    : "/usr/bin/gem install --user-install iruby"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
 
 - name: ctlabs_jupyter.tasks.service.iruby.register
-  command    : "iruby register --force"
+  command    : "/usr/local/bin/iruby register --force"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
 
