@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions: 
-  netbox: 4.0.11
+  netbox: 4.1.11
   python: 3.11
 
 ctlabs_netbox:
@@ -92,6 +92,7 @@ ctlabs_netbox:
       ldap:
         template: ldap_config.py.j2
         file    : /opt/netbox/netbox/netbox/ldap_config.py
+        base    : "dc=ad,dc=ctlabs,dc=internal"
       gunicorn:
         template: gunicorn.py.j2
         file: /opt/netbox/gunicorn.py
@@ -106,7 +107,7 @@ ctlabs_netbox:
         pips:
           - name : django_auth_ldap
           - name : netmiko
-          - name : rq==1.14.0
+          - name : "{{ 'rq==1.14.0' if versions.netbox == '4.0.11' else '#' }}"
           - name : dulwich
           - name : netbox-topology-views
           - name : netbox-plugin-dns
