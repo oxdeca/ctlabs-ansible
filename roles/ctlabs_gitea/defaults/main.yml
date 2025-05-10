@@ -32,6 +32,8 @@ ctlabs_gitea:
       creds    :
         user: ctlabs
         pass: secret123!
+      atlantis:
+        url : https://ats1.ctlabs.internal:4141/events
     service:
       name     : gitea.service
       template : gitea.service.j2
