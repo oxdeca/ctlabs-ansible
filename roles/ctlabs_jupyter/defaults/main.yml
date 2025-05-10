@@ -13,6 +13,7 @@ ctlabs_jupyter:
     repos:
       redhat:
         - crb
+      debian: []
     pkgs:
       redhat:
         - name: "python{{ versions.python }}"
@@ -31,6 +32,8 @@ ctlabs_jupyter:
         - jupyterlab
         - jupyterlab-vim
         - jupyterlab-git
+      pipx:
+        - jupyterlab
     ruby:
       gems:
         - iruby

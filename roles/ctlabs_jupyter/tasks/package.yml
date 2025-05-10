@@ -5,15 +5,23 @@
 # Description : Package installation tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_jupyter.tasks.package.install
-  package:
+- name: ctlabs_jupyter.tasks.package.redhat.install
+  when: os_family == 'redhat'
+  dnf:
     name      : "{{ item.name }}"
     enablerepo: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
     state     : present
-  loop: "{{ ctlabs_jupyter.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
+
+- name: ctlabs_jupyter.tasks.package.debian.install
+  when: os_family == 'debian'
+  package:
+    name      : "{{ item.name }}"
+    state     : present
+  loop: "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
 
 - name: ctlabs_jupyter.tasks.package.python.pips.install
-  when: os_family in ['redhat', 'debian']
+  when: not os in ['kali2025']
   pip:
     name  : "{{ item }}"
   loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
@@ -31,13 +39,11 @@
 - name: ctlabs_jupyter.tasks.package.python.pipx.install
   when: os in ['kali2025']
   command: "pipx install {{ item }} --global"
-  loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
+  loop: "{{ ctlabs_jupyter.defaults.python.pipx }}"
 
 - name: ctlabs_jupyter.tasks.package.ruby.gems.install
+  when: os_family in ['redhat']
   gem:
     name: "{{ item }}"
+    user_install: false
   loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
-
-- name: ctlabs_jupyter.tasks.package.ruby.gems.register
-  command: 
-    cmd: iruby register --force
