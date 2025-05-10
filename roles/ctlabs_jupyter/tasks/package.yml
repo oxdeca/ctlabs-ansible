@@ -5,6 +5,31 @@
 # Description : Package installation tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
+#
+# user/group
+#
+- name: ctlabs_jupyter.tasks.package.group
+  group:
+    name   : "{{ ctlabs_jupyter.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_jupyter.tasks.package.user
+  user:
+    name   : "{{ ctlabs_jupyter.defaults.service.user  }}"
+    group  : "{{ ctlabs_jupyter.defaults.service.group }}"
+    shell  : /bin/bash
+    system : true
+
+- name: ctlabs_jupyter.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_jupyter.defaults.service.user   }}"
+    group : "{{ ctlabs_jupyter.defaults.service.group  }}"
+    groups: "{{ ctlabs_jupyter.defaults.service.groups }}"
+
+#
+# pkgs
+#
+
 - name: ctlabs_jupyter.tasks.package.redhat.install
   when: os_family == 'redhat'
   dnf:
@@ -20,6 +45,9 @@
     state     : present
   loop: "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
 
+#
+# python
+#
 - name: ctlabs_jupyter.tasks.package.python.pips.install
   when: not os in ['kali2025']
   pip:
@@ -41,9 +69,18 @@
   command: "pipx install {{ item }} --global"
   loop: "{{ ctlabs_jupyter.defaults.python.pipx }}"
 
+#
+# ruby
+#
 - name: ctlabs_jupyter.tasks.package.ruby.gems.install
   when: os_family in ['redhat']
   gem:
     name: "{{ item }}"
     user_install: false
   loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
+
+- name: ctlabs_jupyter.tasks.package.iruby.install
+  when: not os in ['kali2025']
+  command    : "/usr/bin/gem install --user-install iruby"
+  become     : true
+  become_user: "{{ ctlabs_jupyter.defaults.service.user }}"

@@ -37,6 +37,8 @@ ctlabs_jupyter:
     ruby:
       gems:
         - iruby
+      iruby:
+        bin: /usr/local/bin/iruby
     config:
       bin      : /usr/local/bin/jupyter
       workdir  : /srv/jupyter/work

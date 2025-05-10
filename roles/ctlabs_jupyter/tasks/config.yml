@@ -5,24 +5,6 @@
 # Description : Configuration tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_jupyter.tasks.package.group
-  group:
-    name   : "{{ ctlabs_jupyter.defaults.service.group }}"
-    system : true
-
-- name: ctlabs_jupyter.tasks.package.user
-  user:
-    name   : "{{ ctlabs_jupyter.defaults.service.user  }}"
-    group  : "{{ ctlabs_jupyter.defaults.service.group }}"
-    shell  : /bin/bash
-    system : true
-
-- name: ctlabs_jupyter.tasks.package.group.certs.member
-  user:
-    name  : "{{ ctlabs_jupyter.defaults.service.user   }}"
-    group : "{{ ctlabs_jupyter.defaults.service.group  }}"
-    groups: "{{ ctlabs_jupyter.defaults.service.groups }}"
-
 - name: ctlabs_jupyter.tasks.config.workdir
   file:
     path  : "{{ ctlabs_jupyter.defaults.config.workdir }}"
@@ -39,3 +21,9 @@
   template:
     src : "{{ ctlabs_jupyter.defaults.config.settings.template }}"
     dest: "{{ ctlabs_jupyter.defaults.config.settings.dir }}/{{ ctlabs_jupyter.defaults.config.settings.file }}"
+
+- name: ctlabs_jupyter.tasks.config.iruby.register
+  when: not os in ['kali2025']
+  command    : "{{ ctlabs_jupyter.defaults.pkgs.ruby.iruby.bin }} register --force"
+  become     : true
+  become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
