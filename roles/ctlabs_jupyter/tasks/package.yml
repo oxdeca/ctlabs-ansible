@@ -5,15 +5,11 @@
 # Description : Package installation tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_jupyter.tasks.package.repos.enable
-  dnf_config_manager:
-    name: "{{ item.name }}"
-  loop: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
-
 - name: ctlabs_jupyter.tasks.package.install
   package:
-    name    : "{{ item.name }}"
-    state : present
+    name      : "{{ item.name }}"
+    enablerepo: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
+    state     : present
   loop: "{{ ctlabs_jupyter.defaults.pkgs[os_family] }}"
 
 - name: ctlabs_jupyter.tasks.package.python.pips.install

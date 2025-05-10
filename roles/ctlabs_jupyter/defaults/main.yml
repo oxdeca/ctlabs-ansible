@@ -12,7 +12,7 @@ ctlabs_jupyter:
   defaults:
     repos:
       redhat:
-        - name: crb
+        - crb
     pkgs:
       redhat:
         - name: "python{{ versions.python }}"
