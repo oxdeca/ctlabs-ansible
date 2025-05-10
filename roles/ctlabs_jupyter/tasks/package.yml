@@ -5,17 +5,29 @@
 # Description : Package installation tasks for the ctlabs_jupyter role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_jupyter.tasks.package.installed
+- name: ctlabs_jupyter.tasks.package.repos.enable
+  dnf_config_manager:
+    name: "{{ item.name }}"
+  loop: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
+
+- name: ctlabs_jupyter.tasks.package.install
   package:
     name    : "{{ item.name }}"
     state : present
   loop: "{{ ctlabs_jupyter.defaults.pkgs[os_family] }}"
 
 - name: ctlabs_jupyter.tasks.package.python.pips.install
-  when: not os.startswith('kali')
+  when: os_family in ['redhat', 'debian']
   pip:
     name  : "{{ item }}"
   loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
+
+- name: ctlabs_jupyter.tasks.package.jupyter.link
+  when: os_family in ['redhat']
+  file:
+    src  : "{{ ctlabs_jupyter.defaults.config.bin }}"
+    dest : /usr/bin/jupyter
+    state: link
 
 # ansible module pipx isn't available on our installation yet.
 # so we use command as workaround
@@ -24,3 +36,12 @@
   when: os in ['kali2025']
   command: "pipx install {{ item }} --global"
   loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
+
+- name: ctlabs_jupyter.tasks.package.ruby.gems.install
+  gem:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
+
+- name: ctlabs_jupyter.tasks.package.ruby.gems.register
+  command: 
+    cmd: iruby register --force

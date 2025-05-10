@@ -10,9 +10,18 @@ versions:
 
 ctlabs_jupyter:
   defaults:
+    repos:
+      redhat:
+        - name: crb
     pkgs:
       redhat:
         - name: "python{{ versions.python }}"
+        - name: ruby-devel
+        - name: make
+        - name: gcc
+        - name: zeromq-devel
+        - name: libyaml-devel
+        - name: redhat-rpm-config
       debian:
         - name: python3
         - name: python3-pexpect
@@ -20,6 +29,11 @@ ctlabs_jupyter:
     python:
       pips:
         - jupyterlab
+        - jupyterlab-vim
+        - jupyterlab-git
+    ruby:
+      gems:
+        - iruby
     config:
       bin      : /usr/local/bin/jupyter
       workdir  : /srv/jupyter/work
