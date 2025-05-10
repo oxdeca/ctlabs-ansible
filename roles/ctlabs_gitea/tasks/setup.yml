@@ -46,12 +46,12 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   uri:
-    url              : https://192.168.10.12:3000/api/v1/user/repos
+    url              : "https://{{ ansible_default_ipv4.address }}:{{ ctlabs_gitea.defaults.config.listen }}/api/v1/user/repos"
     method           : POST
     body_format      : json
     validate_certs   : false
-    url_username     : ctlabs
-    url_password     : secret123!
+    url_username     : "{{ ctlabs_gitea.defaults.config.creds.user }}"
+    url_password     : "{{ ctlabs_gitea.defaults.config.creds.pass }}"
     force_basic_auth : true
     status_code      : [204, 409]
     body:
@@ -72,12 +72,12 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   uri:
-    url              : https://192.168.10.12:3000/api/v1/repos/ctlabs/labs/collaborators/atlantis
+    url              : "https://{{ ansible_default_ipv4.address }}:{{ ctlabs_gitea.defaults.config.listen }}/api/v1/repos/ctlabs/labs/collaborators/atlantis"
     method           : PUT
     body_format      : json
     validate_certs   : false
-    url_username     : ctlabs
-    url_password     : secret123!
+    url_username     : "{{ ctlabs_gitea.defaults.config.creds.user }}"
+    url_password     : "{{ ctlabs_gitea.defaults.config.creds.pass }}"
     force_basic_auth : true
     status_code      : [204]
     body:
@@ -87,12 +87,12 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   uri:
-    url              : https://192.168.10.12:3000/api/v1/repos/ctlabs/labs/hooks
+    url              : "https://{{ ansible_default_ipv4.address }}:{{ ctlabs_gitea.defaults.config.listen }}/api/v1/repos/ctlabs/labs/hooks"
     method           : POST
     body_format      : json
     validate_certs   : false
-    url_username     : ctlabs
-    url_password     : secret123!
+    url_username     : "{{ ctlabs_gitea.defaults.config.creds.user }}"
+    url_password     : "{{ ctlabs_gitea.defaults.config.creds.pass }}"
     force_basic_auth : true
     status_code      : [201]
     body:

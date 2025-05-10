@@ -29,6 +29,9 @@ ctlabs_gitea:
       file     : app.ini
       template : app.ini.j2
       listen   : 3000
+      creds    :
+        user: ctlabs
+        pass: secret123!
     service:
       name     : gitea.service
       template : gitea.service.j2
