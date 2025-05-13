@@ -15,5 +15,5 @@
   pip:
     name      : "{{ item.name }}"
     extra_args: "{{ item.args | default('') }}"
-    executable: "/usr/bin/python{{ versions.python }}-pip"
+    executable: "/usr/bin/pip{{ versions.python }}"
   loop: "{{ ctlabs_airflow.defaults.pips }}"
