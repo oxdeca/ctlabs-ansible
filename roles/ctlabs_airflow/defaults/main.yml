@@ -14,6 +14,7 @@ ctlabs_airflow:
     pkgs:
       redhat:
         - name: "python{{ versions.python }}"
+        - name: "python{{ versions.python }}-pip"
       debian:
         - name: python3
     pips:
