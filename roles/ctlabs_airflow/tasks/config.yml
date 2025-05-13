@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_airflow/tasks/config.yml
+# Description : Configuration tasks for the ctlabs_airflow role
+# ------------------------------------------------------------------------------
+
+#- name: ctlabs_airflow.tasks.config.profile
+#  template:
+#    src : "{{ ctlabs_airflow.defaults.config.profile.template }}"
+#    dest: "{{ ctlabs_airflow.defaults.config.profile.file     }}"

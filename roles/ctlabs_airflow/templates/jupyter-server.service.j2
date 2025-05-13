@@ -1,0 +1,14 @@
+[Unit]
+  Description= Jupyter Lab Server
+  Documentation= https://jupyterlab.readthedocs.io/
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_jupyter.defaults.service.user }}
+  Group={{ ctlabs_jupyter.defaults.service.group }}
+  Restart=on-failure
+  ExecStart=/usr/local/bin/jupyter lab --allow-root --ip 192.168.99.5 --no-browser --notebook-dir=/root/ \
+    --certfile /etc/ca-ctlabs/... --keyfile /etc/ca-ctlabs/... 
+
+[Install]
+  WantedBy=multi-user.target
