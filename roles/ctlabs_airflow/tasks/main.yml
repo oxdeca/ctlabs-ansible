@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_airflow/tasks/main.yml
+# Description : Main tasks file for the ctlabs_airflow role
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_airflow
+    - ctlabs_airflow.precheck
+    - ctlabs_airflow.package
+    - ctlabs_airflow.config
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_airflow
+    - ctlabs_airflow.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_airflow
+    - ctlabs_airflow.config
+
+# - import_tasks: service.yml
+#   tags:
+#     - ctlabs_airflow
+#     - ctlabs_airflow.service

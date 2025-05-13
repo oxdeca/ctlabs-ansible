@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_airflow/tasks/package.yml
+# Description : Package installation tasks for the ctlabs_airflow role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_airflow.tasks.package.install
+  package:
+    name      : "{{ item.name }}"
+    extra_args: "{{ item.args | default('') }}"
+  loop: "{{ ctlabs_airflow.defaults.pkgs[os_family] }}"
