@@ -647,3 +647,12 @@
   tags  : jupyter
   roles :
     - roles/ctlabs_jupyter
+
+# -----------------------------------------------------------------------------
+# ctlabs_airflow
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.airflow
+  hosts : [h1,h2]
+  tags  : airflow
+  roles :
+    - roles/ctlabs_airflow

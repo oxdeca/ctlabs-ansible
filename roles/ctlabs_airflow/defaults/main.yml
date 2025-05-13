@@ -7,6 +7,7 @@
 
 versions:
   python : 3.11
+  airflow: 3.0.1
 
 ctlabs_airflow:
   defaults:
@@ -15,8 +16,9 @@ ctlabs_airflow:
         - name: "python{{ versions.python }}"
       debian:
         - name: python3
-      pips:
-        - airflow
+    pips:
+      - name: "apache-airflow=={{ versions.airflow }}"
+        args: "--constraint https://raw.githubusercontent.com/apache/airflow/constraints-{{ versions.airflow }}/constraints-{{ versions.python }}.txt"
     config:
     service:
   os:

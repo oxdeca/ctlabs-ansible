@@ -5,8 +5,14 @@
 # Description : Package installation tasks for the ctlabs_airflow role
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_airflow.tasks.package.install
+- name: ctlabs_airflow.tasks.package.pkgs.install
   package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_airflow.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_airflow.tasks.package.pips.install
+  pip:
     name      : "{{ item.name }}"
     extra_args: "{{ item.args | default('') }}"
-  loop: "{{ ctlabs_airflow.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_airflow.defaults.pips }}"
