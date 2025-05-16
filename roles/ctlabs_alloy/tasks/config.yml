@@ -9,15 +9,7 @@
   block:
     - name: ctlabs_alloy.tasks.config.dir
       file:
-        path  : "{{ ctlabs_alloy.defaults.config.cfgdir }}"
-        state : directory
-
-    - name: ctlabs_alloy.tasks.config.rundir
-      file:
-        path  : "{{ ctlabs_alloy.defaults.config.rundir }}"
-        owner : "{{ ctlabs_alloy.defaults.config.user   }}"
-        group : "{{ ctlabs_alloy.defaults.config.group  }}"
-        mode  : '0750'
+        path  : "{{ ctlabs_alloy.defaults.config.dir }}"
         state : directory
 
     - name: ctlabs_alloy.tasks.config.installed

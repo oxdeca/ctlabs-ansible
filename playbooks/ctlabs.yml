@@ -104,6 +104,17 @@
             }]
           }
 
+    - name: ctlabs.playbooks.ctlabs.alloy.local_facts
+      when: ansible_hostname in ['mail1', 'mail2']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_alloy.fact
+        content: |
+          {
+            "config" : {
+              "email_archive" : true
+            }
+          }
+
     - name: ctlabs.playbooks.ctlabs.promtail.local_facts
       when: ansible_hostname in ['mail1', 'mail2']
       copy:
@@ -466,6 +477,15 @@
   tags  : mimir
   roles :
     - roles/ctlabs_mimir
+
+# -----------------------------------------------------------------------------
+# ctlabs_alloy
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.alloy
+  hosts : hosts
+  tags  : alloy
+  roles :
+    - roles/ctlabs_alloy
 
 # -----------------------------------------------------------------------------
 # ctlabs_promtail

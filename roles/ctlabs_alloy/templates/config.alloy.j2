@@ -20,6 +20,9 @@ loki.process "journald" {
   }
 }
 
+// ----------------------------------------------------------------------------
+// journald
+// ----------------------------------------------------------------------------
 discovery.relabel "journald" {
   targets = []
     rule {
@@ -62,8 +65,7 @@ loki.source.journal "journald" {
 
 loki.write "default" {
   endpoint {
-    url ={{ ctlabs_alloy_loki_url | default(ctlabs_alloy.defaults.config.loki_url) }}
-    #url = "https://loki.ctlabs.internal:3100/loki/api/v1/push"
+    url = "{{ ctlabs_alloy_loki_url | default(ctlabs_alloy.defaults.config.loki_url) }}"
   }
   external_labels = {}
 }
