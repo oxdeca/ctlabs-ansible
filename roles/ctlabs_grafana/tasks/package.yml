@@ -7,18 +7,20 @@
 
 - name: ctlabs_grafana.tasks.yum.repo
   yum_repository:
-    name        : grafana
-    description : grafana-server
-    baseurl     : https://rpm.grafana.com
-    gpgkey      : https://rpm.grafana.com/gpg.key
+    name        : "{{ item.name    }}"
+    description : "{{ item.desc    }}"
+    baseurl     : "{{ item.baseurl }}"
+    gpgkey      : "{{ item.gpgkey  }}"
     gpgcheck    : true
     sslverify   : true
-    sslcacert   : /etc/pki/tls/certs/ca-bundle.crt
+    sslcacert   : "{{ item.sslcacert }}"
+  loop: "{{ ctlabs_grafana.defaults.repos.redhat }}"
 
 - name: ctlabs_grafana.tasks.package.install
   package:
-    name  : "{{ ctlabs_grafana.defaults.pkgs.name }}"
+    name  : "{{ item.name }}"
     state : present
+  loop : "{{ ctlabs_grafana.defaults.pkgs[os_family] }}"
     
 - name: ctlabs_grafana.tasks.package.sysv.remove
   file:

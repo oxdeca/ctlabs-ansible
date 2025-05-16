@@ -8,15 +8,16 @@
 
 ctlabs_grafana:
   defaults:
-    yum_repo:
-      name      : grafana
-      desc      : grafana-server
-      baseurl   : https://rpm.grafana.com
-      gpgkey    : https://rpm.grafana.com/gpg.key
-      sslcacert : /etc/pki/tls/certs/ca-bundle.crt
+    repos:
+      redhat:
+        - name      : grafana
+          desc      : grafana repo
+          baseurl   : https://rpm.grafana.com
+          gpgkey    : https://rpm.grafana.com/gpg.key
+          sslcacert : /etc/pki/tls/certs/ca-bundle.crt
     pkgs:
-      name    : grafana
-      version : latest
+      redhat:
+        - name: grafana
     config:
       ds:
         dir : /etc/grafana/provisioning/datasources

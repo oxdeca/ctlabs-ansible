@@ -5,14 +5,19 @@
 # Description : main ctlabs_jenkins tasks file.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_jenkins.tasks.package.yum.repo.file
-  get_url:
-    url  : "{{ ctlabs_jenkins.defaults.repo[os_family].url }}"
-    dest : "{{ ctlabs_jenkins.defaults.repo[os_family].dir }}/{{ ctlabs_jenkins.defaults.repo[os_family].name }}"
+- name: ctlabs_jenkins.tasks.package.redhat
+  when: os_family == 'redhat'
+  block:
+    - name: ctlabs_jenkins.tasks.package.redhat.repo.file
+      get_url:
+        url  : "{{ item.url }}"
+        dest : "{{ item.dir }}/{{ item.name }}"
+      loop : "{{ ctlabs_jenkins.defaults.repos.redhat }}"
 
-- name: ctlabs_jenkins.tasks.package.yum.repo.key
-  rpm_key:
-    key  : "{{ ctlabs_jenkins.defaults.repo[os_family].key }}"
+    - name: ctlabs_jenkins.tasks.package.redhat.repos.key
+      rpm_key:
+        key : "{{ item.key }}"
+      loop  : "{{ ctlabs_jenkins.defaults.repos.redhat }}"
 
 - name: ctlabs_jenkins.tasks.package.java.unsupported.remove
   package:

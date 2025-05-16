@@ -7,12 +7,12 @@
 
 ctlabs_jenkins:
   defaults:
-    repo:
+    repos:
       redhat:
-        name : jenkins.repo
-        dir  : /etc/yum.repos.d
-        url  : https://pkg.jenkins.io/redhat/jenkins.repo
-        key  : https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+        - name : jenkins.repo
+          dir  : /etc/yum.repos.d
+          url  : https://pkg.jenkins.io/redhat/jenkins.repo
+          key  : https://pkg.jenkins.io/redhat/jenkins.io-2023.key
     pkgs:
       redhat:
         - name: fontconfig

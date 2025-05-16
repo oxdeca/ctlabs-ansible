@@ -34,4 +34,3 @@
     group  : "{{ ctlabs_promtail.defaults.config.journald.group }}"
     mode   : "{{ ctlabs_promtail.defaults.config.journald.perms }}"
     recurse: yes
-
