@@ -5,7 +5,7 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_alloy.handlers.grafana-server.service.restart
+- name: ctlabs_alloy.handlers.alloy.service.restart
   service:
     name    : "{{ ctlabs_alloy.defaults.service.name }}"
     enabled : true

@@ -1,0 +1,70 @@
+// jinja2: trim_blocks: True, lstrip_blocks: True
+
+// ----------------------------------------------------------------------------
+// File: /etc/alloy/config.alloy
+// ----------------------------------------------------------------------------
+
+loki.process "journald" {
+  forward_to = [loki.write.default.receiver]
+    stage.match {
+      selector = "{unit=~\"session-.*\\\\.scope\"}"
+      stage.template {
+        source   = "merged_scope_unit"
+        template = "session.scope"
+      }
+    stage.labels {
+      values = {
+        unit = "merged_scope_unit",
+      }
+    }
+  }
+}
+
+discovery.relabel "journald" {
+  targets = []
+    rule {
+      source_labels = ["__journal__systemd_unit"]
+      target_label  = "unit"
+    }
+    rule {
+      source_labels = ["__journal__hostname"]
+      target_label  = "host"
+    }
+    rule {
+      source_labels = ["__journal_priority_keyword"]
+      target_label  = "level"
+    }
+    rule {
+      source_labels = ["__journal_syslog_identifier"]
+      target_label  = "facility"
+    }
+    rule {
+      source_labels = ["__journal__comm"]
+      target_label  = "comm"
+    }
+    rule {
+      source_labels = ["__journal__transport"]
+      target_label  = "transport"
+    }
+}
+
+loki.source.journal "journald" {
+  relabel_rules = discovery.relabel.journald.rules
+  forward_to    = [loki.process.journald.receiver]
+  labels        = {
+    host          = "{{ ansible_nodename }}",
+    job           = "journald",
+    site          = "{{ ansible_local.ctlabs.site          | default('') }}",
+    site_group    = "{{ ansible_local.ctlabs.site_group    | default('') }}",
+    cluster_group = "{{ ansible_local.ctlabs.cluster_group | default('') }}",
+  }
+}
+
+loki.write "default" {
+  endpoint {
+    url ={{ ctlabs_alloy_loki_url | default(ctlabs_alloy.defaults.config.loki_url) }}
+    #url = "https://loki.ctlabs.internal:3100/loki/api/v1/push"
+  }
+  external_labels = {}
+}
+

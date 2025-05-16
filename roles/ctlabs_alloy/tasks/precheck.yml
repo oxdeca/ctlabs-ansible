@@ -14,3 +14,11 @@
   rescue:
     - name: ctlabs_alloy.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_alloy.tasks.precheck.loki_url.var
+  set_fact:
+    ctlabs_alloy_loki_url: "{{ ctlabs_alloy_loki_url | default(ctlabs_alloy.defaults.config.loki_url) }}"
+
+- name: ctlabs_alloy.tasks.precheck.loki_url.local_fact
+  set_fact:
+    ctlabs_alloy_loki_url: "{{ ansible_local.ctlabs_loki.url | default(ctlabs_alloy_loki_url) }}"

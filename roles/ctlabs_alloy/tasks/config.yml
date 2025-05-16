@@ -4,3 +4,33 @@
 # File        : ctlabs-ansible/roles/ctlabs_alloy/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_alloy.tasks.config
+  block:
+    - name: ctlabs_alloy.tasks.config.dir
+      file:
+        path  : "{{ ctlabs_alloy.defaults.config.cfgdir }}"
+        state : directory
+
+    - name: ctlabs_alloy.tasks.config.rundir
+      file:
+        path  : "{{ ctlabs_alloy.defaults.config.rundir }}"
+        owner : "{{ ctlabs_alloy.defaults.config.user   }}"
+        group : "{{ ctlabs_alloy.defaults.config.group  }}"
+        mode  : '0750'
+        state : directory
+
+    - name: ctlabs_alloy.tasks.config.installed
+      template:
+        src  : "{{ ctlabs_alloy.defaults.config.template }}"
+        dest : "{{ ctlabs_alloy.defaults.config.dir }}/{{ ctlabs_alloy.defaults.config.file }}"
+      notify: ctlabs_alloy.handlers.alloy.service.restart
+
+- name: ctlabs_alloy.tasks.config.journald.fix_perms
+  when: os == 'centos9'
+  file:
+    dest   : "{{ ctlabs_alloy.defaults.config.journald.dir   }}"
+    owner  : "{{ ctlabs_alloy.defaults.config.journald.owner }}"
+    group  : "{{ ctlabs_alloy.defaults.config.journald.group }}"
+    mode   : "{{ ctlabs_alloy.defaults.config.journald.perms }}"
+    recurse: yes

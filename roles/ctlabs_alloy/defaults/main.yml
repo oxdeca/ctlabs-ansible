@@ -19,12 +19,16 @@ ctlabs_alloy:
       redhat:
         - name: alloy
     config:
-      server:
-        file     : /etc/grafana/grafana.ini
-        template : grafana.ini.j2
-        proto    : https
-        cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
-        key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+      journald:
+        dir  : /var/log/journal
+        owner: root
+        group: systemd-journal
+        perms: 2750
+      dir      : /etc/alloy
+      file     : config.alloy
+      template : config.alloy.j2
+      loki_url : https://loki.ctlabs.internal:3100/loki/api/v1/push
+      templates: []
     service:
       name  : alloy.service
       user  : alloy
