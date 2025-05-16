@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_alloy/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_alloy.tasks.precheck
+  block:
+    - name: ctlabs_alloy.tasks.precheck.os.supported
+      assert:
+        that: os is in ctlabs_alloy.os
+        fail_msg: "OS [{{ os }}] is not supported!"
+  rescue:
+    - name: ctlabs_alloy.tasks.precheck.skip.unsupported
+      meta: end_host

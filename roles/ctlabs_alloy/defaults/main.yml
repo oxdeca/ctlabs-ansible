@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_alloy/defaults/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+
+ctlabs_alloy:
+  defaults:
+    repos:
+      redhat:
+        - name      : grafana
+          desc      : grafana repo
+          baseurl   : https://rpm.grafana.com
+          gpgkey    : https://rpm.grafana.com/gpg.key
+          sslcacert : /etc/pki/tls/certs/ca-bundle.crt
+    pkgs:
+      redhat:
+        - name: alloy
+    config:
+      server:
+        file     : /etc/grafana/grafana.ini
+        template : grafana.ini.j2
+        proto    : https
+        cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+        key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+    service:
+      name  : alloy.service
+      user  : alloy
+      group : alloy
+      groups: [certs]
+  os:
+    - redhat9
+    - centos9

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_alloy/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_alloy
+    - ctlabs_alloy.precheck
+    - ctlabs_alloy.package
+    - ctlabs_alloy.config
+    - ctlabs_alloy.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_alloy
+    - ctlabs_alloy.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_alloy
+    - ctlabs_alloy.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_alloy
+    - ctlabs_alloy.service

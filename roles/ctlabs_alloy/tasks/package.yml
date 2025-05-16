@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_alloy/tasks/package.yml
+# Description : main ctlabs_alloy tasks file.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_alloy.tasks.package.yum.repo.file
+  yum_repository:
+    name        : "{{ item.name    }}"
+    description : "{{ item.desc    }}"
+    baseurl     : "{{ item.baseurl }}"
+    gpgkey      : "{{ item.gpgkey  }}"
+    gpgcheck    : true
+    sslverify   : true
+    sslcacert   : "{{ item.sslcacert }}"
+  loop : "{{ ctlabs_alloy.defaults.repos.redhat }}"
+
+- name: ctlabs_alloy.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop : "{{ ctlabs_alloy.defaults.pkgs[os_family] }}"

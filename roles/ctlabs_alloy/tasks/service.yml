@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_alloy/tasks/service.yml
+# Description : default service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_alloy.tasks.service.start
+  service:
+    name  : "{{ ctlabs_alloy.defaults.service.name }}"
+    state : started
