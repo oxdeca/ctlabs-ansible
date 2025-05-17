@@ -16,6 +16,7 @@ ctlabs_postfix:
     config:
       dir     : /etc/postfix
       postmap : /usr/sbin/postmap
+      groups  : [syslog]
       files :
         - name     : main.cf
           template : main.cf.j2

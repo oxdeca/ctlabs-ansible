@@ -5,6 +5,12 @@
 # Description : default task
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_postfix.tasks.config.groups
+  group:
+    name   : "{{ item }}"
+    system : true
+  loop: "{{ ctlabs_postfix.defaults.config.groups }}"
+
 - name: ctlabs_postfix.tasks.config.files
   template:
     src  : "{{ item.template }}"
