@@ -88,7 +88,7 @@
             "master" : "dc1.ad.{{ CTLABS_DOMAIN }}"
           }
 
-    - name: ctlabs.playbooks.ctlabs.slapd.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.slapd.local_facts
       when: ansible_hostname in [ 'slapd1', 'slapd2']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_slapd.fact
@@ -104,7 +104,7 @@
             }]
           }
 
-    - name: ctlabs.playbooks.ctlabs.alloy.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.alloy.local_facts
       when: ansible_hostname in ['mail1', 'mail2']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_alloy.fact
@@ -115,7 +115,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.promtail.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.promtail.local_facts
       when: ansible_hostname in ['mail1', 'mail2']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_promtail.fact
@@ -126,7 +126,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.prometheus.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.prometheus.local_facts
       when: ansible_hostname == 'prometheus'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_prometheus.fact
