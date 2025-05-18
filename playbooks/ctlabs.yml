@@ -599,8 +599,8 @@
 # ctlabs_k3s server
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.k3s
-  hosts : ['k3s1']
-  tags  : k3s-server
+  hosts : [k3s1]
+  tags  : [k3s, k3s-server]
   roles :
     - roles/ctlabs_k3s
 
@@ -608,7 +608,7 @@
 # ctlabs_k3s agent
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.k3s
-  hosts : ['k3s2', 'k3s3', 'k3s4']
+  hosts : [k3s2, k3s3, k3s4]
   vars  :
   tags  : k3s-agent
   roles :
