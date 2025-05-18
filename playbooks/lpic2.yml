@@ -38,6 +38,7 @@
           {
             "type"   : "master",
             "zones"  : [
+              { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
               { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
             ],
@@ -52,6 +53,7 @@
           {
             "type"    : "slave",
             "zones"  : [
+              { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
               { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
             ],
@@ -65,7 +67,7 @@
         content: |
           {
             "role"   : "master",
-            "domain" : "ad.{{ CTLABS_DOMAIN }}"
+            "domain" : "{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.lpic2.setup.smbadc.slave.local_facts
@@ -75,8 +77,8 @@
         content: |
           {
             "role"   : "slave",
-            "domain" : "ad.{{ CTLABS_DOMAIN }}",
-            "master" : "dc1.ad.{{ CTLABS_DOMAIN }}"
+            "domain" : "{{ CTLABS_DOMAIN }}",
+            "master" : "dc1.{{ CTLABS_DOMAIN }}"
           }
 
     - name: ctlabs.playbooks.lpic2.setup.slapd.local_facts
