@@ -67,7 +67,7 @@
             "masters" : [ "192.168.10.11" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.smbadc.master.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.smbadc.master.local_facts
       when: ansible_hostname == 'dc1'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
@@ -77,7 +77,7 @@
             "domain" : "ad.{{ CTLABS_DOMAIN }}"
           }
 
-    - name: ctlabs.playbooks.ctlabs.smbadc.slave.local_facts
+    - name: ctlabs.playbooks.ctlabs.setup.smbadc.slave.local_facts
       when: ansible_hostname == 'dc2'
       copy:
         dest: /etc/ansible/facts.d/ctlabs_smbadc.fact
