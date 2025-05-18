@@ -39,7 +39,7 @@
   block:
     - name: ctlabs_smbadc.tasks.config.slave.domain.join
       when: ansible_facts.services['samba-ad-dc'].state != 'running'
-      command: /usr/bin/samba-tool domain join "{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" DC --server="{{ ansible_local.ctlabs_smbadc.master }}" --username="{{ ctlabs_smbadc.defaults.config.admin.user }}" --password="{{ ctlabs_smbadc.defaults.config.admin.pass }}" --dns-backend=SAMBA_INTERNAL --option='idmap_ldb:use rfc2307 = yes'
+      command: /usr/bin/samba-tool domain join "{{ ctlabs_smbadc_domain.split('.')[0]|upper }}" DC --server="{{ ansible_local.ctlabs_smbadc.master }}" --username="{{ ctlabs_smbadc.defaults.config.admin.user }}" --password="{{ ctlabs_smbadc.defaults.config.admin.pass }}" --dns-backend=SAMBA_INTERNAL --option='idmap_ldb:use rfc2307=yes'
     
 - name: ctlabs_smbadc.tasks.config.master.krb5
   copy:
