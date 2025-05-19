@@ -20,10 +20,9 @@
   block:
     - name: ctlabs_httpd.tasks.config.debian.ssl.mods
       file:
-        src  : "../mods-available/{{ ctlabs_httpd.defaults.config.debian.ssl.file }}"
+        src  : "../mods-available/{{ item }}"
         dest : "{{ ctlabs_httpd.defaults.config.debian.mods_dir }}/{{ item }}"
         state: link
-        force: true
       loop: "{{ ctlabs_httpd.defaults.config.debian.modules }}"
 
     - name: ctlabs_httpd.tasks.config.debian.ssl.site.conf
@@ -36,4 +35,3 @@
         src  : "../sites-available/{{ ctlabs_httpd.defaults.config.debian.ssl.file }}"
         dest : "{{ ctlabs_httpd.defaults.config.debian.sites_dir }}/{{ ctlabs_httpd.defaults.config.debian.ssl.file }}"
         state: link
-        force: true
