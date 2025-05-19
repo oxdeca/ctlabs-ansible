@@ -1,0 +1,23 @@
+# /etc/apache2/sites-enabled/default-ssl.conf
+
+<IfModule mod_ssl.c>
+  <VirtualHost _default_:443>
+    ServerAdmin           {{ ctlabs_httpd.defaults.config.admin    }}
+    DocumentRoot          {{ ctlabs_httpd.defaults.config.data_dir }}
+
+    ErrorLog              ${APACHE_LOG_DIR}/error.log
+    CustomLog             ${APACHE_LOG_DIR}/access.log combined
+
+    SSLEngine             on
+    SSLCertificateFile    {{ ctlabs_httpd.defaults.config.ssl.dir }}/{{ ansible_nodename }}.crt
+    SSLCertificateKeyFile {{ ctlabs_httpd.defaults.config.ssl.dir }}/{{ ansible_nodename }}.prv
+    SSLCACertificateFile  {{ ctlabs_httpd.defaults.config.ssl.dir }}/{{ ctlabs_httpd.defaults.config.ssl.ca }}.crt
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+      SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+      SSLOptions +StdEnvVars
+    </Directory>
+  </VirtualHost>
+</IfModule>

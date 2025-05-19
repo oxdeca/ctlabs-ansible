@@ -3,10 +3,10 @@
 {# Description : main httpd.conf                                            #}
 {# ------------------------------------------------------------------------ #}
 
-ServerRoot   {{ ctlabs_httpd.defaults.config[os_family].root_dir   }}
-DocumentRoot {{ ctlabs_httpd.defaults.config[os_family].data_dir   }}
-User         {{ ctlabs_httpd.defaults.service[os_family].user      }}
-Group        {{ ctlabs_httpd.defaults.service[os_family].group     }}
+ServerRoot   {{ ctlabs_httpd.defaults.config[os_family].root_dir }}
+DocumentRoot {{ ctlabs_httpd.defaults.config.data_dir            }}
+User         {{ ctlabs_httpd.defaults.service[os_family].user    }}
+Group        {{ ctlabs_httpd.defaults.service[os_family].group   }}
 
 ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}
 ServerName   {{ ctlabs_httpd.defaults.config.servername }}
@@ -18,7 +18,7 @@ ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_htt
 LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
 
 {% if os_family == 'redhat' %}
-Include      {{ ctlabs_httpd.defaults.config[os_family].modules   }}/*.conf
+Include         conf.modules.d/*.conf
 IncludeOptional conf.d/*.conf
 {% elif os_family == 'debian' %}
 IncludeOptional mods-enabled/*.load
