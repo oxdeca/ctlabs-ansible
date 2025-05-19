@@ -15,6 +15,14 @@
   command: filebeat modules enable system 
   notify: ctlabs_filebeat.handlers.service.restart
 
+- name: ctlabs_filebeat.tasks.config.kibana.up
+  vars:
+    ansible_python_interpreter: "{{ '/usr/sbin/ip' if os_family == 'redhat' else '/sbin/ip' }} vrf exec default /usr/bin/python3"
+  wait_for:
+    port: 8080
+    host: "{{ ctlabs_filebeat.defaults.config.kba.host }}"
+    #delay: "{{ (20 | random) + 10 }}"
+
 - name: ctlabs_filebeat.tasks.config.module.setup
   vars:
     ansible_python_interpreter: "{{ '/usr/sbin/ip' if os_family == 'redhat' else '/sbin/ip' }} vrf exec default /usr/bin/python3"
