@@ -5,19 +5,26 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+versions:
+  java: 17
+  rundeck: 5.3.0.20240520-1
+
 ctlabs_rundeck:
   defaults:
     repo:
       redhat:
         file     : /etc/yum.repos.d/rundeck.repo
         template : rundeck.repo.j2
+      debian:
+        file     :
+        template :
     pkgs:
       redhat:
-        - name: java-latest-openjdk-headless
+        - name: "java-{{ versions.java }}-openjdk-headless"
         - name: rundeck
         #- url : https://packagecloud.io/pagerduty/rundeck/packages/rpm_any/rpm_any/rundeck-5.3.0.20240520-1.noarch.rpm/download.rpm?distro_version_id=227
       debian:
-        - name: openjdk-17-jre-headless
+        - name: "openjdk-{{ versions.java }}-jre-headless"
         - url : https://packagecloud.io/pagerduty/rundeck/packages/any/any/rundeck_5.3.0.20240520-1_all.deb/download.deb?distro_version_id=35
     config:
       certs:

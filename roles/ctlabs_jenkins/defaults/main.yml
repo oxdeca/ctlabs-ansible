@@ -5,6 +5,9 @@
 # Description : default variables
 # ------------------------------------------------------------------------------
 
+versions:
+  java: 17
+
 ctlabs_jenkins:
   defaults:
     repos:
@@ -16,10 +19,10 @@ ctlabs_jenkins:
     pkgs:
       redhat:
         - name: fontconfig
-        - name: java-17-openjdk
+        - name: "java-{{ versions.java }}-openjdk"
         - name: jenkins
       debian:
-        - name: openjdk-17-jre-headless
+        - name: "openjdk-{{ versions.java }}-jre-headless"
     config:
       certs:
         src : /etc/ca-ctlabs
