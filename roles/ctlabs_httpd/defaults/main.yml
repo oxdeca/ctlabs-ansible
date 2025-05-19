@@ -40,7 +40,7 @@ ctlabs_httpd:
         sites_dir : /etc/apache2/sites-enabled
         passwd    : /etc/apache2/httpd.passwd
         template  : httpd.conf.j2
-        modules   : [ssl.conf, ssl.load, socache-shmbc.load]
+        modules   : [ssl.conf, ssl.load, socache_shmbc.load]
         file      : /etc/apache2/apache2.conf
         log:
           dir    : /var/log/apache2
