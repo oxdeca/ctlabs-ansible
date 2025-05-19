@@ -22,7 +22,7 @@ setup.template.settings:
   index.number_of_shards: 1
 
 setup.kibana:
-  host: {{ ctlabs_filebeat.defaults.config.kba.host }}
+  host: {{ ctlabs_filebeat.defaults.config.kba.url }}
 
 output.elasticsearch:
   hosts   : {{ ctlabs_filebeat.defaults.config.es.hosts }}

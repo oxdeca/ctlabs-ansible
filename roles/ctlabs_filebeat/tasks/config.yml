@@ -16,7 +16,9 @@
   notify: ctlabs_filebeat.handlers.service.restart
 
 - name: ctlabs_filebeat.tasks.config.module.setup
-  command: ip vrf exec default sh -c 'filebeat setup'
+  vars:
+    ansible_python_interpreter: "{{ '/usr/sbin/ip' if os_family == 'redhat' else '/sbin/ip' }} vrf exec default /usr/bin/python3"
+  command: filebeat setup
   notify: ctlabs_filebeat.handlers.service.restart
 
 - name: ctlabs_filebeat.tasks.config.modules.config
