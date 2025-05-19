@@ -34,7 +34,8 @@ ctlabs_sssd:
         - name: adcli
         - name: packagekit
         - name: python3-pip
-        - name: "{{ 'python3-pexpect' if os.startswith('kali') else '' }}"
+        - name: python3-pexpect
+          when: os.startswith('kali')
     python:
       pips:
         - pexpect

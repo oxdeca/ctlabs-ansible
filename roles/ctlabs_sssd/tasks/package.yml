@@ -15,6 +15,7 @@
     name    : "{{ item.name }}"
     state : present
   loop: "{{ ctlabs_sssd.defaults.pkgs[os_family] }}"
+  when: item.when is not defined or item.when
 
 - name: ctlabs_sssd.tasks.package.python.pips.install
   when: not os.startswith('kali')
