@@ -13,8 +13,8 @@
         fail_msg : "OS[{{os}}] is not supported!"
     - name: ctlabs_sssd.tasks.precheck.addc
       assert:
-        that     : ansible_hostname is not in ctlabs_sssd.defaults.config.dc.hosts
-        fail_msg : "Host {{ ansible_hostname }} is DC!"
+        that     : ansible_nodename is not in ctlabs_sssd.defaults.config.dc.hosts
+        fail_msg : "Host {{ ansible_nodename }} is DC!"
   rescue:
     - name: ctlabs_sssd.tasks.precheck.skip.unsupported
       meta: end_host
