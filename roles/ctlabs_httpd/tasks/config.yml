@@ -28,7 +28,7 @@
     - name: ctlabs_httpd.tasks.config.debian.ssl.site.conf
       template:
         src  : "{{ ctlabs_httpd.defaults.config.debian.ssl.template }}"
-        dest : "{{ ctlabs_httpd.defaults.config.debian.sites_dir }}/{{ ctlabs_httpd.defaults.config.debian.ssl.file }}"
+        dest : "{{ ctlabs_httpd.defaults.config.debian.root_dir }}/sites-available/{{ ctlabs_httpd.defaults.config.debian.ssl.file }}"
 
     - name: ctlabs_httpd.tasks.config.debian.ssl.sites
       file:
