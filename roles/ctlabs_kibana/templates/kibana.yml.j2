@@ -9,7 +9,7 @@
 #kibana.defaultAppId                      : "home"
 
 server.name                               : "{{ ctlabs_kibana.defaults.config.server.name }}"
-server.host                               : "{{ ctlabs_kibana.defaults.config.server.ip   }}"
+server.host                               : "0.0.0.0"  # {{ ctlabs_kibana.defaults.config.server.ip   }}"
 server.port                               : "{{ ctlabs_kibana.defaults.config.server.port }}"
 server.ssl.enabled                        : true
 server.ssl.key                            : "{{ ctlabs_kibana.defaults.config.certs.dir }}/{{ ctlabs_kibana.defaults.config.certs.key }}"

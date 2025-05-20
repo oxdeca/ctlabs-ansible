@@ -16,14 +16,15 @@
   notify: ctlabs_filebeat.handlers.service.restart
 
 - name: ctlabs_filebeat.tasks.config.kibana.up
+  when: ansible_nodename == ctlabs_filebeat.defaults.config.kba.host
   vars:
     ansible_python_interpreter: "{{ '/usr/sbin/ip' if os_family == 'redhat' else '/sbin/ip' }} vrf exec default /usr/bin/python3"
   wait_for:
     port: 8080
     host: "{{ ctlabs_filebeat.defaults.config.kba.host }}"
-    #delay: "{{ (20 | random) + 10 }}"
 
 - name: ctlabs_filebeat.tasks.config.module.setup
+  when: ansible_nodename == ctlabs_filebeat.defaults.config.kba.host
   vars:
     ansible_python_interpreter: "{{ '/usr/sbin/ip' if os_family == 'redhat' else '/sbin/ip' }} vrf exec default /usr/bin/python3"
   command: filebeat setup
@@ -32,5 +33,5 @@
 - name: ctlabs_filebeat.tasks.config.modules.config
   template:
     src  : "modules/{{ item }}.yml.j2"
-    dest : "{{ ctlabs_filebeat.defaults.config.dirs.modules }}/{{ item }}"
+    dest : "{{ ctlabs_filebeat.defaults.config.dirs.modules }}/{{ item }}.yml"
   loop: "{{ ctlabs_filebeat.defaults.config.modules }}"
