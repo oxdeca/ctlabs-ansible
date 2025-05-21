@@ -46,3 +46,5 @@ ctlabs_alloy:
   os:
     - redhat9
     - centos9
+    - debian11
+    - kali2025
