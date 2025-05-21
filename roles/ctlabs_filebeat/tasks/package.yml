@@ -11,33 +11,29 @@
 - name: ctlabs_filebeat.tasks.package.redhat
   when: os_family == 'redhat'
   block:
-    - name: ctlabs_filebeat.tasks.package.redhat.gpg.import
-      yum_repository:
-        name        : "{{ item.name }}"
-        description : "{{ item.name }}"
-        baseurl     : "{{ item.url  }}"
-        gpgkey      : "{{ item.key  }}"
-        gpgcheck    : true
-        sslverify   : true
-      loop: "{{ ctlabs_filebeat.defaults.repos[os_family]"
+    - name: ctlabs_filebeat.tasks.package.redhat.pkg.key
+      rpm_key:
+        key: "{{ item.key }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+
+    - name: ctlabs_filebeat.tasks.package.redhat.pkg.install
+      dnf:
+        name             : "{{ item.url }}"
+        disable_gpg_check: false
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
 
 #
 # Debian
+#
 - name: ctlabs_filebeat.tasks.package.debian
   when: os_family == 'debian'
   block:
-    - name: ctlabs_filebeat.tasks.package.debian.repo.key
+    - name: ctlabs_filebeat.tasks.package.debian.pkg.key
       apt_key:
         url: "{{ item.key }}"
-      loop: "{{ ctlabs_atlantis.default.repos['os_family] }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
 
-    - name: ctlabs_filebeat.tasks.package.debian.repo.file
-      apt_repository:
-        repo: "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
-        name  : "{{ ctlabs_filebeat.defaults.pkgs[os_family].url }}"
-
-- name: ctlabs_filebeat.tasks.package.install
-  package:
-    name  : "{{ item.name }}"
-    state : present
-  loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+    - name: ctlabs_filebeat.tasks.package.debian.pkg.install
+      apt:
+        deb: "{{ item.url }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"

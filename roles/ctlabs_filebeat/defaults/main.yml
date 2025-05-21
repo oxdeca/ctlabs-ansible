@@ -10,22 +10,13 @@ versions:
 
 ctlabs_filebeat:
   defaults:
-    repos:
-      redhat:
-        - name: elastic
-          type: main
-          url : "https://artifacts.elastic.co/packages/oss-9.x/yum"
-          key : https://artifacts.elastic.co/GPG-KEY-elasticsearch
-      debian:
-        - name: elastic
-          type: main
-          url : "htps://artifacts.elastic.co/packages/{{ versions.filebeat }}/apt"
-          key : https://artifacts.elastic.co/GPG-KEY-elasticsearch
     pkgs:
       redhat:
-        url: filebeat
+        - url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ versions.filebeat }}-x86_64.rpm"
+          key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
       debian:
-        url: filebeat
+        - url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ versions.filebeat }}-amd64.deb"
+          key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
     config:
       certs:
         src : /etc/ca-ctlabs
