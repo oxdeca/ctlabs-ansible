@@ -28,15 +28,20 @@
 - name: ctlabs_alloy.tasks.package.debian
   when: os_family == 'debian'
   block:
+    - name: ctlabs_alloy.tasks.package.debian.keyring.dir
+      file:
+        path: "{{ ctlabs_alloy.defaults.config.apt_keys }}"
+        state: directory
+
     - name: ctlabs_alloy.tasks.package.debian.repo.key
       get_url:
         url  : "{{ item.key }}"
-        dest : "{{ apt_keys  }}/{{ item.name }}.asc"
+        dest : "{{ ctlabs_alloy.defaults.config.apt_keys  }}/{{ item.name }}.asc"
       loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
 
     - name: ctlabs_alloy.tasks.package.debian.repo.file
       apt_repository:
-        repo: "deb [signed-by={{ apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
       loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
 
 
