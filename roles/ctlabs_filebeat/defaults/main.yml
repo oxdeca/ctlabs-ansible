@@ -5,15 +5,27 @@
 # Description : default variables
 # ------------------------------------------------------------------------------
 
+versions:
+  filebeat: 9.0.1
+
 ctlabs_filebeat:
   defaults:
+    repos:
+      redhat:
+        - name: elastic
+          type: main
+          url : "https://artifacts.elastic.co/packages/oss-9.x/yum"
+          key : https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      debian:
+        - name: elastic
+          type: main
+          url : "htps://artifacts.elastic.co/packages/{{ versions.filebeat }}/apt"
+          key : https://artifacts.elastic.co/GPG-KEY-elasticsearch
     pkgs:
       redhat:
-        url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.13.4-x86_64.rpm
-        gpg: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        url: filebeat
       debian:
-        url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.13.4-amd64.deb
-        gpg:
+        url: filebeat
     config:
       certs:
         src : /etc/ca-ctlabs
@@ -57,3 +69,6 @@ ctlabs_filebeat:
       group: filebeat
   os:
     - centos9
+    - debian11
+    - debian12
+    - kali2025
