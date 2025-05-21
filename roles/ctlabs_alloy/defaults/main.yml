@@ -10,15 +10,24 @@ ctlabs_alloy:
   defaults:
     repos:
       redhat:
-        - name      : grafana
-          desc      : grafana repo
-          baseurl   : https://rpm.grafana.com
-          gpgkey    : https://rpm.grafana.com/gpg.key
-          sslcacert : /etc/pki/tls/certs/ca-bundle.crt
+        - name   : grafana
+          desc   : grafana repo
+          url    : https://rpm.grafana.com
+          key    : https://rpm.grafana.com/gpg.key
+          cacert : /etc/pki/tls/certs/ca-bundle.crt
+      debian:
+        - name   : grafana
+          desc   : grafana repo
+          type   : main
+          url    : https://apt.grafana.com 
+          key    : https://rpm.grafana.com/gpg.key
     pkgs:
       redhat:
         - name: alloy
+      debian:
+        - name: alloy
     config:
+      apt_keys: /etc/apt/keyrings
       journald:
         dir  : /var/log/journal
         owner: root

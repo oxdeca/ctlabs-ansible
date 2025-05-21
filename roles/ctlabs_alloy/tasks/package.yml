@@ -5,16 +5,40 @@
 # Description : main ctlabs_alloy tasks file.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_alloy.tasks.package.yum.repo.file
-  yum_repository:
-    name        : "{{ item.name    }}"
-    description : "{{ item.desc    }}"
-    baseurl     : "{{ item.baseurl }}"
-    gpgkey      : "{{ item.gpgkey  }}"
-    gpgcheck    : true
-    sslverify   : true
-    sslcacert   : "{{ item.sslcacert }}"
-  loop : "{{ ctlabs_alloy.defaults.repos.redhat }}"
+#
+# RedHat
+#
+- name: ctlabs_alloy.tasks.package.redhat
+  when: os_family == 'redhat'
+  block:
+    - name: ctlabs_alloy.tasks.package.redhat.repo.file
+      yum_repository:
+        name        : "{{ item.name }}"
+        description : "{{ item.desc }}"
+        baseurl     : "{{ item.url  }}"
+        gpgkey      : "{{ item.key  }}"
+        gpgcheck    : true
+        sslverify   : true
+        sslcacert   : "{{ item.cacert }}"
+      loop : "{{ ctlabs_alloy.defaults.repos.redhat }}"
+
+#
+# Debian
+#
+- name: ctlabs_alloy.tasks.package.debian
+  when: os_family == 'debian'
+  block:
+    - name: ctlabs_alloy.tasks.package.debian.repo.key
+      get_url:
+        url  : "{{ item.key }}"
+        dest : "{{ apt_keys  }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
+
+    - name: ctlabs_alloy.tasks.package.debian.repo.file
+      apt_repository:
+        repo: "deb [signed-by={{ apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
+
 
 - name: ctlabs_alloy.tasks.package.install
   package:

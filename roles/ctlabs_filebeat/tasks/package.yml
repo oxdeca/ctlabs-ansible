@@ -28,10 +28,11 @@
 - name: ctlabs_filebeat.tasks.package.debian
   when: os_family == 'debian'
   block:
-    #- name: ctlabs_filebeat.tasks.package.debian.pkg.key
-    #  apt_key:
-    #    url: "{{ item.key }}"
-    #  loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+    - name: ctlabs_filebeat.tasks.package.debian.repo.key
+      get_url:
+        url  : "{{ item.key }}"
+        dest : "{{ apt_keys  }}/elastic.asc"
+      loop: "{{ ctlabs_filebeat.defaults.repos.debian }}"
 
     - name: ctlabs_filebeat.tasks.package.debian.pkg.install
       apt:

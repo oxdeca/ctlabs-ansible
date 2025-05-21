@@ -18,6 +18,7 @@ ctlabs_filebeat:
         - url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ versions.filebeat }}-amd64.deb"
           key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
     config:
+      apt_keys: /etc/apt/keyrings
       certs:
         src : /etc/ca-ctlabs
         dir : /etc/filebeat/certs
