@@ -5,11 +5,13 @@
 # Description : default variables
 # ------------------------------------------------------------------------------
 
+versions:
+  auditbeat: 8.13.4
 ctlabs_auditbeat:
   defaults:
     pkgs:
       redhat:
-        url: https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-8.13.4-x86_64.rpm
+        url: "https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{{ versions.auditbeat }}-x86_64.rpm"
     config:
       dir : /etc/auditbeat
       main:
