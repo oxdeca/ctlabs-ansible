@@ -9,15 +9,27 @@
 #root@vdb1:/# cat /etc/apt/sources.list.d/hashicorp.list
 #deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com bullseye main
 
-- name: ctlabs_k8s.tasks.package.deb.repo.key
-  apt_key:
-    url: "{{ item.key }}"
-  loop: "{{ ctlabs_k8s.defaults.repos[os_family] }}"
+#
+# Debian
+#
+- name: ctlabs_k8s.tasks.package.debian
+  when: os_family == 'debian'
+  block:
+    - name: ctlabs_k8s.tasks.package.debian.keyring.dir
+      file:
+        path : "{{ ctlabs_k8s.defaults.config.apt_keys }}"
+        state: directory
 
-- name: ctlabs_k8s.tasks.package.deb.repo.file
-  apt_repository:
-    repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}" 
-  loop: "{{ ctlabs_k8s.defaults.repos[os_family] }}"
+    - name: ctlabs_k8s.tasks.package.debian.repo.key
+      get_url:
+        url  : "{{ item.key }}"
+        dest : "{{ ctlabs_k8s.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_k8s.defaults.repos.debian }}"
+    
+    - name: ctlabs_k8s.tasks.package.deb.repo.file
+      apt_repository:
+        repo : "deb [signed-by={{ ctlabs_k8s.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ item.type }}" 
+      loop: "{{ ctlabs_k8s.defaults.repos[os_family] }}"
 
 - name: ctlabs_k8s.tasks.package.install
   package:

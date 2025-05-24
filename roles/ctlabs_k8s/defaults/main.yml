@@ -19,7 +19,7 @@ ctlabs_k8s:
       k8s: 
         version: "{{ versions.k8s }}"
       calico:
-        url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ versions.calico}}/manifests/tigera-operator.yaml"
+        url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ versions.calico }}/manifests/tigera-operator.yaml"
       longhorn:
         url    : "https://raw.githubusercontent.com/longhorn/longhorn/v{{ versions.longhorn }}/deploy/longhorn.yaml"
       metrics_server:
@@ -31,9 +31,9 @@ ctlabs_k8s:
     repos:
       debian:
         - name: kubernetes
-          type: deb
-          url : "https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
-          key : "https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key"
+          type: /
+          url : "https://pkgs.k8s.io/core:/stable:/v{{ (versions.k8s).split('.')[:2]|join('.') }}/deb/"
+          key : "https://pkgs.k8s.io/core:/stable:/v{{ (versions.k8s).split('.')[:2]|join('.') }}/deb/Release.key"
       redhat:
     pkgs:
       redhat:
@@ -44,9 +44,10 @@ ctlabs_k8s:
         - name : nfs-common
         - name : etcd-client
         - name : protobuf-compiler
-        - name : "kubelet=\"{{ versions.k8s }}-*\""
-        - name : "kubeadm=\"{{ versions.k8s }}-*\""
-        - name : "kubectl=\"(( versions.k8s }}-*\""
+        - name : containerd
+        - name : kubelet
+        - name : kubeadm
+        - name : kubectl
       python:
         pips:
           - openshift
@@ -58,6 +59,7 @@ ctlabs_k8s:
         template: k8sall.sh.j2
         file    : /usr/local/bin/k8s-all
     config:
+      apt_keys: /etc/apt/keyrings
       dirs:
         main      : /etc/kubernetes
         manifests : /etc/kubernetes/manifests
@@ -104,3 +106,4 @@ ctlabs_k8s:
     - rhel8
     - centos8
     - centos9
+    - debian12
