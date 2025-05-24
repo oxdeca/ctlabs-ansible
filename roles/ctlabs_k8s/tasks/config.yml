@@ -5,6 +5,16 @@
 # Description : main configurations
 # ------------------------------------------------------------------------------
 
+#
+# containerd
+#
+
+- name: ctlabs_k8s.tasks.config.containerd.config
+  template:
+    src  : "{{ ctlabs_k8s.defaults.config.containerd.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.containerd.file     }}"
+  notify: ctlabs_k8s.handlers.service.containerd.restart
+
 - name: ctlabs_k8s.tasks.config.dirs
   file:
     path : "{{ item.value }}"

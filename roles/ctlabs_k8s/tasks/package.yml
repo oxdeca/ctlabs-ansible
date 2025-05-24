@@ -42,8 +42,7 @@
     src  : "{{ ctlabs_k8s.defaults.scripts.versions.template }}"
     dest : "{{ ctlabs_k8s.defaults.scripts.versions.file     }}"
 
-- name: ctlabs_k8s.tasks.package.scripts.k8s_all
-  template:
-    src  : "{{ ctlabs_k8s.defaults.scripts.k8sall.template }}"
-    dest : "{{ ctlabs_k8s.defaults.scripts.k8sall.file     }}"
-
+#- name: ctlabs_k8s.tasks.package.scripts.k8s_all
+#  template:
+#    src  : "{{ ctlabs_k8s.defaults.scripts.k8sall.template }}"
+#    dest : "{{ ctlabs_k8s.defaults.scripts.k8sall.file     }}"

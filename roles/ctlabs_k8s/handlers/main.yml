@@ -11,7 +11,12 @@
     enabled       : true
     daemon_reload : true
 
-- name: ctlabs_k8s.handlers.service.started
+- name: ctlabs_k8s.handlers.service.k8s.started
   service:
     name  : "{{ ctlabs_k8s.defaults.service.name }}"
     state : started
+
+- name: ctlabs_k8s.handlers.service.containerd.restart
+  service:
+    name : "{{ ctlabs_k8s.defaults.service.containerd.name }}"
+    state: restarted

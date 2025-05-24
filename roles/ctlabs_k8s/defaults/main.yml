@@ -64,6 +64,9 @@ ctlabs_k8s:
         main      : /etc/kubernetes
         manifests : /etc/kubernetes/manifests
         components: /etc/kubernetes/components
+      containerd:
+        file    : /etc/containerd/config.toml
+        template: containerd-config.toml.j2
       kubeadm:
         - name    : init
           file    : kubeadm-init.yml
@@ -97,8 +100,10 @@ ctlabs_k8s:
       pgsql_op        : none
       pgsql_opns      : default
     service:
-      name     : k3s.service
-      template : k3s.service.j2
+      containerd:
+        name: containerd.service
+      name     : k8s.service
+      template : k8s.service.j2
     bin:
       path: /usr/bin/k3s
       mode: '0750'
