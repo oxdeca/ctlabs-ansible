@@ -30,3 +30,6 @@
   template:
     src  : "{{ ctlabs_k8s.defaults.config.kernel.params.template }}"
     dest : "{{ ctlabs_k8s.defaults.config.kernel.params.file     }}"
+
+- name: ctlabs_k8s.tasks.preckeck.kernel.params.reload
+  command: "sysctl --system"

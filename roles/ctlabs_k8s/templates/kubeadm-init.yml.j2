@@ -10,32 +10,32 @@ apiVersion     : kubeadm.k8s.io/v1beta3
 bootstrapTokens:
   - groups:
       - system:bootstrappers:kubeadm:default-node-token
-    token : {{ k8s_join_token }}
+    token : {{ ctlabs_k8s_join_token }}
     ttl   : 2h0m0s
     usages:
       - signing
       - authentication
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: {{ k8s_initial_master }}
-{% if k8s_allow_scheduling_masters %}
+    node-ip: {{ ctlabs_k8s_master_ip }}
+{% if ctlabs_k8s_allow_scheduling_masters %}
   taints: []
 {% endif %}
 localAPIEndpoint:
-  advertiseAddress: {{ k8s_initial_master }}
-certificateKey: "{{ k8s_certificate_key }}"
+  advertiseAddress: {{ ctlabs_k8s_master_ip }}
+certificateKey: "{{ ctlabs_k8s_cert_key }}"
 
 ---
 
 kind                : ClusterConfiguration
 apiVersion          : kubeadm.k8s.io/v1beta3
-kubernetesVersion   : {{ ctlabs_k8s.defaults.cluster.version.k8s }}
-controlPlaneEndpoint: "{{ k8s_control_plane_endpoint }}:6443"
+kubernetesVersion   : {{ ctlabs_k8s.defaults.cluster.k8s.version }}
+controlPlaneEndpoint: "{{ ctlabs_k8s_master_ip }}:6443"
 apiServer           :
   extraArgs:
     service-node-port-range: 80-32767
 networking          :
-  podSubnet: "{{ k8s_pod_cidr }}"
+  podSubnet: "{{ ctlabs_k8s_pod_cidr }}"
 
 ---
 
