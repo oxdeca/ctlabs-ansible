@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_containerd/tasks/main.yml
+# Description : main ctlabs_containerd tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_containerd
+    - ctlabs_containerd.precheck
+    - ctlabs_containerd.package
+    - ctlabs_containerd.config
+    - ctlabs_containerd.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_containerd
+    - ctlabs_containerd.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_containerd
+    - ctlabs_containerd.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_containerd
+    - ctlabs_containerd.service

@@ -13,10 +13,10 @@ versions :
   prometheus     : 0.10
   metrics_server : 0.7.0
 
-ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=32) }}"
+ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6) }}.{{ query('community.general.random_string', override_all='01234567890abcdef', length=16 }}"
 ctlabs_k8s_cert_key  : "{{ query('community.general.random_string', override_all='0123456789abcdef', length=32) }}"
 ctlabs_k8s_master_ip : "{{ ansible_default_ipv4.address }}"
-ctlabs_k8s_pid_cidr  : 10.8.15.0/24
+ctlabs_k8s_pod_cidr  : 10.8.15.0/24
 
 ctlabs_k8s:
   defaults:
@@ -79,6 +79,9 @@ ctlabs_k8s:
       containerd:
         file    : /etc/containerd/config.toml
         template: containerd-config.toml.j2
+        crictl:
+          file    : /etc/crictl.yaml
+          template: crictl.yaml.j2
       kubeadm:
         - name    : init
           file    : kubeadm-init.yml

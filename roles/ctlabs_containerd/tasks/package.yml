@@ -1,0 +1,38 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_containerd/tasks/package.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+
+#root@vdb1:/# cat /etc/apt/sources.list.d/hashicorp.list
+#deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com bullseye main
+
+#
+# Debian
+#
+- name: ctlabs_containerd.tasks.package.debian
+  when: os_family == 'debian'
+  block:
+    - name: ctlabs_containerd.tasks.package.debian.keyring.dir
+      file:
+        path : "{{ ctlabs_containerd.defaults.config.apt_keys }}"
+        state: directory
+
+    - name: ctlabs_containerd.tasks.package.debian.repo.key
+      get_url:
+        url  : "{{ item.key }}"
+        dest : "{{ ctlabs_containerd.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_containerd.defaults.repos.debian }}"
+    
+    - name: ctlabs_containerd.tasks.package.deb.repo.file
+      apt_repository:
+        repo : "deb [signed-by={{ ctlabs_containerd.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}" 
+      loop: "{{ ctlabs_containerd.defaults.repos.debian }}"
+
+- name: ctlabs_containerd.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_containerd.defaults.pkgs[os_family] }}"

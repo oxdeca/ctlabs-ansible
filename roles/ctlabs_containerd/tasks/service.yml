@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs_containerd/tasks/service.yml
+# Description : main ctlabs_containerd service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_containerd.tasks.service.start
+  service:
+    name    : "{{ ctlabs_containerd.defaults.service.name }}"
+    enabled : yes
+    state   : started

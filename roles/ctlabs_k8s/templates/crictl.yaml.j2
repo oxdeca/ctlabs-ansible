@@ -1,0 +1,10 @@
+# -----------------------------------------------------------------------------
+# File: /etc/crictl.yaml
+# -----------------------------------------------------------------------------
+
+#runtime-endpoint: unix:///var/run/crio/crio.sock
+#image-endpoint: unix:///var/run/crio/crio.sock
+
+runtime-endpoint: unix:///var/run/containerd/containerd.sock
+image-endpoint: unix:///var/run/containerd/containerd.sock
+timeout: 10

@@ -17,11 +17,18 @@
 #
 # containerd
 #
-- name: ctlabs_k8s.tasks.config.containerd.config
-  template:
-    src  : "{{ ctlabs_k8s.defaults.config.containerd.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.containerd.file     }}"
-  notify: ctlabs_k8s.handlers.service.containerd.restart
+- name: ctlabs_k8s.tasks.config.containerd
+  block:
+    - name: ctlabs_k8s.tasks.config.containerd.config
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.containerd.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.containerd.file     }}"
+      notify: ctlabs_k8s.handlers.service.containerd.restart
+    
+    - name: ctlabs_k8s.tasks.config.containerd.crictl.config
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.containerd.crictl.templates }}"
+        dest : "{{ ctlabs_k8s.defaults.config.containerd.crictl.file      }}"
 
 - name: ctlabs_k8s.tasks.config.dirs
   file:
@@ -33,7 +40,7 @@
 - name: ctlabs_k8s.tasks.config.kubeadm
   template:
     src  : "{{ item.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}/{{ item.file }}"
     mode : '0600'
   loop: "{{ ctlabs_k8s.defaults.config.kubeadm }}"
 

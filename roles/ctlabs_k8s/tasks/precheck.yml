@@ -20,6 +20,9 @@
     - name: ctlabs_k8s.tasks.precheck.skip.unsupported
       meta: end_host
 
+#
+# Kernel
+#
 - name: ctlabs_k8s.tasks.precheck.kernel.modules
   modprobe:
     name: "{{ item }}"

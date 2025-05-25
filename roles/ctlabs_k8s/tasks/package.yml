@@ -37,10 +37,10 @@
     state : present
   loop: "{{ ctlabs_k8s.defaults.pkgs[os_family] }}"
 
-- name: ctlabs_k8s.tasks.package.scripts.versions
-  template:
-    src  : "{{ ctlabs_k8s.defaults.scripts.versions.template }}"
-    dest : "{{ ctlabs_k8s.defaults.scripts.versions.file     }}"
+#- name: ctlabs_k8s.tasks.package.scripts.versions
+#  template:
+#    src  : "{{ ctlabs_k8s.defaults.scripts.versions.template }}"
+#    dest : "{{ ctlabs_k8s.defaults.scripts.versions.file     }}"
 
 #- name: ctlabs_k8s.tasks.package.scripts.k8s_all
 #  template:

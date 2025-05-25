@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_containerd/handlers/main.yml
+# Description : main handler
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_containerd.handlers.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_containerd.defaults.service.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_containerd.handlers.service.start
+  service:
+    name  : "{{ ctlabs_containerd.defaults.service.name }}"
+    state : started
+
+- name: ctlabs_containerd.handlers.service.restart
+  service:
+    name : "{{ ctlabs_containerd.defaults.service.containerd.name }}"
+    state: restarted

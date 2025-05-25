@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_containerd/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_containerd:
+  defaults:
+    repos:
+      debian:
+        - name: containerd
+          type: stable
+          url : "https://download.docker.com/linux/debian"
+          key : "https://download.docker.com/linux/debian/gpg"
+      redhat:
+    pkgs:
+      redhat:
+      debian:
+        - name : containerd.io
+    config:
+      template : config.toml.j2
+      file     : /etc/containerd/config.toml
+    service:
+      - name     : containerd.service
+        template : containerd.service.j2
+  os:
+    - debian12
