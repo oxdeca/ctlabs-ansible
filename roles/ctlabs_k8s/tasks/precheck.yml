@@ -19,3 +19,14 @@
   rescue:
     - name: ctlabs_k8s.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_k8s.tasks.precheck.kernel.modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ctlabs_k8s.defaults.config.kernel.modules }}"
+
+- name: ctlabs_k8s.tasks.precheck.kernel.params
+  template:
+    src  : "{{ ctlabs_k8s.defaults.config.kernel.params.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.kernel.params.file     }}"

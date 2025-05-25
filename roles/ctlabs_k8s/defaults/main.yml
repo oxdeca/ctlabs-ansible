@@ -59,6 +59,13 @@ ctlabs_k8s:
         template: k8sall.sh.j2
         file    : /usr/local/bin/k8s-all
     config:
+      kernel:
+        params:
+          file    : /etc/sysctl.d/99-k8s.conf
+          template: 99-k8s.conf.j2
+        modules:
+          - br_netfilter
+          - overlay
       apt_keys: /etc/apt/keyrings
       dirs:
         main      : /etc/kubernetes
