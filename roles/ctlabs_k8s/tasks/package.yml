@@ -5,7 +5,6 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
-
 #root@vdb1:/# cat /etc/apt/sources.list.d/hashicorp.list
 #deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com bullseye main
 
@@ -36,13 +35,3 @@
     name  : "{{ item.name }}"
     state : present
   loop: "{{ ctlabs_k8s.defaults.pkgs[os_family] }}"
-
-#- name: ctlabs_k8s.tasks.package.scripts.versions
-#  template:
-#    src  : "{{ ctlabs_k8s.defaults.scripts.versions.template }}"
-#    dest : "{{ ctlabs_k8s.defaults.scripts.versions.file     }}"
-
-#- name: ctlabs_k8s.tasks.package.scripts.k8s_all
-#  template:
-#    src  : "{{ ctlabs_k8s.defaults.scripts.k8sall.template }}"
-#    dest : "{{ ctlabs_k8s.defaults.scripts.k8sall.file     }}"

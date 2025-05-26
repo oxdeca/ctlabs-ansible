@@ -49,7 +49,6 @@ ctlabs_k8s:
         - name : nfs-common
         - name : etcd-client
         - name : protobuf-compiler
-        - name : containerd
         - name : kubelet
         - name : kubeadm
         - name : kubectl
