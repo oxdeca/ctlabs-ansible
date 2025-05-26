@@ -7,8 +7,8 @@
 
 - name: ctlabs_k8s.tasks.config.crictl.config
   template:
-    src  : "{{ ctlabs_k8s.defaults.config.crictl.templates }}"
-    dest : "{{ ctlabs_k8s.defaults.config.crictl.file      }}"
+    src  : "{{ ctlabs_k8s.defaults.config.crictl.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.crictl.file     }}"
 
 - name: ctlabs_k8s.tasks.config.dirs
   file:
