@@ -39,7 +39,7 @@
   loop: "{{ ctlabs_k8s.defaults.config.components }}"
 
 - name: ctlabs_k8s.tasks.config.kubeadm-init
-  command: "/usr/bin/kubeadm-init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
+  command: "/usr/bin/kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
 
 - name: ctlabs_k8s.tasks.config.calico.config
   get_url:
