@@ -112,10 +112,7 @@ ctlabs_k8s:
       pgsql_op        : none
       pgsql_opns      : default
     service:
-      containerd:
-        name: containerd.service
-      name     : k8s.service
-      template : k8s.service.j2
+      name: kubelet.service
     bin:
       path: /usr/bin/k3s
       mode: '0750'

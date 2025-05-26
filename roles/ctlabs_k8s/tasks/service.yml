@@ -5,13 +5,13 @@
 # Description : service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_k8s.tasks.service.present
-  template:
-    src  : "{{ ctlabs_k8s.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_k8s.defaults.service.name }}"
-  notify: ctlabs_k8s.handlers.systemd.reload
+#- name: ctlabs_k8s.tasks.service.present
+#  template:
+#    src  : "{{ ctlabs_k8s.defaults.service.template }}"
+#    dest : "{{ systemd_dir + '/' + ctlabs_k8s.defaults.service.name }}"
+#  notify: ctlabs_k8s.handlers.systemd.reload
 
-- name: ctlabs_k8s.tasks.service.started
-  service:
-    name  : "{{ ctlabs_k8s.defaults.service.name }}"
-    state : started
+#- name: ctlabs_k8s.tasks.service.kubelet.started
+#  service:
+#    name  : "{{ ctlabs_k8s.defaults.service.name }}"
+#    state : started
