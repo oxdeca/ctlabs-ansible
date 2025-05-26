@@ -23,7 +23,7 @@ ctlabs_containerd:
       template : config.toml.j2
       file     : /etc/containerd/config.toml
     service:
-      - name     : containerd.service
-        template : containerd.service.j2
+      name     : containerd.service
+      template : containerd.service.j2
   os:
     - debian12
