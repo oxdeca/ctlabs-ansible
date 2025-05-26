@@ -47,11 +47,11 @@
     dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
 
 - name: ctlabs_k8s.tasks.config.calico.install
-  vars:
+  environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl create -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
 
 - name: ctlabs_k8s.tasks.config.calico.custom-resources
-  vars:
+  environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
