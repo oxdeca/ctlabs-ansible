@@ -75,12 +75,9 @@ ctlabs_k8s:
         main      : /etc/kubernetes
         manifests : /etc/kubernetes/manifests
         components: /etc/kubernetes/components
-      containerd:
-        file    : /etc/containerd/config.toml
-        template: containerd-config.toml.j2
-        crictl:
-          file    : /etc/crictl.yaml
-          template: crictl.yaml.j2
+      crictl:
+        file    : /etc/crictl.yaml
+        template: crictl.yaml.j2
       kubeadm:
         - name    : init
           file    : kubeadm-init.yml
