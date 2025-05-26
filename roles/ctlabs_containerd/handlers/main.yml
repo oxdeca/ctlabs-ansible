@@ -18,5 +18,5 @@
 
 - name: ctlabs_containerd.handlers.service.restart
   service:
-    name : "{{ ctlabs_containerd.defaults.service.containerd.name }}"
+    name : "{{ ctlabs_containerd.defaults.service.name }}"
     state: restarted
