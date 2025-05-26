@@ -14,13 +14,13 @@ spec:
   calicoNetwork:
     ipPools:
       - blockSize    : 26
-        cidr         : {{ k8s_pod_cidr }}
+        cidr         : {{ ctlabs_k8s_pod_cidr }}
         encapsulation: VXLANCrossSubnet
         natOutgoing  : Enabled
         nodeSelector : all()
     nodeAddressAutodetectionV4:
-      canReach: {{ k8s_initial_master }}
-{% if k8s_prometheus %}
+      canReach: {{ ctlabs_k8s_master_ip }}
+{% if ctlabs_k8s_prometheus %}
 
 ---
 

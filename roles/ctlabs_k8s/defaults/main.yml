@@ -17,6 +17,7 @@ ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all
 ctlabs_k8s_cert_key  : "{{ query('community.general.random_string', override_all='0123456789abcdef', length=32) }}"
 ctlabs_k8s_master_ip : "{{ ansible_default_ipv4.address }}"
 ctlabs_k8s_pod_cidr  : 10.8.15.0/24
+ctlabs_k8s_prometheus: false
 
 ctlabs_k8s:
   defaults:
