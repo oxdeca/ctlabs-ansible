@@ -18,9 +18,7 @@ bootstrapTokens:
 nodeRegistration:
   kubeletExtraArgs:
     node-ip: {{ ctlabs_k8s_master_ip }}
-{% if ctlabs_k8s_allow_scheduling_masters %}
   taints: []
-{% endif %}
 localAPIEndpoint:
   advertiseAddress: {{ ctlabs_k8s_master_ip }}
 certificateKey: "{{ ctlabs_k8s_cert_key }}"
