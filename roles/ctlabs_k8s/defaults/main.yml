@@ -99,7 +99,7 @@ ctlabs_k8s:
           template: flannel.yml.j2
         - name    : weave
           file    : weave.yml
-          template: weabe.yml.j2
+          template: weave.yml.j2
         - name    : ingress
           file    : ingress-patch.yml
           template: ingress-patch.yml.j2
