@@ -614,6 +614,15 @@
     - roles/ctlabs_k3s
 
 # -----------------------------------------------------------------------------
+# ctlabs_containerd
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.containerd
+  hosts : [k8s1]
+  tags  : [k8s, k8s-server, containerd]
+  roles :
+    - roles/ctlabs_containerd
+
+# -----------------------------------------------------------------------------
 # ctlabs_k8s server
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.k8s

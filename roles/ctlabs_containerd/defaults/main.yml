@@ -19,6 +19,7 @@ ctlabs_containerd:
       debian:
         - name : containerd.io
     config:
+      apt_keys : /etc/apt/keyrings
       template : config.toml.j2
       file     : /etc/containerd/config.toml
     service:
