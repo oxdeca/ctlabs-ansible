@@ -5,20 +5,8 @@
 # Description : main configurations
 # ------------------------------------------------------------------------------
 
-#
-# system
-#
-- name: ctlabs_containerd.tasks.config.hosts
-  blockinfile:
-    path  : /etc/hosts
-    block: |
-      {{ ansible_default_ipv4.address }}  {{ ansible_nodename }}.local {{ ansible_nodename }} {{ ansible_nodename.split('.')[0] }}
-
-#
-# containerd
-#
 - name: ctlabs_containerd.tasks.config.file
   template:
-    src  : "{{ ctlabs_containerd.defaults.config.containerd.template }}"
-    dest : "{{ ctlabs_containerd.defaults.config.containerd.file     }}"
+    src  : "{{ ctlabs_containerd.defaults.config.template }}"
+    dest : "{{ ctlabs_containerd.defaults.config.file     }}"
   notify: ctlabs_containerd.handlers.service.restart
