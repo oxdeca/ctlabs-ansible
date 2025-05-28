@@ -41,7 +41,18 @@
 - name: ctlabs_k8s.tasks.config.kubeadm-init
   command: "/usr/bin/kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
 
-- name: ctlabs_k8s.tasks.config.calico.config
+#
+# Approve Certs
+#
+- name: ctlabs_k8s.tasks.config.certs.approve
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl certificate approve \$(/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name)"
+
+#
+# Calico
+#
+- name: ctlabs_k8s.tasks.config.calico.download
   get_url:
     url  : "{{ ctlabs_k8s.defaults.cluster.calico.url }}"
     dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
@@ -55,3 +66,29 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
+
+#
+# Longhorn
+#
+- name: ctlabs_k8s.tasks.config.longhorn.download
+  get_url:
+    url  : "{{ ctlabs_k8s.defaults.cluster.longhorn.url }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/longhorn.yml"
+
+- name: ctlabs_k8s.tasks.config.longhorn.install
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/longhorn.yml"
+
+#
+# Ingress
+#
+- name: ctlabs_k8s.tasks.config.ingress.download
+  get_url:
+    url  : "{{ ctlabs_k8s.defaults.cluster.ingress.url }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/ingress.yml"
+
+- name: ctlabs_k8s.tasks.config.ingress.install
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/ingress.yml"
