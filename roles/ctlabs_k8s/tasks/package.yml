@@ -35,3 +35,9 @@
     name  : "{{ item.name }}"
     state : present
   loop: "{{ ctlabs_k8s.defaults.pkgs[os_family] }}"
+
+- name: ctlabs_k8s.tasks.package.iscsid.up
+  systemd:
+    name    : iscsid.service
+    enabled : true
+    state   : started

@@ -42,14 +42,6 @@
   command: "/usr/bin/kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
 
 #
-# Approve Certs
-#
-- name: ctlabs_k8s.tasks.config.certs.approve
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl certificate approve $(/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name)"
-
-#
 # Calico
 #
 - name: ctlabs_k8s.tasks.config.calico.download
@@ -66,6 +58,21 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
+
+#
+# Approve Certs
+#
+- name: ctlabs_k8s.tasks.config.certs.list
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name"
+  register: certs
+
+- name: ctlabs_k8s.tasks.config.certs.approve
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl certificate approve {{ item }}"
+  loop: "{{ certs.stdout_lines }}"
 
 #
 # Longhorn
