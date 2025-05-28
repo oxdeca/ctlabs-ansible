@@ -47,7 +47,7 @@
 - name: ctlabs_k8s.tasks.config.certs.approve
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl certificate approve \$(/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name)"
+  command: "/usr/bin/kubectl certificate approve $(/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name)"
 
 #
 # Calico
