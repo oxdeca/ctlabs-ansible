@@ -44,4 +44,4 @@
   blockinfile:
     path  : /etc/hosts
     block: |
-      {{ ansible_default_ipv4.address }}  {{ ansible_nodename }}.local {{ ansible_nodename }} {{ ansible_nodename.split('.')[0] }}
+      {{ ansible_default_ipv4.address }}  {{ ansible_nodename }}.local {{ ansible_nodename }} {{ ansible_nodename.split('.')[0] }} kubernetes
