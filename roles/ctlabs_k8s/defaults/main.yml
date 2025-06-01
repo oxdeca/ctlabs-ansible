@@ -64,6 +64,9 @@ ctlabs_k8s:
         template: k8sall.sh.j2
         file    : /usr/local/bin/k8s-all
     config:
+      profile:
+        template: ctlabs_k8s.sh.j2
+        file    : /etc/profile.d/ctlabs_k8s.sh
       kernel:
         params:
           file    : /etc/sysctl.d/99-k8s.conf
