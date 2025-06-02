@@ -74,6 +74,7 @@ ctlabs_k8s:
         modules:
           - br_netfilter
           - overlay
+        modules_file: /etc/modules-load.d/ctlabs_k8s.conf
       apt_keys: /etc/apt/keyrings
       dirs:
         main      : /etc/kubernetes

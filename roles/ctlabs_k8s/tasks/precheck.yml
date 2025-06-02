@@ -23,11 +23,16 @@
 #
 # Kernel
 #
-- name: ctlabs_k8s.tasks.precheck.kernel.modules
+- name: ctlabs_k8s.tasks.precheck.kernel.modules.load
   modprobe:
     name: "{{ item }}"
     state: present
   loop: "{{ ctlabs_k8s.defaults.config.kernel.modules }}"
+
+- name: ctlabs_k8s.tasks.precheck.kernel.modules.file
+  copy:
+    content: "{{ ctlabs_k8s.defaults.config.kernel.modules | join('\n') }}"
+    dest   : "{{ ctlabs_k8s.defaults.config.kernel.modules_file }}"
 
 - name: ctlabs_k8s.tasks.precheck.kernel.params
   template:
