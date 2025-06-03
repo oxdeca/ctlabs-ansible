@@ -12,6 +12,7 @@ versions :
   ingress        : 1.10.0
   prometheus     : 0.10
   metrics_server : 0.7.0
+  helm           : 3.16.1
 
 ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6)[0] }}.{{ query('community.general.random_string', override_all='01234567890abcdef', length=16)[0] }}"
 ctlabs_k8s_cert_key  : "{{ query('community.general.random_string', override_all='0123456789abcdef', length=64)[0] }}"
@@ -56,6 +57,13 @@ ctlabs_k8s:
       python:
         pips:
           - openshift
+      helm:
+        url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
+        tmptar : /tmp/helm.tar.gz
+        tmpdir : /tmp
+        tardir : /tmp/linux-amd64
+        path   : /usr/bin/helm
+        mode   : '0750'
     scripts:
       versions:
         template: versions.sh.j2

@@ -15,3 +15,9 @@
 #  service:
 #    name  : "{{ ctlabs_k8s.defaults.service.name }}"
 #    state : started
+
+- name: ctlabs_k8s.tasks.service.argocd
+  helm:
+    name: argocd
+    chart_ref: argo/argocd
+    release_namespace: argo

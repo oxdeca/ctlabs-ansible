@@ -41,3 +41,26 @@
     name    : iscsid.service
     enabled : true
     state   : started
+
+- name: ctlabs_k8s.tasks.package.helm
+  block:
+    - name: ctlabs_k8s.tasks.package.helm.download
+      get_url:
+        url   : "{{ ctlabs_k8s.defaults.pkgs.helm.url }}"
+        dest  : "{{ ctlabs_k8s.defaults.pkgs.helm.tmptar }}"
+        #force : no
+    - name: ctlabs_k8s.tasks.package.helm.untar
+      unarchive:
+        src  : "{{ ctlabs_k8s.defaults.pkgs.helm.tmptar }}"
+        dest : "{{ ctlabs_k8s.defaults.pkgs.helm.tmpdir }}/"
+        remote_src: true
+    - name: ctlabs_k8s.tasks.package.helm.install
+      copy:
+        src  : "{{ ctlabs_k8s.defaults.pkgs.helm.tardir }}/helm"
+        dest : "{{ ctlabs_k8s.defaults.pkgs.helm.path   }}"
+        mode : '0750'
+        remote_src: true
+    - name: ctlabs_k8s.tasks.package.helm.argo.repo
+      helm_repository:
+        name: argo
+        repo_url: https://argoproj.github.io/argo-helm
