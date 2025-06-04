@@ -47,6 +47,8 @@ ctlabs_k8s:
       debian:
         - name : apt-transport-https
         - name : python3-pip
+        - name : python3-openshift
+        - name : python3-kubernetes
         - name : open-iscsi
         - name : nfs-common
         - name : etcd-client
@@ -55,8 +57,7 @@ ctlabs_k8s:
         - name : kubeadm
         - name : kubectl
       python:
-        pips:
-          - openshift
+        pips: []
       helm:
         url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
         tmptar : /tmp/helm.tar.gz
@@ -64,6 +65,11 @@ ctlabs_k8s:
         tardir : /tmp/linux-amd64
         path   : /usr/bin/helm
         mode   : '0750'
+    helm:
+      - ns   : argo
+        name : argocd
+        chart: argo/argo-cd
+        repo : https://argoproj.github.io/argo-helm
     scripts:
       versions:
         template: versions.sh.j2

@@ -16,8 +16,64 @@
 #    name  : "{{ ctlabs_k8s.defaults.service.name }}"
 #    state : started
 
+- name: ctlabs_k8s.tasks.service.ingress.controller.ready
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  ansible.builtin.wait_for:
+    host   : "{{ ansible_nodename }}"
+    port   : 443
+    state  : started
+    timeout: 300 
+    delay  : 10 
+
 - name: ctlabs_k8s.tasks.service.argocd
-  helm:
-    name: argocd
-    chart_ref: argo/argocd
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  kubernetes.core.helm:
+    name             : argocd
+    chart_ref        : argo/argo-cd
     release_namespace: argo
+    create_namespace : true
+    values           :
+      configs:
+        params:
+          server.insecure: true
+          server.basehref: /argo
+          server.rootpath: /argo
+      server:
+        ingress:
+          enabled         : true
+          controller      : generic
+          ingressClassName: nginx
+          hostname        : ""
+  register: res_argo
+
+# - debug: "msg={{ res_argo }}"
+
+#- name: ctlabs_k8s.tasks.service.ingress
+#  vars:
+#    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+#  environment:
+#    KUBECONFIG: /etc/kubernetes/admin.conf
+#  kubernetes.core.k8s:
+#    definition:
+#      apiVersion: networking.k8s.io/v1
+#      kind: Ingress
+#      metadata:
+#        name     : nginx-ingress
+#        namespace: argo
+#      spec:
+#        ingressClassName: nginx
+#        rules:
+#        - http:
+#            paths:
+#            - path: /
+#              pathType: Prefix
+#              backend:
+#                service:
+#                  name: argocd-server
+#                  port:
+#                    number: 80
+
