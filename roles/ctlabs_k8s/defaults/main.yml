@@ -67,7 +67,7 @@ ctlabs_k8s:
         mode   : '0750'
     helm:
       - ns   : argo
-        name : argocd
+        name : argo
         chart: argo/argo-cd
         repo : https://argoproj.github.io/argo-helm
     scripts:

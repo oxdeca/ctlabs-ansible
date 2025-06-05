@@ -37,7 +37,11 @@
     release_namespace: argo
     create_namespace : true
     values           :
+      global:
+        domain:
       configs:
+        secret:
+          argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
         params:
           server.insecure: true
           server.basehref: /argo
@@ -47,7 +51,6 @@
           enabled         : true
           controller      : generic
           ingressClassName: nginx
-          hostname        : ""
   register: res_argo
 
 # - debug: "msg={{ res_argo }}"
