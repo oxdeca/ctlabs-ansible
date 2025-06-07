@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/init.yml
+# Description : initialize vault
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.init.status
+  command: "{{ ctlabs_vault.defaults.con.server.bin }} status -address=https://{{ ansible_nodename }}:{{ ctlabs_vault.defaults.config.server.port }}"
+  register: vault_initialized
+
+- name: ctlabs_vault.tasks.init.initialize
+  when: vault_initialized.stdout == false
+  command: "{{ ctlabs_vault.defaults.config.server.bin }} init -adress=https://{{ ansible_nodename }}:{{ ctlabs_vault.defaults.config.server.port }} -key-shares=1 -key-threshold=1"
+  register: vault_init_output
+
+- debug: "msg={{ vault_init_output }}"

@@ -27,6 +27,7 @@ ctlabs_vault:
         - name: vault
       debian:
         - name: vault
+        - name: jq
     config:
       dir   : /etc/vault.d
       server:
