@@ -5,13 +5,69 @@
 # Description : initialize vault
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_vault.tasks.init.status
-  command: "{{ ctlabs_vault.defaults.con.server.bin }} status -address=https://{{ ansible_nodename }}:{{ ctlabs_vault.defaults.config.server.port }}"
-  register: vault_initialized
+- name: ctlabs_vault.tasks.init.init_status
+  uri:
+    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/init"
+    validate_certs  : false
+  register: vault_init_status
+
+- name: ctlabs_vault.tasks.init.init_status.fact
+  set_fact:
+    ctlabs_vault_initialized: "{{ vault_init_status.json.initialized }}"
 
 - name: ctlabs_vault.tasks.init.initialize
-  when: vault_initialized.stdout == false
-  command: "{{ ctlabs_vault.defaults.config.server.bin }} init -adress=https://{{ ansible_nodename }}:{{ ctlabs_vault.defaults.config.server.port }} -key-shares=1 -key-threshold=1"
-  register: vault_init_output
+  when: not ctlabs_vault_initialized
+  uri:
+    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/init"
+    method          : POST
+    validate_certs  : false
+    return_content  : true
+    headers         : 
+      Host: "{{ ansible_nodename }}"
+    body_format     : json
+    body            : >
+      {
+        "secret_shares"    : 1,
+        "secret_threshold" : 1
+      }
+  register: vault_init_result
 
-- debug: "msg={{ vault_init_output }}"
+- name: ctlabs_vault.tasks.init.copy_init_result
+  when: vault_init_result is defined
+  copy:
+    mode   : '0400'
+    owner  : root
+    content: |
+      vault_root_token        : "{{ vault_init_result.json['root_token']     }}"
+      vault_unseal_keys_b64   : "{{ vault_init_result.json['keys_base64'][0] }}"
+      ctlabs_vault_initialized: true
+    dest: "/root/ctlabs-ansible/.ctlabs_vault_init_output.yml"
+  delegate_to: localhost
+
+- name: ctlabs_vault.tasks.init.seal_status
+  uri:
+    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/seal-status"
+    validate_certs : false
+  register: vault_seal_status
+
+- name: ctlabs_vault.tasks.init.seal_status.fact
+  set_fact:
+    ctlabs_vault_sealed: "{{ vault_seal_status.json.sealed }}"
+
+- name: ctlabs_vault.tasks.init.unseal
+  when: ctlabs_vault_sealed
+  uri:
+    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/unseal"
+    method          : POST
+    validate_certs  : false
+    return_content  : true
+    headers         : 
+      Host: "{{ ansible_nodename }}"
+    body_format     : json
+    body            : >
+      {
+        "key" : "{{ vault_init_result.json['keys_base64'][0] }}"
+      }
+  register: vault_unseal_result
+
+- debug: "msg={{ vault_unseal_result }}"

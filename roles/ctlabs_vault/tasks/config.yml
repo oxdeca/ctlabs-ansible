@@ -30,9 +30,3 @@
         src  : "{{ ctlabs_vault.defaults.config.server.template }}"
         dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.server.file }}"
       notify: ctlabs_vault.handlers.service.vault.reload
-
-- name: ctlabs_vault.tasks.config.hosts
-  blockinfile:
-    path : /etc/hosts
-    block: |
-      {{ ansible_default_ipv4.address }} {{ ansible_nodename }} { ansible_nodename.split('.')[0] }}
