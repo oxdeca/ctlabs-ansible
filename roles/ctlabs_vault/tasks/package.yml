@@ -52,3 +52,11 @@
     name  : "{{ ctlabs_vault.defaults.service.user   }}"
     group : "{{ ctlabs_vault.defaults.service.group  }}"
     groups: "{{ ctlabs_vault.defaults.service.groups }}"
+
+#
+# Python
+#
+- name: ctlabs_vault.tasks.package.pips.install
+  pip:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_vault.defaults.pkgs.pips }}"

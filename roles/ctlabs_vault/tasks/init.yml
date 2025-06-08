@@ -71,3 +71,51 @@
   register: vault_unseal_result
 
 - debug: "msg={{ vault_unseal_result }}"
+
+#
+# Enable Secrets Engines
+#
+
+- name: ctlabs_vault.tasks.init.secrets.userpass.enable
+  uri:
+    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/auth/userpass"
+    method         : POST
+    validate_certs : false
+    status_code    : 204
+    headers        :
+      X-Vault-Token: "{{ vault_init_result.json['root_token'] }}"
+    body_format    : json
+    body           : |
+      {
+        "type"        : "userpass",
+        "description" : "User/Pass Authentication"
+      }
+
+- name: ctlabs_vault.tasks.init.secerts.userpass.add_user
+  uri:
+    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/auth/userpass/users/ctlabs"
+    method         : POST
+    validate_certs : false
+    status_code    : 204
+    headers        :
+      X-Vault-Token: "{{ vault_init_result.json['root_token'] }}"
+    body_format    : json
+    body           : |
+      {
+        "password" : "secret123!",
+        "policies" : "default,root"
+      }
+
+- name: ctlabs_vault.tasks.init.secrets.userpass.policy.ctlabs
+  uri:
+    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/policies/acl/ctlabs"
+    method         : POST
+    validate_certs : false
+    status_code    : 204
+    headers        :
+      X-Vault-Token: "{{ vault_init_result.json['root_token'] }}"
+    body_format    : json
+    body           : |
+      {
+        "policy" : "{{ lookup('template', 'ctlabs.hcl.j2') | regex_replace('\r?\n', '\\n') | regex_replace('"', '\\"') }}"
+      }

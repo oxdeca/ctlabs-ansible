@@ -28,6 +28,8 @@ ctlabs_vault:
       debian:
         - name: vault
         - name: jq
+      pips:
+        - hvac
     config:
       dir   : /etc/vault.d
       server:
