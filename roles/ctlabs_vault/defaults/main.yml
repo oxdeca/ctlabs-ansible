@@ -25,9 +25,11 @@ ctlabs_vault:
     pkgs:
       redhat:
         - name: vault
+        - name: python3-pip
       debian:
         - name: vault
         - name: jq
+        - name: python3-pip
       pips:
         - hvac
     config:

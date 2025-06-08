@@ -103,7 +103,7 @@
     body           : |
       {
         "password" : "secret123!",
-        "policies" : "default,root"
+        "policies" : "default,ctlabs"
       }
 
 - name: ctlabs_vault.tasks.init.secrets.userpass.policy.ctlabs
