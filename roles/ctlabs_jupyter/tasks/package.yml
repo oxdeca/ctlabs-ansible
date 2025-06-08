@@ -65,9 +65,11 @@
 # so we use command as workaround
 #
 - name: ctlabs_jupyter.tasks.package.python.pipx.install
-  when: os in ['kali2025']
-  command: "pipx install {{ item }} --global"
-  loop: "{{ ctlabs_jupyter.defaults.python.pipx }}"
+  when       : os in ['kali2025']
+  become     : true
+  become_user: "{{ctlabs_jupyter.defaults.service.user }}"
+  command    : "pipx install {{ item }}"
+  loop       : "{{ ctlabs_jupyter.defaults.python.pipx }}"
 
 #
 # ruby

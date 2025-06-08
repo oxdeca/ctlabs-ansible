@@ -17,6 +17,24 @@
     responses:
       (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
 
+- name: ctlabs_jupyter.tasks.service.password
+  when       : os not in ['kali2025']
+  become     : true
+  become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
+  expect:
+    command: "{{ ctlabs_jupyter.defaults.config.bin }} server password"
+    responses:
+      (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
+
+- name: ctlabs_jupyter.tasks.service.kali.password
+  when       : os in ['kali2025']
+  become     : true
+  become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
+  expect:
+    command: "{{ ctlabs_jupyter.defaults.config.kali.bin }} password"
+    responses:
+      (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
+
 - name: ctlabs_jupyter.tasks.service.started
   service:
     name  : "{{ ctlabs_jupyter.defaults.service.name }}"

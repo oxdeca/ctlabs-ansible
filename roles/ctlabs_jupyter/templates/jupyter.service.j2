@@ -6,7 +6,7 @@
 [Service]
   User={{ ctlabs_jupyter.defaults.service.user }}
   Group={{ ctlabs_jupyter.defaults.service.group }}
-  ExecStart={{ ctlabs_jupyter.defaults.config.bin }}{{ '-' if os in ['kali2025'] else ' ' }}lab --ip {{ ansible_default_ipv4.address }} --no-browser --notebook-dir {{ ctlabs_jupyter.defaults.config.workdir }} --certfile {{ ctlabs_jupyter.defaults.config.cert }} --keyfile  {{ ctlabs_jupyter.defaults.config.key  }}
+  ExecStart={{ ctlabs_jupyter.defaults.config.kali.bin if os in ['kali2025'] else ctlabs_jupyter.defaults.config.bin + ' lab' }} --ip {{ ansible_default_ipv4.address }} --no-browser --notebook-dir {{ ctlabs_jupyter.defaults.config.workdir }} --certfile {{ ctlabs_jupyter.defaults.config.cert }} --keyfile  {{ ctlabs_jupyter.defaults.config.key  }}
   Restart=on-failure
   RestartSec=30s
 
