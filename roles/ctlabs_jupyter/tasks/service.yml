@@ -12,12 +12,6 @@
   notify: ctlabs_jupyter.handlers.systemd.reload
 
 - name: ctlabs_jupyter.tasks.service.password
-  expect:
-    command: "sudo -u {{ ctlabs_jupyter.defaults.service.user }} {{ ctlabs_jupyter.defaults.config.bin }}{{ '-lab' if os in ['kali2025'] else ' server' }} password"
-    responses:
-      (?i)password: "{{ ctlabs_jupyter.defaults.config.pass }}"
-
-- name: ctlabs_jupyter.tasks.service.password
   when       : os not in ['kali2025']
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
