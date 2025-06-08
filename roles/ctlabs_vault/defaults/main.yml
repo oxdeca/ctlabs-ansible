@@ -44,6 +44,8 @@ ctlabs_vault:
         cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
         key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
       client:
+      init:
+        url: "https://{{ ansible_default_ipv4.address }}:8200/v1"
     service:
       name  : vault.service
       user  : vault

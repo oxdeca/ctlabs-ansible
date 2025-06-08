@@ -7,7 +7,7 @@
 
 - name: ctlabs_vault.tasks.init.init_status
   uri:
-    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/init"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/init"
     validate_certs  : false
   register: vault_init_status
 
@@ -18,7 +18,7 @@
 - name: ctlabs_vault.tasks.init.initialize
   when: not ctlabs_vault_initialized
   uri:
-    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/init"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/init"
     method          : POST
     validate_certs  : false
     return_content  : true
@@ -46,7 +46,7 @@
 
 - name: ctlabs_vault.tasks.init.seal_status
   uri:
-    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/seal-status"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/seal-status"
     validate_certs : false
   register: vault_seal_status
 
@@ -57,7 +57,7 @@
 - name: ctlabs_vault.tasks.init.unseal
   when: ctlabs_vault_sealed
   uri:
-    url             : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/unseal"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/unseal"
     method          : POST
     validate_certs  : false
     return_content  : true
@@ -78,7 +78,7 @@
 
 - name: ctlabs_vault.tasks.init.secrets.userpass.enable
   uri:
-    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/auth/userpass"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/userpass"
     method         : POST
     validate_certs : false
     status_code    : 204
@@ -93,7 +93,7 @@
 
 - name: ctlabs_vault.tasks.init.secerts.userpass.add_user
   uri:
-    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/auth/userpass/users/ctlabs"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/auth/userpass/users/ctlabs"
     method         : POST
     validate_certs : false
     status_code    : 204
@@ -108,7 +108,7 @@
 
 - name: ctlabs_vault.tasks.init.secrets.userpass.policy.ctlabs
   uri:
-    url            : "https://{{ ansible_default_ipv4.address }}:8200/v1/sys/policies/acl/ctlabs"
+    url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/policies/acl/ctlabs"
     method         : POST
     validate_certs : false
     status_code    : 204
