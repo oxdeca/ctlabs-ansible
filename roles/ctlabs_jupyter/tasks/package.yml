@@ -27,62 +27,58 @@
     groups: "{{ ctlabs_jupyter.defaults.service.groups }}"
 
 #
-# pkgs
+# RedHat
 #
-
-- name: ctlabs_jupyter.tasks.package.redhat.install
+- name: ctlabs_jupyter.tasks.package.redhat
   when: os_family == 'redhat'
-  dnf:
-    name      : "{{ item.name }}"
-    enablerepo: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
-    state     : present
-  loop: "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
+  block:
+    - name: ctlabs_jupyter.tasks.package.redhat.install
+      dnf:
+        name      : "{{ item.name }}"
+        enablerepo: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
+        state     : present
+      loop: "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
 
-- name: ctlabs_jupyter.tasks.package.debian.install
+    - name: ctlabs_jupyter.tasks.package.redhat.python.pips.install
+      pip:
+        name      : "{{ item }}"
+      loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
+
+    - name: ctlabs_jupyter.tasks.package.redhat.jupyter.link
+      file:
+        src  : "{{ ctlabs_jupyter.defaults.config.bin }}"
+        dest : /usr/bin/jupyter
+        state: link
+
+    - name: ctlabs_jupyter.tasks.package.redhat.ruby.gems.install
+      gem:
+        name: "{{ item }}"
+        user_install: false
+      loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
+
+    - name: ctlabs_jupyter.tasks.package.iruby.install
+      command    : "/usr/bin/gem install --user-install iruby"
+      become     : true
+      become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
+    
+
+#
+# Debian
+#
+- name: ctlabs_jupyter.tasks.package.redhat
   when: os_family == 'debian'
-  package:
-    name      : "{{ item.name }}"
-    state     : present
-  loop: "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
+  block:
+    - name: ctlabs_jupyter.tasks.package.debian.install
+      apt:
+        name        : "{{ item.name }}"
+        update_cache: true
+      loop: "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
+    
+    - name: ctlabs_jupyter.tasks.package.debian.python.pips.install
+      pip:
+        name      : "{{ item }}"
+        extra_args: "--break-system-packages"
+      loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
 
-#
-# python
-#
-- name: ctlabs_jupyter.tasks.package.python.pips.install
-  when: not os in ['kali2025']
-  pip:
-    name  : "{{ item }}"
-  loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
-
-- name: ctlabs_jupyter.tasks.package.jupyter.link
-  when: os_family in ['redhat']
-  file:
-    src  : "{{ ctlabs_jupyter.defaults.config.bin }}"
-    dest : /usr/bin/jupyter
-    state: link
-
-# ansible module pipx isn't available on our installation yet.
-# so we use command as workaround
-#
-- name: ctlabs_jupyter.tasks.package.python.pipx.install
-  when       : os in ['kali2025']
-  become     : true
-  become_user: "{{ctlabs_jupyter.defaults.service.user }}"
-  command    : "pipx install {{ item }}"
-  loop       : "{{ ctlabs_jupyter.defaults.python.pipx }}"
-
-#
-# ruby
-#
-- name: ctlabs_jupyter.tasks.package.ruby.gems.install
-  when: os_family in ['redhat']
-  gem:
-    name: "{{ item }}"
-    user_install: false
-  loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
-
-- name: ctlabs_jupyter.tasks.package.iruby.install
-  when: not os in ['kali2025']
-  command    : "/usr/bin/gem install --user-install iruby"
-  become     : true
-  become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
+    - name: ctlabs_jupyter.tasks.package.iruby.install
+      command: "/usr/bin/gem install iruby"

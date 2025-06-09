@@ -24,9 +24,14 @@ ctlabs_jupyter:
         - name: libyaml-devel
         - name: redhat-rpm-config
       debian:
+        - name: git
+        - name: libzmq5
+        - name: libzmq5-dev
         - name: python3
         - name: python3-pexpect
-        - name: "{{ 'pipx' if os.startswith('kali') else 'python3-pip' }}"
+        - name: python3-pip
+        - name: python3-setuptools
+        - name: ruby
     python:
       pips:
         - jupyterlab
@@ -37,18 +42,17 @@ ctlabs_jupyter:
     ruby:
       gems:
         - iruby
+        - ffi-rzmq
       iruby:
         bin: /usr/local/bin/iruby
     config:
-      kali:
-        bin: /home/jupyter/.local/bin/jupyter-lab
       bin      : /usr/local/bin/jupyter
       workdir  : /srv/jupyter/work
       cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
       key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       pass     : secret123!
       settings :
-        dir     : "{{ '/home/jupyter/.local/share/pipx/venvs/jupyterlab/share/jupyter/lab/settings' if os in ['kali2025'] else '/usr/local/share/jupyter/lab/settings' }}"
+        dir     : /usr/local/share/jupyter/lab/settings
         template: overrides.json.j2
         file    : overrides.json
     service:

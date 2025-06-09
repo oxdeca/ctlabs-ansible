@@ -23,7 +23,6 @@
     dest: "{{ ctlabs_jupyter.defaults.config.settings.dir }}/{{ ctlabs_jupyter.defaults.config.settings.file }}"
 
 - name: ctlabs_jupyter.tasks.config.iruby.register
-  when: not os in ['kali2025']
   command    : "{{ ctlabs_jupyter.defaults.ruby.iruby.bin }} register --force"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
