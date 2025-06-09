@@ -276,7 +276,7 @@
         content: |
           {
             "rundeck" : {
-              "server_url"    : "https://192.168.100.166:8192",
+              "server_url"    : "https://{{ CTLABS_HOST }}:8192",
               "auth_provider" : "ad"
             }
           }
