@@ -10,3 +10,7 @@
     name    : "{{ ctlabs_jenkins.defaults.service.name }}"
     enabled : true
     state   : restarted
+
+- name: ctlabs_jenkins.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

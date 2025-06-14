@@ -33,8 +33,9 @@ ctlabs_jenkins:
       dirs:
         main: /etc/jenkins
     service:
-      user : jenkins
-      group: jenkins
-      name : jenkins.service
+      name     : jenkins.service
+      template : jenkins.service.j2
+      user     : jenkins
+      group    : jenkins
   os:
     - centos9

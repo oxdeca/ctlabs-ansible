@@ -5,8 +5,34 @@
 # Description : main ctlabs_jenkins service
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_jenkins.tasks.service.present
+  template:
+    src  : "{{ ctlabs_jenkins.defaults.service.template }}"
+    dest : "{{ systemd_dir + '/' + ctlabs_jenkins.defaults.service.name }}"
+  notify: ctlabs_jenkins.handlers.systemd.reload
+
 - name: ctlabs_jenkins.tasks.service.start
   service:
     name    : "{{ ctlabs_jenkins.defaults.service.name }}"
     enabled : yes
     state   : started
+
+#- name: ctlabs_jenkins.tasks.config.plugin.jcasc
+#  jenkins_plugin:
+#    url           :
+#    username      :
+#    token         :
+#    name          :
+#    state         :
+#    validate_certs: false
+#  register: jcasc_plugin_install
+
+#- name: ctlabs_jenkins.tasks.config.theme.dark
+#  jenkins_plugin:
+#    url           :
+#    username      :
+#    token         :
+#    name          :
+#    state         :
+#    validate_certs: false
+#  register: dark_theme

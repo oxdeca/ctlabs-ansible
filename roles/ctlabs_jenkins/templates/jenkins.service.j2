@@ -1,0 +1,16 @@
+[Unit]
+Description=Jenkins Continuous Integration Server
+Requires=network.target
+After=network.target
+StartLimitBurst=5
+StartLimitIntervalSec=5m
+
+[Service]
+Type=notify
+NotifyAccess=main
+ExecStart=/usr/bin/jenkins
+Restart=on-failure
+SuccessExitStatus=143
+
+Environment="JAVA_OPTS=-Djava.awt.headless=true"
+Environment="JENKINS_OPTS=--webroot=/var/cache/jenkins/war --httpPort=-1 --httpsPort=8080 --httpsKeyStore='/etc/jenkins/keystore.jks' --httpsKeyStorePassword='secret123!'"

@@ -5,4 +5,27 @@
 # Description : create default configuration user/directories
 # ------------------------------------------------------------------------------
 
+# openssl pkcs12 -export -in /etc/ca-ctlabs/ansible.ctlabs.internal.crt -inkey /etc/ca-ctlabs/ansible.ctlabs.internal.prv -out ansible.ctlabs.internal.p12 -name ansible.ctlabs.internal -passout pass:secret123! -CAfile /etc/ca-ctlabs/ca-ctlabs.crt
+- name: ctlabs_jenkins.tasks.config.cert.p12
+  cmd: |
+   openssl pkcs12 \
+     -export      \
+     -in    /etc/ca-ctlabs/ansible.ctlabs.internal.crt \
+     -inkey /etc/ca-ctlabs/ansible.ctlabs.internal.prv \
+     -out   /etc/ca-ctlabs/ansible.ctlabs.internal.p12 \
+     -name ansible.ctlabs.internal                     \
+     -passwout pass:{{ password }}                     \
+     -CAfile /etc/ca-ctlabs/ca-ctlabs.crt
 
+# keytool -importkeystore -srckeystore ansible.ctlabs.internal.p12 -srcstoretype PKCS12 -srcstorepass secret123! -destkeystore /etc/jenkins/keystore.jks -deststoretype JKS -deststorepass secret123! -srcalias ansible.ctlabs.internal -destalias ansible.ctlabs.internal
+- name: ctlabs_jenkins.tasks.cert.import
+  cmd: |
+    keytool -importkeystore                                  \
+      -srckeystore /etc/ca-ctlabs/ansible.ctlabs.intenal.p12 \
+      -srcstoretype PKCS12                                   \
+      -srcstorepass secret123!                               \
+      -destkeystore /etc/jenkins/keystore.jks                \
+      -deststoretype JKS                                     \
+      -deststorepass secret123!                              \
+      -srcalias ansible.ctlabs.internal                      \
+      -destalias ansible.ctlabs.internal 
