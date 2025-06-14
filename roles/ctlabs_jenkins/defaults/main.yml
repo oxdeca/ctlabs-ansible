@@ -24,14 +24,17 @@ ctlabs_jenkins:
       debian:
         - name: "openjdk-{{ versions.java }}-jre-headless"
     config:
-      certs:
-        src : /etc/ca-ctlabs
-        dir : /etc/kibana/certs
-        crt : "{{ ansible_nodename }}.crt"
-        key : "{{ ansible_nodename }}.prv"
-        ca  : ca-ctlabs.crt
-      dirs:
-        main: /etc/jenkins
+      dir     : /etc/jenkins
+      keystore: 
+        file: keystore.jks
+        type: JKS
+      certs   :
+        dir     : /etc/ca-ctlabs
+        crt     : "{{ ansible_nodename }}.crt"
+        p12     : "{{ ansible_nodename }}.p12"
+        key     : "{{ ansible_nodename }}.key"
+        passfile: "passwd.{{ ansible_nodename }}"
+        ca      : ca-ctlabs.crt
     service:
       name     : jenkins.service
       template : jenkins.service.j2

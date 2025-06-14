@@ -13,4 +13,4 @@ Restart=on-failure
 SuccessExitStatus=143
 
 Environment="JAVA_OPTS=-Djava.awt.headless=true"
-Environment="JENKINS_OPTS=--webroot=/var/cache/jenkins/war --httpPort=-1 --httpsPort=8080 --httpsKeyStore='/etc/jenkins/keystore.jks' --httpsKeyStorePassword='secret123!'"
+Environment="JENKINS_OPTS=--webroot=/var/cache/jenkins/war --httpPort=-1 --httpsPort=8080 --httpsKeyStore='/etc/jenkins/keystore.jks' --httpsKeyStorePassword='{{ ctlabs_jenkins_cert_pass }}'"

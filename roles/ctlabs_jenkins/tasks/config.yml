@@ -5,27 +5,50 @@
 # Description : create default configuration user/directories
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_jenkins.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_jenkins.defaults.config.dir     }}"
+    owner : "{{ ctlabs_jenkins.defaults.service.user   }}"
+    group : "{{ ctlabs_jenkins.defaults.service.group  }}"
+    state : directory
+
+- name: ctlabs_jenkins.tasks.config.copy.passfile
+  copy:
+    src  : "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}"
+    dest : "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export"
+
+- name: ctlabs_jenkins.tasks.config.read.pass
+  slurp:
+    src: "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}"
+  register: cert_pass
+  no_log  : true
+
+- name: ctlabs_jenkins.tasks.config.fact.pass
+  set_fact:
+    ctlabs_jenkins_cert_pass: "{{ cert_pass.content | b64decode | trim }}"
+
 # openssl pkcs12 -export -in /etc/ca-ctlabs/ansible.ctlabs.internal.crt -inkey /etc/ca-ctlabs/ansible.ctlabs.internal.prv -out ansible.ctlabs.internal.p12 -name ansible.ctlabs.internal -passout pass:secret123! -CAfile /etc/ca-ctlabs/ca-ctlabs.crt
 - name: ctlabs_jenkins.tasks.config.cert.p12
-  cmd: |
+  command: |
    openssl pkcs12 \
      -export      \
-     -in    /etc/ca-ctlabs/ansible.ctlabs.internal.crt \
-     -inkey /etc/ca-ctlabs/ansible.ctlabs.internal.prv \
-     -out   /etc/ca-ctlabs/ansible.ctlabs.internal.p12 \
-     -name ansible.ctlabs.internal                     \
-     -passwout pass:{{ password }}                     \
-     -CAfile /etc/ca-ctlabs/ca-ctlabs.crt
+     -in      {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.crt }} \
+     -inkey   {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.key }} \
+     -out     {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
+     -name    {{ ansible_nodename }} \
+     -passin  file:{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
+     -passout file:{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
+     -CAfile  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.ca }}
 
 # keytool -importkeystore -srckeystore ansible.ctlabs.internal.p12 -srcstoretype PKCS12 -srcstorepass secret123! -destkeystore /etc/jenkins/keystore.jks -deststoretype JKS -deststorepass secret123! -srcalias ansible.ctlabs.internal -destalias ansible.ctlabs.internal
 - name: ctlabs_jenkins.tasks.cert.import
-  cmd: |
-    keytool -importkeystore                                  \
-      -srckeystore /etc/ca-ctlabs/ansible.ctlabs.intenal.p12 \
-      -srcstoretype PKCS12                                   \
-      -srcstorepass secret123!                               \
-      -destkeystore /etc/jenkins/keystore.jks                \
-      -deststoretype JKS                                     \
-      -deststorepass secret123!                              \
-      -srcalias ansible.ctlabs.internal                      \
-      -destalias ansible.ctlabs.internal 
+  command: |
+    keytool -importkeystore \
+      -srckeystore        {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
+      -srcstoretype       PKCS12 \
+      -srcstorepass:file  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
+      -destkeystore       {{ ctlabs_jenkins.defaults.config.dir }}/{{ ctlabs_jenkins.defaults.config.keystore.file }} \
+      -deststoretype      {{ ctlabs_jenkins.defaults.config.keystore.type }} \
+      -deststorepass:file {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
+      -srcalias           {{ ansible_nodename }} \
+      -destalias          {{ ansible_nodename }}
