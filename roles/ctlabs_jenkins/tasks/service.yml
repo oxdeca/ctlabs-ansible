@@ -17,6 +17,15 @@
     enabled : yes
     state   : started
 
+- name: ctlabs_jenkins.tasks.service.plugins.install
+  jenkins_plugin:
+    name         : "{{ item }}"
+    url          : "https://{{ ansible_nodename }}:8080"
+    url_username : "{{ ctlabs_jenkins.defaults.config.admin.user }}"
+    url_password : "{{ ctlabs_jenkins.defaults.config.admin.pass }}"
+  loop: [workflow-aggregator, git, credentials, ws-cleanup, timestamper, dark-theme, mailer, matrix-auth, build-timeout, cloudbees-folder, ssh-slaves, junit, pipeline-stage-view, pipeline-input-step]
+  notify: ctlabs_jenkins.handlers.jenkins.service.reload
+    
 #- name: ctlabs_jenkins.tasks.config.plugin.jcasc
 #  jenkins_plugin:
 #    url           :
