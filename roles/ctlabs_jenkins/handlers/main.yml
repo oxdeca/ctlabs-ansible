@@ -11,10 +11,10 @@
     enabled : true
     state   : restarted
 
-- name: ctlabs_jenkins.handlers.jenkins.service.reload
+- name: ctlabs_jenkins.handlers.jenkins.service.restart
   service:
     name  : "{{ ctlabs_jenkins.defaults.service.name }}"
-    state : reloaded
+    state : restarted
 
 - name: ctlabs_jenkins.handlers.systemd.reload
   systemd:

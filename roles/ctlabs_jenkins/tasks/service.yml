@@ -24,7 +24,7 @@
     url_username : "{{ ctlabs_jenkins.defaults.config.admin.user }}"
     url_password : "{{ ctlabs_jenkins.defaults.config.admin.pass }}"
   loop: [workflow-aggregator, git, credentials, ws-cleanup, timestamper, dark-theme, mailer, matrix-auth, build-timeout, cloudbees-folder, ssh-slaves, junit, pipeline-stage-view, pipeline-input-step]
-  notify: ctlabs_jenkins.handlers.jenkins.service.reload
+  notify: ctlabs_jenkins.handlers.jenkins.service.restart
     
 #- name: ctlabs_jenkins.tasks.config.plugin.jcasc
 #  jenkins_plugin:
