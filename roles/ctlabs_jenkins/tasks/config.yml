@@ -59,7 +59,7 @@
   file:
     path : /var/lib/jenkins/init.groovy.d/
     owner: "{{ ctlabs_jenkins.defaults.service.user  }}"
-    group: "{{ ctlabs_jenkins.defaults.service group }}"
+    group: "{{ ctlabs_jenkins.defaults.service.group }}"
     mode : '0750'
     state: directory
 
@@ -68,5 +68,5 @@
     src : files/ctlabs-user.groovy
     dest: /var/lib/jenkins/init.groovy.d/ctlabs-user.groovy
     owner: "{{ ctlabs_jenkins.defaults.service.user  }}"
-    group: "{{ ctlabs_jenkins.defaults.service group }}"
+    group: "{{ ctlabs_jenkins.defaults.service.group }}"
     mode : '0640'
