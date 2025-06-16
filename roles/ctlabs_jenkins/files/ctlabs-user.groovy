@@ -1,9 +1,9 @@
 #!groovy
 
-# ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_jenkins/files/ctlabs-user.groovy
-# Description : Create Default user
-# ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
+// File        : ctlabs-ansible/roles/ctlabs_jenkins/files/ctlabs-user.groovy
+// Description : Create Default user
+// ------------------------------------------------------------------------------
 
 import jenkins.model.*
 import hudson.security.*
