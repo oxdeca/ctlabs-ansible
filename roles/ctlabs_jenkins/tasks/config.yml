@@ -69,4 +69,4 @@
     dest: /var/lib/jenkins/init.groovy.d/ctlabs-user.groovy
     owner: "{{ ctlabs_jenkins.defaults.service.user  }}"
     group: "{{ ctlabs_jenkins.defaults.service.group }}"
-    mode : '0640'
+    mode : '0750'
