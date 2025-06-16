@@ -1,9 +1,9 @@
 ---
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/templates/node_exporter.conf.j2
-# Description : node_exporter web server configuration
-# ------------------------------------------------------------------------------
+# Description : blackbox_exporter web server configuration
+# -----------------------------------------------------------------------------------------------
 
 tls_server_config:
   cert_file: {{ ctlabs_blackbox_exporter.defaults.config.server.tls.crt }}

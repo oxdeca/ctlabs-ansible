@@ -10,14 +10,14 @@
     path  : "{{ ctlabs_blackbox_exporter.defaults.config.cfgdir }}"
     state : directory
 
-#- name: ctlabs_blackbox_exporter.tasks.config.installed
-#  template:
-#    src  : "{{ ctlabs_blackbox_exporter.defaults.config.template }}"
-#    dest : "{{ ctlabs_blackbox_exporter.defaults.config.file     }}"
-#  notify: ctlabs_blackbox_exporter.handlers.node_exporter.service.restart
+- name: ctlabs_blackbox_exporter.tasks.config.installed
+  template:
+    src  : "{{ ctlabs_blackbox_exporter.defaults.config.template }}"
+    dest : "{{ ctlabs_blackbox_exporter.defaults.config.file     }}"
+  notify: ctlabs_blackbox_exporter.handlers.blackbox_exporter.service.restart
 
 - name: ctlabs_blackbox_exporter.tasks.config.server
   template:
     src  : "{{ ctlabs_blackbox_exporter.defaults.config.server.template }}"
     dest : "{{ ctlabs_blackbox_exporter.defaults.config.server.file     }}"
-  notify: ctlabs_blackbox_exporter.handlers.node_exporter.service.restart
+  notify: ctlabs_blackbox_exporter.handlers.blackbox_exporter.service.restart

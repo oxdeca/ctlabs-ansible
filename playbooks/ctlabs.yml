@@ -470,6 +470,15 @@
     - roles/ctlabs_node_exporter
 
 # -----------------------------------------------------------------------------
+# ctlabs_blackbox_exporter
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.blackbox_exporter
+  hosts : prometheus
+  tags  : blackbox_exporter
+  roles :
+    - roles/ctlabs_blackbox_exporter
+
+# -----------------------------------------------------------------------------
 # ctlabs_mimir
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.mimir

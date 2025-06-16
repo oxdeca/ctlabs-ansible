@@ -17,13 +17,14 @@ ctlabs_blackbox_exporter:
       tmptar  : /tmp/blackbox_exporter.tar.gz
     config:
       bin      : /opt/blackbox_exporter/blackbox_exporter
+      workdir  : /opt/blackbox_exporter
       bindir   : /opt
       tmpdir   : /tmp
       cfgdir   : /etc/blackbox_exporter
       datadir  : /data
       agentdir : /data-agent
-      file     : blackbox_exporter.conf
-      template : blackbox_exporter.conf.j2
+      file     : blackbox.yml
+      template : /etc/blackbox_exporter.yml.j2
       listen   : 9115
       server:
         file     : /etc/blackbox_exporter/web-config.yml
@@ -41,6 +42,7 @@ ctlabs_blackbox_exporter:
   os:
     - redhat7
     - redhat8
+    - redhat9
     - centos7
     - centos8
     - centos9
