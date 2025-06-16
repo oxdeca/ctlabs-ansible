@@ -1,0 +1,13 @@
+[Unit]
+  Description=Blackbox Exporter
+  Documentation= https://prometheus.io/docs/guides/blackbox-exporter/
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_blackbox_exporter.defaults.service.user }}
+  Group={{ ctlabs_blackbox_exporter.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_blackbox_exporter.defaults.config.bin }} --web.config.file={{ ctlabs_blackbox_exporter.defaults.config.server.file }}
+
+[Install]
+  WantedBy=multi-user.target

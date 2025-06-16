@@ -1,0 +1,49 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  blackbox_exporter: 0.26.0
+
+ctlabs_blackbox_exporter:
+  defaults:
+    pkgs:
+      name    : blackbox_exporter
+      version : "{{ versions.blackbox_exporter }}.linux-amd64"
+      url     : "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ versions.blackbox_exporter }}/blackbox_exporter-{{ versions.blackbox_exporter }}.linux-amd64.tar.gz"
+      tmptar  : /tmp/blackbox_exporter.tar.gz
+    config:
+      bin      : /opt/blackbox_exporter/blackbox_exporter
+      bindir   : /opt
+      tmpdir   : /tmp
+      cfgdir   : /etc/blackbox_exporter
+      datadir  : /data
+      agentdir : /data-agent
+      file     : blackbox_exporter.conf
+      template : blackbox_exporter.conf.j2
+      listen   : 9115
+      server:
+        file     : /etc/blackbox_exporter/web-config.yml
+        template : web-config.yml.j2
+        tls:
+          crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+    service:
+      name     : blackbox_exporter.service
+      template : blackbox_exporter.service.j2
+      user     : blackbox_exporter
+      group    : blackbox_exporter
+      groups   : [certs]
+    logrotate:
+  os:
+    - redhat7
+    - redhat8
+    - centos7
+    - centos8
+    - centos9
+    - debian11
+    - kali2024
+    - kali2025

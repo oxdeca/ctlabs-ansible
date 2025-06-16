@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_blackbox_exporter.handlers.blackbox_exporter.service.restart
+  service:
+    name    : "{{ ctlabs_blackbox_exporter.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_blackbox_exporter.handlers.blackbox_exporter.service.reload
+  service:
+    name  : "{{ ctlabs_blackbox_exporter.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_blackbox_exporter.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

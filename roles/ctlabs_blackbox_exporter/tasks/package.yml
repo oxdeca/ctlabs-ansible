@@ -1,0 +1,51 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_blackbox_exporter.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_blackbox_exporter.defaults.config.bindir }}"
+    state : directory
+
+- name: ctlabs_blackbox_exporter.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_blackbox_exporter.defaults.pkgs.url    }}"
+    dest : "{{ ctlabs_blackbox_exporter.defaults.pkgs.tmptar }}"
+  delegate_to: localhost
+
+- name: ctlabs_blackbox_exporter.tasks.package.copy
+  copy:
+    src : "{{ ctlabs_blackbox_exporter.defaults.pkgs.tmptar }}"
+    dest: "{{ ctlabs_blackbox_exporter.defaults.pkgs.tmptar }}"
+
+- name: ctlabs_blackbox_exporter.tasks.package.untar
+  unarchive:
+    src  : "{{ ctlabs_blackbox_exporter.defaults.pkgs.tmptar   }}"
+    dest : "{{ ctlabs_blackbox_exporter.defaults.config.bindir }}"
+    remote_src: true
+
+- name: ctlabs_blackbox_exporter.tasks.package.install
+  file:
+    src   : "{{ ctlabs_blackbox_exporter.defaults.config.bindir + '/' + ctlabs_blackbox_exporter.defaults.pkgs.name + '-' + ctlabs_blackbox_exporter.defaults.pkgs.version }}"
+    dest  : "{{ ctlabs_blackbox_exporter.defaults.config.bindir + '/' + ctlabs_blackbox_exporter.defaults.pkgs.name }}"
+    state : link
+
+- name: ctlabs_blackbox_exporter.tasks.package.group
+  group:
+    name   : "{{ ctlabs_blackbox_exporter.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_blackbox_exporter.tasks.package.user
+  user:
+    name   : "{{ ctlabs_blackbox_exporter.defaults.service.user  }}"
+    group  : "{{ ctlabs_blackbox_exporter.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_blackbox_exporter.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_blackbox_exporter.defaults.service.user   }}"
+    group : "{{ ctlabs_blackbox_exporter.defaults.service.group  }}"
+    groups: "{{ ctlabs_blackbox_exporter.defaults.service.groups }}"

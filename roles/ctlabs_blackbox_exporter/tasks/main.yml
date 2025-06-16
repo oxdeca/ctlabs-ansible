@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_blackbox_exporter
+    - ctlabs_blackbox_exporter.precheck
+    - ctlabs_blackbox_exporter.package
+    - ctlabs_blackbox_exporter.config
+    - ctlabs_blackbox_exporter.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_blackbox_exporter
+    - ctlabs_blackbox_exporter.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_blackbox_exporter
+    - ctlabs_blackbox_exporter.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_blackbox_exporter
+    - ctlabs_blackbox_exporter.service

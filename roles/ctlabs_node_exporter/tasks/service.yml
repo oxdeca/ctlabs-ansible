@@ -15,4 +15,3 @@
   service:
     name  : "{{ ctlabs_node_exporter.defaults.service.name }}"
     state : started
-
