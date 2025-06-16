@@ -1,0 +1,81 @@
+---
+
+# -----------------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_blackbox_exporter/templates/blackbox.yml.j2
+# Description : blackbox_exporter configuration
+# -----------------------------------------------------------------------------------------------
+
+modules:
+  # HTTP/HTTPS Probes
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      # Optional: Controls HTTP redirect following. Default is true.
+      # follow_redirects: true 
+      # Validates that the HTTP status code is between 200-299.
+      # valid_status_codes: [200, 201, 202, 204]
+      # Validates HTTP response headers. Case-insensitive regex.
+      # valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      # no_follow_redirects: false # If true, 3xx redirects are treated as successful. Default is false.
+      
+      # Optional: TLS/SSL verification settings
+      # tls_config:
+      #   insecure_skip_verify: true # For testing with self-signed certs (USE WITH CAUTION)
+      #   ca_file: /etc/ssl/certs/ca-certificates.crt # Path to CA certs for custom trust
+      #   cert_file: /etc/certs/client.crt
+      #   key_file: /etc/certs/client.key
+      
+      # Optional: HTTP Basic Authentication
+      # basic_auth:
+      #   username: "myuser"
+      #   password: "mypassword"
+      
+      # Optional: Custom HTTP headers
+      # headers:
+      #   User-Agent: "BlackboxExporter"
+      #   Accept: "application/json"
+      
+      # Optional: HTTP method (default is GET)
+      # method: POST
+      # body: "some_data"
+      # body_mimetype: "application/json"
+
+  http_status_ok:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200] # Explicitly only allow 200 OK
+      no_follow_redirects: true # Don't follow redirects, consider 3xx failures
+
+
+  # TCP Port Probes
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      # Optional: TLS/SSL connection settings for TCP
+      # tls: true # Enable TLS for the TCP connection
+      # tls_config:
+      #   insecure_skip_verify: true # For testing with self-signed certs (USE WITH CAUTION)
+      #   ca_file: /etc/ssl/certs/ca-certificates.crt
+      #   server_name: my.server.com # Required for SNI with TLS
+      
+      # Optional: Send/Expect strings (e.g., for SMTP, FTP, SSH banners)
+      # send: "HELO example.org\r\n"
+      # expect: "220 example.org ESMTP"
+      # Send/expect can be a list of strings, sent sequentially.
+      # Each expect entry is a regex.
+
+
+  # ICMP (Ping) Probe
+  # Note: ICMP probes require CAP_NET_RAW capability for the blackbox_exporter process
+  #       or running it as root (less secure).
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      # Optional: IP protocol version (default is "ip4")
+      # ip_protocol: "ip6"
+      # Optional: Don't resolve reverse DNS
+      # dont_resolve_ptr: true
