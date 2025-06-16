@@ -32,9 +32,13 @@ ctlabs_grafana:
       dashboards:
         file    : /etc/grafana/provisioning/dashboards/dashboards.yml
         template: dashboards.yml.j2
-        node_exporter:
-          url : https://grafana.com/api/dashboards/1860/revisions/37/download
-          file: /etc/grafana/provisioning/dashboards/1860_rev37.json
+        import:
+          # node_exporter:
+          - url : https://grafana.com/api/dashboards/1860/revisions/37/download
+            file: /etc/grafana/provisioning/dashboards/1860_rev37.json
+          # blackbox_exporter:
+          - url : https://grafana.com/api/dashboards/7587/revisions/3/download
+            file: /etc/grafana/provisioning/dashboards/7587_rev3.json
       server:
         file     : /etc/grafana/grafana.ini
         template : grafana.ini.j2

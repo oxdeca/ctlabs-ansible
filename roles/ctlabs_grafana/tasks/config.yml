@@ -31,6 +31,7 @@
 
 - name: ctlabs_grafana.tasks.config.dashboards.json
   get_url:
-    url  : "{{ ctlabs_grafana.defaults.config.dashboards.node_exporter.url  }}"
-    dest : "{{ ctlabs_grafana.defaults.config.dashboards.node_exporter.file }}"
+    url  : "{{ item.url  }}"
+    dest : "{{ item.file }}"
+  loop: "{{ ctlabs_grafana.defaults.config.dashboards.import  }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
