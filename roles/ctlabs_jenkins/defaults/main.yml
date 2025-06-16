@@ -24,6 +24,7 @@ ctlabs_jenkins:
       debian:
         - name: "openjdk-{{ versions.java }}-jre-headless"
     config:
+      homedir : /var/lib/jenkins
       dir     : /etc/jenkins
       keystore: 
         file: keystore.jks

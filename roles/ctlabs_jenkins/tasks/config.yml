@@ -41,7 +41,7 @@
      -CAfile  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.ca }}
 
 # keytool -importkeystore -srckeystore ansible.ctlabs.internal.p12 -srcstoretype PKCS12 -srcstorepass secret123! -destkeystore /etc/jenkins/keystore.jks -deststoretype JKS -deststorepass secret123! -srcalias ansible.ctlabs.internal -destalias ansible.ctlabs.internal
-- name: ctlabs_jenkins.tasks.cert.import
+- name: ctlabs_jenkins.tasks.config.cert.import
   command: |
     keytool -importkeystore \
       -srckeystore        {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
@@ -52,3 +52,21 @@
       -deststorepass:file {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
       -srcalias           {{ ansible_nodename }} \
       -destalias          {{ ansible_nodename }}
+  args:
+    creates: "{{ ctlabs_jenkins.defaults.config.dir }}/{{ ctlabs_jenkins.defaults.config.keystore.file }}"
+
+- name: ctlabs_jenkins.tasks.config.dir.groovy
+  file:
+    path : /var/lib/jenkins/init.groovy.d/
+    owner: "{{ ctlabs_jenkins.defaults.service.user  }}"
+    group: "{{ ctlabs_jenkins.defaults.service group }}"
+    mode : '0750'
+    state: directory
+
+- name: ctlabs_jenkins.tasks.config.user.ctlabs
+  copy:
+    src : files/ctlabs-user.groovy
+    dest: /var/lib/jenkins/init.groovy.d/ctlabs-user.groovy
+    owner: "{{ ctlabs_jenkins.defaults.service.user  }}"
+    group: "{{ ctlabs_jenkins.defaults.service group }}"
+    mode : '0640'

@@ -12,5 +12,6 @@ ExecStart=/usr/bin/jenkins
 Restart=on-failure
 SuccessExitStatus=143
 
-Environment="JAVA_OPTS=-Djava.awt.headless=true"
-Environment="JENKINS_OPTS=--webroot=/var/cache/jenkins/war --httpPort=-1 --httpsPort=8080 --httpsKeyStore='/etc/jenkins/keystore.jks' --httpsKeyStorePassword='{{ ctlabs_jenkins_cert_pass }}'"
+Environment="JENKINS_HOME={{ ctlabs_jenkins.defaults.config.homedir }}"
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
+Environment="JENKINS_OPTS=--webroot=/var/cache/jenkins/war --httpPort=-1 --httpsPort=8080 --httpsKeyStore='{{ ctlabs_jenkins.defaults.config.dir }}/{{ ctlabs_jenkins.defaults.config.keystore.file }}' --httpsKeyStorePassword='{{ ctlabs_jenkins_cert_pass }}'"
