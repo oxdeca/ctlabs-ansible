@@ -8,6 +8,7 @@
   Group={{ ctlabs_blackbox_exporter.defaults.service.group }}
   Restart=on-failure
   ExecStart={{ ctlabs_blackbox_exporter.defaults.config.bin }} --web.config.file={{ ctlabs_blackbox_exporter.defaults.config.server.file }}
+  WorkingDirectory={{ ctlabs_blackbox_exporter.defaults.config.workdir }}
 
 [Install]
   WantedBy=multi-user.target
