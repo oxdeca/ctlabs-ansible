@@ -24,7 +24,7 @@ ctlabs_blackbox_exporter:
       datadir  : /data
       agentdir : /data-agent
       file     : /etc/blackbox_exporter/blackbox.yml
-      template : blackbox_exporter.yml.j2
+      template : blackbox.yml.j2
       listen   : 9115
       server:
         file     : /etc/blackbox_exporter/web-config.yml
