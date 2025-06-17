@@ -24,6 +24,11 @@ ctlabs_k3s:
         tardir : /tmp/linux-amd64
         path   : /usr/bin/helm
         mode   : '0750'
+    helm:
+      - ns   : argo
+        name : argo
+        chart: argo/argo-cd
+        repo : https://argoproj.github.io/argo-helm
     config:
       role: server
       server:

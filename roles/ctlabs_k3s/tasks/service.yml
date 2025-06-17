@@ -39,3 +39,29 @@
         name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
         state : started
     
+- name: ctlabs_k3s.tasks.service.argocd
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  kubernetes.core.helm:
+    name             : argocd
+    chart_ref        : argo/argo-cd
+    release_namespace: argo
+    create_namespace : true
+    values           :
+      global:
+        domain:
+      configs:
+        secret:
+          argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
+        params:
+          server.insecure: true
+          server.basehref: /argo
+          server.rootpath: /argo
+      server:
+        ingress:
+          enabled         : true
+          controller      : generic
+          ingressClassName: nginx
+  register: res_argo
