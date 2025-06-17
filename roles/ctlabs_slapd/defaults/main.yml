@@ -12,8 +12,8 @@ ctlabs_slapd:
         - name : slapd
         - name : ldap-utils
       redhat:
-        - name : openldap-servers-2.6.6
-        - name : openldap-clients-2.6.6
+        - name : openldap-servers
+        - name : openldap-clients
     files:
       - src: switch_slapd_config.sh
         dst: /root/switch_slapd_config.sh
