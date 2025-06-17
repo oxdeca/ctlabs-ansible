@@ -12,6 +12,8 @@ versions:
 ctlabs_k3s:
   defaults:
     pkgs:
+      debian:
+        - name: python3-yaml
       k3s:
         uri  : "https://github.com/k3s-io/k3s/releases/download/v{{ versions.k3s }}+k3s1/k3s"
         path : /usr/bin/k3s
