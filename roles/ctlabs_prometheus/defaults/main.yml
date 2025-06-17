@@ -42,11 +42,15 @@ ctlabs_prometheus:
         domain : ctlabs.internal
         targets: "{{ groups['hosts'] }}"
         port: 9100
+      blackbox_exporter:
+        targets: [ www.google.com, www.duckduckgo.com]
+        port: 9115
       goflow2:
         targets :
           - prometheus.ctlabs.internal:8080
       templates:
         - 10_node_exporter.job.j2
+        - 10_blackbox_exporter.job.j2
         - 10_goflow2.job.j2
     service:
       name     : prometheus.service
