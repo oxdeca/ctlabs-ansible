@@ -43,7 +43,7 @@ ctlabs_prometheus:
         targets: "{{ groups['hosts'] }}"
         port: 9100
       blackbox_exporter:
-        targets: [ www.google.com, www.duckduckgo.com ]
+        targets: [ https://www.google.com, https://www.duckduckgo.com, https://github.com/oxdeca, https://oxdeca.com ]
         port: 9115
       goflow2:
         targets :
