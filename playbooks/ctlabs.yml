@@ -134,9 +134,10 @@
           {
             "mode"   : "agent",
             "config" : {
-              "node_exporter" : true,
-              "goflow2"       : true,
-              "remote_write"  : {
+              "node_exporter"     : true,
+              "blackbox_exporter" : true,
+              "goflow2"           : true,
+              "remote_write"      : {
                 "uri" : "https://mimir.ctlabs.internal:9009/api/v1/push"
               }
             }
