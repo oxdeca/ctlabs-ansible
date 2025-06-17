@@ -29,9 +29,18 @@
     dest : "{{ ctlabs_grafana.defaults.config.dashboards.file     }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart
 
-- name: ctlabs_grafana.tasks.config.dashboards.json
+- name: ctlabs_grafana.tasks.config.dashboards.json.download
+  when: item.url is defined
   get_url:
     url  : "{{ item.url  }}"
+    dest : "{{ item.file }}"
+  loop: "{{ ctlabs_grafana.defaults.config.dashboards.import  }}"
+  notify: ctlabs_grafana.handlers.grafana-server.service.restart
+
+- name: ctlabs_grafana.tasks.config.dashboards.json.copy
+  when: item.src is defined
+  copy:
+    src  : "{{ item.src  }}"
     dest : "{{ item.file }}"
   loop: "{{ ctlabs_grafana.defaults.config.dashboards.import  }}"
   notify: ctlabs_grafana.handlers.grafana-server.service.restart

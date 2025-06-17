@@ -10,8 +10,18 @@ providers:
     orgId: 1
     folder: ''
     type: file
-    disableDeleteion: false
+    disableDeletion: false
     updateIntervalSeconds: 30
+    allowUiUpdates: false
     options:
       path: /etc/grafana/provisioning/dashboards
-      allowwUiUpdates: false
+
+  - name: 'Prometheus Blackbox Exporter'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/provisioning/dashboards
