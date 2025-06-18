@@ -39,11 +39,21 @@
         name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
         state : started
     
+- name: ctlabs_k3s.tasks.service.cluster.ready
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  ansible.builtin.wait_for:
+    host   : "{{ ansible_nodename }}"
+    port   : 6443
+    state  : started
+    timeout: 300 
+    delay  : 10 
+
 - name: ctlabs_k3s.tasks.service.argocd
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   kubernetes.core.helm:
     name             : argocd
     chart_ref        : argo/argo-cd
@@ -62,6 +72,5 @@
       server:
         ingress:
           enabled         : true
-          controller      : generic
-          ingressClassName: nginx
+          ingressClassName: traefik
   register: res_argo
