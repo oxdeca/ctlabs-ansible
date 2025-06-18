@@ -39,38 +39,41 @@
         name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
         state : started
     
-- name: ctlabs_k3s.tasks.service.cluster.ready
-  vars:
-    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-  ansible.builtin.wait_for:
-    host   : "{{ ansible_nodename }}"
-    port   : 6443
-    state  : started
-    timeout: 300 
-    delay  : 10 
-
-- name: ctlabs_k3s.tasks.service.argocd
-  vars:
-    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-  kubernetes.core.helm:
-    name             : argocd
-    chart_ref        : argo/argo-cd
-    release_namespace: argo
-    create_namespace : true
-    values           :
-      global:
-        domain:
-      configs:
-        secret:
-          argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
-        params:
-          server.insecure: true
-          server.basehref: /argo
-          server.rootpath: /argo
-      server:
-        ingress:
-          enabled         : true
-          ingressClassName: traefik
-  register: res_argo
+- name: ctlabs_k3s.tasks.service.cluster
+  when: ctlabs_k3s_role == "server"
+  block:
+    - name: ctlabs_k3s.tasks.service.cluster.ready
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      ansible.builtin.wait_for:
+        host   : "{{ ansible_nodename }}"
+        port   : 6443
+        state  : started
+        timeout: 300 
+        delay  : 10 
+    
+    - name: ctlabs_k3s.tasks.service.argocd
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      kubernetes.core.helm:
+        name             : argocd
+        chart_ref        : argo/argo-cd
+        release_namespace: argo
+        create_namespace : true
+        values           :
+          global:
+            domain:
+          configs:
+            secret:
+              argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
+            params:
+              server.insecure: true
+              server.basehref: /argo
+              server.rootpath: /argo
+          server:
+            ingress:
+              enabled         : true
+              ingressClassName: traefik
+      register: res_argo
