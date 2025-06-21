@@ -55,6 +55,10 @@ ctlabs_jupyter:
         dir     : /usr/local/share/jupyter/lab/settings
         template: overrides.json.j2
         file    : overrides.json
+      sudo:
+        dir     : /etc/sudoers.d
+        template: 01_jupyter.j2
+        file    : 01_jupyter
     service:
       name    : jupyter.service
       template: jupyter.service.j2

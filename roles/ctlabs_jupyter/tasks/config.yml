@@ -26,3 +26,8 @@
   command    : "{{ ctlabs_jupyter.defaults.ruby.iruby.bin }} register --force"
   become     : true
   become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
+
+- name: ctlabs_jupyter.tasks.config.sudo
+  template:
+    src : "{{ ctlabs_jupyter.defaults.config.sudo.template }}"
+    dest: "{{ ctlabs_jupyter.defaults.config.sudo.dir }}/{{ ctlabs_jupyter.defaults.config.sudo.file }}"
