@@ -200,9 +200,7 @@
 # ctlabs_openvpn
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.openvpn
-  hosts :
-    - ro1
-    - ro2
+  hosts : [ro1, ro2]
   tags  : openvpn
   roles :
     - roles/ctlabs_openvpn
@@ -211,9 +209,7 @@
 # ctlabs_frr
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.frr
-  hosts :
-    - ro1
-    - ro2
+  hosts : [ro1, ro2]
   tags  : frr
   roles :
     - roles/ctlabs_frr
@@ -222,9 +218,7 @@
 # ctlabs_bind
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.bind
-  hosts :
-    - ns1
-    - ns2
+  hosts : [ns1, ns2]
   tags  : bind
   roles :
     - roles/ctlabs_bind
@@ -251,9 +245,7 @@
 # ctlabs_sssd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.sssd
-  hosts :
-    - ns1
-    - slapd1
+  hosts : [ns1, slapd1]
   tags  : sssd
   roles :
     - roles/ctlabs_sssd
@@ -262,9 +254,7 @@
 # ctlabs_slapd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.slapd
-  hosts :
-    - slapd1
-    - slapd2
+  hosts : [slapd1, slapd2]
   tags  : slapd
   roles :
     - roles/ctlabs_slapd
@@ -273,9 +263,7 @@
 # ctlabs_haproxy
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.haproxy
-  hosts :
-    - slapd1
-    - slapd2
+  hosts : [slapd1, slapd2]
   tags  : haproxy
   roles :
     - roles/ctlabs_haproxy
@@ -284,9 +272,7 @@
 # ctlabs_httpd
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.httpd
-  hosts :
-    - www1
-    - www2
+  hosts : [www1, www2]
   tags  : httpd
   roles :
     - roles/ctlabs_httpd
@@ -295,9 +281,7 @@
 # ctlabs_postgresql
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.postgresql
-  hosts :
-    - db1
-    - db2
+  hosts : [db1, db2]
   tags  : postgresql
   roles :
     - roles/ctlabs_postgresql
@@ -306,9 +290,7 @@
 # ctlabs_redis
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.redis
-  hosts :
-    - db1
-    - db2
+  hosts : [db1, db2]
   tags  : redis
   roles :
     - roles/ctlabs_redis
@@ -317,9 +299,16 @@
 # ctlabs_netbox
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.lpic2.netbox
-  hosts :
-    - www1
-    - www2
+  hosts : [www1, www2]
   tags  : netbox
   roles :
     - roles/ctlabs_netbox
+
+# -----------------------------------------------------------------------------
+# ctlabs_jupyter
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.lpic2.jupyter
+  hosts : [ansible,h1,h2]
+  tags  : jupyter
+  roles :
+    - roles/ctlabs_jupyter
