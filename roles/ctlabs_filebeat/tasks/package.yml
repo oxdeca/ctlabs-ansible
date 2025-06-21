@@ -33,12 +33,6 @@
         path: "{{ ctlabs_filebeat.defaults.config.apt_keys }}"
         state: directory
 
-    - name: ctlabs_filebeat.tasks.package.debian.repo.key
-      get_url:
-        url  : "{{ item.key }}"
-        dest : "{{ ctlabs_filebeat.defaults.config.apt_keys }}/elastic.asc"
-      loop: "{{ ctlabs_filebeat.defaults.repos.debian }}"
-
     - name: ctlabs_filebeat.tasks.package.debian.pkg.install
       apt:
         deb: "{{ item.url }}"

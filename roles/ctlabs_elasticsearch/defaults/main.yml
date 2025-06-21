@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  elasticsearch: 8.13.4
+  elasticsearch: 8.18.2
 
 ctlabs_elasticsearch:
   defaults:
