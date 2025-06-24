@@ -32,10 +32,20 @@
 - name: ctlabs_jupyter.tasks.package.redhat
   when: os_family == 'redhat'
   block:
+    - name: ctlabs_jupyter.tasks.package.redhat.repo.file
+      yum_repository:
+        name        : "{{ item.name }}"
+        description : "{{ item.name }}"
+        baseurl     : "{{ item.url  }}"
+        gpgkey      : "{{ item.key  }}"
+        gpgcheck    : true
+        sslverify   : true
+      loop: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
+
     - name: ctlabs_jupyter.tasks.package.redhat.install
       dnf:
         name      : "{{ item.name }}"
-        enablerepo: "{{ ctlabs_jupyter.defaults.repos[os_family] }}"
+        enablerepo: "{{ item.repo | default() }}"
         state     : present
       loop: "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
 
@@ -68,21 +78,21 @@
 - name: ctlabs_jupyter.tasks.package.debian
   when: os_family == 'debian'
   block:
-    - name: ctlabs_atlantis.tasks.package.debian.repo.keyring.dir
+    - name: ctlabs_jupyter.tasks.package.debian.repo.keyring.dir
       file:
-        path : "{{ ctlabs_atlantis.defaults.config.apt_keys }}"
+        path : "{{ ctlabs_jupyter.defaults.config.apt_keys }}"
         state: directory
 
-    - name: ctlabs_atlantis.tasks.package.debian.repo.key
+    - name: ctlabs_jupyter.tasks.package.debian.repo.key
       get_url:
         url : "{{ item.key }}"
-        dest: "{{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc"
-      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
+        dest: "{{ ctlabs_jupyter.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_jupyter.defaults.repos.debian }}"
 
-    - name: ctlabs_atlantis.tasks.package.debian.repo.file
+    - name: ctlabs_jupyter.tasks.package.debian.repo.file
       apt_repository:
-        repo : "deb [signed-by={{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
-      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
+        repo : "deb [signed-by={{ ctlabs_jupyter.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ item.name }} {{ item.type }}"
+      loop: "{{ ctlabs_jupyter.defaults.repos.debian }}"
 
     - name: ctlabs_jupyter.tasks.package.debian.pkgs.install
       apt:

@@ -12,13 +12,14 @@ ctlabs_jupyter:
   defaults:
     repos:
       redhat:
-        - crb
-      debian:
         - name: hashicorp
-          type: main
-          url : https://apt.releases.hashicorp.com 
-          key : https://apt.releases.hashicorp.com/gpg
+          url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if os in ['redhat7'] else '$releasever' }}/$basearch/stable"
+          key : https://rpm.releases.hashicorp.com/gpg
         - name: gcp-sdk
+          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if os in ['redhat7'] else '$releasever' }}-$basearch"
+          key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      debian:
+        - name: cloud-sdk
           type: main
           url : https://packages.cloud.google.com/apt
           key : https://packages.cloud.google.com/apt/doc/apt-key.gpg
@@ -30,7 +31,10 @@ ctlabs_jupyter:
         - name: gcc
         - name: zeromq-devel
         - name: libyaml-devel
+          repo: crb
         - name: redhat-rpm-config
+        - name: terraform
+        - name: google-cloud-cli
       debian:
         - name: git
         - name: libzmq5
@@ -56,11 +60,15 @@ ctlabs_jupyter:
       iruby:
         bin: /usr/local/bin/iruby
     config:
+      apt_keys : /etc/apt/keyrings
       bin      : /usr/local/bin/jupyter
       workdir  : /srv/jupyter/work
       cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
       key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       pass     : secret123!
+      profile  :
+        template: jupyter.sh.j2
+        file    : /etc/profile.d/jupyter.sh
       settings :
         dir     : /usr/local/share/jupyter/lab/settings
         template: overrides.json.j2

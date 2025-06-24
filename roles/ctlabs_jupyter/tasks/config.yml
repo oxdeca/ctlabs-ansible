@@ -22,6 +22,11 @@
     src : "{{ ctlabs_jupyter.defaults.config.settings.template }}"
     dest: "{{ ctlabs_jupyter.defaults.config.settings.dir }}/{{ ctlabs_jupyter.defaults.config.settings.file }}"
 
+- name: ctlabs_jupyter.tasks.config.profile
+  template:
+    src : "{{ ctlabs_jupyter.defaults.config.profile.template }}"
+    dest: "{{ ctlabs_jupyter.defaults.config.profile.file     }}"
+
 - name: ctlabs_jupyter.tasks.config.iruby.register
   command    : "{{ ctlabs_jupyter.defaults.ruby.iruby.bin }} register --force"
   become     : true
