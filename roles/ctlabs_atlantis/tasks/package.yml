@@ -5,6 +5,9 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+#
+# RedHat
+#
 - name: ctlabs_atlantis.tasks.package.redhat
   when: os_family == "redhat"
   block:
@@ -18,19 +21,31 @@
         sslverify   : true
       loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
 
+#
+# Debian
+#
 - name: ctlabs_atlantis.tasks.package.debian
   when: os_family == "debian"
   block:
+    - name: ctlabs_atlantis.tasks.package.debian.keyring.dir
+      file:
+        path : "{{ ctlabs_atlantis.defaults.config.apt_keys }}"
+        state: directory
+
     - name: ctlabs_atlantis.tasks.package.debian.repo.key
-      apt_key:
-        url: "{{ item.key }}"
-      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
 
     - name: ctlabs_atlantis.tasks.package.debian.repo.file
       apt_repository:
-        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
-      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+        repo : "deb [signed-by={{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
 
+#
+# Common
+#
 - name: ctlabs_atlantis.tasks.package.installed
   package:
     name    : "{{ item.name }}"
