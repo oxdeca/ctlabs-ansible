@@ -13,7 +13,15 @@ ctlabs_jupyter:
     repos:
       redhat:
         - crb
-      debian: []
+      debian:
+        - name: hashicorp
+          type: main
+          url : https://apt.releases.hashicorp.com 
+          key : https://apt.releases.hashicorp.com/gpg
+        - name: gcp-sdk
+          type: main
+          url : https://packages.cloud.google.com/apt
+          key : https://packages.cloud.google.com/apt/doc/apt-key.gpg
     pkgs:
       redhat:
         - name: "python{{ versions.python }}"
@@ -32,6 +40,8 @@ ctlabs_jupyter:
         - name: python3-pip
         - name: python3-setuptools
         - name: ruby
+        - name: terraform
+        - name: google-cloud-cli
     python:
       pips:
         - jupyterlab

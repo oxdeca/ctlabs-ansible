@@ -56,7 +56,7 @@
         user_install: false
       loop: "{{ ctlabs_jupyter.defaults.ruby.gems }}"
 
-    - name: ctlabs_jupyter.tasks.package.iruby.install
+    - name: ctlabs_jupyter.tasks.package.redhat.iruby.install
       command    : "/usr/bin/gem install --user-install iruby"
       become     : true
       become_user: "{{ ctlabs_jupyter.defaults.service.user }}"
@@ -65,10 +65,26 @@
 #
 # Debian
 #
-- name: ctlabs_jupyter.tasks.package.redhat
+- name: ctlabs_jupyter.tasks.package.debian
   when: os_family == 'debian'
   block:
-    - name: ctlabs_jupyter.tasks.package.debian.install
+    - name: ctlabs_atlantis.tasks.package.debian.repo.keyring.dir
+      file:
+        path : "{{ ctlabs_atlantis.defaults.config.apt_keys }}"
+        state: directory
+
+    - name: ctlabs_atlantis.tasks.package.debian.repo.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
+
+    - name: ctlabs_atlantis.tasks.package.debian.repo.file
+      apt_repository:
+        repo : "deb [signed-by={{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
+
+    - name: ctlabs_jupyter.tasks.package.debian.pkgs.install
       apt:
         name        : "{{ item.name }}"
         update_cache: true
@@ -80,5 +96,5 @@
         extra_args: "--break-system-packages"
       loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
 
-    - name: ctlabs_jupyter.tasks.package.iruby.install
+    - name: ctlabs_jupyter.tasks.package.debian.iruby.install
       command: "/usr/bin/gem install iruby"
