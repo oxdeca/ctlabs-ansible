@@ -75,8 +75,8 @@ ctlabs_netbox:
         redhat: httpd.service
     backup:
       dir    : /backup
-      dmpfile: nbdb.dmp
-      tarfile: nbmedia.tar
+      dmpfile: nbdb4.dmp
+      tarfile: nbfiles.tgz
       media_dirs: [ media, scripts, reports ]
     config:
       update:

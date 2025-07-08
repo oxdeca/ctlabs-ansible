@@ -50,10 +50,22 @@ backup() {
   systemctl stop netbox netbox-rq
    PGPASSWORD='{{ ctlabs_netbox.defaults.config.db.pass }}' pg_dump -h{{ ctlabs_netbox.defaults.config.db.host }} -Upostgres -dnetbox -Fc > {{ ctlabs_netbox.defaults.backup.dir }}/${dumpfile}
   systemctl start netbox netbox-rq
-  
-  # files
-  # cd {{ ctlabs_netbox.defaults.install.app_dir }} && tar cvf {{ ctlabs_netbox.defaults.backup.dir }}/{{ ctlabs_netbox.defaults.backup.tarfile }} {{ ctlabs_netbox.defaults.backup.media_dirs | join(' ') }}
 }
+
+backup_files() {
+  local tarfile=${1:-''}
+
+  if [ -e "{{ ctlabs_netbox.defaults.backup.dir }}/${tarfile}" ]; then
+    printf "Tarfile '${tarfile}' already exists!\n"
+    printf "Aborting ...\n"
+    exit 1
+  fi
+
+  cd {{ ctlabs_netbox.defaults.install.app_dir }}
+  tar czvpf {{ ctlabs_netbox.defaults.backup.dir }}/${tarfile} ./media ./scripts ./reports ./netbox/configuration.py ./netbox/ldap_config.py
+  cd -
+}
+
 
 restore() {
   local dumpfile=${1:-''}
@@ -89,6 +101,8 @@ case $1 in
   'backup')
     if [ "${2}" == "db" ]; then
       backup ${3}
+    elif [ "${2}" == "files" ]; then
+      backup_files ${3}
     fi
     ;;
 

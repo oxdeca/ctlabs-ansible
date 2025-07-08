@@ -37,3 +37,17 @@
   service:
     name  : "{{ ctlabs_netbox.defaults.service.nbhk.name }}"
     state : started
+
+- name: ctlabs_netbox.tasks.service.cron.backup.db
+  cron:
+    name    : backup_db
+      minute: 50
+      hour  : 23
+      job   : /usr/bin/backrest.sh backup db    "$(/usr/bin/date '+\%Y-\%m-\%d-\%H.\%M.\%S').nbdb4.dmp"
+
+- name: ctlabs_netbox.tasks.service.cron.backup.files
+  cron:
+    name    : backup_files
+      minute: 55
+      hour  : 23
+      job   : /usr/bin/backrest.sh backup files "$(/usr/bin/date '+\%Y-\%m-\%d-\%H.\%M.\%S').nbfiles.tgz"
