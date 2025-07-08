@@ -20,7 +20,8 @@ ctlabs_guacamole:
         - name : tomcat
     webapp:
       file : /var/lib/tomcat/webapps/guacamole.war
-      url  : "https://apache.org/dyn/closer.lua/guacamole/{{ versions.guacamole }}/binary/guacamole-{{ versions.guacamole }}.war?action=download"
+      #url  : "https://apache.org/dyn/closer.lua/guacamole/{{ versions.guacamole }}/binary/guacamole-{{ versions.guacamole }}.war?action=download"
+      url  : "https://dlcdn.apache.org/guacamole/{{ versions.guacamole }}/binary/guacamole-{{ versions.guacamole }}.war?action=download"
     config:
       dir      : /etc/guacamole/
       server:
