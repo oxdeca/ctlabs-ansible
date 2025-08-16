@@ -26,3 +26,6 @@ ctlabs_asciinema:
     service:
   os:
     - centos9
+  virtype:
+    - kvm
+    - container

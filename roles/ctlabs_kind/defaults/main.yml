@@ -43,3 +43,5 @@ ctlabs_kind:
     - centos8
     - centos9
     - debian11
+  virtype:
+    - kvm

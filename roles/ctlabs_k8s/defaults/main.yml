@@ -139,3 +139,5 @@ ctlabs_k8s:
     - centos8
     - centos9
     - debian12
+  virtype:
+    - kvm

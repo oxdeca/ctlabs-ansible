@@ -11,7 +11,8 @@
       assert:
         that     : ctg_os is in ctlabs_fpm.os
         fail_msg : "OS [{{ ctg_os }}] is not supported!"
-    - name: ctlabs_fpm.tasks.precheck.virttype
+
+    - name: ctlabs_fpm.tasks.precheck.virtype
       assert:
         that     : ctg_virtype is in ctlabs_fpm.virtype
         fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"

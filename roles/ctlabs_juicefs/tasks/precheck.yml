@@ -13,7 +13,7 @@
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
     - name: ctlabs_juicefs.tasks.precheck.virtype
       assert:
-        that     : ctg_virtype is in [ 'kvm', 'vmware' ]
+        that     : ctg_virtype is in ctlabs_juicefs.virtype
         fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
   rescue:
     - name: ctlabs_juicefs.tasks.precheck.skip.unsupported

@@ -38,11 +38,11 @@ ctlabs_docker:
       - name : docker-compose
     service:
       - name : docker
-    virtypes:
-      - kvm
-      - vmware
     os:
       - redhat8
       - redhat9
       - centos8
       - centos9
+    virtype:
+      - kvm
+      - vmware

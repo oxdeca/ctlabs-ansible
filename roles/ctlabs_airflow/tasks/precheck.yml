@@ -11,10 +11,10 @@
       assert:
         that: ctg_os is in ctlabs_airflow.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
-        
+
     - name: ctlabs_airflow.tasks.precheck.virtype
       assert:
-        that     : ctg_virtype is in [ 'kvm', 'container' ]
+        that     : ctg_virtype is in ctlabs_airflow.virtype
         fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
   rescue:
     - name: ctlabs_airflow.tasks.precheck.skip.unsupported

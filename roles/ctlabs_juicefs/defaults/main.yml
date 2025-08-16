@@ -48,3 +48,6 @@ ctlabs_juicefs:
   os:
     - centos9
     - debian11
+  virtype:
+    - kvm
+    - vmware

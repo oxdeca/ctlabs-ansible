@@ -14,7 +14,7 @@
     
     - name: ctlabs_docker.tasks.precheck.virtype
       assert:
-        that     : ctg_virtype is in ( 'kvm' )
+        that     : ctg_virtype is in ctlabs_docker.virtype
         fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
   rescue:
     - name: ctlabs_docker.tasks.precheck.skip.unsupported

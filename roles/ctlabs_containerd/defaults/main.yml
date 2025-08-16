@@ -28,3 +28,5 @@ ctlabs_containerd:
   os:
     - debian11
     - debian12
+  virtype:
+    - kvm
