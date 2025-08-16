@@ -12,7 +12,7 @@
 # Debian
 #
 - name: ctlabs_k8s.tasks.package.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_k8s.tasks.package.debian.keyring.dir
       file:
@@ -28,13 +28,13 @@
     - name: ctlabs_k8s.tasks.package.deb.repo.file
       apt_repository:
         repo : "deb [signed-by={{ ctlabs_k8s.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ item.type }}" 
-      loop: "{{ ctlabs_k8s.defaults.repos[os_family] }}"
+      loop: "{{ ctlabs_k8s.defaults.repos[ctg_os_family] }}"
 
 - name: ctlabs_k8s.tasks.package.install
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_k8s.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_k8s.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_k8s.tasks.package.iscsid.up
   systemd:

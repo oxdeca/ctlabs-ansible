@@ -12,7 +12,7 @@ ctlabs_tomcat:
       - name : jdk
     service:
       name     : ctlabs_tomcat
-      file     : "{{ systemd_dir }}/ctlabs_tomcat@.service"
+      file     : "{{ ctg_systemd_dir }}/ctlabs_tomcat@.service"
       template : templates/service.j2
     config:
       user             : tomcat
@@ -20,10 +20,10 @@ ctlabs_tomcat:
       dir_mode         : '0770'
       umask            : '0002'
       shell            : /sbin/nologin
-      data_dir         : "{{ data_dir }}/tomcat"
-      catalina_base    : "{{ data_dir }}/tomcat/catalina_base"
-      tomcat_path      : "{{ software_dir }}/tomcat"
-      jdk_path         : "{{ software_dir }}/jdk"
+      data_dir         : "{{ ctg_data_dir }}/tomcat"
+      catalina_base    : "{{ ctg_data_dir }}/tomcat/catalina_base"
+      tomcat_path      : "{{ ctg_sw_dir }}/tomcat"
+      jdk_path         : "{{ ctg_sw_dir }}/jdk"
       tomcat_version   : 8
       jdk_version      : 11
       jvm_options      : -Xss1m -Xms512m -Xmx2048m
@@ -62,7 +62,7 @@ ctlabs_tomcat:
         - work
     sysconfig:
       name     : 'instance.'
-      dir      : "{{ data_dir }}/tomcat/sysconfig"
+      dir      : "{{ ctg_data_dir }}/tomcat/sysconfig"
       template : templates/sysconfig.instance.j2
 #  instances:
 #    1:

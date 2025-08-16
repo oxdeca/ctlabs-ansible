@@ -9,8 +9,8 @@
   block:
     - name: ctlabs_frr.tasks.precheck.supported_os
       assert:
-        that: os is in ctlabs_frr.os
-        fail_msg: "OS [{{ os }}] is not supported!"
+        that: ctg_os is in ctlabs_frr.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
   rescue:
     - name: ctlabs_frr.tasks.precheck.skip.unsupported
       meta: end_host

@@ -35,7 +35,7 @@
         chdir : "{{ ctlabs_ca.defaults.config.dir }}"
       register: "ca_create_output"
 
-    - name: ctlabs_ca.tasks.ca.{{os_family}}.install
+    - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.install
       blockinfile:
-        path : "{{ ctlabs_ca.defaults.config[os_family].cacerts }}"
+        path : "{{ ctlabs_ca.defaults.config[ctg_os_family].cacerts }}"
         block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"

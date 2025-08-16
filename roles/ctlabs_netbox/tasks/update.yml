@@ -22,7 +22,7 @@
     data:
       name                 : "{{ intentory_hostname }}"
       site                 : "{{ ansible_local.site | default('GCP') }}"
-      platform             : "{{ os }}"
+      platform             : "{{ ctg_os }}"
       comments             : "{{ ansible_virtualization_type }}"
       memory               : "{{ ansible_memtotal_mb }}"
       vcpus                : "{{ ansible_processor_vcpus }}"

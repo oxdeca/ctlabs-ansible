@@ -9,7 +9,7 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_kind.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_kind.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_kind.tasks.package.kindinstall
   get_url:

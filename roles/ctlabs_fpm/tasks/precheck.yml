@@ -9,12 +9,12 @@
   block:
     - name: ctlabs_fpm.tasks.precheck.os.supported
       assert:
-        that     : os is in ctlabs_fpm.os
-        fail_msg : "OS [{{os}}] is not supported!"
+        that     : ctg_os is in ctlabs_fpm.os
+        fail_msg : "OS [{{ ctg_os }}] is not supported!"
     - name: ctlabs_fpm.tasks.precheck.virttype
       assert:
-        that     : virtype is in ctlabs_fpm.virtype
-        fail_msg : "Virtualization Type '{{ virtype }}' not supported!"
+        that     : ctg_virtype is in ctlabs_fpm.virtype
+        fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
   rescue:
     - name: ctlabs_fpm.tasks.precheck.skip.unsupported
       meta: end_host

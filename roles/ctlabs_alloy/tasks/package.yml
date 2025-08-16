@@ -9,7 +9,7 @@
 # RedHat
 #
 - name: ctlabs_alloy.tasks.package.redhat
-  when: os_family == 'redhat'
+  when: ctg_os_family == 'redhat'
   block:
     - name: ctlabs_alloy.tasks.package.redhat.repo.file
       yum_repository:
@@ -26,7 +26,7 @@
 # Debian
 #
 - name: ctlabs_alloy.tasks.package.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_alloy.tasks.package.debian.keyring.dir
       file:
@@ -49,4 +49,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop : "{{ ctlabs_alloy.defaults.pkgs[os_family] }}"
+  loop : "{{ ctlabs_alloy.defaults.pkgs[ctg_os_family] }}"

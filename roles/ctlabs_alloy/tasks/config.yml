@@ -19,7 +19,7 @@
       notify: ctlabs_alloy.handlers.alloy.service.restart
 
 - name: ctlabs_alloy.tasks.config.journald.fix_perms
-  when: os == 'centos9'
+  when: ctg_os == 'centos9'
   file:
     dest   : "{{ ctlabs_alloy.defaults.config.journald.dir   }}"
     owner  : "{{ ctlabs_alloy.defaults.config.journald.owner }}"

@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
 # Global Configuration
 # -----------------------------------------------------------------------------
-pidfile                 {{ ctlabs_slapd.defaults.config[os_family].run_dir }}/slapd.pid
-argsfile                {{ ctlabs_slapd.defaults.config[os_family].run_dir }}/slapd.args
+pidfile                 {{ ctlabs_slapd.defaults.config[ctg_os_family].run_dir }}/slapd.pid
+argsfile                {{ ctlabs_slapd.defaults.config[ctg_os_family].run_dir }}/slapd.args
 
 TLSCACertificateFile    {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.ca  }}
 TLSCertificateFile      {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_slapd.defaults.config.tls.crt }}
@@ -18,17 +18,17 @@ access                  to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=
 # -----------------------------------------------------------------------------
 # Schemas
 # -----------------------------------------------------------------------------
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/core.schema
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/cosine.schema
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/inetorgperson.schema
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/misc.schema
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/nis.schema
-include                 {{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/ad.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/core.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/cosine.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/inetorgperson.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/misc.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/nis.schema
+include                 {{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/ad.schema
 
 # -----------------------------------------------------------------------------
 # Modules
 # -----------------------------------------------------------------------------
-modulepath              {{ ctlabs_slapd.defaults.config[os_family].lib_dir }}
+modulepath              {{ ctlabs_slapd.defaults.config[ctg_os_family].lib_dir }}
 moduleload              back_ldap
 moduleload              back_monitor
 moduleload              rwm

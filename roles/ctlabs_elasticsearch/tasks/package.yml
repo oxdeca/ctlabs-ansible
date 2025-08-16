@@ -7,11 +7,11 @@
 
 - name: ctlabs_elasticsearch.tasks.package.gpg.import
   rpm_key:
-    key   : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].gpg }}"
+    key   : "{{ ctlabs_elasticsearch.defaults.pkgs[ctg_os_family].gpg }}"
     state : present
 
 - name: ctlabs_elasticsearch.tasks.package.install
   dnf:
-    name              : "{{ ctlabs_elasticsearch.defaults.pkgs[os_family].url }}"
+    name              : "{{ ctlabs_elasticsearch.defaults.pkgs[ctg_os_family].url }}"
     disable_gpg_check : false
     state             : present

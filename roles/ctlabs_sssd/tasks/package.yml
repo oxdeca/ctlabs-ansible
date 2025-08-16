@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_sssd.tasks.package.debian.cache.update
-  when: os_family == "debian"
+  when: ctg_os_family == "debian"
   apt:
     update_cache : true
 
@@ -14,11 +14,11 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_sssd.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_sssd.defaults.pkgs[ctg_os_family] }}"
   when: item.when is not defined or item.when
 
 - name: ctlabs_sssd.tasks.package.python.pips.install
-  when: not os.startswith('kali')
+  when: not ctg_os.startswith('kali')
   pip:
     name: "{{ item }}"
   loop: "{{ ctlabs_sssd.defaults.python.pips }}"

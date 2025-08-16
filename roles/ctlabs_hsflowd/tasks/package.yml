@@ -6,8 +6,8 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_hsflowd.tasks.package.redhat.install
-  when: os_family == 'redhat'
+  when: ctg_os_family == 'redhat'
   dnf:
     name              : "{{ item.url if item.url is defined else item.name }}"
     disable_gpg_check : true
-  loop: "{{ ctlabs_hsflowd.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_hsflowd.defaults.pkgs[ctg_os_family] }}"

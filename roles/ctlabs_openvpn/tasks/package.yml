@@ -9,4 +9,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_openvpn.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_openvpn.defaults.pkgs[ctg_os_family] }}"

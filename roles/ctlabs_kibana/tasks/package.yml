@@ -8,12 +8,12 @@
 
 - name: ctlabs_kibana.tasks.package.gpg.import
   rpm_key:
-    key   : "{{ ctlabs_kibana.defaults.pkgs[os_family].gpg }}"
+    key   : "{{ ctlabs_kibana.defaults.pkgs[ctg_os_family].gpg }}"
     state : present
 
 
 - name: ctlabs_kibana.tasks.package.install
   dnf:
-    name              : "{{ ctlabs_kibana.defaults.pkgs[os_family].url }}"
+    name              : "{{ ctlabs_kibana.defaults.pkgs[ctg_os_family].url }}"
     disable_gpg_check : false
     state             : present

@@ -31,5 +31,5 @@
 - name: ctlabs_guacamole.tasks.config.httpd
   template:
     src  : "{{ ctlabs_guacamole.defaults.config.httpd.template        }}"
-    dest : "{{ ctlabs_guacamole.defaults.config.httpd.file[os_family] }}"
+    dest : "{{ ctlabs_guacamole.defaults.config.httpd.file[ctg_os_family] }}"
   notify: ctlabs_guacamole.handlers.httpd.reload

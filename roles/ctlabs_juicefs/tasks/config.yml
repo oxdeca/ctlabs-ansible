@@ -7,10 +7,10 @@
 
 - name: ctlabs_juicefs.tasks.config.juicefs
   template:
-    src  : "{{ ctlabs_juicefs.defaults.config[os_family].template }}"
-    dest : "{{ ctlabs_juicefs.defaults.config[os_family].file     }}"
+    src  : "{{ ctlabs_juicefs.defaults.config[ctg_os_family].template }}"
+    dest : "{{ ctlabs_juicefs.defaults.config[ctg_os_family].file     }}"
   notify: ctlabs_juicefs.handlers.juicefs.service.reload
 
 - name: ctlabs_juicefs.tasks.config.juicefs.passwd
   shell:
-    cmd: htpasswd -bc {{ ctlabs_juicefs.defaults.config[os_family].passwd }} {{ ctlabs_juicefs.defaults.config.auth_user }} {{ ctlabs_juicefs.defaults.config.auth_pass }}
+    cmd: htpasswd -bc {{ ctlabs_juicefs.defaults.config[ctg_os_family].passwd }} {{ ctlabs_juicefs.defaults.config.auth_user }} {{ ctlabs_juicefs.defaults.config.auth_pass }}

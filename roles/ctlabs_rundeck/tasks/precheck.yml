@@ -9,8 +9,8 @@
   block:
     - name: ctlabs_rundeck.tasks.precheck.os.supported
       assert:
-        that     : os is in ctlabs_rundeck.os
-        fail_msg : "OS[{{os}}] is not supported!"
+        that     : ctg_os is in ctlabs_rundeck.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
   rescue:
     - name: ctlabs_rundeck.tasks.precheck.skip.unsupported
       meta: end_host

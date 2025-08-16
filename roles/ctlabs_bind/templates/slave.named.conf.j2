@@ -6,12 +6,12 @@ options {
   listen-on               port 53 { 127.0.0.1; {{ ansible_default_ipv4.address }}; };
   #listen-on-v6            port 53 { ::1; };
 
-  directory               "{{ ctlabs_bind.defaults.config[os_family].dir            }}";
-  dump-file               "{{ ctlabs_bind.defaults.config[os_family].dump_file      }}";
-  statistics-file         "{{ ctlabs_bind.defaults.config[os_family].stats_file     }}";
-  memstatistics-file      "{{ ctlabs_bind.defaults.config[os_family].memstats_file  }}";
-  secroots-file           "{{ ctlabs_bind.defaults.config[os_family].secroots_file  }}";
-  recursing-file          "{{ ctlabs_bind.defaults.config[os_family].recursing_file }}";
+  directory               "{{ ctlabs_bind.defaults.config[ctg_os_family].dir            }}";
+  dump-file               "{{ ctlabs_bind.defaults.config[ctg_os_family].dump_file      }}";
+  statistics-file         "{{ ctlabs_bind.defaults.config[ctg_os_family].stats_file     }}";
+  memstatistics-file      "{{ ctlabs_bind.defaults.config[ctg_os_family].memstats_file  }}";
+  secroots-file           "{{ ctlabs_bind.defaults.config[ctg_os_family].secroots_file  }}";
+  recursing-file          "{{ ctlabs_bind.defaults.config[ctg_os_family].recursing_file }}";
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
   allow-transfer          { none; };
@@ -20,11 +20,11 @@ options {
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
 
-  managed-keys-directory  "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}";
+  managed-keys-directory  "{{ ctlabs_bind.defaults.config[ctg_os_family].keys_dir }}";
   geoip-directory         "/usr/share/GeoIP";
   pid-file                "/run/named/named.pid";
   session-keyfile         "/run/named/session.key";
-{% if os_family == 'redhat' %}
+{% if ctg_os_family == 'redhat' %}
   include                 "/etc/crypto-policies/back-ends/bind.config";
 {% endif %}
 };
@@ -46,14 +46,14 @@ logging {
 };
 
 
-{% if os_family == 'redhat' %}
+{% if ctg_os_family == 'redhat' %}
 zone "." IN {
   type   hint;
   file   "named.ca";
 };
 include  "/etc/named.rfc1912.zones";
 include  "/etc/named.root.key";
-{% elif os_family == 'debian' %}
+{% elif ctg_os_family == 'debian' %}
 //include "/etc/bind/named.conf.default-zones";
 {% endif %}
 
@@ -63,7 +63,7 @@ zone "{{ zone.name }}" IN {
   type       {{ zone.type }};
 {%   if zone.type == "slave" %}  
   masters  { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
-  file       "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db";
+  file       "{{ ctlabs_bind.defaults.config[ctg_os_family].zones_dir }}/{{ zone.name }}.db";
 {%   endif %}
 {%   if zone.type == "forward" %}
   forwarders  { {{  zone.forwarders|join('; ') }}; };

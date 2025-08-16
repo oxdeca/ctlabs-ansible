@@ -65,7 +65,7 @@ loki.source.journal "journald" {
 
 loki.write "default" {
   endpoint {
-    url = "{{ ctlabs_alloy_loki_url | default(ctlabs_alloy.defaults.config.loki_url) }}"
+    url = "{{ ctlabs_alloy_loki_url }}"
   }
   external_labels = {}
 }

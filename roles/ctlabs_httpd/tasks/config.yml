@@ -7,16 +7,16 @@
 
 - name: ctlabs_httpd.tasks.config.httpd
   template:
-    src  : "{{ ctlabs_httpd.defaults.config[os_family].template }}"
-    dest : "{{ ctlabs_httpd.defaults.config[os_family].file     }}"
+    src  : "{{ ctlabs_httpd.defaults.config[ctg_os_family].template }}"
+    dest : "{{ ctlabs_httpd.defaults.config[ctg_os_family].file     }}"
   notify: ctlabs_httpd.handlers.httpd.service.reload
 
 - name: ctlabs_httpd.tasks.config.httpd.passwd
   shell:
-    cmd: htpasswd -bc {{ ctlabs_httpd.defaults.config[os_family].passwd }} {{ ctlabs_httpd.defaults.config.auth_user }} {{ ctlabs_httpd.defaults.config.auth_pass }}
+    cmd: htpasswd -bc {{ ctlabs_httpd.defaults.config[ctg_os_family].passwd }} {{ ctlabs_httpd.defaults.config.auth_user }} {{ ctlabs_httpd.defaults.config.auth_pass }}
 
 - name: ctlabs_httpd.tasks.config.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_httpd.tasks.config.debian.ssl.mods
       file:

@@ -9,7 +9,7 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_netbox.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_netbox.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_netbox.tasks.package.download
   get_url:

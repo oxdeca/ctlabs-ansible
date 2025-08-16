@@ -12,7 +12,7 @@
 
 - name: ctlabs_slapd.tasks.service.installed
   systemd:
-    name    : "{{ ctlabs_slapd.defaults.service[os_family].name }}"
+    name    : "{{ ctlabs_slapd.defaults.service[ctg_os_family].name }}"
     enabled : true
     masked  : false
     state   : started

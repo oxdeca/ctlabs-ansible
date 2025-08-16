@@ -9,7 +9,7 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_gitea.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_gitea.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_gitea.tasks.package.group
   group:

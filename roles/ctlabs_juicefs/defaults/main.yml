@@ -19,7 +19,7 @@ ctlabs_juicefs:
         - name: gcp-sdk
           type: main
           desc: GCP SDK
-          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if os in ['redhat7'] else '$releasever' }}-$basearch"
+          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if ctg_os in ['redhat7'] else '$releasever' }}-$basearch"
           key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     pkgs:
       debian:

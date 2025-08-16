@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_jenkins.tasks.package.redhat
-  when: os_family == 'redhat'
+  when: ctg_os_family == 'redhat'
   block:
     - name: ctlabs_jenkins.tasks.package.redhat.repo.file
       get_url:
@@ -31,4 +31,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop : "{{ ctlabs_jenkins.defaults.pkgs[os_family] }}"
+  loop : "{{ ctlabs_jenkins.defaults.pkgs[ctg_os_family] }}"

@@ -12,25 +12,25 @@
 
 - name: ctlabs_slapd.tasks.config.log.dir.exists
   file:
-    name : "{{ ctlabs_slapd.defaults.config[os_family].log_dir }}"
+    name : "{{ ctlabs_slapd.defaults.config[ctg_os_family].log_dir }}"
     state: directory
-    owner: "{{ ctlabs_slapd.defaults.service[os_family].user  }}"
-    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
+    owner: "{{ ctlabs_slapd.defaults.service[ctg_os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
 
 - name: ctlabs_slapd.tasks.config.run.dir.exists
   file:
-    name : "{{ ctlabs_slapd.defaults.config[os_family].run_dir }}"
+    name : "{{ ctlabs_slapd.defaults.config[ctg_os_family].run_dir }}"
     state: directory
-    owner: "{{ ctlabs_slapd.defaults.service[os_family].user  }}"
-    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
+    owner: "{{ ctlabs_slapd.defaults.service[ctg_os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
 
 - name: ctlabs_slapd.tasks.config.tls.prepare
   copy:
     src  : "{{ ctlabs_slapd.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
     dest : "{{ ctlabs_slapd.defaults.config.tls.dir }}/{{ item.name }}"
     mode : "{{ item.mode }}"
-    owner: "{{ ctlabs_slapd.defaults.service[os_family].user }}"
-    group: "{{ ctlabs_slapd.defaults.service[os_family].group }}"
+    owner: "{{ ctlabs_slapd.defaults.service[ctg_os_family].user }}"
+    group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
   loop:
     - { name: "{{ ctlabs_slapd.defaults.config.tls.crt }}", mode: '0640' }
     - { name: "{{ ctlabs_slapd.defaults.config.tls.key }}", mode: '0600' }
@@ -44,7 +44,7 @@
   notify: ctlabs_slapd.handlers.service.restart
 
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
-  command: mv "{{ ctlabs_slapd.defaults.config[os_family].slapd_dir }}" "{{ ctlabs_slapd.defaults.config[os_family].slapd_dir }}.bak"
+  command: mv "{{ ctlabs_slapd.defaults.config[ctg_os_family].slapd_dir }}" "{{ ctlabs_slapd.defaults.config[ctg_os_family].slapd_dir }}.bak"
   ignore_errors: true
     #src : "{{ ctlabs_slapd.defaults.config.slapd_dir }}"
     #dest: "{{ ctlabs_slapd.defaults.config.slapd_dir }}.bak"
@@ -52,13 +52,13 @@
 - name: ctlabs_slapd.tasks.config.schemas
   copy:
     src  : "{{ item }}"
-    dest : "{{ ctlabs_slapd.defaults.config[os_family].dir }}/schema/{{ item }}"
+    dest : "{{ ctlabs_slapd.defaults.config[ctg_os_family].dir }}/schema/{{ item }}"
   loop: "{{ ctlabs_slapd.defaults.config.schemas }}"
 
 - name: ctlabs_slapd.tasks.config.install
   template:
-    src  : "{{ ctlabs_slapd.defaults.config[os_family].template }}"
-    dest : "{{ ctlabs_slapd.defaults.config[os_family].file     }}"
+    src  : "{{ ctlabs_slapd.defaults.config[ctg_os_family].template }}"
+    dest : "{{ ctlabs_slapd.defaults.config[ctg_os_family].file     }}"
   notify: ctlabs_slapd.handlers.service.restart
 
 - name: ctlabs_slapd.tasks.config.files

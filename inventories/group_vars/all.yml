@@ -5,15 +5,21 @@
 # Description : Variables used for all hosts
 # -----------------------------------------------------------------------------
 
-# gcp_project : "{{ lookup('pipe', 'gcloud info --format=\"value(config.project)\"') }}"
-# gcp_env     : "{{ lookup('pipe', 'gcloud info --format=\"value(config.project)\" | cut -d- -f2') }}"
-ctlabs_env    : lab
+ctg_facts       : "{{ ansible_local            | default() }}"
+ctg_project     : "{{ ctg_facts.ctlabs.project | default() }}"
+ctg_env         : "{{ ctg_facts.ctlabs.env     | default() }}"
 
-# os           : "{{ ansible_os_family|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
-virtype      : "{{ ansible_virtualization_type | lower }}"
-os           : "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
-os_family    : "{{ ansible_os_family|lower }}"
-date         : "{{ ansible_date_time.date }}"
-systemd_dir  : "/etc/systemd/system"
-todaysdate   : "{{ lookup('pipe', '/usr/bin/date +%Y%m%d') }}"
-uxtime       : "{{ lookup('pipe', '/usr/bin/date +%s')   }}"
+ctg_vault_addr  : "{{ lookup('env', 'VAULT_ADDR')  }}"
+ctg_vault_token : "{{ lookup('env', 'VAULT_TOKEN') }}"
+
+ctg_os          : "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
+ctg_os_family   : "{{ ansible_os_family    | lower }}"
+ctg_os_distro   : "{{ ansible_distribution | lower }}"
+ctg_os_version  : "{{ ansible_distribution_major_version }}"
+ctg_virt_type   : "{{ ansible_virtualization_type | lower }}"
+
+ctg_date        : "{{ ansible_date_time.date }}"
+ctg_systemd_dir : "/etc/systemd/system"
+ctg_todaysdate  : "{{ lookup('pipe', '/usr/bin/date +%Y%m%d') }}"
+ctg_uxtime      : "{{ lookup('pipe', '/usr/bin/date +%s')   }}"
+ctg_vendor      : "{{ ansible_system_vendor | lower }}"

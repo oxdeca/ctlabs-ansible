@@ -9,7 +9,7 @@
 # RedHat
 #
 - name: ctlabs_atlantis.tasks.package.redhat
-  when: os_family == "redhat"
+  when: ctg_os_family == "redhat"
   block:
     - name: ctlabs_atlantis.tasks.package.redhat.repo.file
       yum_repository:
@@ -19,13 +19,13 @@
         gpgkey      : "{{ item.key  }}"
         gpgcheck    : true
         sslverify   : true
-      loop: "{{ ctlabs_atlantis.defaults.repos[os_family] }}"
+      loop: "{{ ctlabs_atlantis.defaults.repos[ctg_os_family] }}"
 
 #
 # Debian
 #
 - name: ctlabs_atlantis.tasks.package.debian
-  when: os_family == "debian"
+  when: ctg_os_family == "debian"
   block:
     - name: ctlabs_atlantis.tasks.package.debian.keyring.dir
       file:
@@ -50,7 +50,7 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_atlantis.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_atlantis.defaults.pkgs[ctg_os_family] }}"
 
 # atlantis
 - name: ctlabs_atlantis.tasks.package.bindir

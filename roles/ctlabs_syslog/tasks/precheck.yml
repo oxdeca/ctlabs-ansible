@@ -9,8 +9,8 @@
   block:
     - name: ctlabs_syslog.tasks.precheck.os.supported
       assert:
-        that: os is in ctlabs_syslog.os
-        fail_msg: "{{ os }} is not supported!"
+        that: ctg_os is in ctlabs_syslog.os
+        fail_msg: "{{ ctg_os }} is not supported!"
   rescue:
     - name: ctlabs_syslog.tasks.precheck.skip.unsupported
       meta: end_host

@@ -9,10 +9,10 @@
   file:
     path : "{{ item }}"
     state: directory
-    owner: "{{ ctlabs_bind.defaults.service[os_family].user  }}"
-    group: "{{ ctlabs_bind.defaults.service[os_family].group }}"
+    owner: "{{ ctlabs_bind.defaults.service[ctg_os_family].user  }}"
+    group: "{{ ctlabs_bind.defaults.service[ctg_os_family].group }}"
   loop:
-    - "{{ ctlabs_bind.defaults.config[os_family].keys_dir }}"
+    - "{{ ctlabs_bind.defaults.config[ctg_os_family].keys_dir }}"
 
 - name: ctlabs_bind.tasks.config.master
   when: ansible_local.ctlabs_bind.type == 'master'
@@ -20,13 +20,13 @@
     - name: ctlabs_bind.tasks.config.named
       template:
         src  : master.named.conf.j2
-        dest : "{{ ctlabs_bind.defaults.config[os_family].file }}"
+        dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].file }}"
 
     - name: ctlabs_bind.tasks.config.zones
       when: zone.type|default('master') == 'master'
       template:
         src  : zone.db.j2
-        dest : "{{ ctlabs_bind.defaults.config[os_family].zones_dir }}/{{ zone.name }}.db"
+        dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].zones_dir }}/{{ zone.name }}.db"
       loop: "{{ ctlabs_bind_zones | unique }}"
       loop_control:
         loop_var: zone
@@ -40,5 +40,5 @@
     - name: ctlabs.tasks.config.named
       template:
         src  : slave.named.conf.j2
-        dest : "{{ ctlabs_bind.defaults.config[os_family].file }}"
+        dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].file }}"
       notify: ctlabs_bind.handlers.named.service.reload

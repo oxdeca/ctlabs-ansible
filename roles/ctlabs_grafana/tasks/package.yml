@@ -20,7 +20,7 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop : "{{ ctlabs_grafana.defaults.pkgs[os_family] }}"
+  loop : "{{ ctlabs_grafana.defaults.pkgs[ctg_os_family] }}"
     
 - name: ctlabs_grafana.tasks.package.sysv.remove
   file:

@@ -9,12 +9,16 @@
   block:
     - name: ctlabs_jupyter.tasks.precheck.os.supported
       assert:
-        that: os is in ctlabs_jupyter.os
-        fail_msg: "OS [{{ os }}] is not supported!"
+        that: ctg_os is in ctlabs_jupyter.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+
     - name: ctlabs_jupyter.tasks.precheck.virttype
       assert:
-        that     : virtype is in [ 'container' ]
-        fail_msg : "Virtualization Type '{{ virtype }}' not supported!"
+        that     : ctg_virtype is in [ 'container' ]
+        fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
+    - name: ctlabs_jupyter.tasks.precheck.active
+      assert:
+        ctlabs_facts.
   rescue:
     - name: ctlabs_jupyter.tasks.precheck.skip.unsupported
       meta: end_host

@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_sssd.tasks.config.pam.redhat
-  when: os_family == "redhat"
+  when: ctg_os_family == "redhat"
   block:
     - name: ctlabs_sssd.tasks.config.pam.redhat.authselect.sssd
       command: authselect select sssd --force
@@ -15,7 +15,7 @@
       command: authselect enable-feature with-mkhomedir
 
 - name: ctlabs_sssd.tasks.config.pam.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_sssd.tasks.config.pam.debian.auth-update.mkhomedir
       command: pam-auth-update --enable mkhomedir

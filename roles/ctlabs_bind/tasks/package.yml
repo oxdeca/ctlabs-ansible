@@ -9,4 +9,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_bind.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_bind.defaults.pkgs[ctg_os_family] }}"

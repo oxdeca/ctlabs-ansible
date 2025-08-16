@@ -15,7 +15,7 @@ ctlabs_vault:
       redhat:
         - name: hashicorp
           type: main
-          url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if os in ['redhat7'] else '$releasever' }}/$basearch/stable"
+          url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if ctg_os in ['redhat7'] else '$releasever' }}/$basearch/stable"
           key : https://rpm.releases.hashicorp.com/gpg
       debian:
         - name: hashicorp

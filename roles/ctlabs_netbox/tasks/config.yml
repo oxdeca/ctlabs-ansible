@@ -30,7 +30,7 @@
 - name: ctlabs_netbox.tasks.config.httpd
   template:
     src  : "{{ ctlabs_netbox.defaults.config.httpd.template        }}"
-    dest : "{{ ctlabs_netbox.defaults.config.httpd.file[os_family] }}"
+    dest : "{{ ctlabs_netbox.defaults.config.httpd.file[ctg_os_family] }}"
   notify: ctlabs_netbox.handlers.httpd.reload
   #notify: ctlabs_httpd.handlers.httpd.service
 

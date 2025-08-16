@@ -7,5 +7,5 @@
 
 - name: ctlabs_juicefs.handlers.httpd.service.reload
   service:
-    name  : "{{ ctlabs_juicefs.defaults.service[os_family].name }}"
+    name  : "{{ ctlabs_juicefs.defaults.service[ctg_os_family].name }}"
     state : reloaded

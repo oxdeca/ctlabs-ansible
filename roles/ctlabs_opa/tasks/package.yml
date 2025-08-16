@@ -9,7 +9,7 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_opa.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_opa.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_opa.tasks.package.group
   group:
