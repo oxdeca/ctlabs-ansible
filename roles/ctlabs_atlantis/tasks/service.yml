@@ -8,7 +8,7 @@
 - name: ctlabs_atlantis.tasks.service.create
   template:
     src  : "{{ ctlabs_atlantis.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_atlantis.defaults.service.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_atlantis.defaults.service.name }}"
   notify: ctlabs_atlantis.handlers.systemd.reload
 
 - name: ctlabs_atlantis.tasks.service.start

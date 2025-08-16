@@ -8,7 +8,7 @@
 - name: ctlabs_jenkins.tasks.service.present
   template:
     src  : "{{ ctlabs_jenkins.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_jenkins.defaults.service.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_jenkins.defaults.service.name }}"
   notify: ctlabs_jenkins.handlers.systemd.reload
 
 - name: ctlabs_jenkins.tasks.service.start

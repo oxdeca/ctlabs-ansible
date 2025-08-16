@@ -11,7 +11,7 @@
     - name: ctlabs_k3s.tasks.service.server.present
       template:
         src  : "{{ ctlabs_k3s.defaults.service.server.template }}"
-        dest : "{{ systemd_dir + '/' + ctlabs_k3s.defaults.service.server.name }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.server.name }}"
       notify: ctlabs_k3s.handlers.server.systemd.reload
     
     - name: ctlabs_k3s.tasks.service.server.started
@@ -25,7 +25,7 @@
     - name: ctlabs_k3s.tasks.service.agent.present
       template:
         src  : "{{ ctlabs_k3s.defaults.service.agent.template }}"
-        dest : "{{ systemd_dir + '/' + ctlabs_k3s.defaults.service.agent.name }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.agent.name }}"
       notify: ctlabs_k3s.handlers.agent.systemd.reload
 
     - name: ctlabs_k3s.tasks.service.agent.sysconfig.present

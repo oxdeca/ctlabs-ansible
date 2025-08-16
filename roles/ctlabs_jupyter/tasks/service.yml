@@ -8,7 +8,7 @@
 - name: ctlabs_jupyter.tasks.service.present
   template:
     src  : "{{ ctlabs_jupyter.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_jupyter.defaults.service.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_jupyter.defaults.service.name }}"
   notify: ctlabs_jupyter.handlers.systemd.reload
 
 - name: ctlabs_jupyter.tasks.service.password

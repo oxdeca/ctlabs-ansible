@@ -8,19 +8,19 @@
 - name: ctlabs_netbox.tasks.service.nb.install
   template:
     src  : "{{ ctlabs_netbox.defaults.service.nb.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_netbox.defaults.service.nb.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_netbox.defaults.service.nb.name }}"
   notify: ctlabs_netbox.handlers.service.nb.restart
 
 - name: ctlabs_netbox.tasks.service.nbrq.install
   template:
     src  : "{{ ctlabs_netbox.defaults.service.nbrq.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_netbox.defaults.service.nbrq.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_netbox.defaults.service.nbrq.name }}"
   notify: ctlabs_netbox.handlers.service.nbrq.restart
 
 - name: ctlabs_netbox.tasks.service.nbhk.install
   template:
     src  : "{{ ctlabs_netbox.defaults.service.nbhk.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_netbox.defaults.service.nbhk.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_netbox.defaults.service.nbhk.name }}"
   notify: ctlabs_netbox.handlers.service.nbhk.restart
 
 - name: ctlabs_netbox.tasks.service.nb.start

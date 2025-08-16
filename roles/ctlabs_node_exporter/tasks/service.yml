@@ -8,7 +8,7 @@
 - name: ctlabs_node_exporter.tasks.service.create
   template:
     src  : "{{ ctlabs_node_exporter.defaults.service.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_node_exporter.defaults.service.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_node_exporter.defaults.service.name }}"
   notify: ctlabs_node_exporter.handlers.systemd.reload
 
 - name: ctlabs_node_exporter.tasks.service.start

@@ -8,13 +8,13 @@
 - name: ctlabs_kafka.tasks.service.zookeeper.install
   template:
     src  : "{{ ctlabs_kafka.defaults.service.zookeeper.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.zookeeper.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_kafka.defaults.service.zookeeper.name }}"
   notify: ctlabs_kafka.handlers.service.zookeeper.restart
 
 - name: ctlabs_kafka.tasks.service.kafka.install
   template:
     src  : "{{ ctlabs_kafka.defaults.service.kafka.template }}"
-    dest : "{{ systemd_dir + '/' + ctlabs_kafka.defaults.service.kafka.name }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_kafka.defaults.service.kafka.name }}"
   notify: ctlabs_kafka.handlers.service.kafka.restart
 
 - name: ctlabs_kafka.tasks.service.zookeeper.start

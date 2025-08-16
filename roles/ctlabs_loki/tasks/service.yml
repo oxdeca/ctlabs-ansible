@@ -8,7 +8,7 @@
 #- name: ctlabs_loki.tasks.service.create
 #  template:
 #    src  : "{{ ctlabs_loki.defaults.service.template }}"
-#    dest : "{{ systemd_dir + '/' + ctlabs_loki.defaults.service.name }}"
+#    dest : "{{ ctg_systemd_dir + '/' + ctlabs_loki.defaults.service.name }}"
 #  notify: ctlabs_loki.handlers.systemd.reload
 
 - name: ctlabs_loki.tasks.service.start
