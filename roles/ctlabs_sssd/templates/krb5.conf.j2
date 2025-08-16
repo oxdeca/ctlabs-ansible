@@ -3,7 +3,7 @@
 # Template    : ctlabs-ansible/roles/ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.krb5.template }}
 # ------------------------------------------------------------------------------
 
-{% if os_family    == "redhat" %}  
+{% if ctg_os_family    == "redhat" %}  
 includedir /etc/krb5.conf.d/
 {% endif %}
 
@@ -20,9 +20,9 @@ includedir /etc/krb5.conf.d/
   renew_lifetime       = 7d
   rdns                 = false
   forwardable          = true
-{% if os_family    == "redhat" %}  
+{% if ctg_os_family    == "redhat" %}  
   pkinit_anchors       = FILE:/etc/pki/tls/certs/ca-bundle.crt
-{% elif os_family == "debian" %}
+{% elif ctg_os_family == "debian" %}
   pkinit_anchors       = FILE:/etc/ssl/certs/ca-certificates.crt
 {% endif %}
   spake_preauth_groups = edwards25519
