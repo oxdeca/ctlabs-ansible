@@ -10,7 +10,7 @@ TLSCertificateKeyFile   {{ ctlabs_slapd.defaults.config.tls.dir }}/{{ ctlabs_sla
 #TLSVerifyClient         never
 
 sizelimit               10000
-logfile                 {{ ctlabs_slapd.defaults.config[os_family].log_dir }}/slapd.log
+logfile                 {{ ctlabs_slapd.defaults.config[ctg_os_family].log_dir }}/slapd.log
 loglevel                256
 
 access                  to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * none
