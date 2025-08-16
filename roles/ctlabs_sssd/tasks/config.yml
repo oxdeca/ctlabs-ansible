@@ -57,7 +57,7 @@
     # echo -en ansible_nodename | openssl sha512 | awk '{print toupper(substr($2, 11, 5)) }'
     - name: ctlabs_sssd.tasks.config.ad.computer_name
       set_fact:
-        ctlabs_sssd_computer_name: "{{ (ansible_hostname[:8] + '-' + ctlabs_env[:1] + ( ansible_nodename|hash('sha512') )[10:15])|upper }}"
+        ctlabs_sssd_computer_name: "{{ (ansible_hostname[:8] + '-' + ctg_env[:1] + ( ansible_nodename|hash('sha512') )[10:15])|upper }}"
     
     - debug: "msg=ctlabs_sssd_computer_name={{ ctlabs_sssd_computer_name }}"
     
