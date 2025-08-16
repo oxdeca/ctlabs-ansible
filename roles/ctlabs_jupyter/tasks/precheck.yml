@@ -16,9 +16,6 @@
       assert:
         that     : ctg_virtype is in ctlabs_jupyter.virtype
         fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
-    - name: ctlabs_jupyter.tasks.precheck.active
-      assert:
-        ctlabs_facts.
   rescue:
     - name: ctlabs_jupyter.tasks.precheck.skip.unsupported
       meta: end_host
