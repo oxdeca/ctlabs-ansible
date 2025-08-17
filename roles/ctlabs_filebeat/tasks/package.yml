@@ -9,24 +9,24 @@
 # RedHat
 #
 - name: ctlabs_filebeat.tasks.package.redhat
-  when: os_family == 'redhat'
+  when: ctg_os_family == 'redhat'
   block:
     - name: ctlabs_filebeat.tasks.package.redhat.pkg.key
       rpm_key:
         key: "{{ item.key }}"
-      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
 
     - name: ctlabs_filebeat.tasks.package.redhat.pkg.install
       dnf:
         name             : "{{ item.url }}"
         disable_gpg_check: false
-      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
 
 #
 # Debian
 #
 - name: ctlabs_filebeat.tasks.package.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_filebeat.tasks.package.debian.keyring.dir
       file:
@@ -36,4 +36,4 @@
     - name: ctlabs_filebeat.tasks.package.debian.pkg.install
       apt:
         deb: "{{ item.url }}"
-      loop: "{{ ctlabs_filebeat.defaults.pkgs[os_family] }}"
+      loop: "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"

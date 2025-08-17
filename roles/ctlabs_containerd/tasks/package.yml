@@ -13,7 +13,7 @@
 # Debian
 #
 - name: ctlabs_containerd.tasks.package.debian
-  when: os_family == 'debian'
+  when: ctg_os_family == 'debian'
   block:
     - name: ctlabs_containerd.tasks.package.debian.keyring.dir
       file:
@@ -35,4 +35,4 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_containerd.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_containerd.defaults.pkgs[ctg_os_family] }}"

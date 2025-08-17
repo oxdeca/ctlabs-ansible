@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_wazuh.tasks.package.redhat
-  when: os_family == "redhat"
+  when: ctg_os_family == "redhat"
   block:
     - name: ctlabs_wazuh.tasks.package.redhat.repo.file
       yum_repository:
@@ -16,26 +16,26 @@
         gpgkey      : "{{ item.key  }}"
         gpgcheck    : true
         sslverify   : true
-      loop: "{{ ctlabs_wazuh.defaults.repos[os_family] }}"
+      loop: "{{ ctlabs_wazuh.defaults.repos[ctg_os_family] }}"
 
 - name: ctlabs_wazuh.tasks.package.debian
-  when: os_family == "debian"
+  when: ctg_os_family == "debian"
   block:
     - name: ctlabs_wazuh.tasks.package.debian.repo.key
       apt_key:
         url: "{{ item.key }}"
-      loop: "{{ ctlabs_wazuh.defaults.repos[os_family] }}"
+      loop: "{{ ctlabs_wazuh.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_wazuh.tasks.package.debian.repo.file
       apt_repository:
         repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
-      loop: "{{ ctlabs_wazuh.defaults.repos[os_family] }}"
+      loop: "{{ ctlabs_wazuh.defaults.repos[ctg_os_family] }}"
 
 - name: ctlabs_wazuh.tasks.package.install
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_wazuh.defaults.pkgs[os_family] }}"
+  loop: "{{ ctlabs_wazuh.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_wazuh.tasks.package.group.certs.member
   user:
