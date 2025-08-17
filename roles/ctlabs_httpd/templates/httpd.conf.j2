@@ -3,24 +3,24 @@
 {# Description : main httpd.conf                                            #}
 {# ------------------------------------------------------------------------ #}
 
-ServerRoot   {{ ctlabs_httpd.defaults.config[os_family].root_dir }}
+ServerRoot   {{ ctlabs_httpd.defaults.config[ctg_os_family].root_dir }}
 DocumentRoot {{ ctlabs_httpd.defaults.config.data_dir            }}
-User         {{ ctlabs_httpd.defaults.service[os_family].user    }}
-Group        {{ ctlabs_httpd.defaults.service[os_family].group   }}
+User         {{ ctlabs_httpd.defaults.service[ctg_os_family].user    }}
+Group        {{ ctlabs_httpd.defaults.service[ctg_os_family].group   }}
 
 ServerAdmin  {{ ctlabs_httpd.defaults.config.admin      }}
 ServerName   {{ ctlabs_httpd.defaults.config.servername }}
-{% if os_family == 'redhat' %}
+{% if ctg_os_family == 'redhat' %}
 Listen       {{ ctlabs_httpd.defaults.config.listen     }}
 {% endif %}
 
-ErrorLog     {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[os_family].log.error }}
-LogLevel     {{ ctlabs_httpd.defaults.config[os_family].log.level }}
+ErrorLog     {{ ctlabs_httpd.defaults.config[ctg_os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[ctg_os_family].log.error }}
+LogLevel     {{ ctlabs_httpd.defaults.config[ctg_os_family].log.level }}
 
-{% if os_family == 'redhat' %}
+{% if ctg_os_family == 'redhat' %}
 Include         conf.modules.d/*.conf
 IncludeOptional conf.d/*.conf
-{% elif os_family == 'debian' %}
+{% elif ctg_os_family == 'debian' %}
 IncludeOptional mods-enabled/*.load
 IncludeOptional mods-enabled/*.conf
 Include         ports.conf
@@ -61,7 +61,7 @@ IncludeOptional sites-enabled/*.conf
     LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
   </IfModule>
 
-  CustomLog {{ ctlabs_httpd.defaults.config[os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[os_family].log.access }} combined
+  CustomLog {{ ctlabs_httpd.defaults.config[ctg_os_family].log.dir }}/{{ ctlabs_httpd.defaults.config[ctg_os_family].log.access }} combined
 </IfModule>
 
 <IfModule alias_module>
