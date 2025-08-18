@@ -6,6 +6,8 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_vault.tasks.init.init_status
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/init"
     validate_certs  : false
@@ -19,6 +21,8 @@
 
 - name: ctlabs_vault.tasks.init.initialize
   when: not ctlabs_vault_initialized
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/init"
     method          : POST
@@ -43,10 +47,12 @@
       vault_root_token        : "{{ vault_init_result.json['root_token']     }}"
       vault_unseal_keys_b64   : "{{ vault_init_result.json['keys_base64'][0] }}"
       ctlabs_vault_initialized: true
-    dest: "/root/ctlabs-ansible/.ctlabs_vault_init_output.yml"
+    dest: "/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
   delegate_to: localhost
 
 - name: ctlabs_vault.tasks.init.seal_status
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/seal-status"
     validate_certs : false
@@ -58,6 +64,8 @@
 
 - name: ctlabs_vault.tasks.init.unseal
   when: ctlabs_vault_sealed
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/unseal"
     method          : POST
@@ -79,6 +87,8 @@
 #
 
 - name: ctlabs_vault.tasks.init.secrets.userpass.enable
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/userpass"
     method         : POST
@@ -94,6 +104,8 @@
       }
 
 - name: ctlabs_vault.tasks.init.secerts.userpass.add_user
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/auth/userpass/users/ctlabs"
     method         : POST
@@ -109,6 +121,8 @@
       }
 
 - name: ctlabs_vault.tasks.init.secrets.userpass.policy.ctlabs
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/policies/acl/ctlabs"
     method         : POST
