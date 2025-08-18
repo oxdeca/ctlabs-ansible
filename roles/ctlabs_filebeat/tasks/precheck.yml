@@ -12,9 +12,10 @@
   block:
     - name: ctlabs_filebeat.tasks.precheck.supported_os
       assert:
-        that     : os is in ctlabs_filebeat.os
-        fail_msg : "OS[{{os}}] is not supported!"
+        that     : ctg_os is in ctlabs_filebeat.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
     - name: ctlabs_filebeat.tasks.precheck.kibana
+
       assert:
         that     : ansible_hostname != ctlabs_filebeat.defaults.config.kba.host
         fail_msg : "Host {{ ansible_hostname }} is kibana host."
