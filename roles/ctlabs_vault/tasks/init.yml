@@ -10,6 +10,8 @@
     url             : "{{ ctlabs_vault.defaults.config.init.url }}/sys/init"
     validate_certs  : false
   register: vault_init_status
+  retries : 12
+  delay   : 5
 
 - name: ctlabs_vault.tasks.init.init_status.fact
   set_fact:
