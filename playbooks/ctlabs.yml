@@ -14,7 +14,7 @@
   gather_facts: false
   tasks       :
     - name: ctlabs.playbooks.ctlabs.up.wait
-      wait_for_connection:
+      wait__connection:
         delay: 5
 
 # -----------------------------------------------------------------------------
@@ -47,7 +47,8 @@
             "zones"  : [
               { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
-              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } }
+              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } },
+              { "name" : "ad.ctlabs.internal", "type" : "forward", "forwarders" : [ "192.168.10.14" ] }
             ],
             "slaves" : [ "192.168.20.11" ]
           }
@@ -62,7 +63,8 @@
             "zones"  : [
               { "name" : "{{ CTLABS_DOMAIN }}" }, 
               { "name" : "ctlabs.internal" }, 
-              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } } 
+              { "name" : "svc.ctlabs.internal", "ddns" : { "allow" : [ "127.0.0.1" ] } },
+              { "name" : "ad.ctlabs.internal", "type" : "forward", "forwarders" : [ "192.168.10.14" ] }
             ],
             "masters" : [ "192.168.10.11" ]
           }
