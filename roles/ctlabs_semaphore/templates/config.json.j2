@@ -1,32 +1,19 @@
 {
-  "mysql": {
-    "host": "",                                                                                                                                                                              
-    "user": "",                                                                                                                                                                              
-    "pass": "",                                                                                                                                                                              
-    "name": "",                                                                                                                                                                              
-    "options": null                                                                                                                                                                          
+  "sqlite": {
+    "host": "{{ ctlabs_semaphore.defaults.config.db.dir }}/{{ ctlabs_semaphore.defaults.config.db.file }}"
   },
-  "bolt": {
-    "host": "/root/semaphore.boltdb",
-    "user": "",                                                                                                                                                                              
-    "pass": "",                                                                                                                                                                              
-    "name": "",                                                                                                                                                                              
-    "options": null                                                                                                                                                                          
-  },
-  "postgres": {
-    "host": "",
-    "user": "",                                                                                                                                                                              
-    "pass": "",                                                                                                                                                                              
-    "name": "",                                                                                                                                                                              
-    "options": null                                                                                                                                                                          
-  },
-  "dialect": "bolt", 
-  "port": "",
+  "dialect": "sqlite",
+  "cookie_hash": "VKtG32Cl0w0X3VE55/q2VypfamyftMKWLXo+Ya4n84g=",
+  "cookie_encryption": "Mb3nN/AtmmkKRZ2tEcbBIPlZYeAGKpC/hj2NoaZpgwk=",
+  "access_key_encryption": "COMtCqJvuHzBk8dNsmR9Lmbk8SWUgN9J+R3YL96BcJI=",
+  "port": "{{ ctlabs_semaphore.defaults.config.port }}",
   "interface": "", 
   "tmp_path": "/tmp/semaphore/playbooks",
-  "cookie_hash": "6NHv3DCAoBODRg4IHqtW7hzZAx+m120dSn3m2H6114Y=",
-  "cookie_encryption": "BwRF5rJ4r5wXnRdUNhbFM1LNI9X8LZKZORyidPYvuxk=",
-  "access_key_encryption": "iaDkpFAUbuhG66YnE1ekCIIEnTXwVzyunZ9k3gIcRUw=",
+  "tls": {
+      "enabled": true,
+      "cert_file": "{{ ctlabs_semaphore.defaults.config.ssl.dir }}/{{ ansible_nodename }}.crt",
+      "key_file": "{{ ctlabs_semaphore.defaults.config.ssl.dir }}/{{ ansible_nodename }}.prv"
+  },
   "email_sender": "",
   "email_host": "",
   "email_port": "",

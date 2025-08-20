@@ -6,28 +6,35 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  semaphore: 2.9.45
+  semaphore: 2.16.17
 
 ctlabs_semaphore:
   defaults:
     pkgs:
       - name    : semaphore
         version : "{{ versions.semaphore }}"
-        url     : "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ verions.semaphore }}/semaphore_{{ versions.semaphore }}_linux_amd64.rpm"
-      - name    : bolt
-        version : latest
+        url     : "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ versions.semaphore }}/semaphore_{{ versions.semaphore }}_linux_amd64.rpm"
     config:
+      dir        : /etc/semaphore
       bin        : /usr/bin/semaphore
-      file       : /root/config.json
+      file       : config.json
       template   : config.json.j2
-      boltdb     : /root/semaphore.boltdb
-      boltdb.b64 : files/db.b64
+      listen: 3010
+      db:
+        dir  : /var/db
+        file : semaphore.db
+      ssl:
+        dir: /etc/ca-ctlabs
     service:
       name     : semaphore.service
       template : semaphore.service.j2
+      user     : semaphore
+      group    : semaphore
+      groups   : [certs]
   os:
-    - rhel7
-    - rhel8
+    - redhat7
+    - redhat8
+    - redhat9
     - centos7
     - centos8
     - centos9

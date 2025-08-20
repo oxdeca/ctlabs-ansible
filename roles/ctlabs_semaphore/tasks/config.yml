@@ -6,12 +6,23 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_semaphore.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_semaphore.defaults.config.dir }}"
+    state : directory
+
+- name: ctlabs_semaphore.tasks.config.db.dir
+  file:
+    path  : "{{ ctlabs_semaphore.defaults.config.db.dir }}"
+    state : directory
+
+- name: ctlabs_semaphore.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_semaphore.defaults.service.user   }}"
+    group : "{{ ctlabs_semaphore.defaults.service.group  }}"
+    groups: "{{ ctlabs_semaphore.defaults.service.groups }}"
+
+- name: ctlabs_semaphore.tasks.config.file
   template:
     src  : "{{ ctlabs_semaphore.defaults.config.template }}"
-    dest : "{{ ctlabs_semaphore.defaults.config.file     }}"
+    dest : "{{ ctlabs_semaphore.defaults.config.dir }}/{{ ctlabs_semaphore.defaults.config.file     }}"
   notify: ctlabs_semaphore.handlers.semaphore.service.restart
-
-#- name: ctlabs_semaphore.tasks.config.boltdb
-#  copy:
-#    dest    : "{{ ctlabs_semaphore.defaults.config.boltdb }}"
-#    content : "{{ lookup('file', ctlabs_semaphore.defaults.config.boltdb.b64) | b64decode }}"
