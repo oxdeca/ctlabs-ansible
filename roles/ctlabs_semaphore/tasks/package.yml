@@ -12,13 +12,13 @@
     state             : present
   loop: "{{ ctlabs_semaphore.defaults.pkgs }}"
 
-#- name: ctlabs_semaphore.tasks.package.group
-#  group:
-#    name   : "{{ ctlabs_semaphore.defaults.config.group }}"
-#    system : true
+- name: ctlabs_semaphore.tasks.package.group
+  group:
+    name   : "{{ ctlabs_semaphore.defaults.service.group }}"
+    system : true
 
-#- name: ctlabs_semaphore.tasks.package.user
-#  user:
-#    name   : "{{ ctlabs_semaphore.defaults.config.user  }}"
-#    group  : "{{ ctlabs_semaphore.defaults.config.group }}"
-#    system : true
+- name: ctlabs_semaphore.tasks.package.user
+  user:
+    name   : "{{ ctlabs_semaphore.defaults.service.user  }}"
+    group  : "{{ ctlabs_semaphore.defaults.service.group }}"
+    system : true

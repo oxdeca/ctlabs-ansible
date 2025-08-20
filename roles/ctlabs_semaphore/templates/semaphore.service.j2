@@ -9,7 +9,7 @@ After=network-online.target
 #ExecReload=/bin/kill -HUP $MAINPID
 User={{ ctlabs_semaphore.defaults.service.user }}
 Group={{ ctlabs_semaphore.defaults.service.group }}
-ExecStart={{ ctlabs_semaphore.defaults.config.bin }} service --config={{ ctlabs_semaphore.defaults.config.file }}
+ExecStart={{ ctlabs_semaphore.defaults.config.bin }} service --config={{ ctlabs_semaphore.defaults.config.dir }}/{{ ctlabs_semaphore.defaults.config.file }}
 Restart=on-failure
 SyslogIdentifier=semaphore
 

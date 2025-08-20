@@ -19,9 +19,9 @@ ctlabs_semaphore:
       bin        : /usr/bin/semaphore
       file       : config.json
       template   : config.json.j2
-      listen: 3010
+      listen     : 3010
       db:
-        dir  : /var/db
+        dir  : /var/db/semaphore
         file : semaphore.db
       ssl:
         dir: /etc/ca-ctlabs
