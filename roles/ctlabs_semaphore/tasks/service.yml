@@ -15,3 +15,6 @@
   service:
     name  : "{{ ctlabs_semaphore.defaults.service.name }}"
     state : started
+
+- name: ctlabs_semaphore.tasks.service.admin
+  command: "semaphore user add --admin --name ctlabs --login ctlabs --password 'secret123!' --email admin@ctlabs.internal --config {{ ctlabs_semaphore.defaults.config.dir }}/{{ ctlabs_semaphore.defaults.config.file }}"
