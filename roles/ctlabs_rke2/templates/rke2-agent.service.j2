@@ -1,0 +1,17 @@
+[Unit]
+Description=rke2 agent
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+
+User=root
+EnvironmentFile=/etc/sysconfig/rke2
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} agent
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

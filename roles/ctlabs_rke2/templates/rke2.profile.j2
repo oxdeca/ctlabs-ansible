@@ -1,0 +1,9 @@
+# /etc/profile.d/rke2.sh
+
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+
+alias kubectl="/usr/bin/rke2 kubectl"
+alias kc=kubectl
+alias kcw="kubectl -o wide"
+
+alias crictl="/usr/bin/rke2 crictl"

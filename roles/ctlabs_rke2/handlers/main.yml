@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rke2/handlers/main.yml
+# Description : main handler
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rke2.handlers.server.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_rke2.defaults.service.server.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_rke2.handlers.service.server.started
+  service:
+    name  : "{{ ctlabs_rke2.defaults.service.server.name }}"
+    state : started
+
+- name: ctlabs_rke2.handlers.agent.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_rke2.defaults.service.agent.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_rke2.handlers.service.agent.started
+  service:
+    name  : "{{ ctlabs_rke2.defaults.service.agent.name }}"
+    state : started

@@ -1,0 +1,55 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rke2/tasks/precheck.yml
+# Description : tasks prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rke2.tasks.precheck
+  block:
+    - name: ctlabs_rke2.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_rke2.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+
+    - name: ctlabs_rke2.tasks.precheck.virtype
+      assert:
+        that     : ctg_virtype is in ctlabs_rke2.virtype
+        fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
+  rescue:
+    - name: ctlabs_rke2.tasks.precheck.skip.unsupported
+      meta: end_host
+
+
+- name: ctlabs_rke2.tasks.precheck.k3s_role.var
+  set_fact:
+    ctlabs_k3s_role: "{{ ctlabs_k3s_role | default(ctlabs_rke2.defaults.config.role) }}"
+
+- name: ctlabs_rke2.tasks.precheck.k3s_role.local_fact
+  set_fact:
+    ctlabs_k3s_role: "{{ ansible_local.ctlabs_rke2.role | default(ctlabs_k3s_role) }}"
+
+#- debug: "msg={{ ctlabs_k3s_role }}"
+
+- name: ctlabs_rke2.tasks.precheck.agent.vars
+  when: ctlabs_k3s_role == "agent"
+  block:
+    - name: ctlabs_rke2.tasks.precheck.k3s_url.fact
+      set_fact:
+        ctlabs_k3s_server_url: "{{ ansible_local.ctlabs_rke2.server_url | default(ctlabs_rke2.defaults.config.server.url) }}"
+
+    - name: ctlabs_rke2.tasks.precheck.k3s_server_node.up
+      wait_for:
+        port: 6443
+        host: "{{ ansible_local.ctlabs_rke2.server_node }}"
+        delay: "{{ (20 | random) + 10 }}"
+
+    - name: ctlabs_rke2.tasks.precheck.k3s_token.get
+      slurp:
+        path: "{{ ctlabs_rke2.defaults.config.server.token }}"
+      register: file_content
+      delegate_to: "{{ ansible_local.ctlabs_rke2.server_node }}"
+
+    - name: ctlabs_rke2.tasks.precheck.k3s_token.fact
+      set_fact:
+        ctlabs_k3s_server_token: "{{ file_content.content | b64decode | trim }}"

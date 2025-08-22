@@ -1,0 +1,17 @@
+[Unit]
+Description=rke2 server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+
+User=root
+
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rke2/tasks/main.yml
+# Description : main ctlabs_rke2 tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_rke2
+    - ctlabs_rke2.precheck
+    - ctlabs_rke2.package
+    - ctlabs_rke2.config
+    - ctlabs_rke2.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_rke2
+    - ctlabs_rke2.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_rke2
+    - ctlabs_rke2.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_rke2
+    - ctlabs_rke2.service
