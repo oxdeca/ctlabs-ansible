@@ -5,10 +5,10 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_rke2.tasks.config.profile
-  template:
-    src  : "{{ ctlabs_rke2.defaults.config.profile.template }}"
-    dest : "{{ ctlabs_rke2.defaults.config.profile.file     }}"
+#- name: ctlabs_rke2.tasks.config.profile
+#  template:
+#    src  : "{{ ctlabs_rke2.defaults.config.profile.template }}"
+#    dest : "{{ ctlabs_rke2.defaults.config.profile.file     }}"
 
 - name: ctlabs_rke2.tasks.config.sysconfig.dir
   file:

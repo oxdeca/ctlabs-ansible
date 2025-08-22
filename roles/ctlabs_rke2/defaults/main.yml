@@ -15,7 +15,7 @@ ctlabs_rke2:
       debian:
         - name: python3-yaml
       rke2:
-        uri  : "https://github.com/rancher/rke2/releases/download/v{{ versions.rke2 }}+ke2r1/rke2.linux-amd64"
+        uri  : "https://github.com/rancher/rke2/releases/download/v{{ versions.rke2 }}+rke2r1/rke2.linux-amd64"
         path : /usr/bin/rke2
         mode : '0750'
       helm:
