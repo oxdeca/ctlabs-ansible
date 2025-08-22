@@ -11,11 +11,11 @@
     state : present
   loop: "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
 
-- name: ctlabs_rke2.tasks.package.k3s.installed
+- name: ctlabs_rke2.tasks.package.rke2.installed
   get_url:
-    url  : "{{ ctlabs_rke2.defaults.pkgs.k3s.uri }}"
-    dest : "{{ ctlabs_rke2.defaults.pkgs.k3s.path }}"
-    mode : "{{ ctlabs_rke2.defaults.pkgs.k3s.mode }}"
+    url  : "{{ ctlabs_rke2.defaults.pkgs.rke2.uri }}"
+    dest : "{{ ctlabs_rke2.defaults.pkgs.rke2.path }}"
+    mode : "{{ ctlabs_rke2.defaults.pkgs.rke2.mode }}"
 
 - name: ctlabs_rke2.tasks.package.helm
   block:

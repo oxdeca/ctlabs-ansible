@@ -1,4 +1,4 @@
-rke2
+---
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_rke2/defaults/main.yml
@@ -6,7 +6,7 @@ rke2
 # ------------------------------------------------------------------------------
 
 versions:
-  rke2 : 1.29.2
+  rke2 : 1.33.3
   helm : 3.16.1
 
 ctlabs_rke2:
@@ -14,9 +14,9 @@ ctlabs_rke2:
     pkgs:
       debian:
         - name: python3-yaml
-      k3s:
-        uri  : "https://github.com/rke2-io/k3s/releases/download/v{{ versions.k3s }}+k3s1/k3s"
-        path : /usr/bin/k3s
+      rke2:
+        uri  : "https://github.com/rancher/rke2/releases/download/v{{ versions.rke2 }}+ke2r1/rke2.linux-amd64"
+        path : /usr/bin/rke2
         mode : '0750'
       helm:
         version: 
@@ -35,28 +35,29 @@ ctlabs_rke2:
       role: server
       server:
         url: "https://{{ ansible_nodename }}:6443"
-        token: /var/lib/rancher/k3s/server/token
+        token: /var/lib/rancher/rke2/server/token
       profile:
-        template: k3s.profile.j2
-        file    : /etc/profile.d/k3s.sh
+        template: rke2.profile.j2
+        file    : /etc/profile.d/rke2.sh
     service:
       server:
-        name     : k3s-server.service
-        template : k3s-server.service.j2
+        name     : rke2-server.service
+        template : rke2-server.service.j2
       agent:
-        name     : k3s-agent.service
-        template : k3s-agent.service.j2
+        name     : rke2-agent.service
+        template : rke2-agent.service.j2
     sysconfig:
       dir  : /etc/sysconfig
       agent:
-        name     : /etc/sysconfig/k3s
-        template : k3s-agent.sysconfig.j2
+        name     : /etc/sysconfig/rke2
+        template : rke2-agent.sysconfig.j2
     bin:
-      path: /usr/bin/k3s
+      path: /usr/bin/rke2
       mode: '0750'
   os:
     - centos8
     - centos9
     - debian11
+    - debian12
   virtype:
     - kvm

@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_rke2.tasks.service.server
-  when: ctlabs_k3s_role == "server"
+  when: ctlabs_rke2_role == "server"
   block:
     - name: ctlabs_rke2.tasks.service.server.present
       template:
@@ -20,7 +20,7 @@
         state : started
     
 - name: ctlabs_rke2.tasks.service.agent
-  when: ctlabs_k3s_role == "agent"
+  when: ctlabs_rke2_role == "agent"
   block:
     - name: ctlabs_rke2.tasks.service.agent.present
       template:
@@ -40,7 +40,7 @@
         state : started
     
 - name: ctlabs_rke2.tasks.service.cluster
-  when: ctlabs_k3s_role == "server"
+  when: ctlabs_rke2_role == "server"
   block:
     - name: ctlabs_rke2.tasks.service.cluster.ready
       vars:
@@ -56,7 +56,7 @@
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
       environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
       kubernetes.core.helm:
         name             : argocd
         chart_ref        : argo/argo-cd

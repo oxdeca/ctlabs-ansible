@@ -306,6 +306,27 @@
             "server_url"  : "https://k3s1.ctlabs.internal:6443"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.rke2.server.local_facts
+      when: ansible_hostname in ['rke21']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_rke2.fact
+        content: |
+          {
+            "node" : "control-plane",
+            "role" : "server"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
+      when: ansible_hostname in ['rke22', 'rke23', 'rke24']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_rke2.fact
+        content: |
+          {
+            "node"        : "control-plane",
+            "role"        : "agent",
+            "server_node" : "rke21",
+            "server_url"  : "https://rke21.ctlabs.internal:6443"
+          }
 
 # -----------------------------------------------------------------------------
 # ctlabs_ca
@@ -624,6 +645,24 @@
   tags  : k3s-agent
   roles :
     - roles/ctlabs_k3s
+
+# -----------------------------------------------------------------------------
+# ctlabs_rke2 server
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.rke2
+  hosts : [rke21]
+  tags  : [rke2, rke2-server]
+  roles :
+    - roles/ctlabs_rke2
+
+# -----------------------------------------------------------------------------
+# ctlabs_rke2 agent
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.rke2
+  hosts : [rke22, rke23, rke24]
+  tags  : rke2-agent
+  roles :
+    - roles/ctlabs_rke2
 
 # -----------------------------------------------------------------------------
 # ctlabs_containerd
