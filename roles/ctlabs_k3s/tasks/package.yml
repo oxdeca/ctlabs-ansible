@@ -46,3 +46,5 @@
         name    : "{{ item.name }}"
         repo_url: "{{ item.repo }}"
       loop: "{{ ctlabs_k3s.defaults.helm }}"
+      register: result
+      until   : result is success
