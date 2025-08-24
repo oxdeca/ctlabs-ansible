@@ -47,7 +47,11 @@
         name      : "{{ item.name }}"
         enablerepo: "{{ item.repo | default() }}"
         state     : present
-      loop: "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
+      loop    : "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
     - name: ctlabs_jupyter.tasks.package.redhat.python.pips.install
       pip:

@@ -1,14 +1,15 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_syslog/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_nginx/tasks/package.yml
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_syslog.tasks.package.install
-  yum:
-    name   : "{{ ctlabs_syslog.defaults[ctlabs_syslog_kind].pkgs.name }}"
-    state  : present
+- name: ctlabs_nginx.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_nginx.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
   delay   : 1

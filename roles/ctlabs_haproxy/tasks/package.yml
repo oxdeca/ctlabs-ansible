@@ -9,4 +9,8 @@
   package:
     name    : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_haproxy.defaults.pkgs }}"
+  loop    : "{{ ctlabs_haproxy.defaults.pkgs }}"
+  register: result
+  until   : result is success
+  delay   : 1
+  retries : 5

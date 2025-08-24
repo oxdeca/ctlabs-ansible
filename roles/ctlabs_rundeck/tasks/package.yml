@@ -35,6 +35,10 @@
         deb   : "{{ item.url }}"
         state : present
       loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
     - name: ctlabs_rundeck.tasks.package.apt.install.debian
       when: ctg_os_family == 'debian' and item.name is defined
@@ -42,4 +46,7 @@
         name   : "{{ item.name }}"
         state : present
       loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
-
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5

@@ -17,3 +17,7 @@
     name              : "{{ ctlabs_kibana.defaults.pkgs[ctg_os_family].url }}"
     disable_gpg_check : false
     state             : present
+  register: result
+  until   : result is success
+  delay   : 1
+  retries : 5

@@ -13,21 +13,33 @@
         name              : "{{ item.url if item.url is defined else item.name }}"
         disable_gpg_check : true
         state             : present
-      loop: "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      loop    : "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
     - name: ctlabs_kafka.tasks.package.url.install.debian
       when: ctg_os_family == 'debian' and item.url is defined
       apt:
         deb   : "{{ item.url }}"
         state : present
-      loop: "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      loop    : "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
     - name: ctlabs_kafka.tasks.package.apt.install.debian
       when: ctg_os_family == 'debian' and item.name is defined
       apt:
         name   : "{{ item.name }}"
         state : present
-      loop: "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      loop    : "{{ ctlabs_kafka.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
 
 - name: ctlabs_kafka.tasks.package.group

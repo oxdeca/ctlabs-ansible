@@ -10,6 +10,10 @@
     name              : "{{ ctlabs_mimir.defaults.pkgs.url        }}"
     disable_gpg_check : "{{ not ctlabs_mimir.defaults.pkgs.chkgpg }}"
     state             : present
+  register: result
+  until   : result is success
+  delay   : 1
+  retries : 5
 
 - name: ctlabs_mimir.tasks.package.group.certs.member
   user:

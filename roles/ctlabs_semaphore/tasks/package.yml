@@ -10,7 +10,11 @@
     name              : "{{ item.url if item.url is defined else item.name }}"
     disable_gpg_check : true
     state             : present
-  loop: "{{ ctlabs_semaphore.defaults.pkgs }}"
+  loop    : "{{ ctlabs_semaphore.defaults.pkgs }}"
+  register: result
+  until   : result is success
+  delay   : 1
+  retries : 5
 
 - name: ctlabs_semaphore.tasks.package.group
   group:

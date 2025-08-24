@@ -20,7 +20,11 @@
       dnf:
         name             : "{{ item.url }}"
         disable_gpg_check: false
-      loop: "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
+      loop    : "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
 
 #
 # Debian
@@ -36,4 +40,8 @@
     - name: ctlabs_filebeat.tasks.package.debian.pkg.install
       apt:
         deb: "{{ item.url }}"
-      loop: "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
+      loop    : "{{ ctlabs_filebeat.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+      delay   : 1
+      retries : 5
