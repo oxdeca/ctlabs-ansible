@@ -281,11 +281,15 @@ zone_ctlabs_internal:
 
   - name  : git1
     type  : A
-    value : 192.168.30.32
+    value : 192.168.30.15
 
   - name  : ats1
     type  : A
-    value : 192.168.30.33
+    value : 192.168.30.16
+
+  - name  : gua1
+    type  : A
+    value : 192.168.30.17
 
 # -----------------------------------------------------------------------------
 # opa
