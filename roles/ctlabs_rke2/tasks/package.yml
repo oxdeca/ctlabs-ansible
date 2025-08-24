@@ -9,9 +9,13 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop: "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
+  loop    : "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+  delay   : 1
+  retries : 5
 
-- name: ctlabs_rke2.tasks.package.rke2.installed
+- name: ctlabs_rke2.tasks.package.rke2.install
   get_url:
     url  : "{{ ctlabs_rke2.defaults.pkgs.rke2.uri }}"
     dest : "{{ ctlabs_rke2.defaults.pkgs.rke2.path }}"
