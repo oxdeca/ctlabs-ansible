@@ -21,8 +21,6 @@
       loop: "{{ ctlabs_promtail.defaults.pkgs[ctg_os_family] }}"
       register: result
       until   : result is success
-      delay   : 1
-      retries : 5
 
     - name: ctlabs_promtail.tasks.package.install.debian
       when: ctg_os_family == 'debian'

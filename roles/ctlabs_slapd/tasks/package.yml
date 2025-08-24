@@ -12,8 +12,6 @@
   loop    : "{{ ctlabs_slapd.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_slapd.tasks.package.script.installed
   copy:

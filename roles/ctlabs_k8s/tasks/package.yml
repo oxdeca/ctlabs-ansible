@@ -37,8 +37,6 @@
   loop    : "{{ ctlabs_k8s.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_k8s.tasks.package.iscsid.up
   systemd:

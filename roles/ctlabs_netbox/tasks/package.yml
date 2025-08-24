@@ -12,8 +12,6 @@
   loop    : "{{ ctlabs_netbox.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_netbox.tasks.package.download
   get_url:

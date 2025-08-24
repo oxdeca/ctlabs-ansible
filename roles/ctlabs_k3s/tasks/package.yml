@@ -12,14 +12,14 @@
   loop    : "{{ ctlabs_k3s.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
-- name: ctlabs_k3s.tasks.package.k3s.installed
+- name: ctlabs_k3s.tasks.package.k3s.install
   get_url:
     url  : "{{ ctlabs_k3s.defaults.pkgs.k3s.uri }}"
     dest : "{{ ctlabs_k3s.defaults.pkgs.k3s.path }}"
     mode : "{{ ctlabs_k3s.defaults.pkgs.k3s.mode }}"
+  register: result
+  until   : result is success
 
 - name: ctlabs_k3s.tasks.package.helm
   block:
@@ -28,6 +28,8 @@
         url   : "{{ ctlabs_k3s.defaults.pkgs.helm.url }}"
         dest  : "{{ ctlabs_k3s.defaults.pkgs.helm.tmptar }}"
         #force : no
+      register: result
+      until   : result is success
     - name: ctlabs_k3s.tasks.package.helm.untar
       unarchive:
         src  : "{{ ctlabs_k3s.defaults.pkgs.helm.tmptar }}"

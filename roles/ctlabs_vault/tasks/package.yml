@@ -48,8 +48,6 @@
   loop    : "{{ ctlabs_vault.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_vault.tasks.package.group.certs.member
   user:

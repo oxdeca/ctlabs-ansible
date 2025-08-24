@@ -38,5 +38,3 @@
   loop    : "{{ ctlabs_containerd.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5

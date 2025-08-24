@@ -12,8 +12,6 @@
   loop    : "{{ ctlabs_airflow.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_airflow.tasks.package.pips.install
   pip:

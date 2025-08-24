@@ -50,12 +50,10 @@
       loop    : "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"
       register: result
       until   : result is success
-      delay   : 1
-      retries : 5
 
     - name: ctlabs_jupyter.tasks.package.redhat.python.pips.install
       pip:
-        name      : "{{ item }}"
+        name: "{{ item }}"
       loop: "{{ ctlabs_jupyter.defaults.python.pips }}"
 
     - name: ctlabs_jupyter.tasks.package.redhat.jupyter.link
@@ -102,11 +100,9 @@
       apt:
         name        : "{{ item.name }}"
         update_cache: true
-      loop: "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
+      loop    : "{{ ctlabs_jupyter.defaults.pkgs.debian }}"
       register: result
       until   : result is success
-      delay   : 1
-      retries : 5
     
     - name: ctlabs_jupyter.tasks.package.debian.python.pips.install
       pip:

@@ -11,5 +11,3 @@
     state  : present
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5

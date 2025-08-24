@@ -18,8 +18,6 @@
   when    : item.when is not defined or item.when
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_sssd.tasks.package.python.pips.install
   when: not ctg_os.startswith('kali')

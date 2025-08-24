@@ -13,8 +13,6 @@
   loop    : "{{ ctlabs_loki.defaults.pkgs }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_loki.tasks.package.group.certs.member
   user:
