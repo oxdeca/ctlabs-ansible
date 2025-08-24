@@ -90,6 +90,8 @@
         url : "{{ item.key }}"
         dest: "{{ ctlabs_jupyter.defaults.config.apt_keys }}/{{ item.name }}.asc"
       loop: "{{ ctlabs_jupyter.defaults.repos.debian }}"
+      register: result
+      until   : result is success
 
     - name: ctlabs_jupyter.tasks.package.debian.repo.file
       apt_repository:
