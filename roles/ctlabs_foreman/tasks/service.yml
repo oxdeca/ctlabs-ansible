@@ -5,9 +5,9 @@
 # Description : services
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_foreman.tasks.service.bind.running
-  service:
-    name    : "{{ ctlabs_foreman.defaults.service[ctg_os_family].name }}"
-    state   : started
-    enabled : true
+#- name: ctlabs_foreman.tasks.service.bind.running
+#  service:
+#    name    : "{{ ctlabs_foreman.defaults.service[ctg_os_family].name }}"
+#    state   : started
+#    enabled : true
 

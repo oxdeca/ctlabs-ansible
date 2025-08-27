@@ -328,6 +328,24 @@
             "server_url"  : "https://rke21.ctlabs.internal:6443"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.foreman.server.local_facts
+      when: ansible_hostname in ['fm1']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_foreman.fact
+        content: |
+          {
+            "role" : "server"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.foreman.proxy.local_facts
+      when: ansible_hostname in ['fm2', 'fm3', 'fm4']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_foreman.fact
+        content: |
+          {
+            "role" : "proxy"
+          }
+
 # -----------------------------------------------------------------------------
 # ctlabs_ca
 # -----------------------------------------------------------------------------
@@ -744,3 +762,12 @@
   tags  : airflow
   roles :
     - roles/ctlabs_airflow
+
+# -----------------------------------------------------------------------------
+# ctlabs_foreman
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.foreman
+  hosts : [fm1,fm2]
+  tags  : [foreman,forman-server]
+  roles :
+    - roles/ctlabs_foreman
