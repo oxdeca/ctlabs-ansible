@@ -25,31 +25,31 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   command: |
-    {{ ctlabs_foreman.defaults.install.cmd }} --scenario foreman \
-    --enable-foreman-plugin-ansible                              \
-    --enable-foreman-plugin-discovery                            \
-    --enable-foreman-plugin-openscap                             \
-    --enable-foreman-plugin-remote-execution                     \
-    --enable-foreman-plugin-webhooks                             \
-    --enable-foreman-plugin-salt                                 \
-    --enable-foreman-plugin-vault                                \
-    --enable-foreman-plugin-netbox                               \
-    --enable-foreman-plugin-leapp                                \
+    {{ ctlabs_foreman.defaults.install.cmd }} -s -S foreman \
+    --enable-foreman-plugin-ansible                         \
+    --enable-foreman-plugin-discovery                       \
+    --enable-foreman-plugin-openscap                        \
+    --enable-foreman-plugin-remote-execution                \
+    --enable-foreman-plugin-webhooks                        \
+    --enable-foreman-plugin-salt                            \
+    --enable-foreman-plugin-vault                           \
+    --enable-foreman-plugin-netbox                          \
+    --enable-foreman-plugin-leapp                           \
     --enable-foreman-cli-openscap
   register: output
 
-#    --enable-foreman-proxy-plugin-openscap-puppet-module true \
 
 - debug: "msg={{ output }}"
 
 
 - name: ctlabs_foreman.tasks.package.proxy.plugins
-  when: ctlabs_foreman_role in [ 'server', 'proxy' ]
+  when: ctlabs_foreman_role in [ 'server' ]  #, 'proxy' ]
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   command: |
-    {{ ctlabs_foreman.defaults.install.cmd }} --scenario foreman \
-    --enable-foreman-proxy-plugin-openscap                       \
+    {{ ctlabs_foreman.defaults.install.cmd }} -s -S foreman \
+    --enable-foreman-proxy-plugin-openscap                  \
+    --foreman-proxy-plugin-openscap-puppet-module true      \
     --enable-foreman-proxy-plugin-remote-execution-script
   register: output
 

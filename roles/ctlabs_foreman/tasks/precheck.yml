@@ -29,4 +29,3 @@
     ctlabs_foreman_role: "{{ ansible_local.ctlabs_foreman.role | default(ctlabs_foreman_role) }}"
 
 # make sure the hostname is resolvable via forward/reverse dns
-

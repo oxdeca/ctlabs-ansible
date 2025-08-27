@@ -6,3 +6,5 @@
 # ------------------------------------------------------------------------------
 
 
+- name: ctlabs_foreman.tasks.config.openscap.content.upload
+  command: hammer scap-content bulk-upload --type default
