@@ -10,10 +10,10 @@ ctlabs_foreman:
     pkgs:
       debian: []
       redhat:
-        - url: https://yum.theforeman.org/katello/4.17/katello/el9/x86_64/katello-repos-latest.rpm
-          when: katello
-        - url: https://yum.puppet.com/puppet8-release-el-9.noarch.rpm
-        - url: https://yum.theforeman.org/releases/3.15/el9/x86_64/foreman-release.rpm
+        - url  : https://yum.puppet.com/puppet8-release-el-9.noarch.rpm
+        - url  : https://yum.theforeman.org/releases/3.15/el9/x86_64/foreman-release.rpm
+        - url  : https://yum.theforeman.org/katello/4.17/katello/el9/x86_64/katello-repos-latest.rpm
+        - name : foreman-installer-katello
       foreman:
         cli:
           # --enable-foreman-cli-openscap
@@ -30,10 +30,13 @@ ctlabs_foreman:
           # --enable-foreman-proxy-plugin-remove-execution-script
           - remote-execution-script
           - openscap-puppet-module true
+    install:
+      cmd: /usr/sbin/foreman-installer
     service:
       debian: []
       redhat: []
     config:
+      role: server
   os:
     - redhat9
     - centos9
