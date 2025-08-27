@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_foreman/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_foreman
+    - ctlabs_foreman.precheck
+    - ctlabs_foreman.package
+    - ctlabs_foreman.config
+    - ctlabs_foreman.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_foreman
+    - ctlabs_foreman.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_foreman
+    - ctlabs_foreman.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_foreman
+    - ctlabs_foreman.service

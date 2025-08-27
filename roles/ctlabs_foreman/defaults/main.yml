@@ -1,0 +1,39 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_foreman/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_foreman:
+  defaults:
+    pkgs:
+      debian: []
+      redhat:
+        - url: https://yum.theforeman.org/katello/4.17/katello/el9/x86_64/katello-repos-latest.rpm
+          when: katello
+        - url: https://yum.puppet.com/puppet8-release-el-9.noarch.rpm
+        - url: https://yum.theforeman.org/releases/3.15/el9/x86_64/foreman-release.rpm
+      foreman:
+        cli:
+          # --enable-foreman-cli-openscap
+          - openscap
+        plugins:
+          # --enable-foreman-plugin-remote-execution
+          - remote-execution
+          - ansible
+          - discovery
+          - openscap
+          - webhooks
+          - netbox
+        proxy-plugins:
+          # --enable-foreman-proxy-plugin-remove-execution-script
+          - remote-execution-script
+          - openscap-puppet-module true
+    service:
+      debian: []
+      redhat: []
+    config:
+  os:
+    - redhat9
+    - centos9

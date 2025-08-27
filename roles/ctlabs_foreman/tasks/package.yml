@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_foreman/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+#
+# RedHat
+#
+- name: ctlabs_foreman.tasks.package.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_foreman.tasks.package.redhat.pkg.install
+      dnf:
+        name : "{{ item.url if item.url is defined else item.name }}"
+      loop     : "{{ ctlabs_foreman.defaults.pkgs[ctg_os_family] }}"
+      register : result
+      until    : result is success

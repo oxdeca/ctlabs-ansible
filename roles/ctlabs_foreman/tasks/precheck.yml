@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_foreman/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_foreman.tasks.precheck
+  block:
+    - name: ctlabs_foreman.tasks.precheck.supported_os
+      assert:
+        that: ctg_os is in ctlabs_foreman.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+    
+    - name: ctlabs_foreman.tasks.precheck.type.check
+      assert:
+        that: ansible_local.ctlabs_foreman.type in [ 'master', 'proxy' ]
+        fail_msg: "No type specified. ['master', 'proxy']"
+  rescue:
+    - name: ctlabs_foreman.tasks.precheck.skip.unsupported
+      meta: end_host
