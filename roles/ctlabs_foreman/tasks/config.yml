@@ -5,6 +5,12 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_foreman.tasks.config.openscap.module.import
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  command: /usr/bin/hammer proxy import-classes --id 1
 
 - name: ctlabs_foreman.tasks.config.openscap.content.upload
-  command: hammer scap-content bulk-upload --type default
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  command: /usr/bin/hammer scap-content bulk-upload --type default

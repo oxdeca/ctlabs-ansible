@@ -26,6 +26,8 @@
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   command: |
     {{ ctlabs_foreman.defaults.install.cmd }} -s -S foreman \
+    --foreman-initial-admin-username ctlabs                 \
+    --foreman-initial-admin-password secret123!             \
     --enable-foreman-plugin-ansible                         \
     --enable-foreman-plugin-discovery                       \
     --enable-foreman-plugin-openscap                        \
