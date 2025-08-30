@@ -5,14 +5,19 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
+versions:
+  foreman: 3.15
+  katello: 4.17
+  puppet : 8
+
 ctlabs_foreman:
   defaults:
     pkgs:
       debian: []
       redhat:
-        - url  : https://yum.puppet.com/puppet8-release-el-9.noarch.rpm
-        - url  : https://yum.theforeman.org/releases/3.15/el9/x86_64/foreman-release.rpm
-        - url  : https://yum.theforeman.org/katello/4.17/katello/el9/x86_64/katello-repos-latest.rpm
+        - url  : "https://yum.puppet.com/puppet{{ versions.puppet }}-release-el-9.noarch.rpm"
+        - url  : "https://yum.theforeman.org/releases/{{ versions.foreman }}/el9/x86_64/foreman-release.rpm"
+        - url  : "https://yum.theforeman.org/katello/{{ versions.katello }}/katello/el9/x86_64/katello-repos-latest.rpm"
         - name : foreman-installer-katello
       foreman:
         cli:
@@ -31,7 +36,31 @@ ctlabs_foreman:
           - remote-execution-script
           - openscap-puppet-module true
     install:
-      cmd: /usr/sbin/foreman-installer
+      cmd     : /usr/sbin/foreman-installer
+      scenario: foreman # katello
+      web:
+        user: ctlabs
+        pass: secret123!
+      server:
+        flags: |
+          --enable-foreman-plugin-ansible          \
+          --enable-foreman-plugin-salt             \
+          --enable-foreman-plugin-puppet           \
+          --enable-foreman-plugin-openscap         \
+          --enable-foreman-plugin-discovery        \
+          --enable-foreman-plugin-remote-execution \
+          --enable-foreman-plugin-webhooks         \
+          --enable-foreman-plugin-vault            \
+          --enable-foreman-plugin-netbox           \
+          --enable-foreman-plugin-leapp            \
+          --enable-foreman-plugin-google           \
+          --enable-foreman-compute-libvirt
+      proxy:
+        flags: |
+          --enable-foreman-proxy-plugin-ansible                 \
+          --enable-foreman-proxy-plugin-openscap                \
+          --enable-foreman-proxy-plugin-remote-execution-script \
+          --foreman-proxy-plugin-openscap-ansible-module true
     service:
       debian: []
       redhat: []
