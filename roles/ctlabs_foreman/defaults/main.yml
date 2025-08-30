@@ -42,24 +42,24 @@ ctlabs_foreman:
         user: ctlabs
         pass: secret123!
       server:
-        flags: |
-          --enable-foreman-plugin-ansible          \
-          --enable-foreman-plugin-salt             \
-          --enable-foreman-plugin-puppet           \
-          --enable-foreman-plugin-openscap         \
-          --enable-foreman-plugin-discovery        \
-          --enable-foreman-plugin-remote-execution \
-          --enable-foreman-plugin-webhooks         \
-          --enable-foreman-plugin-vault            \
-          --enable-foreman-plugin-netbox           \
-          --enable-foreman-plugin-leapp            \
-          --enable-foreman-plugin-google           \
+        flags: >
+          --enable-foreman-plugin-ansible
+          --enable-foreman-plugin-salt
+          --enable-foreman-plugin-puppet
+          --enable-foreman-plugin-openscap
+          --enable-foreman-plugin-discovery
+          --enable-foreman-plugin-remote-execution
+          --enable-foreman-plugin-webhooks
+          --enable-foreman-plugin-vault
+          --enable-foreman-plugin-netbox
+          --enable-foreman-plugin-leapp
+          --enable-foreman-plugin-google
           --enable-foreman-compute-libvirt
       proxy:
-        flags: |
-          --enable-foreman-proxy-plugin-ansible                 \
-          --enable-foreman-proxy-plugin-openscap                \
-          --enable-foreman-proxy-plugin-remote-execution-script \
+        flags: >
+          --enable-foreman-proxy-plugin-ansible
+          --enable-foreman-proxy-plugin-openscap
+          --enable-foreman-proxy-plugin-remote-execution-script
           --foreman-proxy-plugin-openscap-ansible-module true
     service:
       debian: []
