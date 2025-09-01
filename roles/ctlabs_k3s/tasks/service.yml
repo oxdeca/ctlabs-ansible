@@ -19,6 +19,25 @@
         name  : "{{ ctlabs_k3s.defaults.service.server.name }}"
         state : started
     
+- name: ctlabs_k3s.tasks.service.worker
+  when: ctlabs_k3s_role == "worker"
+  block:
+    - name: ctlabs_k3s.tasks.service.worker.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.service.worker.template }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.worker.name }}"
+      notify: ctlabs_k3s.handlers.worker.systemd.reload
+
+    - name: ctlabs_k3s.tasks.service.worker.sysconfig.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.sysconfig.worker.template }}"
+        dest : "{{ ctlabs_k3s.defaults.sysconfig.worker.name     }}"
+    
+    - name: ctlabs_k3s.tasks.service.worker.started
+      service:
+        name  : "{{ ctlabs_k3s.defaults.service.worker.name }}"
+        state : started
+    
 - name: ctlabs_k3s.tasks.service.agent
   when: ctlabs_k3s_role == "agent"
   block:
@@ -32,7 +51,6 @@
       template:
         src  : "{{ ctlabs_k3s.defaults.sysconfig.agent.template }}"
         dest : "{{ ctlabs_k3s.defaults.sysconfig.agent.name     }}"
-
     
     - name: ctlabs_k3s.tasks.service.agent.started
       service:

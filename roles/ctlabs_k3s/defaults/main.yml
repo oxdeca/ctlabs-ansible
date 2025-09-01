@@ -43,6 +43,9 @@ ctlabs_k3s:
       server:
         name     : k3s-server.service
         template : k3s-server.service.j2
+      worker:
+        name     : k3s-worker.service
+        template : k3s-worker.service.j2
       agent:
         name     : k3s-agent.service
         template : k3s-agent.service.j2
