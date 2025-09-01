@@ -307,7 +307,7 @@
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.data.local_facts
-      when: ansible_hostname in [''k3s4']
+      when: ansible_hostname in ['k3s4']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
