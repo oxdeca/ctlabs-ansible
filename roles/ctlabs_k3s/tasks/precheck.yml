@@ -32,7 +32,7 @@
 #- debug: "msg={{ ctlabs_k3s_role }}"
 
 - name: ctlabs_k3s.tasks.precheck.agent.vars
-  when: ctlabs_k3s_role is in ["agent", "worker"]
+  when: ctlabs_k3s_role is in ["agent"]
   block:
     - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
       set_fact:

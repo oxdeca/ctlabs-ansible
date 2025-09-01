@@ -1,5 +1,5 @@
 [Unit]
-Description=k3s agent
+Description=k3s agent ({{ ctg_facts.ctlabs_k3s.plane }})
 After=network.target
 StartLimitIntervalSec=0
 
@@ -8,7 +8,11 @@ Type=simple
 
 User=root
 EnvironmentFile=/etc/sysconfig/k3s
+{% if ctg_facts.ctlabs_k3s.plane == 'data' %}
 ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} agent
+{% elif ctg_facts.ctlabs_k3s.plane == 'control' %}
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server
+{% endif %}
 
 Restart=always
 RestartSec=5

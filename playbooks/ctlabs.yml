@@ -290,17 +290,29 @@
         dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
           {
-            "node" : "control-plane",
-            "role" : "server"
+            "plane" : "control",
+            "role"  : "server"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.local_facts
-      when: ansible_hostname in ['k3s2', 'k3s3', 'k3s4']
+    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.control.local_facts
+      when: ansible_hostname in ['k3s2', 'k3s3']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_k3s.fact
         content: |
           {
-            "node"        : "control-plane",
+            "plane"       : "control",
+            "role"        : "agent",
+            "server_node" : "k3s1",
+            "server_url"  : "https://k3s1.ctlabs.internal:6443"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.data.local_facts
+      when: ansible_hostname in [''k3s4']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_k3s.fact
+        content: |
+          {
+            "plane"       : "data",
             "role"        : "agent",
             "server_node" : "k3s1",
             "server_url"  : "https://k3s1.ctlabs.internal:6443"
