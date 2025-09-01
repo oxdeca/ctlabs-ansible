@@ -74,3 +74,4 @@
               enabled         : true
               ingressClassName: traefik
       register: res_argo
+      until   : res_argo is success
