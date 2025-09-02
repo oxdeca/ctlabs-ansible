@@ -31,6 +31,7 @@ ctlabs_vault:
         - name: vault
         - name: jq
         - name: python3-pip
+        - name: python3-hvac
       pips:
         - hvac
     config:

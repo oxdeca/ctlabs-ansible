@@ -58,5 +58,6 @@ ctlabs_k3s:
     - centos8
     - centos9
     - debian11
+    - debian12
   virtype:
     - kvm
