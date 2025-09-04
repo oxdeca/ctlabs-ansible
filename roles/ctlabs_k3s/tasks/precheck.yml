@@ -27,7 +27,7 @@
 
 - name: ctlabs_k3s.tasks.precheck.k3s_role.local_fact
   set_fact:
-    ctlabs_k3s_role: "{{ ansible_local.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
+    ctlabs_k3s_role: "{{ ctg_facts.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
 #- debug: "msg={{ ctlabs_k3s_role }}"
 
@@ -36,19 +36,19 @@
   block:
     - name: ctlabs_k3s.tasks.precheck.k3s_url.fact
       set_fact:
-        ctlabs_k3s_server_url: "{{ ansible_local.ctlabs_k3s.server_url | default(ctlabs_k3s.defaults.config.server.url) }}"
+        ctlabs_k3s_server_url: "{{ ctg_facts.ctlabs_k3s.server_url | default(ctlabs_k3s.defaults.config.server.url) }}"
 
     - name: ctlabs_k3s.tasks.precheck.k3s_server_node.up
       wait_for:
         port: 6443
-        host: "{{ ansible_local.ctlabs_k3s.server_node }}"
+        host: "{{ ctg_facts.ctlabs_k3s.server_node }}"
         delay: "{{ (20 | random) + 10 }}"
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.get
       slurp:
         path: "{{ ctlabs_k3s.defaults.config.server.token }}"
       register: file_content
-      delegate_to: "{{ ansible_local.ctlabs_k3s.server_node }}"
+      delegate_to: "{{ ctg_facts.ctlabs_k3s.server_node }}"
 
     - name: ctlabs_k3s.tasks.precheck.k3s_token.fact
       set_fact:
