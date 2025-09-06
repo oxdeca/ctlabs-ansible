@@ -54,6 +54,7 @@ ctlabs_foreman:
           --enable-foreman-plugin-netbox
           --enable-foreman-plugin-leapp
           --enable-foreman-plugin-google
+          --enable-foreman-plugin-kubevirt
           --enable-foreman-compute-libvirt
       proxy:
         flags: >

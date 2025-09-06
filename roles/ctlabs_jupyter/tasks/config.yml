@@ -12,6 +12,13 @@
     group : "{{ ctlabs_jupyter.defaults.service.group  }}"
     state : directory
 
+- name: ctlabs_jupyter.tasks.config.workdir.perms
+  file:
+    path    : "{{ ctlabs_jupyter.defaults.config.workdir }}"
+    owner   : "{{ ctlabs_jupyter.defaults.service.user   }}"
+    group   : "{{ ctlabs_jupyter.defaults.service.group  }}"
+    recurse : true
+
 - name: ctlabs_jupyter.tasks.config.settings.dir
   file:
     name  : "{{ ctlabs_jupyter.defaults.config.settings.dir }}"
