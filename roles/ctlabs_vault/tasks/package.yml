@@ -25,11 +25,6 @@
         sslverify   : true
       loop: "{{ ctlabs_vault.defaults.repos[ctg_os_family] }}"
 
-    - name: ctlabs_vault.tasks.package.redhat.pips.install
-      pip:
-        name: "{{ item }}"
-      loop: "{{ ctlabs_vault.defaults.pkgs.pips }}"
-
 #
 # Debian
 #
@@ -51,8 +46,15 @@
     name  : "{{ item.name }}"
     state : present
   loop    : "{{ ctlabs_vault.defaults.pkgs[ctg_os_family] }}"
+  when    : item.when is not defined or item.when
   register: result
   until   : result is success
+
+- name: ctlabs_vault.tasks.package.redhat.pips.install
+  when: ctg_os_family == "redhat" or ctg_os == "debian11"
+  pip:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_vault.defaults.pkgs.pips }}"
 
 - name: ctlabs_vault.tasks.package.group.certs.member
   user:

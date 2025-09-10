@@ -26,6 +26,14 @@
 
 - name: ctlabs_foreman.tasks.precheck.foreman_role.local_fact
   set_fact:
-    ctlabs_foreman_role: "{{ ansible_local.ctlabs_foreman.role | default(ctlabs_foreman_role) }}"
+    ctlabs_foreman_role: "{{ ctg_facts.ctlabs_foreman.role | default(ctlabs_foreman_role) }}"
+
+- name: ctlabs_foreman.tasks.precheck.foreman_scenario.var
+  set_fact:
+    ctlabs_foreman_scenario: "{{ ctlabs_foreman_scenario | default(ctlabs_foreman.defaults.install.scenario) }}"
+
+- name: ctlabs_foreman.tasks.precheck.foreman_scenario.local_fact
+  set_fact:
+    ctlabs_foreman_scenario: "{{ ctg_facts.ctlabs_foreman.scenario | default(ctlabs_foreman_scenario) }}"
 
 # make sure the hostname is resolvable via forward/reverse dns

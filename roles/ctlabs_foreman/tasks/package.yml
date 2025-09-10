@@ -25,7 +25,7 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   command: |
-    {{ ctlabs_foreman.defaults.install.cmd }} -s -S {{ ctlabs_foreman.defaults.install.scenario }} \
+    {{ ctlabs_foreman.defaults.install.cmd }} -s -S {{ ctlabs_foreman_scenario }} \
     --foreman-initial-admin-username {{ ctlabs_foreman.defaults.install.web.user }} \
     --foreman-initial-admin-password {{ ctlabs_foreman.defaults.install.web.pass }} \
     {{ ctlabs_foreman.defaults.install.server.flags }}
@@ -40,7 +40,7 @@
   vars:
     ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   command: |
-    {{ ctlabs_foreman.defaults.install.cmd }} -s -S {{ ctlabs_foreman.defaults.install.scenario }} \
+    {{ ctlabs_foreman.defaults.install.cmd }} -s -S {{ ctlabs_foreman_scenario }} \
     {{ ctlabs_foreman.defaults.install.proxy.flags }}
   register: output
 
