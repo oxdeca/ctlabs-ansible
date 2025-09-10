@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
-# File        : {{ ctlabs_sssd.defaults.config.sssd.file }}
-# Template    : ctlabs-ansible/roles/ctlabs_sssd/templates/{{ ctlabs_sssd.defaults.config.sssd.template }}
+# File        : sssd.conf
+# Template    : ctlabs_sssd/templates/sssd-ad.conf.j2
 # ------------------------------------------------------------------------------
 {%- set tmp = [] -%}
 {%- for host in ctlabs_sssd_ad_server -%}

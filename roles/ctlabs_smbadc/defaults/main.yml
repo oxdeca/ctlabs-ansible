@@ -55,3 +55,4 @@ ctlabs_smbadc:
         - winbind
   os:
     - debian11
+    - debian12
