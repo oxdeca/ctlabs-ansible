@@ -70,10 +70,10 @@
               argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
             params:
               server.insecure: true
-              server.basehref: /argo
-              server.rootpath: /argo
+              server.basehref: /
+              server.rootpath: /
           server:
             ingress:
               enabled         : true
-              ingressClassName: traefik
+              ingressClassName: nginx
       register: res_argo
