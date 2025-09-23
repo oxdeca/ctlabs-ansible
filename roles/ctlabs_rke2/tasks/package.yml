@@ -12,14 +12,14 @@
   loop    : "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-  delay   : 1
-  retries : 5
 
 - name: ctlabs_rke2.tasks.package.rke2.install
   get_url:
     url  : "{{ ctlabs_rke2.defaults.pkgs.rke2.uri }}"
     dest : "{{ ctlabs_rke2.defaults.pkgs.rke2.path }}"
     mode : "{{ ctlabs_rke2.defaults.pkgs.rke2.mode }}"
+  register: result
+  until   : result is success
 
 - name: ctlabs_rke2.tasks.package.helm
   block:
@@ -28,19 +28,26 @@
         url   : "{{ ctlabs_rke2.defaults.pkgs.helm.url }}"
         dest  : "{{ ctlabs_rke2.defaults.pkgs.helm.tmptar }}"
         #force : no
+      register: result
+      until   : result is success
+      
     - name: ctlabs_rke2.tasks.package.helm.untar
       unarchive:
         src  : "{{ ctlabs_rke2.defaults.pkgs.helm.tmptar }}"
         dest : "{{ ctlabs_rke2.defaults.pkgs.helm.tmpdir }}/"
         remote_src: true
+
     - name: ctlabs_rke2.tasks.package.helm.install
       copy:
         src  : "{{ ctlabs_rke2.defaults.pkgs.helm.tardir }}/helm"
         dest : "{{ ctlabs_rke2.defaults.pkgs.helm.path   }}"
         mode : '0750'
         remote_src: true
+
     - name: ctlabs_rke2.tasks.package.helm.argo.repo
       kubernetes.core.helm_repository:
         name    : "{{ item.name }}"
         repo_url: "{{ item.repo }}"
       loop: "{{ ctlabs_rke2.defaults.helm }}"
+      register: result
+      until   : result is success

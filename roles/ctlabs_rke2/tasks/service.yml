@@ -46,23 +46,35 @@
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
       ansible.builtin.wait_for:
-        host   : "{{ ansible_nodename }}"
-        port   : 6443
-        state  : started
-        timeout: 300 
-        delay  : 10 
-    
+        host  : "{{ ansible_nodename }}"
+        port  : 6443
+        delay : 10 
+
+    - name: ctlabs_rke2.tasks.service.cluster.ingress.ready
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+      kubernetes.core.k8s_info:
+        kind      : Daemonset
+        name      : rke2-ingress-nginx-controller
+        namespace : kube-system
+        wait      : true
+
     - name: ctlabs_rke2.tasks.service.argocd
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
       environment:
         KUBECONFIG: /etc/rancher/rke2/rke2.yaml
       kubernetes.core.helm:
-        name             : argocd
-        chart_ref        : argo/argo-cd
-        release_namespace: argo
-        create_namespace : true
-        values           :
+        name              : argocd
+        chart_ref         : argo/argo-cd
+        release_namespace : argo
+        create_namespace  : true
+        update_repo_cache : true
+        wait              : true
+        atomic            : true
+        values:
           global:
             domain:
           configs:
@@ -70,10 +82,9 @@
               argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
             params:
               server.insecure: true
-              server.basehref: /
-              server.rootpath: /
           server:
             ingress:
               enabled         : true
               ingressClassName: nginx
       register: res_argo
+      until   : res_argo is success
