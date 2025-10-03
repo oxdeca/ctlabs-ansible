@@ -35,7 +35,7 @@ ctlabs_rke2:
     config:
       role: server
       server:
-        url: "https://{{ ansible_nodename }}:6443"
+        url: "https://{{ ansible_nodename }}:9345"
         token: /var/lib/rancher/rke2/server/token
       profile:
         template: rke2.profile.j2

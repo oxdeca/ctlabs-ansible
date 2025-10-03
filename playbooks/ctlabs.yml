@@ -324,20 +324,32 @@
         dest: /etc/ansible/facts.d/ctlabs_rke2.fact
         content: |
           {
-            "node" : "control-plane",
-            "role" : "server"
+            "plane" : "control",
+            "role"  : "server"
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
-      when: ansible_hostname in ['rke22', 'rke23', 'rke24']
+      when: ansible_hostname in ['rke22', 'rke23']
       copy:
         dest: /etc/ansible/facts.d/ctlabs_rke2.fact
         content: |
           {
-            "node"        : "control-plane",
+            "node"        : "control",
             "role"        : "agent",
             "server_node" : "rke21",
-            "server_url"  : "https://rke21.ctlabs.internal:6443"
+            "server_url"  : "https://rke21.ctlabs.internal:9345"
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
+      when: ansible_hostname in ['rke24']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_rke2.fact
+        content: |
+          {
+            "node"        : "data",
+            "role"        : "agent",
+            "server_node" : "rke21",
+            "server_url"  : "https://rke21.ctlabs.internal:9345"
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.foreman.server.local_facts
