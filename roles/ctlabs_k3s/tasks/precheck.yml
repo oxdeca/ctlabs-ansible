@@ -20,7 +20,6 @@
     - name: ctlabs_k3s.tasks.precheck.skip.unsupported
       meta: end_host
 
-
 - name: ctlabs_k3s.tasks.precheck.k3s_role.var
   set_fact:
     ctlabs_k3s_role: "{{ ctlabs_k3s_role | default(ctlabs_k3s.defaults.config.role) }}"

@@ -47,8 +47,8 @@
       ansible.builtin.wait_for:
         host   : "{{ ansible_nodename }}"
         port   : 6443
-        state  : started
-        timeout: 300 
+        #state  : started
+        #timeout: 300 
         delay  : 10 
     
     - name: ctlabs_k3s.tasks.service.argocd

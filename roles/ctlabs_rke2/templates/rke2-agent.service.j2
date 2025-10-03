@@ -1,5 +1,5 @@
 [Unit]
-Description=rke2 agent
+Description=rke2 agent ({{  ctg_facts.ctlabs_rke2.plane }})
 After=network.target
 StartLimitIntervalSec=0
 
@@ -8,7 +8,11 @@ Type=simple
 
 User=root
 EnvironmentFile=/etc/sysconfig/rke2
+{% if ctg_facts.ctlabs_rke2.plane == 'data' %}
 ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} agent
+{% elif ctg_facts.ctlabs_rke2.plane == 'control' %}
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
+{% endif %}
 
 Restart=always
 RestartSec=5

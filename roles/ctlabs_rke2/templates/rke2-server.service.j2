@@ -8,7 +8,7 @@ Type=simple
 
 User=root
 
-ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server --cluster-init
 
 Restart=always
 RestartSec=5
