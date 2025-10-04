@@ -334,7 +334,7 @@
         dest: /etc/ansible/facts.d/ctlabs_rke2.fact
         content: |
           {
-            "node"        : "control",
+            "plane"       : "control",
             "role"        : "agent",
             "server_node" : "rke21",
             "server_url"  : "https://rke21.ctlabs.internal:9345"
@@ -346,7 +346,7 @@
         dest: /etc/ansible/facts.d/ctlabs_rke2.fact
         content: |
           {
-            "node"        : "data",
+            "plane"       : "data",
             "role"        : "agent",
             "server_node" : "rke21",
             "server_url"  : "https://rke21.ctlabs.internal:9345"
