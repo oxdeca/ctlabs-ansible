@@ -44,6 +44,7 @@ ctlabs_jupyter:
         - name: python3-pip
         - name: python3-setuptools
         - name: ruby
+        - name: ruby-dev
         - name: terraform
         - name: google-cloud-cli
     python:
@@ -86,5 +87,6 @@ ctlabs_jupyter:
   os:
     - centos9
     - kali2025
+    - parrot6
   virtype:
     - container
