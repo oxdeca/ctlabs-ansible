@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  guacamole: 1.5.5
+  guacamole: 1.6.0
 
 ctlabs_guacamole:
   defaults:

@@ -33,7 +33,6 @@
         src  : "{{ ctlabs_rke2.defaults.sysconfig.agent.template }}"
         dest : "{{ ctlabs_rke2.defaults.sysconfig.agent.name     }}"
 
-    
     - name: ctlabs_rke2.tasks.service.agent.started
       service:
         name  : "{{ ctlabs_rke2.defaults.service.agent.name }}"
