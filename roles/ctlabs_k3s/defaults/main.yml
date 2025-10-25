@@ -6,14 +6,16 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  k3s  : 1.29.2
-  helm : 3.16.1
+  k3s   : 1.29.2
+  helm  : 3.16.1
+  nginx : 1.13
 
 ctlabs_k3s:
   defaults:
     pkgs:
       debian:
         - name: python3-yaml
+        - name: python3-kubernetes
       k3s:
         uri  : "https://github.com/k3s-io/k3s/releases/download/v{{ versions.k3s }}+k3s1/k3s"
         path : /usr/bin/k3s
@@ -31,6 +33,12 @@ ctlabs_k3s:
         name : argo
         chart: argo/argo-cd
         repo : https://argoproj.github.io/argo-helm
+    ingress:
+      nginx:
+        url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/release-{{ versions.nginx }}/deploy/static/provider/baremetal/deploy.yaml"
+        lb :
+          template: ingress-nginx-controller-lb.yml.j2
+          file    : /tmp/ingress-nginx-lb.yml
     config:
       role   : server
       ingress: traefik

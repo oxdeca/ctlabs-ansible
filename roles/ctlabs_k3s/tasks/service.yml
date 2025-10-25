@@ -50,7 +50,7 @@
         #state  : started
         #timeout: 300 
         delay  : 10 
-    
+
     - name: ctlabs_k3s.tasks.service.argocd
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
@@ -75,3 +75,30 @@
               ingressClassName: "{{ ctlabs_k3s_ingress }}"
       register: res_argo
       until   : res_argo is success
+
+    - name: ctlabs_k3s.tasks.service.ingress
+      when: ctlabs_k3s_ingress == "nginx"
+      block:
+        - name: ctlabs_k3s.tasks.service.ingress.download
+          get_url:
+            url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
+            dest: /tmp/ingress-deployment.yml
+          register: res_ingress
+          until   : res_ingress is success
+
+        - name: ctlabs_k3s.tasks.service.ingress.install
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            src: /tmp/ingress-deployment.yml
+
+        - name: ctlabs_k3s.tasks.service.ingress.lb.file
+          template:
+            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
+            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
+
+        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
