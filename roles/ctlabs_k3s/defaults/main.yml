@@ -37,8 +37,8 @@ ctlabs_k3s:
       nginx:
         url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/release-{{ versions.nginx }}/deploy/static/provider/baremetal/deploy.yaml"
         lb :
-          template: ingress-nginx-controller-lb.yml.j2
-          file    : /tmp/ingress-nginx-lb.yml
+          template: ingress-controller-lb.yml.j2
+          file    : /tmp/ingress-controller-lb.yml
     config:
       role   : server
       ingress: traefik
