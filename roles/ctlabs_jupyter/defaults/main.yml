@@ -35,6 +35,7 @@ ctlabs_jupyter:
         - name: redhat-rpm-config
         - name: terraform
         - name: google-cloud-cli
+        - url : https://github.com/open-policy-agent/conftest/releases/download/v0.63.0/conftest_0.63.0_linux_amd64.rpm
       debian:
         - name: git
         - name: libzmq5
