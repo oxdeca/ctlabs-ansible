@@ -44,7 +44,7 @@
 
     - name: ctlabs_jupyter.tasks.package.redhat.install
       dnf:
-        name      : "{{ item.name }}"
+        name      : "{{ item.url if item.url is defined else item.name }}"
         enablerepo: "{{ item.repo | default() }}"
         state     : present
       loop    : "{{ ctlabs_jupyter.defaults.pkgs.redhat }}"

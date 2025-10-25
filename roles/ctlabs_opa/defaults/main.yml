@@ -6,13 +6,16 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  opa: 1.0.1
+  opa      : 1.0.1
+  conftest : 0.63.0
 
 ctlabs_opa:
   defaults:
     pkgs:
-      redhat: []
-      debian: []
+      redhat: 
+        - url : "https://github.com/open-policy-agent/conftest/releases/download/v{{ versions.conftest }}/conftest_{{ versions.conftest }}_linux_amd64.rpm"
+      debian:
+        - url : "https://github.com/open-policy-agent/conftest/releases/download/v{{ versions.conftest }}/conftest_{{ versions.conftest}}_linux_amd64.deb"
       opa:
         obin   : opa_linux_amd64
         dbin   : "opa-{{ versions.opa }}"

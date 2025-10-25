@@ -5,10 +5,26 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_opa.tasks.package.installed
-  package:
-    name    : "{{ item.name }}"
-    state : present
+#
+# RedHat
+#
+- name: ctlabs_opa.tasks.package.redhat.install
+  when: ctg_os_family == 'redhat'
+  dnf:
+    name : "{{ item.url if item.url is defined else item.name }}"
+    state: present
+  loop    : "{{ ctlabs_opa.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+#
+# Debian
+#
+- name: ctlabs_opa.tasks.package.debian.install
+  when: ctg_os_family == 'debian'
+  apt:
+    deb  : "{{ item.url if item.url is defined else item.name }}"
+    state: present
   loop    : "{{ ctlabs_opa.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
@@ -17,6 +33,8 @@
   group:
     name   : "{{ ctlabs_opa.defaults.service.group }}"
     system : true
+
+# ---
 
 - name: ctlabs_opa.tasks.package.user
   user:
