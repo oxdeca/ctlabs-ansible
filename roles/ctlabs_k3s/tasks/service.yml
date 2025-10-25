@@ -72,6 +72,6 @@
           server:
             ingress:
               enabled         : true
-              ingressClassName: traefik
+              ingressClassName: "{{ ctlabs_k3s_ingress }}"
       register: res_argo
       until   : res_argo is success
