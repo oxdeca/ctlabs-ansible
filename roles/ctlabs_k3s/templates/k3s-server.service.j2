@@ -7,8 +7,11 @@ StartLimitIntervalSec=0
 Type=simple
 
 User=root
-
+{% if ctlabs_k3s_ingress == "traefik" %}
 ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init
+{%  elif ctlabs_k3s_ingress == "nginx" %}
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init --disable=traefik,servicelb
+{% endif %}
 
 Restart=always
 RestartSec=5

@@ -28,6 +28,14 @@
   set_fact:
     ctlabs_k3s_role: "{{ ctg_facts.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
+- name: ctlabs_k3s.tasks.precheck.k3s_ingress.var
+  set_fact:
+    ctlabs_k3s_ingress: "{{ ctlabs_k3s_ingress | default(ctlabs_k3s.defaults.config.ingress) }}"
+
+- name: ctlabs_k3s.tasks.precheck.k3s_ingress.local_fact
+  set_fact:
+    ctlabs_k3s_ingress: "{{ ctg_facts.ctlabs_k3s.ingress | default(ctlabs_k3s_ingress) }}"
+
 #- debug: "msg={{ ctlabs_k3s_role }}"
 
 - name: ctlabs_k3s.tasks.precheck.agent.vars

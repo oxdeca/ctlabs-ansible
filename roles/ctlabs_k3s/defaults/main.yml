@@ -32,7 +32,8 @@ ctlabs_k3s:
         chart: argo/argo-cd
         repo : https://argoproj.github.io/argo-helm
     config:
-      role: server
+      role   : server
+      ingress: traefik
       server:
         url: "https://{{ ansible_nodename }}:6443"
         token: /var/lib/rancher/k3s/server/token
