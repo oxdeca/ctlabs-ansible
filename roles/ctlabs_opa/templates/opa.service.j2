@@ -6,7 +6,7 @@
 [Service]
   User={{ ctlabs_opa.defaults.service.user }}
   Group={{ ctlabs_opa.defaults.service.group }}
-  ExecStart={{ ctlabs_opa.defaults.config.bin }} run -s -a {{ ansible_default_ipv4.address }}:{{ ctlabs_opa.defaults.config.listen }}
+  ExecStart={{ ctlabs_opa.defaults.config.bin }} run -s -a {{ ansible_default_ipv4.address }}:{{ ctlabs_opa.defaults.config.listen }} --tls-cert-file /etc/ca-ctlabs/{{ ansible_nodename }}.crt --tls-cert-private-key-file /etc/ca-ctlabs/{{ ansible_nodename }}.prv
   Restart=on-failure
   RestartSec=30s
 
