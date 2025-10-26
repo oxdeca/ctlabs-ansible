@@ -12,7 +12,7 @@
   when: ctg_os_family == 'redhat'
   dnf:
     name : "{{ item.url if item.url is defined else item.name }}"
-    state: present
+    disable_gpg_check: true
   loop    : "{{ ctlabs_opa.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
