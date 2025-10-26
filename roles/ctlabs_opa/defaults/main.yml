@@ -30,7 +30,7 @@ ctlabs_opa:
       agentdir : /data-agent
       file     : opa-config.yml
       template : opa-config.yml.j2
-      listen   : 9100
+      listen   : 8181
     service:
       name     : opa.service
       template : opa.service.j2

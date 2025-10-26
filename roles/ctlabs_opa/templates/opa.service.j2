@@ -6,7 +6,7 @@
 [Service]
   User={{ ctlabs_opa.defaults.service.user }}
   Group={{ ctlabs_opa.defaults.service.group }}
-  ExecStart={{ ctlabs_opa.defaults.config.bin }} run -s -a {{ ansible_default_ipv4.address }}
+  ExecStart={{ ctlabs_opa.defaults.config.bin }} run -s -a {{ ansible_default_ipv4.address }}:{{ ctlabs_opa.defaults.config.listen }}
   Restart=on-failure
   RestartSec=30s
 
