@@ -1,0 +1,14 @@
+[Unit]
+  Description= OPA Server
+  Documentation= https://www.openpolicyagent.org/
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_opa.defaults.service.user }}
+  Group={{ ctlabs_opa.defaults.service.group }}
+  ExecStart={{ ctlabs_opa.defaults.config.bin }} run -s
+  Restart=on-failure
+  RestartSec=30s
+
+[Install]
+  WantedBy=multi-user.target

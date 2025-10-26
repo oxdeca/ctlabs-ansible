@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  opa      : 1.0.1
+  opa      : 1.9.0
   conftest : 0.63.0
 
 ctlabs_opa:
@@ -17,18 +17,19 @@ ctlabs_opa:
       debian:
         - url : "https://github.com/open-policy-agent/conftest/releases/download/v{{ versions.conftest }}/conftest_{{ versions.conftest}}_linux_amd64.deb"
       opa:
-        obin   : opa_linux_amd64
+        obin   : opa_linux_amd64_static
         dbin   : "opa-{{ versions.opa }}"
         bin    : opa
-        url    : "https://github.com/open-policy-agent/opa/releases/download/v{{ versions.opa }}/opa_linux_amd64"
-        bindir : /opt/opa
+        url    : "https://github.com/open-policy-agent/opa/releases/download/v{{ versions.opa }}/opa_linux_amd64_static"
+        bindir : /usr/bin
         tmpdir : /tmp
     config:
+      bin      : opa
       cfgdir   : /etc/opa
       datadir  : /data
       agentdir : /data-agent
-      file     : opa.conf
-      template : opa.conf.j2
+      file     : opa-config.yml
+      template : opa-config.yml.j2
       listen   : 9100
     service:
       name     : opa.service
