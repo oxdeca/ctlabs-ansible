@@ -17,12 +17,13 @@ $TTL    3600
 
 {#% set zone_data = vars['zone_' + zone.replace('.', '_')] #}
 {% for record in zone_data -%}
-{%   if record.type == 'COMMENT'  %}
+{%   set rtype = (record.type|default('A')) %}
+{%   if rtype == 'COMMENT'  %}
 
 ; {{ record.value }}
-{%   elif record.type == 'TXT' %}
-{{ record.name.ljust(32) }}  IN  {{ record.type.ljust(6) }} {{ record.value | tojson }}
+{%   elif rtype == 'TXT' %}
+{{ record.name.ljust(32) }}  IN  {{ rtype.ljust(6) }} {{ record.value | tojson }}
 {%   else %}
-{{ record.name.ljust(32) }}  IN  {{ record.type.ljust(6) }} {{ record.value }}
+{{ record.name.ljust(32) }}  IN  {{ rtype.ljust(6) }} {{ record.value }}
 {%   endif %}
 {% endfor -%}

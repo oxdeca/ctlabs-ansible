@@ -15,7 +15,7 @@ options {
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
   allow-transfer          { none; };
-  allow-notify            { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
+  allow-notify            { {{ ctg_facts.ctlabs_bind.masters|join('; ') }}; };
 
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
@@ -62,7 +62,7 @@ include  "/etc/named.root.key";
 zone "{{ zone.name }}" IN {
   type       {{ zone.type }};
 {%   if zone.type == "slave" %}  
-  masters  { {{ ansible_local.ctlabs_bind.masters|join('; ') }}; };
+  masters  { {{ ctg_facts.ctlabs_bind.masters|join('; ') }}; };
   file       "{{ ctlabs_bind.defaults.config[ctg_os_family].zones_dir }}/{{ zone.name }}.db";
 {%   endif %}
 {%   if zone.type == "forward" %}

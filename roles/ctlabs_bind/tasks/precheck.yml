@@ -14,7 +14,7 @@
     
     - name: ctlabs_bind.tasks.precheck.type.check
       assert:
-        that: ansible_local.ctlabs_bind.type in [ 'master', 'slave' ]
+        that: ctg_facts.ctlabs_bind.type in [ 'master', 'slave' ]
         fail_msg: "No type specified. ['master', 'slave']"
   rescue:
     - name: ctlabs_bind.tasks.precheck.skip.unsupported
@@ -26,4 +26,4 @@
 
 - name: ctlabs_bind.tasks.precheck.zones.local_fact
   set_fact:
-    ctlabs_bind_zones: "{{ ansible_local.ctlabs_bind.zones | default(ctlabs_bind_zones) }}"
+    ctlabs_bind_zones: "{{ ctg_facts.ctlabs_bind.zones | default(ctlabs_bind_zones) }}"

@@ -15,7 +15,7 @@
     - "{{ ctlabs_bind.defaults.config[ctg_os_family].keys_dir }}"
 
 - name: ctlabs_bind.tasks.config.master
-  when: ansible_local.ctlabs_bind.type == 'master'
+  when: ctg_facts.ctlabs_bind.type == 'master'
   block:
     - name: ctlabs_bind.tasks.config.named
       template:
@@ -35,7 +35,7 @@
       notify: ctlabs_bind.handlers.named.service.reload
 
 - name: ctlabs_bind.tasks.config.slave
-  when: ansible_local.ctlabs_bind.type == 'slave'
+  when: ctg_facts.ctlabs_bind.type == 'slave'
   block:
     - name: ctlabs.tasks.config.named
       template:

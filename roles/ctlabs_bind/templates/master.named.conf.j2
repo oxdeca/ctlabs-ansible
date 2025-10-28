@@ -14,7 +14,7 @@ options {
   recursing-file          "{{ ctlabs_bind.defaults.config[ctg_os_family].recursing_file }}";
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
-  allow-transfer          { {{ ansible_local.ctlabs_bind.slaves|join('; ') }}; };
+  allow-transfer          { {{ ctg_facts.ctlabs_bind.slaves|join('; ') }}; };
 
   notify                  yes;
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
