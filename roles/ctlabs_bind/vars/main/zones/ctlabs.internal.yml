@@ -77,11 +77,9 @@ zone_ctlabs_internal:
     value : www1.ctlabs.internal.
 
   - name  : www1
-    type  : A
     value : 192.168.30.13
 
   - name  : www2
-    type  : A
     value : 192.168.30.14
 
 # -----------------------------------------------------------------------------
@@ -91,19 +89,15 @@ zone_ctlabs_internal:
     value : k3s server
 
   - name  : k3s1
-    type  : A
     value : 192.168.30.31
 
   - name  : k3s2
-    type  : A
     value : 192.168.30.32
 
   - name  : k3s3
-    type  : A
     value : 192.168.30.33
 
   - name  : k3s4
-    type  : A
     value : 192.168.30.34
 
 # -----------------------------------------------------------------------------
@@ -113,19 +107,15 @@ zone_ctlabs_internal:
     value : rke2 server
 
   - name  : rke21
-    type  : A
     value : 192.168.30.41
 
   - name  : rke22
-    type  : A
     value : 192.168.30.42
 
   - name  : rke23
-    type  : A
     value : 192.168.30.43
 
   - name  : rke24
-    type  : A
     value : 192.168.30.44
 
 # -----------------------------------------------------------------------------
@@ -135,19 +125,15 @@ zone_ctlabs_internal:
     value : foreman server
 
   - name  : fm1
-    type  : A
     value : 192.168.30.51
 
   - name  : fm2
-    type  : A
     value : 192.168.30.52
 
   - name  : fm3
-    type  : A
     value : 192.168.30.53
 
   - name  : fm4
-    type  : A
     value : 192.168.30.54
 
 # -----------------------------------------------------------------------------
@@ -157,19 +143,15 @@ zone_ctlabs_internal:
     value : other hosts
 
   - name  : h1
-    type  : A
     value : 192.168.10.12
 
   - name  : h2
-    type  : A
     value : 192.168.20.12
 
   - name  : h3
-    type  : A
     value : 192.168.10.17
 
   - name  : h4
-    type  : A
     value : 192.168.20.17
     
 # -----------------------------------------------------------------------------
@@ -189,11 +171,9 @@ zone_ctlabs_internal:
     value : Active Directory
 
   - name  : dc1
-    type  : A
     value : 192.168.10.14
 
   - name  : dc2
-    type  : A
     value : 192.168.20.14
 
   - name  : _ldap._tcp
@@ -235,11 +215,9 @@ zone_ctlabs_internal:
     value : slapd server
 
   - name  : slapd1
-    type  : A
     value : 192.168.10.13
 
   - name  : slapd2
-    type  : A
     value : 192.168.20.13
 
 # -----------------------------------------------------------------------------
@@ -249,19 +227,15 @@ zone_ctlabs_internal:
     value : grafanfa / prometheus
 
   - name  : prometheus
-    type  : A
     value : 192.168.10.21
 
   - name  : grafana
-    type  : A
     value : 192.168.20.22
 
   - name  : loki
-    type  : A
     value : 192.168.20.23
 
   - name  : mimir
-    type  : A
     value : 192.168.20.24
 
 # -----------------------------------------------------------------------------
@@ -271,19 +245,15 @@ zone_ctlabs_internal:
     value : elasticsearch / kibana
 
   - name  : es1
-    type  : A
     value : 192.168.10.31
 
   - name  : es2
-    type  : A
     value : 192.168.20.31
 
   - name  : kba1
-    type  : A
     value : 192.168.10.32
 
   - name  : kba2
-    type  : A
     value : 192.168.20.32
 
 
@@ -294,31 +264,24 @@ zone_ctlabs_internal:
     value : dbs
 
   - name  : db1
-    type  : A
     value : 192.168.50.5
 
   - name  : db2
-    type  : A
     value : 192.168.50.6
 
   - name  : vdb1
-    type  : A
     value : 192.168.30.11
 
   - name  : vdb2
-    type  : A
     value : 192.168.30.12
 
   - name  : git1
-    type  : A
     value : 192.168.30.15
 
   - name  : ats1
-    type  : A
     value : 192.168.30.16
 
   - name  : gua1
-    type  : A
     value : 192.168.30.17
 
 # -----------------------------------------------------------------------------
@@ -328,9 +291,7 @@ zone_ctlabs_internal:
     value : opa
 
   - name  : opa1
-    type  : A
     value : 192.168.10.16
     
   - name  : opa2
-    type  : A
     value : 192.168.20.16
