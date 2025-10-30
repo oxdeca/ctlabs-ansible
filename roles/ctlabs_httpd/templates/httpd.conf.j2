@@ -94,9 +94,12 @@ AddDefaultCharset  UTF-8
 EnableSendfile on
 
 <Location />
-  AuthType           Basic
+  AuthType          Basic
   AuthName          "Restricted Area"
   AuthBasicProvider file
   AuthUserFile      httpd.passwd
+
+  Satisfy           Any
+  Require           ip 192.168.10.0/24 192.168.20.0/24 192.168.30.0/24
   Require           valid-user # all granted
 </Location>
