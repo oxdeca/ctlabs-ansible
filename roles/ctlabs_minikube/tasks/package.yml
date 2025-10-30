@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_minikube.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_minikube.tasks.package.minikube.install
+  get_url:
+    url  : "{{ ctlabs_minikube.defaults.pkgs.minikube.uri }}"
+    dest : "{{ ctlabs_minikube.defaults.pkgs.minikube.path }}"
+    mode : "{{ ctlabs_minikube.defaults.pkgs.minikube.mode }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_minikube.tasks.package.kubectl.install
+  get_url:
+    url   : "{{ ctlabs_minikube.defaults.pkgs.kubectl.url  }}"
+    dest  : "{{ ctlabs_minikube.defaults.pkgs.kubectl.path }}"
+    mode  : "{{ ctlabs_minikube.defaults.pkgs.kubectl.mode }}"
+  register: result
+  until   : result is success

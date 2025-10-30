@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  minikube : 1.37.0
+  k8s      : 1.34.0
+  kubectl  : 1.34.0
+
+ctlabs_minikube:
+  defaults:
+    pkgs:
+      redhat: []
+      debian:
+        - podman
+      minikube:
+        url  : "https://github.com/kubernetes/minikube/releases/download/v{{ versions.minikube }}/minikube-linux-amd64"
+        path : /usr/bin/minikube
+      kubectl:
+        #url  : "https://storage.googleapis.com/kubernetes-release/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
+        url  : "https://dl.k8s.io/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
+        path : /usr/bin/kubectl
+    config:
+    handlers:
+    service:
+      user   : minikube
+      group  : minikube
+      groups : []
+  os:
+    - debian12
+  virtype:
+    - kvm

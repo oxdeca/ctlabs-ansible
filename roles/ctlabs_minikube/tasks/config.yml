@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.config.profile
+  template:
+    src  : "{{ ctlabs_minikube.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_minikube.defaults.config.profile.file     }}"
+
+- name: ctlabs_minikube.tasks.config.sysconfig.dir
+  file:
+    path : "{{ ctlabs_minikube.defaults.sysconfig.dir }}"
+    state: directory

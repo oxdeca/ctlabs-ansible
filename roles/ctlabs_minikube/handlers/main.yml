@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/handlers/main.yml
+# Description : main handler
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.handlers.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_minikube.defaults.service.name }}" 
+    enabled       : true
+    daemon_reload : true
+
+- name: ctlabs_minikube.handlers.service.started
+  service:
+    name  : "{{ ctlabs_minikube.defaults.service.name }}"
+    state : started

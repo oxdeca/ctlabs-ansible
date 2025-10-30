@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/main.yml
+# Description : main ctlabs_minikube tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.precheck
+    - ctlabs_minikube.package
+    - ctlabs_minikube.config
+    - ctlabs_minikube.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.service

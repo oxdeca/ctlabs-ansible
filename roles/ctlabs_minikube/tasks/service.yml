@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.service.install
+  template:
+    src  : "{{ ctlabs_minikube.defaults.service.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_minikube.defaults.service.name }}"
+  notify: ctlabs_minikube.handlers.systemd.reload
+    
+- name: ctlabs_minikube.tasks.service.start
+  service:
+    name  : "{{ ctlabs_minikube.defaults.service.name }}"
+    state : started
