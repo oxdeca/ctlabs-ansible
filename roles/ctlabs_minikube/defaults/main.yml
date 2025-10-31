@@ -34,11 +34,15 @@ ctlabs_minikube:
         file     : /etc/sudoers.d/minikube
     handlers:
     service:
-      name     : minikube.service
-      template : minikube.service.j2
-      user     : minikube
-      group    : minikube
-      groups   : []
+      net:
+        file     : minikube-net.service
+        template : minikube-net.service.j2
+      main:
+        name     : minikube.service
+        template : minikube.service.j2
+        user     : minikube
+        group    : minikube
+        groups   : []
   os:
     - debian12
   virtype:

@@ -7,29 +7,35 @@
 
 - name: ctlabs_minikube.taske.service.group
   group:
-    name   : "{{ ctlabs_minikube.defaults.service.group }}"
+    name   : "{{ ctlabs_minikube.defaults.service.main.group }}"
     system : true
 
 - name: ctlabs_minikube.tasks.service.user
   user:
-    name   : "{{ ctlabs_minikube.defaults.service.user  }}"
-    group  : "{{ ctlabs_minikube.defaults.service.group }}"
+    name   : "{{ ctlabs_minikube.defaults.service.main.user  }}"
+    group  : "{{ ctlabs_minikube.defaults.service.main.group }}"
     shell  : /bin/bash
     system : true
 
 - name: ctlabs_minikube.tasks.service.groups.member
   user:
-    name   : "{{ ctlabs_minikube.defaults.service.user   }}"
-    group  : "{{ ctlabs_minikube.defaults.service.group  }}"
-    groups : "{{ ctlabs_minikube.defaults.service.groups }}"
+    name   : "{{ ctlabs_minikube.defaults.service.main.user   }}"
+    group  : "{{ ctlabs_minikube.defaults.service.main.group  }}"
+    groups : "{{ ctlabs_minikube.defaults.service.main.groups }}"
+
+- name: ctlabs_minikube.tasks.service.net.install
+  template:
+    src  : "{{ ctlabs_minikube.defaults.service.net.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_minikube.defaults.service.net.name }}"
+  notify: ctlabs_minikube.handlers.systemd.reload
 
 - name: ctlabs_minikube.tasks.service.install
   template:
-    src  : "{{ ctlabs_minikube.defaults.service.template }}"
-    dest : "{{ ctg_systemd_dir + '/' + ctlabs_minikube.defaults.service.name }}"
+    src  : "{{ ctlabs_minikube.defaults.service.main.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_minikube.defaults.service.main.name }}"
   notify: ctlabs_minikube.handlers.systemd.reload
-    
+
 - name: ctlabs_minikube.tasks.service.start
   service:
-    name  : "{{ ctlabs_minikube.defaults.service.name }}"
+    name  : "{{ ctlabs_minikube.defaults.service.main.name }}"
     state : started

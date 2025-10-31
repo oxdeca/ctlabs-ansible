@@ -1,0 +1,17 @@
+[Unit]
+Description=Minikube Network
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+
+User=root
+Group=root
+
+ExecStart=/usr/bin/podman network create minikube --driver=bridge --opt mtu=1460 --subnet=192.168.49.0/24 --gateway=192.168.49.1
+ExecStop=/usr/bin/podman network rm minikube
+
+[Install]
+WantedBy=multi-user.target

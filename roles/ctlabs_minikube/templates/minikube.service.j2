@@ -1,7 +1,8 @@
 [Unit]
 Description=Minikube
-After=network.target
+After=network.target minikube-net.service
 StartLimitIntervalSec=0
+Requires=minikube-net.service
 
 [Service]
 Type=oneshot
@@ -9,7 +10,8 @@ RemainAfterExit=true
 
 User=minikube
 Group=minikube
-ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start
+
+ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start --network minikube
 ExecStop={{ ctlabs_minikube.defaults.pkgs.minikube.path }} stop
 
 [Install]

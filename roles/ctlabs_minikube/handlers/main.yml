@@ -7,11 +7,14 @@
 
 - name: ctlabs_minikube.handlers.systemd.reload
   systemd:
-    name          : "{{ ctlabs_minikube.defaults.service.name }}" 
+    name          : "{{ ctlabs_minikube.defaults.service.main.name }}" 
     enabled       : true
     daemon_reload : true
+  loop:
+    - "{{ ctlabs_minikube.defaults.service.net.name }}"
+    - "{{ ctlabs_minikube.defaults.service.main.name }}"
 
-- name: ctlabs_minikube.handlers.service.started
+- name: ctlabs_minikube.handlers.service.main.started
   service:
-    name  : "{{ ctlabs_minikube.defaults.service.name }}"
+    name  : "{{ ctlabs_minikube.defaults.service.main.name }}"
     state : started
