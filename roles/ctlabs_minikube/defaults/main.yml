@@ -26,12 +26,12 @@ ctlabs_minikube:
         path : /usr/bin/kubectl
         mode : '0755'
     config:
-      main:
-        template :
-        file:
+      profile:
+        template : minikube.profile.j2
+        file     : /etc/profile.d/minikube.sh
       sudo:
-        template: minikube.sudo.j2
-        file    : /etc/sudoers.d/minikube
+        template : minikube.sudo.j2
+        file     : /etc/sudoers.d/minikube
     handlers:
     service:
       name     : minikube.service
