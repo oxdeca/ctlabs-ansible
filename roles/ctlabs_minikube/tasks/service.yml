@@ -5,6 +5,24 @@
 # Description : service
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_minikube.taske.service.group
+  group:
+    name   : "{{ ctlabs_minikube.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_minikube.tasks.service.user
+  user:
+    name   : "{{ ctlabs_minikube.defaults.service.user  }}"
+    group  : "{{ ctlabs_minikube.defaults.service.group }}"
+    shell  : /bin/bash
+    system : true
+
+- name: ctlabs_minikube.tasks.service.groups.member
+  user:
+    name   : "{{ ctlabs_minikube.defaults.service.user   }}"
+    group  : "{{ ctlabs_minikube.defaults.service.group  }}"
+    groups : "{{ ctlabs_minikube.defaults.service.groups }}"
+
 - name: ctlabs_minikube.tasks.service.install
   template:
     src  : "{{ ctlabs_minikube.defaults.service.template }}"

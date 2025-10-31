@@ -15,20 +15,30 @@ ctlabs_minikube:
     pkgs:
       redhat: []
       debian:
-        - podman
+        - name: podman
       minikube:
         url  : "https://github.com/kubernetes/minikube/releases/download/v{{ versions.minikube }}/minikube-linux-amd64"
         path : /usr/bin/minikube
+        mode : '0755'
       kubectl:
         #url  : "https://storage.googleapis.com/kubernetes-release/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
         url  : "https://dl.k8s.io/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
         path : /usr/bin/kubectl
+        mode : '0755'
     config:
+      main:
+        template :
+        file:
+      sudo:
+        template: minikube.sudo.conf.j2
+        file: /etc/sudoers.d/minikube.conf
     handlers:
     service:
-      user   : minikube
-      group  : minikube
-      groups : []
+      name     : minikube.service
+      template : minikube.service.j2
+      user     : minikube
+      group    : minikube
+      groups   : []
   os:
     - debian12
   virtype:

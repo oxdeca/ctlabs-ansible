@@ -1,4 +1,6 @@
-# ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_minikube/templates/minikube.sudoer.conf
-# Description : main handler
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/templates/minikube.sudo.conf
+# Description : sudo rules
+# --------------------------------------------------------------------------------
+
+minikube ALL = (root) NOPASSWD:ALL

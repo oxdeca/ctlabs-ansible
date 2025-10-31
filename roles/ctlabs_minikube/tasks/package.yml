@@ -15,7 +15,7 @@
 
 - name: ctlabs_minikube.tasks.package.minikube.install
   get_url:
-    url  : "{{ ctlabs_minikube.defaults.pkgs.minikube.uri }}"
+    url  : "{{ ctlabs_minikube.defaults.pkgs.minikube.url }}"
     dest : "{{ ctlabs_minikube.defaults.pkgs.minikube.path }}"
     mode : "{{ ctlabs_minikube.defaults.pkgs.minikube.mode }}"
   register: result
