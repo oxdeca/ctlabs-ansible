@@ -35,7 +35,7 @@ ctlabs_minikube:
     handlers:
     service:
       net:
-        file     : minikube-net.service
+        name     : minikube-net.service
         template : minikube-net.service.j2
       main:
         name     : minikube.service
