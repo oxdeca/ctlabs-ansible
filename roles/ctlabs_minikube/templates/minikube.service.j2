@@ -9,6 +9,7 @@ Type=simple
 User=minikube
 Group=minikube
 ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start
+ExecStop={{ ctlabs_minikube.defaults.pkgs.minikube.path }} stop
 
 Restart=always
 RestartSec=5
