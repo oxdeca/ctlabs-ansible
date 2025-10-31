@@ -4,15 +4,13 @@ After=network.target
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
+Type=oneshot
+RemainAfterExit=true
 
 User=minikube
 Group=minikube
 ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start
 ExecStop={{ ctlabs_minikube.defaults.pkgs.minikube.path }} stop
-
-Restart=always
-RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
