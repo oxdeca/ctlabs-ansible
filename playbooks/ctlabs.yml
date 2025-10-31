@@ -675,7 +675,7 @@
 # ctlabs_minikube
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.minikube
-  hosts : [h3,h4]
+  hosts : [mkube1,mkube2]
   tags  : [minikube]
   roles :
     - roles/ctlabs_minikube
