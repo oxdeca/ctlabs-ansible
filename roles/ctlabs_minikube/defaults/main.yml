@@ -30,8 +30,8 @@ ctlabs_minikube:
         template :
         file:
       sudo:
-        template: minikube.sudo.conf.j2
-        file: /etc/sudoers.d/minikube.conf
+        template: minikube.sudo.j2
+        file    : /etc/sudoers.d/minikube
     handlers:
     service:
       name     : minikube.service
