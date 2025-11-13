@@ -1,17 +1,17 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_xrpe/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tasks/service.yml
 # Description : default variables
 # ------------------------------------------------------------------------------
 
-#- name: ctlabs_xrpe.tasks.service.create
+#- name: ctlabs_xrdp.tasks.service.create
 #  template:
-#    src  : "{{ ctlabs_xrpe.defaults.service.template }}"
-#    dest : "{{ ctg_systemd_dir + '/' + ctlabs_xrpe.defaults.service.name }}"
-#  notify: ctlabs_xrpe.handlers.systemd.reload
+#    src  : "{{ ctlabs_xrdp.defaults.service.template }}"
+#    dest : "{{ ctg_systemd_dir + '/' + ctlabs_xrdp.defaults.service.name }}"
+#  notify: ctlabs_xrdp.handlers.systemd.reload
 
-- name: ctlabs_xrpe.tasks.service.start
+- name: ctlabs_xrdp.tasks.service.start
   service:
-    name  : "{{ ctlabs_xrpe.defaults.service.name }}"
+    name  : "{{ ctlabs_xrdp.defaults.service.name }}"
     state : started

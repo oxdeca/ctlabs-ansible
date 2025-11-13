@@ -10,9 +10,9 @@
   block:
     - name: ctlabs_xrdp.tasks.package.debian.install
       apt:
-        name       : "{{ item.name }}"
-        state      : present
-        extra_args : "{{ item.args }}"
+        name               : "{{ item.name }}"
+        state              : present
+        install_recommends : "{{ item.install_recommends | default(omit) }}"
       loop    : "{{ ctlabs_xrdp.defaults.pkgs[ctg_os_family] }}"
       register: result
       until   : result is success

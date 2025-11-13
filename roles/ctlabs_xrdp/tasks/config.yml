@@ -10,6 +10,18 @@
     src  : "{{ ctlabs_xrdp.defaults.config.startwm.template }}"
     dest : "{{ ctlabs_xrdp.defaults.config.startwm.file     }}"
 
-#- name: ctlabs_xrdp.tasks.config.xfce4-theme
+- name: ctlabs_xrdp.tasks.config.terminal-theme.download
+  git:
+    repo : "{{ ctlabs_xrdp.defaults.repos.dracula.url }}"
+    dest : "{{ ctlabs_xrdp.defaults.repos.dracula.tmp }}"
 
-#- name: ctlabs_xrdp.tasks.config.terminal-theme
+- name: ctlabs_xrdp.tasks.config.terminal-theme.dir
+  file:
+    path: "{{ ctlabs_xrdp.defaults.repos.dracula.dir }}"
+    state: directory
+
+- name: ctlabs_xrdp.tasks.config.terminal-theme.copy
+  copy:
+    src  : "{{ ctlabs_xrdp.defaults.repos.dracula.tmp }}/{{ ctlabs_xrdp.defaults.repos.dracula.name }}"
+    dest : "{{ ctlabs_xrdp.defaults.repos.dracula.dir }}/{{ ctlabs_xrdp.defaults.repos.dracula.name }}"
+    remote_src: true

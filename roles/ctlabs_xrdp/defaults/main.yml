@@ -12,23 +12,24 @@ ctlabs_xrdp:
     pkgs:
       debian:
         - name: xserver-xorg-core
-          args: --no-install-recommends
+          install_recommends: false
         - name: xserver-xorg-video-qxl
         - name: xinit
+        - name: x11-utils
         - name: xrdp
-        - name: xorgrdp
+        - name: xorgxrdp
         - name: xfce4
         - name: xfce4-terminal
-        - name: chromium
         - name: desktop-base
+        - name: chromium
+        - name: git
       redhat: []
-      addons:
-        - name: xfce4-theme-dark
-          url : https://github.com/freefreeno/Adwaita-dark-xfce.git
-          dir : /usr/share/themes/Adwaita-dark-Xfce
-        - name: terminal-theme-dracula
-          url : https://github.com/dracula/xfce4-terminal.git
-          dir : /usr/share/xfce4/terminal/colorschemes/Dracula.theme
+    repos:
+      dracula:
+        name : Dracula.theme
+        url  : https://github.com/dracula/xfce4-terminal.git
+        tmp  : /tmp/dracula
+        dir  : /usr/share/xfce4/terminal/colorschemes/
     config:
       startwm:
         template: startwm.sh.j2
