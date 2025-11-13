@@ -23,6 +23,8 @@ ctlabs_xrdp:
         - name: desktop-base
         - name: chromium
         - name: git
+        - name: tmux
+        - name: htop
       redhat: []
     repos:
       dracula:
@@ -36,6 +38,11 @@ ctlabs_xrdp:
         file    : /etc/xrdp/startwm.sh
     service:
       name : xrdp.service
+    login:
+      user   : ctlabs
+      pass   : "$6$XkUy88ozFYT1Ezr8$.ZPa/PWOOswMcvZmIZITGO6VtcKepkqegKJJitSSyFdycve0UbHPJHPBGDN/HCUd.DBGzzd2xwlUjzsm0dQO./"
+      group  : ctlabs
+      groups : [sudo]
   os:
     - debian12
   virtype:
