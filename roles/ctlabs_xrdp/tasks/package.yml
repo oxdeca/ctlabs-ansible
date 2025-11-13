@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_xrdp.tasks.package.debian
+  when: ctg_os_family == "debian"
+  block:
+    - name: ctlabs_xrdp.tasks.package.debian.install
+      apt:
+        name       : "{{ item.name }}"
+        state      : present
+        extra_args : "{{ item.args }}"
+      loop    : "{{ ctlabs_xrdp.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success

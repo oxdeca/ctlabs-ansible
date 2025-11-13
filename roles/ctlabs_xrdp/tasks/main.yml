@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tasks/main.yml
+# Description : main ctlabs_xrdp tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_xrdp
+    - ctlabs_xrdp.precheck
+    - ctlabs_xrdp.package
+    - ctlabs_xrdp.config
+    - ctlabs_xrdp.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_xrdp
+    - ctlabs_xrdp.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_xrdp
+    - ctlabs_xrdp.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_xrdp
+    - ctlabs_xrdp.service

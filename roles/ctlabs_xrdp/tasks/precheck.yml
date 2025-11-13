@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tasks/precheck.yml
+# Description : tasks prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_xrdp.tasks.precheck
+  block:
+    - name: ctlabs_xrdp.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_xrdp.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+
+    - name: ctlabs_xrdp.tasks.precheck.virtype
+      assert:
+        that     : ctg_virtype is in ctlabs_xrdp.virtype
+        fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
+  rescue:
+    - name: ctlabs_xrdp.tasks.precheck.skip.unsupported
+      meta: end_host

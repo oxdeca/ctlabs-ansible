@@ -10,7 +10,7 @@ RemainAfterExit=true
 User=root
 Group=root
 
-ExecStart=/usr/bin/podman network create minikube --driver=bridge --opt mtu=1460 --subnet=192.168.49.0/24 --gateway=192.168.49.1
+ExecStart=/usr/bin/podman network create minikube --driver=bridge --opt mtu=1460 --subnet={{ ctlabs_minikube.defaults.service.net.subnet }} --gateway={{ ctlabs_minikube.defaults.service.net.gw }}
 ExecStop=/usr/bin/podman network rm minikube
 
 [Install]

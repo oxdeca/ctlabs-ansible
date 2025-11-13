@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+
+ctlabs_xrdp:
+  defaults:
+    pkgs:
+      debian:
+        - name: xserver-xorg-core
+          args: --no-install-recommends
+        - name: xserver-xorg-video-qxl
+        - name: xinit
+        - name: xrdp
+        - name: xorgrdp
+        - name: xfce4
+        - name: xfce4-terminal
+        - name: chromium
+        - name: desktop-base
+      redhat: []
+      addons:
+        - name: xfce4-theme-dark
+          url : https://github.com/freefreeno/Adwaita-dark-xfce.git
+          dir : /usr/share/themes/Adwaita-dark-Xfce
+        - name: terminal-theme-dracula
+          url : https://github.com/dracula/xfce4-terminal.git
+          dir : /usr/share/xfce4/terminal/colorschemes/Dracula.theme
+    config:
+      startwm:
+        template: startwm.sh.j2
+        file    : /etc/xrdp/startwm.sh
+    service:
+      name : xrdp.service
+  os:
+    - debian12
+  virtype:
+    - kvm

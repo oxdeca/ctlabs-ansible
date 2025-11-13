@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_xrdp.tasks.config.startwm
+  template:
+    src  : "{{ ctlabs_xrdp.defaults.config.startwm.template }}"
+    dest : "{{ ctlabs_xrdp.defaults.config.startwm.file     }}"
+
+#- name: ctlabs_xrdp.tasks.config.xfce4-theme
+
+#- name: ctlabs_xrdp.tasks.config.terminal-theme

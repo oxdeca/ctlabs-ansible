@@ -37,6 +37,8 @@ ctlabs_minikube:
       net:
         name     : minikube-net.service
         template : minikube-net.service.j2
+        subnet   : 192.168.49.0/24
+        gw       : 192.168.49.1
       main:
         name     : minikube.service
         template : minikube.service.j2
