@@ -37,7 +37,7 @@
     - name: ctlabs_xrdp.tasks.config.skeleton.files
       template:
         src  : "{{ item.template }}"
-        dest : "{{ item.dir + '/' + item file }}"
+        dest : "{{ item.dir + '/' + item.file }}"
       loop: "{{ ctlabs_xrdp.defaults.config.skeleton }}"
 
 - name: ctlabs_xrdp.taske.service.group
