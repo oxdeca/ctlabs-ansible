@@ -23,6 +23,7 @@ ctlabs_xrdp:
         - name: xfce4-screenshooter
         - name: desktop-base
         - name: chromium
+        - name: flameshot
         - name: git
         - name: tmux
         - name: htop
@@ -37,6 +38,13 @@ ctlabs_xrdp:
       startwm:
         template: startwm.sh.j2
         file    : /etc/xrdp/startwm.sh
+      skeleton:
+        - template: terminalrc.j2
+          file    : terminalrc
+          dir     : /etc/skel/.config/xfce4/terminal
+        - template: xsettings.xml.j2
+          file    : xsettings.xml
+          dir     : /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
     service:
       name : xrdp.service
     login:
