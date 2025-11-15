@@ -26,6 +26,9 @@
     dest : "{{ ctlabs_xrdp.defaults.repos.dracula.dir }}/{{ ctlabs_xrdp.defaults.repos.dracula.name }}"
     remote_src: true
 
+- name: ctlabs_xrdp.tasks.config.desktop-theme
+  command: 'xfconf-query -c xsettings -p /Net/ThemeName -n -s "Adwaita-dark"'
+
 - name: ctlabs_xrdp.taske.service.group
   group:
     name   : "{{ ctlabs_xrdp.defaults.login.group }}"

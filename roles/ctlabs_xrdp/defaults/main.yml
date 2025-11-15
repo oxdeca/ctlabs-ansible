@@ -20,6 +20,7 @@ ctlabs_xrdp:
         - name: xorgxrdp
         - name: xfce4
         - name: xfce4-terminal
+        - name: xfce4-screenshooter
         - name: desktop-base
         - name: chromium
         - name: git
