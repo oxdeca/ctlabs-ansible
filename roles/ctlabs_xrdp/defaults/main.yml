@@ -38,6 +38,9 @@ ctlabs_xrdp:
       startwm:
         template: startwm.sh.j2
         file    : /etc/xrdp/startwm.sh
+      tmux:
+        template: tmux.conf.j2
+        file    : /etc/tmux.conf
       skeleton:
         - template: terminalrc.j2
           file    : terminalrc

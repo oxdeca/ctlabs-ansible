@@ -40,6 +40,11 @@
         dest : "{{ item.dir + '/' + item.file }}"
       loop: "{{ ctlabs_xrdp.defaults.config.skeleton }}"
 
+- name: ctlabs_xrdp.tasks.config.tmux
+  template:
+    src  : "{{ ctlabs_xrdp.defaults.config.tmux.template }}"
+    dest : "{{ ctlabs_xrdp.defaults.config.tmux.file     }}"
+
 - name: ctlabs_xrdp.taske.service.group
   group:
     name   : "{{ ctlabs_xrdp.defaults.login.group }}"

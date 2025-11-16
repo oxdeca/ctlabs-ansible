@@ -1,0 +1,37 @@
+# -----------------------------------------------------------------------------
+# File: /etc/tmux.conf
+# -----------------------------------------------------------------------------
+
+unbind C-b
+set -g prefix C-a
+set -g default-terminal "screen-256color"
+bind-key C-a last-window
+bind a send-prefix
+set-option -g allow-rename off
+set -g base-index 1
+set-window-option -g mode-keys vi
+setw -g monitor-activity on
+set -g mouse on
+bind | split-window -h
+bind - split-window -v
+unbind '"'
+unbind %
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# vim copy mode
+bind P paste-buffer
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X copy-selection
+bind-key -T copy-mode-vi r send-keys -X rectangle-toggle
+# Update default binding of 'Enter' to also use copy-pipe
+unbind -T copy-mode-vi Enter
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "xclip -selection c"
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
+bind-key -T prefix m set -g mouse\; display 'Mouse: #{?mouse,ON,OFF}'
+
+# statusbar
+set -g status-position bottom
+set -g status-justify left
