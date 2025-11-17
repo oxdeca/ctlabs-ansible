@@ -5,9 +5,32 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+#
+# Debian
+#
 - name: ctlabs_xrdp.tasks.package.debian
   when: ctg_os_family == "debian"
   block:
+    - name: ctlabs_xrdp.tasks.package.debian.keyring.dir
+      file:
+        path : "{{ ctlabs_xrdp.defaults.config.apt_keys }}"
+        state: directory
+
+    - name: ctlabs_xrdp.tasks.package.debian.repo.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_xrdp.defaults.config.apt_keys }}/{{ item.name }}.asc"
+      loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
+
+    - name: ctlabs_xrdp.tasks.package.debian.repo.file
+      apt_repository:
+        repo : "deb [signed-by={{ ctlabs_xrdp.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+      loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
+      
+    - name: ctlabs_xrdp.tasls.package.debian.update
+      apt:
+        update_cache: true
+
     - name: ctlabs_xrdp.tasks.package.debian.install
       apt:
         name               : "{{ item.name }}"
