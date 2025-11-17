@@ -23,10 +23,20 @@
       loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
 
     - name: ctlabs_xrdp.tasks.package.debian.repo.file
+      when: item.format == "apt"
       apt_repository:
-        repo : "deb [signed-by={{ ctlabs_xrdp.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+        repo : "deb [signed-by={{ ctlabs_xrdp.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
       loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
-      
+
+    - name: ctlabs_xrdp.tasks.package.debian.repo.file
+      when: item.format == "deb822"
+      deb822_repository:
+        name  : "{{ item.name }}"
+        types : deb
+        suites: "{{ item.suites }}"
+        uris  : "{{ item.uri }}"
+      loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
+
     - name: ctlabs_xrdp.tasls.package.debian.update
       apt:
         update_cache: true
