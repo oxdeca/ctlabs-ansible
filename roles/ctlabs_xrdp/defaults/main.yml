@@ -49,6 +49,7 @@ ctlabs_xrdp:
           key    : https://apt.releases.hashicorp.com/gpg
         - name   : gcp-sdk
           format : apt
+          release: cloud-sdk
           type   : main
           url    : https://packages.cloud.google.com/apt
           key    : https://packages.cloud.google.com/apt/doc/apt-key.gpg
