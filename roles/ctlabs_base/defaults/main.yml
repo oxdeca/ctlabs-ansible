@@ -5,7 +5,7 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
-ar_plugin_redhat: "{{ 'yum-plugin-artifact-registry' if ansible_distribution_major_version == '7' else 'dnf-plugin-artifact-registry' }}"
+ar_plugin_redhat: "{{ 'yum-plugin-artifact-registry' if ctg_os_version == '7' else 'dnf-plugin-artifact-registry' }}"
 
 # role defaults
 ctlabs_base:
@@ -41,6 +41,8 @@ ctlabs_base:
         - name: qemu-img
         - name: cloud-utils-growpart
         - name: make
+        - name: jq
+        - name: python3-requests
       debian:
         - name : xfsprogs
         - name : apt-transport-artifact-registry

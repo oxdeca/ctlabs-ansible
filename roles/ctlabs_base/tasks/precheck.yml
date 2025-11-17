@@ -33,4 +33,4 @@
 
 - name: ctlabs_base.tasks.precheck.disks
   set_fact:
-    ctlabs_base_disks: "{{ ansible_local.ctlabs_base_disks if ansible_local.ctlabs_base_disks is defined else [] }}"
+    ctlabs_base_disks: "{{ ctg_facts.ctlabs_base_disks if ctg_facts.ctlabs_base_disks is defined else [] }}"

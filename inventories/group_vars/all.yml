@@ -15,6 +15,7 @@ ctg_vault_token : "{{ lookup('env', 'VAULT_TOKEN') }}"
 ctg_os          : "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version if ansible_os_family != 'Windows' }}"
 ctg_os_family   : "{{ ansible_os_family    | lower }}"
 ctg_os_distro   : "{{ ansible_distribution | lower }}"
+ctg_os_release  : "{{ anible_distribution_release | lower }}"
 ctg_os_version  : "{{ ansible_distribution_major_version }}"
 ctg_virtype     : "{{ ansible_virtualization_type | lower }}"
 

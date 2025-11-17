@@ -28,7 +28,7 @@
 
     - name: ctlabs_base.tasks.package.debian.repo.file
       apt_repository:
-        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+        repo : "deb {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
       loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
 
 - name: ctlabs_base.tasks.package.installed
