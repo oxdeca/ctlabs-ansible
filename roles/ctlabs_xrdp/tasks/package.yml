@@ -35,6 +35,7 @@
         types : deb
         suites: "{{ item.suites }}"
         uris  : "{{ item.uri }}"
+        signed_by: "{{ item.key }}"
       loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
 
     - name: ctlabs_xrdp.tasls.package.debian.update
