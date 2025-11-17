@@ -44,7 +44,8 @@
 
     - name: ctlabs_xrdp.tasks.package.debian.install
       apt:
-        name               : "{{ item.name }}"
+        name               : "{{ item.name | default(omit) }}"
+        deb                : "{{ item.uri  | default(omit) }}"
         state              : present
         install_recommends : "{{ item.install_recommends | default(omit) }}"
       loop    : "{{ ctlabs_xrdp.defaults.pkgs[ctg_os_family] }}"

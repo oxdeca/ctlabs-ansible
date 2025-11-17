@@ -34,6 +34,7 @@ ctlabs_xrdp:
         - name: sublime-text
         - name: terraform
         - name: google-cloud-cli
+        - uri : "https://github.com/open-policy-agent/conftest/releases/download/v0.63.0/conftest_0.63.0_linux_amd64.deb"
       redhat: []
     repos:
       dracula:
