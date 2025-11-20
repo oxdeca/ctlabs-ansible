@@ -806,11 +806,20 @@
   roles :
     - roles/ctlabs_foreman
 
-# -----------------------------------------------------------------------------                                                                                 
-# ctlabs_xrdp                                                                  
-# -----------------------------------------------------------------------------                                                                                 
-- name  : ctlabs.playbooks.ctlabs.xrdp                                         
-  hosts : [h3,h4]                                                              
-  tags  : [xrdp]                                                               
-  roles :                                                                      
-    - roles/ctlabs_xrdp 
+# -----------------------------------------------------------------------------
+# ctlabs_xrdp
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.xrdp
+  hosts : [h3,h4]
+  tags  : [xrdp]
+  roles :
+    - roles/ctlabs_xrdp
+
+# -----------------------------------------------------------------------------
+# ctlabs_burp
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.burp
+  hosts : [burp1,burp2]
+  tags  : [burp]
+  roles :
+    - roles/ctlabs_burp
