@@ -14,7 +14,8 @@
   get_url:
     url  : "{{ ctlabs_burp.defaults.pkgs.url       }}"
     dest : "{{ ctlabs_burp.defaults.pkgs.installer }}"
+    mode : '0750'
+    owner: root
 
 - name: ctlabs_burp.tasks.package.install
-  cmd   : "/bin/sh -c '{{ ctlabs_burp.defaults.pkgs.installer }} -q -varfile {{ ctlabs_burp.defaults.install.response.file }} -overwrite'"
-  chdir : /tmp
+  command : "/bin/sh -c '{{ ctlabs_burp.defaults.pkgs.installer }} -q -varfile {{ ctlabs_burp.defaults.install.response.file }} -overwrite'"
