@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_burp/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_burp.tasks.precheck
+  block:
+    - name: ctlabs_burp.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_burp.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+
+    - name: ctlabs_burp.tasks.precheck.virtype
+      assert:
+        that     : ctg_virtype is in ctlabs_burp.virtype
+        fail_msg : "Virtualization Type '{{ ctg_virtype }}' not supported!"
+  rescue:
+    - name: ctlabs_burp.tasks.precheck.skip.unsupported
+      meta: end_host
