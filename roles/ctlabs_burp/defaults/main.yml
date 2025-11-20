@@ -16,7 +16,7 @@ ctlabs_burp:
       url       : "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ versions.burp.community }}"
       installer : /tmp/burp.install
     install:
-      dir     : "/opt/burp-{{ versins.burp.community }}"
+      dir     : "/opt/burp-{{ versions.burp.community }}"
       response:
         template: burp.response.file.j2
         file    : /tmp/burp.response.file
