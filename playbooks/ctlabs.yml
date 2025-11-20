@@ -810,7 +810,7 @@
 # ctlabs_xrdp
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.xrdp
-  hosts : [h3,h4]
+  hosts : [h3,h4,burp1,burp2]
   tags  : [xrdp]
   roles :
     - roles/ctlabs_xrdp
