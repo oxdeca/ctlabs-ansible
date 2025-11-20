@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_burp/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_burp.tasks.package.response.file
+  template:
+    src  : "{{ ctlabs_burp.defaults.install.response.template }}"
+    dest : "{{ ctlabs_burp.defaults.install.response.file     }}"
+
+- name: ctlabs_burp.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_burp.defaults.pkgs.url       }}"
+    dest : "{{ ctlabs_burp.defaults.pkgs.installer }}"
+
+- name: ctlabs_burp.tasks.package.install
+  cmd   : "/bin/sh -c '{{ ctlabs_burp.defaults.pkgs.installer }} -q -varfile {{ ctlabs_burp.defaults.install.response.file }} -overwrite'"
+  chdir : /tmp

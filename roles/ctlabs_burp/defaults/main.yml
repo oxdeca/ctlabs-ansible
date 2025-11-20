@@ -1,0 +1,27 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_burp/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  burp
+    community: 2025.10.5
+
+ctlabs_burp:
+  defaults:
+    pkgs:
+      - name      : burp
+        url       : "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ versions.burp.community }}"
+        installer : /tmp/burp.install
+    install:
+      response:
+        template: burp.response.file.j2
+        file    : /tmp/burp.response.file
+    config:
+    service:
+  os:
+    - debian12
+  virtype:
+    - kvm

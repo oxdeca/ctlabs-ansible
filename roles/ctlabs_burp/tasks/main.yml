@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_burp/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_burp
+    - ctlabs_burp.precheck
+    - ctlabs_burp.package
+    - ctlabs_burp.config
+    - ctlabs_burp.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_burp
+    - ctlabs_burp.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_burp
+    - ctlabs_burp.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_burp
+    - ctlabs_burp.service
