@@ -8,6 +8,7 @@
 ctlabs_smbadc:
   defaults:
     pkgs:
+      - name : python3-urllib3
       - name : samba
       - name : winbind
       #- name : ldap-account-manager
