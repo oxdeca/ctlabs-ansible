@@ -28,6 +28,8 @@ ctlabs_ca:
         cacerts: /etc/ssl/certs/ca-certificates.crt
       redhat:
         cacerts: /etc/pki/tls/cert.pem
+      alpine:
+        cacerts: /etc/ssl/certs/ca-certificates.crt
   os:
     - centos7
     - centos8
@@ -41,3 +43,4 @@ ctlabs_ca:
     - kali2025
     - ubuntu24
     - parrot6
+    - alpine3

@@ -6,9 +6,9 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  k3s   : 1.29.2
-  helm  : 3.16.1
-  nginx : 1.13
+  k3s   : 1.34.3
+  helm  : 4.0.4
+  nginx : 1.14.1
 
 ctlabs_k3s:
   defaults:
@@ -35,7 +35,7 @@ ctlabs_k3s:
         repo : https://argoproj.github.io/argo-helm
     ingress:
       nginx:
-        url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/release-{{ versions.nginx }}/deploy/static/provider/baremetal/deploy.yaml"
+        url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.nginx }}/deploy/static/provider/baremetal/deploy.yaml"
         lb :
           template: ingress-controller-lb.yml.j2
           file    : /tmp/ingress-controller-lb.yml
