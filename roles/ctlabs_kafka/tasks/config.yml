@@ -21,7 +21,7 @@
 - name: ctlabs_kafka.tasks.config.server.auth.perms
   file:
     path: "{{ ctlabs_kafka.defaults.config.dirs.main }}/{{ ctlabs_kafka.defaults.config.server.auth.file }}"
-    owner: ctlabs_kafka.defaults.service.user
-    group: ctlabs_kafka.defaults.service.group
+    owner: "{{ ctlabs_kafka.defaults.service.user  }}"
+    group: "{{ ctlabs_kafka.defaults.service.group }}"
     mode: '0400'
   notify: ctlabs_kafka.handlers.service.kafka.restart
