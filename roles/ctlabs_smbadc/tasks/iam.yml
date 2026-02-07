@@ -2,76 +2,71 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/iam.yml
-# Description : Idempotent IAM management for Samba AD DC (portable version)
+# Description : Idempotent IAM management for Samba AD DC (fully idempotent)
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_smbadc.tasks.iam
   when: ctlabs_smbadc_role == "master"
   block:
-    #
-    # policy
-    #
+    # ==========================================================================
+    # DOMAIN WIDE: Password & account expiration policy
+    # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.policy.password.set
+      command: /usr/bin/samba-tool domain passwordsettings set --max-pwd-age=0 --min-pwd-age=0 --history-length=0
       register: pwd_policy_result
-      command      : /usr/bin/samba-tool domain passwordsettings set --max-pwd-age=0 --min-pwd-age=0 --history-length=0
-      changed_when : "'Updated password settings' in pwd_policy_result.stdout"
-      check_mode   : "{{ ansible_check_mode }}"
+      changed_when: "'Updated password settings' in pwd_policy_result.stdout"
+      check_mode: "{{ ansible_check_mode }}"
 
-    #
-    # existin groups
-    #
+    # ==========================================================================
+    # PHASE 1: Gather baseline state (what already exists)
+    # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.state.groups.gather
-      register: existing_groups_raw
       command: /usr/bin/samba-tool group list
-      changed_when : false
-      check_mode   : false
+      register: existing_groups_raw
+      changed_when: false
+      check_mode: false
 
     - name: ctlabs_smbadc.tasks.iam.state.groups.parse
+      set_fact:
+        existing_groups: >-
+          {{
+            existing_groups_raw.stdout_lines
+            | reject('equalto', '')
+            | reject('search', '^(Group|-----|SID)$')
+            | map('trim')
+            | map('lower')
+            | list
+          }}
       when: existing_groups_raw.rc == 0
-      set_fact :
-        existing_groups: "{{ existing_groups_raw.stdout_lines | reject('equalto', '') | reject('search', '^(Group|-----|SID)$') | map('trim') | map('lower') | list }}"
 
-    #
-    # existing users
-    #
     - name: ctlabs_smbadc.tasks.iam.state.users.gather
-      register: existing_users_raw
       command: /usr/bin/samba-tool user list
-      changed_when : false
-      check_mode   : false
+      register: existing_users_raw
+      changed_when: false
+      check_mode: false
 
     - name: ctlabs_smbadc.tasks.iam.state.users.parse
+      set_fact:
+        existing_users: >-
+          {{
+            existing_users_raw.stdout_lines
+            | reject('equalto', '')
+            | reject('search', '^(User|-----|SID)$')
+            | map('trim')
+            | map('lower')
+            | list
+          }}
       when: existing_users_raw.rc == 0
-      set_fact:
-        existing_users: "{{ existing_users_raw.stdout_lines | reject('equalto', '') | reject('search', '^(User|-----|SID)$') | map('trim') | map('lower') | list }}"
 
-    #
-    # existing group memberships
-    #
-    - name: ctlabs_smbadc.tasks.iam.state.memberships.gather
-      when: domain_roles is defined
-      register: role_group_memberships
-      command: /usr/bin/samba-tool group listmembers "{{ item }}"
-      loop: "{{( domain_roles.admins.groups | default([])) + (domain_roles.netbox_admin.groups | default([])) + (domain_roles.rundeck_admin.groups | default([])) }}"
-      changed_when : false
-      check_mode   : false
-
-    - name: ctlabs_smbadc.tasks.iam.state.memberships.parse
-      when: role_group_memberships is defined and role_group_memberships.results is defined
-      set_fact:
-        group_members: "{{group_members | default({}) | combine({item.item: (item.stdout_lines | map('trim') | map('lower') | list) if item.stdout_lines else [] }) }}"
-      loop: "{{ role_group_memberships.results }}"
-
-
-    #
-    # create ou
-    #
+    # ==========================================================================
+    # PHASE 2: Create structural objects (OUs → Groups)
+    # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.ou.create
-      register : ou_creation
-      command  : /usr/bin/samba-tool ou create "{{ ou_dn }}"
-      loop: "{{ domain_ou | default([]) }}"
       vars:
         ou_dn: "ou={{ item.name }}{{ (',' + item.path) if item.path is defined else '' }},dc={{ ctlabs_smbadc_domain|split('.')|join(',dc=') }}"
+      command: /usr/bin/samba-tool ou create "{{ ou_dn }}"
+      loop: "{{ domain_ou | default([]) }}"
+      register: ou_creation
       failed_when:
         - ou_creation.rc != 0
         - "'already exists' not in ou_creation.stderr | lower"
@@ -79,26 +74,74 @@
       changed_when: ou_creation.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
-    #
-    # create group
-    #
     - name: ctlabs_smbadc.tasks.iam.group.create
-      when: (item.name | lower) not in (existing_groups | default([]))
-      register: group_creation
-      command  :  /usr/bin/samba-tool group add "{{ item.name }}" --groupou="{{ item.ou }}"
+      command: >
+        /usr/bin/samba-tool group add "{{ item.name }}"
+          --groupou="{{ item.ou }}"
       loop: "{{ domain_groups | default([]) }}"
+      when:
+        - (item.name | lower) not in (existing_groups | default([]))
+      register: group_creation
       failed_when:
         - group_creation.rc != 0
         - "'already exists' not in group_creation.stderr | lower"
       changed_when: group_creation.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
-    #
-    # create user
-    #
+    # ==========================================================================
+    # PHASE 3: Re-gather state AFTER groups exist (critical for idempotency)
+    # ==========================================================================
+    - name: ctlabs_smbadc.tasks.iam.state.groups.regather
+      command: /usr/bin/samba-tool group list
+      register: groups_after_create_raw
+      changed_when: false
+      check_mode: false
+
+    - name: ctlabs_smbadc.tasks.iam.state.groups.reparse
+      set_fact:
+        groups_after_create: >-
+          {{
+            groups_after_create_raw.stdout_lines
+            | reject('equalto', '')
+            | reject('search', '^(Group|-----|SID)$')
+            | map('trim')
+            | map('lower')
+            | list
+          }}
+      when: groups_after_create_raw.rc == 0
+
+    - name: ctlabs_smbadc.tasks.iam.state.memberships.gather
+      command: /usr/bin/samba-tool group listmembers "{{ item }}"
+      loop: >-
+        {{
+          (domain_roles.admins.groups | default([]))
+          + (domain_roles.netbox_admin.groups | default([]))
+          + (domain_roles.rundeck_admin.groups | default([]))
+        }}
+      register: role_group_memberships
+      when:
+        - domain_roles is defined
+        - (item | lower) in (groups_after_create | default([]))
+      changed_when: false
+      check_mode: false
+
+    - name: ctlabs_smbadc.tasks.iam.state.memberships.parse
+      set_fact:
+        group_members: >-
+          {{
+            group_members | default({}) | combine({
+              item.item: (item.stdout_lines | map('trim') | map('lower') | list) if (item.rc == 0 and item.stdout_lines) else []
+            })
+          }}
+      loop: "{{ role_group_memberships.results | default([]) }}"
+      when: role_group_memberships is defined and role_group_memberships.results is defined
+
+    # ==========================================================================
+    # PHASE 4: Create users (regular + service)
+    # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.user.create
-      when: ( item.firstname is defined and item.lastname is defined ) and ( (username | lower) not in (existing_users | default([])) )
-      register: user_creation
+      vars:
+        username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
       command: >
         /usr/bin/samba-tool user create "{{ username }}"
           --given-name="{{ item.firstname }}"
@@ -109,12 +152,13 @@
           --login-shell="{{ ctlabs_smbadc.defaults.config.domain.user.shell | default('/bin/bash') }}"
           --home-directory="/home/{{ username }}"
           --random-password
-          --must-change-at-next-login=no
       loop: "{{ domain_users | default([]) }}"
-      vars:
-        username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
       loop_control:
         label: "{{ username }} ({{ item.firstname }} {{ item.lastname }})"
+      when:
+        - item.firstname is defined and item.lastname is defined
+        - (username | lower) not in (existing_users | default([]))
+      register: user_creation
       failed_when:
         - user_creation.rc != 0
         - "'already exists' not in user_creation.stderr | lower"
@@ -122,15 +166,17 @@
       check_mode: "{{ ansible_check_mode }}"
 
     - name: ctlabs_smbadc.tasks.iam.user.password.set
-      when: ( item.firstname is defined and item.lastname is defined ) and ( (username | lower) in (existing_users | default([])) )
-      register: password_set
-      command: /usr/bin/samba-tool user setpassword "{{ username }}" --newpassword="{{ password }}" --must-change-at-next-login=no
-      loop: "{{ domain_users | default([]) }}"
       vars:
         username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
         password: "{{ item.pass | default(ctlabs_smbadc.defaults.config.domain.user.pass) }}"
+      command: /usr/bin/samba-tool user setpassword "{{ username }}" --newpassword="{{ password }}"
+      loop: "{{ domain_users | default([]) }}"
       loop_control:
         label: "{{ username }}"
+      when:
+        - item.firstname is defined and item.lastname is defined
+        - (username | lower) in (existing_users | default([]))
+      register: password_set
       failed_when:
         - password_set.rc != 0
         - "'Failed to set password' in password_set.stderr"
@@ -138,28 +184,32 @@
       check_mode: "{{ ansible_check_mode }}"
 
     - name: ctlabs_smbadc.tasks.iam.user.expiry.disable
-      when: ( item.firstname is defined and item.lastname is defined ) and ( (username | lower) in (existing_users | default([])) )
-      register: expiry_set
-      command: /usr/bin/samba-tool user setexpiry "{{ username }}" --noexpiry
-      loop: "{{ domain_users | default([]) }}"
       vars:
         username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
+      command: /usr/bin/samba-tool user setexpiry "{{ username }}" --noexpiry
+      loop: "{{ domain_users | default([]) }}"
       loop_control:
         label: "{{ username }}"
+      when:
+        - item.firstname is defined and item.lastname is defined
+        - (username | lower) in (existing_users | default([]))
+      register: expiry_set
       failed_when: expiry_set.rc != 0
       changed_when: expiry_set.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
-    #
-    # create service
-    #
     - name: ctlabs_smbadc.tasks.iam.service.create
-      when: ( item.name is defined ) and ( (item.name | lower) not in (existing_users | default([])) )
-      register: svc_user_creation
-      command: /usr/bin/samba-tool user create "{{ item.name }}" --userou="{{ item.ou }}" --random-password --must-change-at-next-login=no
+      command: >
+        /usr/bin/samba-tool user create "{{ item.name }}"
+          --userou="{{ item.ou }}"
+          --random-password
       loop: "{{ domain_services | default([]) }}"
       loop_control:
         label: "{{ item.name }}"
+      when:
+        - item.name is defined
+        - (item.name | lower) not in (existing_users | default([]))
+      register: svc_user_creation
       failed_when:
         - svc_user_creation.rc != 0
         - "'already exists' not in svc_user_creation.stderr | lower"
@@ -167,14 +217,16 @@
       check_mode: "{{ ansible_check_mode }}"
 
     - name: ctlabs_smbadc.tasks.iam.service.password.set
-      when: ( item.name is defined ) and ( (item.name | lower) in (existing_users | default([])) )
-      register: svc_password_set
-      command: /usr/bin/samba-tool user setpassword "{{ item.name }}" --newpassword="{{ password }}" --must-change-at-next-login=no
+      command: /usr/bin/samba-tool user setpassword "{{ item.name }}" --newpassword="{{ password }}"
       loop: "{{ domain_services | default([]) }}"
       vars:
         password: "{{ item.pass | default(ctlabs_smbadc.defaults.config.domain.service.pass) }}"
       loop_control:
         label: "{{ item.name }}"
+      when:
+        - item.name is defined
+        - (item.name | lower) in (existing_users | default([]))
+      register: svc_password_set
       failed_when:
         - svc_password_set.rc != 0
         - "'Failed to set password' in svc_password_set.stderr"
@@ -194,12 +246,13 @@
       changed_when: svc_expiry_set.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
-    #
-    # create group memberships
-    #
+    # ==========================================================================
+    # PHASE 5: Add role-based memberships (groups guaranteed to exist now)
+    # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.membership.admins.add
-      when: ( domain_roles.admins.groups is defined ) and ( svc_user not in (group_members[target_group] | default([])) )
-      register: admin_membership
+      vars:
+        svc_user: "{{ item.0.name | lower }}"
+        target_group: "{{ item.1 }}"
       command: /usr/bin/samba-tool group addmembers "{{ target_group }}" "{{ svc_user }}"
       loop: >-
         {{
@@ -209,13 +262,14 @@
           | product((domain_roles.admins.groups | default([])) | list)
           | list
         }}
-      vars:
-        svc_user: "{{ item.0.name | lower }}"
-        target_group: "{{ item.1 }}"
+      when:
+        - domain_roles.admins.groups is defined
+        - (target_group | lower) in (groups_after_create | default([]))
+        - svc_user not in (group_members[target_group] | default([]))
+      register: admin_membership
       failed_when:
         - admin_membership.rc != 0
         - "'already a member' not in admin_membership.stderr | lower"
-        - "'No such group' not in admin_membership.stderr | lower"
       changed_when: admin_membership.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
@@ -234,12 +288,12 @@
         }}
       when:
         - domain_roles.netbox_admin.groups is defined
+        - (target_group | lower) in (groups_after_create | default([]))
         - username not in (group_members[target_group] | default([]))
       register: netbox_membership
       failed_when:
         - netbox_membership.rc != 0
         - "'already a member' not in netbox_membership.stderr | lower"
-        - "'No such group' not in netbox_membership.stderr | lower"
       changed_when: netbox_membership.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
@@ -258,12 +312,12 @@
         }}
       when:
         - domain_roles.rundeck_admin.groups is defined
+        - (target_group | lower) in (groups_after_create | default([]))
         - username not in (group_members[target_group] | default([]))
       register: rundeck_membership
       failed_when:
         - rundeck_membership.rc != 0
         - "'already a member' not in rundeck_membership.stderr | lower"
-        - "'No such group' not in rundeck_membership.stderr | lower"
       changed_when: rundeck_membership.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
