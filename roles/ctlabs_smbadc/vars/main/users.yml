@@ -31,6 +31,9 @@ domain_users:
     uid       : 5003
     gid       : 5003
     ou        : ou=users
+    roles     :
+      - netbox_admin
+      - rundeck_admin
 
 domain_services:
 
