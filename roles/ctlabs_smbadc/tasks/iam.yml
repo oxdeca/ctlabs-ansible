@@ -1,16 +1,21 @@
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/iam.yml
-# Description : Idempotent IAM management for Samba AD DC (dynamic memberships)
+# Description : Idempotent IAM management for Samba AD DC (default passwords + dynamic)
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_smbadc.tasks.iam
   when: ctlabs_smbadc_role == "master"
   block:
     # ==========================================================================
-    # DOMAIN WIDE: Password & account expiration policy (MUST come first)
+    # DOMAIN WIDE: Password policy (disable expiration + complexity for labs)
     # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.policy.password.set
-      command: /usr/bin/samba-tool domain passwordsettings set --max-pwd-age=0 --min-pwd-age=0 --history-length=0 --complexity=off
+      command: >-
+        /usr/bin/samba-tool domain passwordsettings set
+          --max-pwd-age=0
+          --min-pwd-age=0
+          --history-length=0
+          --complexity=off
       register: pwd_policy_result
       changed_when: "'Updated password settings' in pwd_policy_result.stdout"
       check_mode: "{{ ansible_check_mode }}"
@@ -73,7 +78,7 @@
       check_mode: "{{ ansible_check_mode }}"
 
     - name: ctlabs_smbadc.tasks.iam.group.create
-      command: >
+      command: >-
         /usr/bin/samba-tool group add "{{ item.name }}"
           --groupou="{{ item.ou }}"
       loop: "{{ domain_groups | default([]) }}"
@@ -130,14 +135,16 @@
       when: role_group_memberships is defined and role_group_memberships.results is defined
 
     # ==========================================================================
-    # PHASE 4: Create regular users
+    # PHASE 4: Create regular users with DEFAULT password
+    # Critical: Pass password as separate argument to avoid shell escaping issues
     # ==========================================================================
-    - name: ctlabs_smbadc.tasks.iam.user.create.with_password
+    - name: ctlabs_smbadc.tasks.iam.user.create
       vars:
         username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
-      command: >
+        default_pass: "{{ ctlabs_smbadc.defaults.config.domain.user.pass }}"
+      command: >-
         /usr/bin/samba-tool user create "{{ username }}"
-          "{{ item.pass }}"
+          "{{ default_pass }}"
           --given-name="{{ item.firstname }}"
           --surname="{{ item.lastname }}"
           --userou="{{ item.ou }}"
@@ -150,73 +157,24 @@
         label: "{{ username }} ({{ item.firstname }} {{ item.lastname }})"
       when:
         - item.firstname is defined and item.lastname is defined
-        - item.pass is defined
         - (username | lower) not in (existing_users | default([]))
-      register: user_creation_with_pass
+      register: user_creation
       failed_when:
-        - user_creation_with_pass.rc != 0
-        - "'already exists' not in user_creation_with_pass.stderr | lower"
-      changed_when: user_creation_with_pass.rc == 0
-      check_mode: "{{ ansible_check_mode }}"
-
-    - name: ctlabs_smbadc.tasks.iam.user.create.random
-      vars:
-        username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
-      command: >
-        /usr/bin/samba-tool user create "{{ username }}"
-          --given-name="{{ item.firstname }}"
-          --surname="{{ item.lastname }}"
-          --userou="{{ item.ou }}"
-          {% if item.uid is defined %}--uid-number="{{ item.uid }}"{% endif %}
-          {% if item.gid is defined %}--gid-number="{{ item.gid }}"{% endif %}
-          --login-shell="{{ ctlabs_smbadc.defaults.config.domain.user.shell | default('/bin/bash') }}"
-          --home-directory="/home/{{ username }}"
-          --random-password
-      loop: "{{ domain_users | default([]) }}"
-      loop_control:
-        label: "{{ username }} ({{ item.firstname }} {{ item.lastname }})"
-      when:
-        - item.firstname is defined and item.lastname is defined
-        - item.pass is not defined
-        - (username | lower) not in (existing_users | default([]))
-      register: user_creation_random
-      failed_when:
-        - user_creation_random.rc != 0
-        - "'already exists' not in user_creation_random.stderr | lower"
-      changed_when: user_creation_random.rc == 0
+        - user_creation.rc != 0
+        - "'already exists' not in user_creation.stderr | lower"
+      changed_when: user_creation.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
     # ==========================================================================
-    # PHASE 5: Update passwords for existing users (idempotent rotation)
-    # ==========================================================================
-    - name: ctlabs_smbadc.tasks.iam.user.password.update
-      vars:
-        username: "{{ (item.lastname[0:5] + item.firstname[0:2]) | lower }}"
-      command: >
-        /usr/bin/samba-tool user setpassword "{{ username }}"
-          --newpassword="{{ item.pass }}"
-      loop: "{{ domain_users | default([]) }}"
-      loop_control:
-        label: "{{ username }}"
-      when:
-        - item.firstname is defined and item.lastname is defined
-        - item.pass is defined
-        - (username | lower) in (existing_users | default([]))
-      register: password_update
-      failed_when:
-        - password_update.rc != 0
-        - "'Failed to set password' in password_update.stderr"
-      changed_when: password_update.rc == 0
-      check_mode: "{{ ansible_check_mode }}"
-
-    # ==========================================================================
-    # PHASE 6: Create service accounts
+    # PHASE 5: Create service accounts with DEFAULT password
     # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.service.create
-      command: >
+      vars:
+        default_pass: "{{ ctlabs_smbadc.defaults.config.domain.service.pass }}"
+      command: >-
         /usr/bin/samba-tool user create "{{ item.name }}"
+          "{{ default_pass }}"
           --userou="{{ item.ou }}"
-          --random-password
       loop: "{{ domain_services | default([]) }}"
       loop_control:
         label: "{{ item.name }}"
@@ -230,26 +188,8 @@
       changed_when: svc_user_creation.rc == 0
       check_mode: "{{ ansible_check_mode }}"
 
-    - name: ctlabs_smbadc.tasks.iam.service.password.update
-      command: >
-        /usr/bin/samba-tool user setpassword "{{ item.name }}"
-          --newpassword="{{ item.pass }}"
-      loop: "{{ domain_services | default([]) }}"
-      loop_control:
-        label: "{{ item.name }}"
-      when:
-        - item.name is defined
-        - item.pass is defined
-        - (item.name | lower) in (existing_users | default([]))
-      register: svc_password_update
-      failed_when:
-        - svc_password_update.rc != 0
-        - "'Failed to set password' in svc_password_update.stderr"
-      changed_when: svc_password_update.rc == 0
-      check_mode: "{{ ansible_check_mode }}"
-
     # ==========================================================================
-    # PHASE 7: Disable account expiration for ALL users
+    # PHASE 6: Disable account expiration for ALL users (existing + newly created)
     # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.state.users.regather
       command: /usr/bin/samba-tool user list
@@ -299,7 +239,8 @@
       check_mode: "{{ ansible_check_mode }}"
 
     # ==========================================================================
-    # PHASE 8: DYNAMIC GROUP MEMBERSHIPS (single task for all roles)
+    # PHASE 7: DYNAMIC GROUP MEMBERSHIPS (single task for all roles)
+    # Works with ANY role defined in domain_roles structure
     # ==========================================================================
     - name: ctlabs_smbadc.tasks.iam.state.memberships.build
       set_fact:
