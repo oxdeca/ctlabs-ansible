@@ -23,6 +23,7 @@ advertised.listeners=INTERNAL://{{ ansible_default_ipv4.address }}:9093,EXTERNAL
 listener.security.protocol.map       = INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
 sasl.enabled.mechanisms              = PLAIN
 sasl.mechanism.inter.broker.protocol = PLAIN
+super.users                          = User:admin
 
 # 4. Keep internal traffic on the INTERNAL listener
 inter.broker.listener.name = INTERNAL

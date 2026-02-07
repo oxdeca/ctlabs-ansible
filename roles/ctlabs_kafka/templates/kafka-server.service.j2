@@ -11,6 +11,7 @@ Group=kafka
 #PIDFile=/var/tmp/kafka.pid
 WorkingDirectory={{ ctlabs_kafka.defaults.install.root_dir }}
 
+Environment="KAFKA_OPTS=-Djava.security.auth.login.config={{ ctlabs_kafka.defaults.config.dirs.main }}/{{ ctlabs_kafka.defaults.config.server.auth.file }}"
 ExecStart={{ ctlabs_kafka.defaults.install.root_dir }}/bin/kafka-server-start.sh {{ ctlabs_kafka.defaults.install.root_dir }}/config/server.properties
 
 Restart=on-failure
