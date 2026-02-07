@@ -284,6 +284,18 @@
             }
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.kafka.local_facts
+      when: ansible_hostname in ['kafka1', 'kafka2']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_kafka.fact
+        content: |
+          {
+            "kafka" : {
+              "server_address" : "{{ CTLABS_HOST }}:9092",
+              "auth_method"    : "SASL_PLAINTEXT"
+            }
+          }
+
     - name: ctlabs.playbooks.ctlabs.setup.k3s.server.local_facts
       when: ansible_hostname in ['k3s1']
       copy:
@@ -409,6 +421,15 @@
   tags  : rundeck
   roles :
     - roles/ctlabs_rundeck
+
+# -----------------------------------------------------------------------------
+# ctlabs_kafka
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.kafka
+  hosts : [kafka1, kafka2]
+  tags  : kafka
+  roles :
+    - roles/ctlabs_kafka
 
 # -----------------------------------------------------------------------------
 # ctlabs_openvpn

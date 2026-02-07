@@ -6,3 +6,14 @@
 # ------------------------------------------------------------------------------
 
 
+- name: ctlabs_kafka.tasks.config.server.main
+  template:
+    src : "{{ ctlabs_kafka.defaults.config.server.main.template }}"
+    dest: "{{ ctlabs_kafka.defaults.config.dirs.main }}/{{ ctlabs_kafka.defaults.config.server.main.file }}"
+  notify: ctlabs_kafka.handlers.service.restart
+
+- name: ctlabs_kafka.tasks.config.server.auth
+  template:
+    src  : "{{ ctlabs_kafka.defaults.config.server.auth.template }}"
+    dest : "{{ ctlabs_kafka.defaults.config.dirs.main }}/{{ ctlabs_kafka.defaults.config.server.auth.file }}"
+  notify: ctlabs_kafka.handlers.service.kafka.restart

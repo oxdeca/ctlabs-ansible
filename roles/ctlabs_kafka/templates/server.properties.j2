@@ -1,0 +1,50 @@
+# -----------------------------------------------------------------------------
+# File: ctlabs-ansible/roles/ctlabs_kafka/templates/server.properties
+# Desc: /opt/kafka/config/server.properties
+# -----------------------------------------------------------------------------
+
+broker.id=0
+############################# Split Brain / NAT Settings #############################
+
+# 1. Define Two Listeners bound to your internal IP
+#    - INTERNAL (Port 9093): For in ctlab-internal communication
+#    - EXTERNAL (Port 9092): For external communication
+listeners=INTERNAL://{{ ansible_default_ipv4.address }}:9093,EXTERNAL://{{ ansible_default_ipv4.address }}:9092
+
+# 2. Advertise Different Addresses
+#    - INTERNAL: "Broker, talk to yourself at 192.168.10.13:9093" (Safe!)
+#    - EXTERNAL: "Streamlit App, talk to me at 172.20.1.155:9092"
+advertised.listeners=INTERNAL://{{ ansible_default_ipv4.address }}:9093,EXTERNAL://{{ ctlabs_kafka_server_address }}
+
+# 3. Map Protocols
+#listener.security.protocol.map = INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+# 3b. Enable SASL PLAIN mechanism
+listener.security.protocol.map       = INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+sasl.enabled.mechanisms              = PLAIN
+sasl.mechanism.inter.broker.protocol = PLAIN
+
+# 4. Keep internal traffic on the INTERNAL listener
+inter.broker.listener.name = INTERNAL
+
+num.network.threads                      = 3
+num.io.threads                           = 8
+num.partitions                           = 1
+num.recovery.threads.per.data.dir        = 1
+offsets.topic.replication.factor         = 1
+
+socket.send.buffer.bytes                 = 102400
+socket.receive.buffer.bytes              = 102400
+socket.request.max.bytes                 = 104857600
+
+log.dirs                                 = /tmp/kafka-logs
+log.retention.hours                      = 168
+log.retention.check.interval.ms          = 300000
+
+transaction.state.log.replication.factor = 1
+transaction.state.log.min.isr            = 1
+
+zookeeper.connect                        = localhost:2181
+zookeeper.connection.timeout.ms          = 18000
+
+group.initial.rebalance.delay.ms         = 0

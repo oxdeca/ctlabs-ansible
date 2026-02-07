@@ -16,7 +16,6 @@ domain_users:
     uid       : 5001
     gid       : 5001
     ou        : ou=users
-    pass      : secret123!
     roles     :
       - netbox_admin
       - rundeck_admin
@@ -26,14 +25,12 @@ domain_users:
     uid       : 5002
     gid       : 5002
     ou        : ou=users
-    pass      : secret123!
 
   - firstname : Michael
     lastname  : Jones
     uid       : 5003
     gid       : 5003
     ou        : ou=users
-    pass      : secret123!
 
 domain_services:
 
@@ -54,13 +51,11 @@ domain_services:
     uid  : 4003
     gid  : 4003
     ou   : ou=services
-    pass : secret123!
 
   - name : sssd
     uid  : 4004
     gid  : 4004
     ou   : ou=services
-    pass : secret123!
     roles:
       - admins
 
@@ -68,5 +63,4 @@ domain_services:
     uid  : 4005
     gid  : 4005
     ou   : ou=services
-    pass : secret123!
 

@@ -5,6 +5,11 @@
 # Description : main ctlabs_smbadc tasks file.
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_smbadc.tasks.package.debian.update.cache
+  when: ctg_os_family == 'debian'
+  apt:
+    update_cache: true
+
 - name: ctlabs_smbadc.tasks.package.installed
   package:
     name    : "{{ item.name }}"

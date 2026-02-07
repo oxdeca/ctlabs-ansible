@@ -28,8 +28,8 @@ ctlabs_smbadc:
       admin:
         user : Administrator
         pass : secret123!
-      role       : master
-      dns        :
+      role: master
+      dns:
         - "{{ ansible_default_ipv4.address }}"
         - 127.0.0.11
       tls:
@@ -48,6 +48,9 @@ ctlabs_smbadc:
       domain:
         user:
           shell: /bin/bash
+          pass: secret123!
+        service:
+          pass: secret123!
     service:
       name  : samba-ad-dc.service
       user  : samba
