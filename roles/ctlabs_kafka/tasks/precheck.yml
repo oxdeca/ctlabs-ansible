@@ -20,7 +20,7 @@
 
 - name: ctlabs_kafka.tasks.precheck.kafka.server_address.var
   set_fact:
-    ctlabs_kafka_server_address: "{{ CTLABS_KAFKA_SERVER_ADDRESS | default(ctlabs_kafka.defaults.config.kafka.server_address) }}"
+    ctlabs_kafka_server_address: "{{ CTLABS_KAFKA_SERVER_ADDRESS | default(ctlabs_kafka.defaults.config.server.address) }}"
 
 - name: ctlabs_kafka.tasks.precheck.kafka.server_address.local_fact
   set_fact:
