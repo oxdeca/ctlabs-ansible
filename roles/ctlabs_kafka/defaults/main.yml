@@ -24,13 +24,14 @@ ctlabs_kafka:
       root_dir : /opt/kafka
     config:
       certs:
-        src : /etc/ca-ctlabs
-        dir : /etc/kibana/certs
-        crt : "{{ ansible_nodename }}.crt"
-        key : "{{ ansible_nodename }}.prv"
-        ca  : ca-ctlabs.crt
+        dir  : /etc/ca-ctlabs
+        crt  : "{{ ansible_nodename }}.crt"
+        key  : "{{ ansible_nodename }}.prv"
+        pass : secret123!
+        ca   : ca-ctlabs.crt
       dirs:
         main: /opt/kafka/config
+        tls:  /opt/kafka/config/tls
       server:
         address: "192.168.100.166:9092"
         main:

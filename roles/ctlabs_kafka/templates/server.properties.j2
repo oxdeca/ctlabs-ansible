@@ -18,12 +18,15 @@ advertised.listeners=INTERNAL://{{ ansible_default_ipv4.address }}:9093,EXTERNAL
 
 # 3. Map Protocols
 #listener.security.protocol.map = INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+# Listener mapping (SASL over TLS)
+#listener.security.protocol.map       = INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+listener.security.protocol.map=INTERNAL:PLAINTEXT,EXTERNAL:SASL_SSL
 
 # 3b. Enable SASL PLAIN mechanism
-listener.security.protocol.map       = INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
 sasl.enabled.mechanisms              = PLAIN
 sasl.mechanism.inter.broker.protocol = PLAIN
-super.users                          = User:admin
+super.users                          = User:admin;User:ctlabs
+auto.create.topics.enable            = true
 
 # 4. Keep internal traffic on the INTERNAL listener
 inter.broker.listener.name = INTERNAL
@@ -49,3 +52,17 @@ zookeeper.connect                        = localhost:2181
 zookeeper.connection.timeout.ms          = 18000
 
 group.initial.rebalance.delay.ms         = 0
+
+# TLS configuration (PKCS12 format)
+ssl.keystore.location                    = {{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.keystore.p12
+ssl.keystore.password                    = {{ ctlabs_kafka.defaults.config.certs.pass }}
+ssl.key.password                         = {{ ctlabs_kafka.defaults.config.certs.pass }}
+ssl.keystore.type                        = PKCS12
+
+ssl.truststore.location                  = {{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.truststore.p12
+ssl.truststore.password                  = {{ ctlabs_kafka.defaults.config.certs.pass }}
+ssl.truststore.type                      = PKCS12
+
+ssl.client.auth                          = required
+ssl.protocol                             = TLSv1.3
+ssl.enabled.protocols                    = TLSv1.2,TLSv1.3

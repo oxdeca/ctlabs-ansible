@@ -25,3 +25,66 @@
     group: "{{ ctlabs_kafka.defaults.service.group }}"
     mode: '0400'
   notify: ctlabs_kafka.handlers.service.kafka.restart
+
+- name: ctlabs_kafka.tasks.config.cert.dir
+  file:
+    path : "{{ ctlabs_kafka.defaults.config.dirs.tls }}"
+    owner: "{{ ctlabs_kafka.defaults.service.user  }}"
+    group: "{{ ctlabs_kafka.defaults.service.group }}"
+    mode: '0700'
+    state: directory
+
+# ------------------------------------------------------------------
+# 1. Convert PEM cert + key → PKCS12 keystore
+# ------------------------------------------------------------------
+- name: ctlabs_kafka.tasks.config.keystore.create
+  command: >
+    openssl pkcs12 -export
+    -in "{{ ctlabs_ca.defaults.config.certs.dir }}/{{ ctlabs_kafka.defaults.config.certs.crt }}"
+    -inkey "{{ ctlabs_ca.defaults.config.certs.dir }}/{{ ctlabs_kafka.defaults.config.certs.key }}"
+    -out "{{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.keystore.p12"
+    -name "{{ ansible_nodename }}"
+    -CAfile "{{ ctlabs_ca.defaults.config.certs.dir }}/{{ ctlabs_kafka.defaults.config.certs.ca }}"
+    -caname "CA-Ctlabs"
+    -password pass:{{ ctlabs_kafka.defaults.config.certs.pass }}
+#  args:
+#    creates: "{{ ctlabs_kafka.defaults.tls.keystore_path }}"
+#    warn: false
+  become: true
+  become_user: kafka
+  notify: ctlabs_kafka.handlers.service.kafka.restart
+
+# ------------------------------------------------------------------
+# 2. Convert CA PEM → PKCS12 truststore
+# ------------------------------------------------------------------
+- name: ctlabs_kafka.tasks.config.truststore.create
+  command: >
+    openssl pkcs12 -export
+    -in "{{ ctlabs_ca.defaults.config.certs.dir }}/{{ ctlabs_kafka.defaults.config.certs.ca }}"
+    -nokeys
+    -out "{{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.truststore.p12"
+    -name "CA-Ctlabs"
+    -password pass:{{ ctlabs_kafka.defaults.config.certs.pass }}
+#  args:
+#    creates: "{{ ctlabs_kafka.defaults.tls.truststore_path }}"
+#    warn: false
+  become: true
+  become_user: kafka
+  notify: ctlabs_kafka.handlers.service.kafka.restart
+
+# ------------------------------------------------------------------
+# 3. Secure keystore/truststore permissions
+# ------------------------------------------------------------------
+- name: ctlabs_kafka.tasks.config.keystore.secure
+  file:
+    path: "{{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.keystore.p12"
+    owner: kafka
+    group: kafka
+    mode: '0400'
+
+- name: ctlabs_kafka.tasks.config.truststore.secure
+  file:
+    path: "{{ ctlabs_kafka.defaults.config.dirs.tls }}/kafka.truststore.p12"
+    owner: kafka
+    group: kafka
+    mode: '0444'  # Truststore can be readable by others (no secrets)
