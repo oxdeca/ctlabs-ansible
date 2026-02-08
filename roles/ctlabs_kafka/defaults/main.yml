@@ -41,8 +41,9 @@ ctlabs_kafka:
           template : kafka_server_jaas.conf.j2
           file     : kafka_server_jaas.conf
     service:
-      user : kafka
-      group: kafka
+      user  : kafka
+      group : kafka
+      groups: [certs]
       zookeeper:
         name     : kafka-zookeeper.service
         template : kafka-zookeeper.service.j2

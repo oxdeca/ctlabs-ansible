@@ -47,6 +47,12 @@
     group  : "{{ ctlabs_kafka.defaults.service.group }}"
     system : true
 
+- name: ctlabs_kafka.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_kafka.defaults.service.user   }}"
+    group : "{{ ctlabs_kafka.defaults.service.group  }}"
+    groups: "{{ ctlabs_kafka.defaults.service.groups }}"
+
 - name: ctlabs_kafka.tasks.package.download
   get_url:
     url  : "{{ ctlabs_kafka.defaults.pkgs.kafka.url    }}" 
