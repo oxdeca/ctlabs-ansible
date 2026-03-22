@@ -61,3 +61,15 @@
     name  : "{{ ctlabs_vault.defaults.service.user   }}"
     group : "{{ ctlabs_vault.defaults.service.group  }}"
     groups: "{{ ctlabs_vault.defaults.service.groups }}"
+
+
+#
+# Backup Script
+#
+- name: ctlabs_vault.tasks.package.backup.script
+  copy:
+    src   : "{{ ctlabs_vault.defaults.files.backup.script }}"
+    dest  : "{{ ctlabs_vault.defaults.files.backup.dst    }}"
+    owner : root
+    group : root
+    mode  : '0750'

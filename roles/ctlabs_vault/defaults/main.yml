@@ -6,7 +6,8 @@
 # ------------------------------------------------------------------------------
 
 # env vars
-CTLABS_VAULT_SERVER: 'false'
+CTLABS_VAULT_SERVER: false
+CTLABS_VAULT_AGENT : false
 CMD_IP_PATH        : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
 
 # role defaults
@@ -35,6 +36,10 @@ ctlabs_vault:
           when: "{{ ctg_os == 'debian12' }}"
       pips:
         - hvac
+    files:
+      backup:
+        script: vault-backup.py
+        dst   : /usr/sbin/vault-backup.py
     config:
       dir   : /etc/vault.d
       server:

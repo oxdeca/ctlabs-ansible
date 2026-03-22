@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  atlantis: 0.32.0
+  atlantis: 0.40.0
 
 ctlabs_atlantis:
   defaults:
@@ -15,27 +15,27 @@ ctlabs_atlantis:
         - name: hashicorp
           url : "https://rpm.releases.hashicorp.com/RHEL/{{ '8' if ctg_os in ['redhat7'] else '$releasever' }}/$basearch/stable"
           key : https://rpm.releases.hashicorp.com/gpg
-        - name: gcp-sdk
-          url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if ctg_os in ['redhat7'] else '$releasever' }}-$basearch"
-          key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        #- name: gcp-sdk
+        #  url : "https://packages.cloud.google.com/yum/repos/cloud-sdk-el{{ '8' if ctg_os in ['redhat7'] else '$releasever' }}-$basearch"
+        #  key : https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
       debian:
         - name: hashicorp
           type: main
           url : https://apt.releases.hashicorp.com 
           key : https://apt.releases.hashicorp.com/gpg
-        - name: gcp-sdk
-          type: main
-          url : https://packages.cloud.google.com/apt
-          key : https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        #- name: gcp-sdk
+        #  type: main
+        #  url : https://packages.cloud.google.com/apt
+        #  key : https://packages.cloud.google.com/apt/doc/apt-key.gpg
     pkgs:
       debian:
         - name : git
         - name : terraform
-        - name : google-cloud-cli
+        #- name : google-cloud-cli
       redhat:
         - name : git
         - name : terraform
-        - name : google-cloud-cli
+        #- name : google-cloud-cli
       atlantis:
         version : "{{ versions.atlantis }}"
         bin     : atlantis

@@ -24,3 +24,5 @@ ctg_systemd_dir : "/etc/systemd/system"
 ctg_todaysdate  : "{{ lookup('pipe', '/usr/bin/date +%Y%m%d') }}"
 ctg_uxtime      : "{{ lookup('pipe', '/usr/bin/date +%s')   }}"
 ctg_vendor      : "{{ ansible_system_vendor | lower }}"
+
+ctg_cmd_ip      : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"

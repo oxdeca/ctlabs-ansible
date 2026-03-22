@@ -49,8 +49,6 @@
       mv "{{ ctlabs_slapd.defaults.config[ctg_os_family].slapd_dir }}" "{{ ctlabs_slapd.defaults.config[ctg_os_family].slapd_dir }}.bak"
     fi
   ignore_errors: true
-    #src : "{{ ctlabs_slapd.defaults.config.slapd_dir }}"
-    #dest: "{{ ctlabs_slapd.defaults.config.slapd_dir }}.bak"
 
 - name: ctlabs_slapd.tasks.config.schemas
   copy:

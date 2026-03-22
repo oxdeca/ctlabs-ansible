@@ -32,8 +32,11 @@ ctlabs_xrdp:
         - name: python3-pytest
         - name: python3-requests
         - name: sublime-text
+        - name: sublime-merge
         - name: terraform
-        - name: google-cloud-cli
+        #- name: google-cloud-cli
+        - name: fonts-noto-color-emoji
+        - name: sshfs
         - uri : "https://github.com/open-policy-agent/conftest/releases/download/v0.63.0/conftest_0.63.0_linux_amd64.deb"
       redhat: []
     repos:
