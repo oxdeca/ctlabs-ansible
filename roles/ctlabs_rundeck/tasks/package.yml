@@ -19,8 +19,7 @@
 
     - name: ctlabs_rundeck.tasks.package.install
       dnf:
-        name    : "{{ item.name }}"
-
+        name: "{{ item.name }}"
         state : present
       loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
 

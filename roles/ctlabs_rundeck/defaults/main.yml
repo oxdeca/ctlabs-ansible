@@ -15,6 +15,7 @@ ctlabs_rundeck:
       redhat:
         file     : /etc/yum.repos.d/rundeck.repo
         template : rundeck.repo.j2
+        gpg      : https://docs.rundeck.com/keys/BUILD-GPG-KEY-20260105.key
       debian:
         file     :
         template :
