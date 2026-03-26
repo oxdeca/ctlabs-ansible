@@ -6,20 +6,26 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_rundeck.tasks.package
+  when: ctg_os_family == 'redhat'
   block:
-    - name: ctlabs_rundeck.tasks.package.repo
-      when: ctg_os_family == 'redhat'
+    - name: ctlabs_rundeck.tasks.package.repo.setup
       template:
         src  : "{{ ctlabs_rundeck.defaults.repo[ctg_os_family].template }}"
         dest : "{{ ctlabs_rundeck.defaults.repo[ctg_os_family].file     }}"
 
+    - name: ctlabs_rundeck.tasks.package.repo.gpg
+      rpm_key:
+        key: "{{ ctlabs_rundeck.defaults.repo[ctg_os_family].gpg }}"
+
     - name: ctlabs_rundeck.tasks.package.install
-      package:
+      dnf:
         name    : "{{ item.name }}"
+
         state : present
       loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
 
 - name: ctlabs_rundeck.tasks.package
+  when: ctg_os_family == 'debian'
   block:
 #    - name: ctlabs_rundeck.tasks.package.install.redhat
 #      when: ctg_os_family == 'redhat'
@@ -30,7 +36,7 @@
 #      loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
 
     - name: ctlabs_rundeck.tasks.package.url.install.debian
-      when: ctg_os_family == 'debian' and item.url is defined
+      when: item.url is defined
       apt:
         deb   : "{{ item.url }}"
         state : present
@@ -39,7 +45,7 @@
       until   : result is success
 
     - name: ctlabs_rundeck.tasks.package.apt.install.debian
-      when: ctg_os_family == 'debian' and item.name is defined
+      when: item.name is defined
       apt:
         name   : "{{ item.name }}"
         state : present
