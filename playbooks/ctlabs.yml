@@ -9,7 +9,7 @@
 # check that all nodes are up
 # -----------------------------------------------------------------------------
 - name        : ctlabs.playbook.nodes.up
-  hosts       : all
+  hosts       : all:!rhosts
   tags        : up
   gather_facts: false
   tasks       :
@@ -21,7 +21,7 @@
 # ctlabs setup
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.setup
-  hosts : all
+  hosts : all:!rhosts
   tags  : setup
   tasks :
     - name: ctlabs.playbooks.ctlabs.setup.local_facts.dir
@@ -388,7 +388,7 @@
 # -----------------------------------------------------------------------------
     
 - name  : ctlabs.playbooks.ctlabs.ca
-  hosts : all
+  hosts : all:!rhosts
   tags  : ca
   roles :
     - roles/ctlabs_ca
