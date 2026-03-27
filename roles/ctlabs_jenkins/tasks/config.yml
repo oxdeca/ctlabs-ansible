@@ -15,13 +15,13 @@
 - name: ctlabs_jenkins.tasks.config.copy.passfile
   copy:
     src  : "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}"
-    dest : "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export"
+    dest : "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}"
 
 - name: ctlabs_jenkins.tasks.config.read.pass
   slurp:
     src: "{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}"
   register: cert_pass
-  no_log  : true
+  #no_log  : true
 
 - name: ctlabs_jenkins.tasks.config.fact.pass
   set_fact:
@@ -46,10 +46,10 @@
     keytool -importkeystore \
       -srckeystore        {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
       -srcstoretype       PKCS12 \
-      -srcstorepass:file  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
+      -srcstorepass:file  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
       -destkeystore       {{ ctlabs_jenkins.defaults.config.dir }}/{{ ctlabs_jenkins.defaults.config.keystore.file }} \
       -deststoretype      {{ ctlabs_jenkins.defaults.config.keystore.type }} \
-      -deststorepass:file {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
+      -deststorepass:file {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
       -srcalias           {{ ansible_nodename }} \
       -destalias          {{ ansible_nodename }}
   args:
