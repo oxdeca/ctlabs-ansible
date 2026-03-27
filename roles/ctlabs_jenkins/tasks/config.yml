@@ -36,8 +36,8 @@
      -inkey   {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.key }} \
      -out     {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
      -name    {{ ansible_nodename }} \
-     -passin  file:{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
-     -passout file:{{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
+     -passin  pass:{{ ctlabs_jenkins_cert_pass }} \
+     -passout pass:{{ ctlabs_jenkins_cert_pass }} \
      -CAfile  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.ca }}
 
 # keytool -importkeystore -srckeystore ansible.ctlabs.internal.p12 -srcstoretype PKCS12 -srcstorepass secret123! -destkeystore /etc/jenkins/keystore.jks -deststoretype JKS -deststorepass secret123! -srcalias ansible.ctlabs.internal -destalias ansible.ctlabs.internal
@@ -46,7 +46,7 @@
     keytool -importkeystore \
       -srckeystore        {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.p12 }} \
       -srcstoretype       PKCS12 \
-      -srcstorepass:file  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }}.export \
+      -srcstorepass:file  {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
       -destkeystore       {{ ctlabs_jenkins.defaults.config.dir }}/{{ ctlabs_jenkins.defaults.config.keystore.file }} \
       -deststoretype      {{ ctlabs_jenkins.defaults.config.keystore.type }} \
       -deststorepass:file {{ ctlabs_jenkins.defaults.config.certs.dir }}/{{ ctlabs_jenkins.defaults.config.certs.passfile }} \
