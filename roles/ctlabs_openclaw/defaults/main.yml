@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+
+ctlabs_openclaw:
+  defaults:
+    pkgs:
+      debian:
+        - name: nodejs
+        - name: git
+      redhat:
+        - name: nodejs
+    script:
+      - url : https://openclaw.ai/install.sh
+        path: /tmp/install.sh
+    config:
+    service:
+      template: openclaw.service.j2
+      file    : "{{ ctg_systemd_dir }}/openclaw.service"
+  os:
+    - debian12

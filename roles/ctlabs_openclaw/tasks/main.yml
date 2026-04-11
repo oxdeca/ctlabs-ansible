@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_openclaw
+    - ctlabs_openclaw.precheck
+    - ctlabs_openclaw.package
+    - ctlabs_openclaw.config
+    - ctlabs_openclaw.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_openclaw
+    - ctlabs_openclaw.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_openclaw
+    - ctlabs_openclaw.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_openclaw
+    - ctlabs_openclaw.service

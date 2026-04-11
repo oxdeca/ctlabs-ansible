@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openclaw.tasks.package.debian.update.cache
+  when: ctg_os_family == 'debian'
+  apt:
+    update_cache: true
+
+- name: ctlabs_openclaw.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_openclaw.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_openclaw.tasks.install.script.download
+  get_url:
+    url  : "{{ ctlabs_openclaw.defaults.script.url  }}"
+    dest : "{{ ctlabs_openclaw.defaults.script.path }}"
+    mode : '0750'
+
+- name: ctlabs_openclaw.tasks.install.script.run
+  command: "{{ ctlabs_openclaw.defaults.script.path }}"

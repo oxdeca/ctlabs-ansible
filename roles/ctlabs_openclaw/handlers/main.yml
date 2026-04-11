@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openclaw.handlers.named.service.reload
+  service:
+    name  : "{{ ctlabs_openclaw.defaults.service[ctg_os_family].name }}"
+    state : reloaded

@@ -38,7 +38,7 @@
         signed_by: "{{ item.key }}"
       loop: "{{ ctlabs_xrdp.defaults.repos.debian }}"
 
-    - name: ctlabs_xrdp.tasls.package.debian.update
+    - name: ctlabs_xrdp.tasks.package.debian.update
       apt:
         update_cache: true
 

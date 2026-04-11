@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/tasks/service.yml
+# Description : services
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openclaw.tasks.service.openclaw.install
+  template:
+    src  : "{{ ctlabs_openclaw.defaults.service.template }}"
+    dest : "{{ ctlabs_openclaw.defaults.service.file     }}"
+
+- name: ctlabs_openclaw.tasks.service.openclaw.running
+  service:
+    name    : "{{ ctlabs_openclaw.defaults.service[ctg_os_family].name }}"
+    state   : started
+    enabled : true

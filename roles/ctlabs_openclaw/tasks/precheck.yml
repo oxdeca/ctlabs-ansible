@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openclaw/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openclaw.tasks.precheck
+  block:
+    - name: ctlabs_openclaw.tasks.precheck.supported_os
+      assert:
+        that: ctg_os is in ctlabs_openclaw.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+    
+    - name: ctlabs_openclaw.tasks.precheck.type.check
+      assert:
+        that: ctg_facts.ctlabs_openclaw.type in [ 'master', 'slave' ]
+        fail_msg: "No type specified. ['master', 'slave']"
+  rescue:
+    - name: ctlabs_openclaw.tasks.precheck.skip.unsupported
+      meta: end_host
