@@ -1,0 +1,104 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "/root/.openclaw/workspace",
+      "models": {
+        "mistral/mistral-large-latest": {
+          "alias": "Mistral"
+        }
+      },
+      "model": {
+        "primary": "mistral/mistral-large-latest"
+      }
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "tls": {
+      "enabled": true,
+      "certPath": "/etc/ca-ctlabs/{{ ansible_nodename }}.crt",
+      "keyPath": "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+    },
+    "controlUi": {
+      "allowedOrigins": [
+        "http://{{ ctg_hv }}:18789",
+        "https://{{ ctg_hv }}:18789"
+      ],
+      "allowInsecureAuth": true
+    },
+    "port": 18789,
+    "bind": "lan",
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.4.10",
+    "lastTouchedAt": "2026-04-11T14:53:19.981Z"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "profile": "coding",
+    "web": {
+      "search": {
+        "provider": "ollama",
+        "enabled": true
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "mistral": {
+        "baseUrl": "https://api.mistral.ai/v1",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "mistral-large-latest",
+            "name": "Mistral Large (latest)",
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0.5,
+              "output": 1.5,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 262144,
+            "maxTokens": 16384
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "profiles": {
+      "mistral:default": {
+        "provider": "mistral",
+        "mode": "api_key"
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "ollama": {
+        "enabled": true
+      },
+      "mistral": {
+        "enabled": true
+      }
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-04-11T14:53:11.437Z",
+    "lastRunVersion": "2026.4.10",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  }
+}

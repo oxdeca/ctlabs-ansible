@@ -47,4 +47,4 @@ ctg_ipv4        : >-
                     else (ansible_interfaces[0].ipv4.address)
                   }}
 ctg_cmd_ip      : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
-ctg_hv          : "{{ lookup('file', '/etc/hosts') | regex_search('^(\\S+).*host\\.containers\\.internal', '\\1') | first }}"
+ctg_hv          : "{{ (lookup('file', '/etc/hosts').splitlines() | select('match', '^\\S+\\s+host\\.containers\\.internal') | first | default('')).split()[0] }}"

@@ -4,16 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/openclaw gateway \
-  --bind lan \
-  --port 18789 \
-  --allow-unconfigured \
-  --tls-enabled \
-  --tls-cert-path /etc/ca-ctlabs/{{ ansible_nodename }}.crt \
-  --tls-key-path /etc/ca-ctlabs/{{ ansible_nodename }}.prv \
-  --tls-min-version TLSv1.2 \
-  --tls-ciphers "HIGH:!aNULL:!MD5" \
-  --control-ui-allowed-origins "http://{{ ctg_hv }}:18789,https://{{ ctg_hv }}:18789"
+ExecStart=/usr/local/bin/openclaw gateway --bind lan --port 18789 --allow-unconfigured 
 
 Restart=always
 RestartSec=5

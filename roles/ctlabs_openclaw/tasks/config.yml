@@ -4,3 +4,8 @@
 # File        : ctlabs-ansible/roles/ctlabs_openclaw/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_openclaw.tasks.config.openclaw.json
+  template:
+    src  : "{{ ctlabs_openclaw.defaults.config.template }}"
+    dest : "{{ ctlabs_openclaw.defaults.config.file     }}"
