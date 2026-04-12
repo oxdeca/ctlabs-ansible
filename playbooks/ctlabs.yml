@@ -844,3 +844,12 @@
   tags  : [burp]
   roles :
     - roles/ctlabs_burp
+
+# -----------------------------------------------------------------------------
+# ctlabs_openclaw
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.openclaw
+  hosts : [h1,h2]
+  tags  : [openclaw]
+  roles :
+    - roles/ctlabs_openclaw
