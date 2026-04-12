@@ -27,4 +27,4 @@
   command: openclaw devices approve
   register: device_list
 
-- debug: "msg={{ device_list }}"
+- debug: "msg={{ device_list.stdout }}"
