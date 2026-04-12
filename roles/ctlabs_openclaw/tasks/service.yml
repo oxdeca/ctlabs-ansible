@@ -18,7 +18,7 @@
     enabled : true
 
 - name: ctlabs_openclaw.tasls.service.openclaw.pairing.url
-  command: openclaw dashboard --
+  command: openclaw dashboard --no-open
   register: pairing_url
 
 - debug: "msg=Open this URL in your browser: {{ pairing_url.stdout }}"
