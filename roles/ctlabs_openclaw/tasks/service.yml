@@ -21,4 +21,4 @@
   command: openclaw dashboard --no-open
   register: pairing_url
 
-- debug: "msg=Open this URL in your browser: {{ pairing_url.stdout }}"
+- debug: "msg=Open this URL in your browser: {{ pairing_url.stdout | regex_replace('\n', ' ') }}"
