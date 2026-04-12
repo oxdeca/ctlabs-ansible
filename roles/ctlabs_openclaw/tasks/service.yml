@@ -9,9 +9,16 @@
   template:
     src  : "{{ ctlabs_openclaw.defaults.service.template }}"
     dest : "{{ ctlabs_openclaw.defaults.service.file     }}"
+  notify: ctlabs_openclaw.handlers.openclaw.service.restarted
 
 - name: ctlabs_openclaw.tasks.service.openclaw.running
   service:
-    name    : "{{ ctlabs_openclaw.defaults.service[ctg_os_family].name }}"
+    name    : "{{ ctlabs_openclaw.defaults.service.name }}"
     state   : started
     enabled : true
+
+- name: ctlabs_openclaw.tasls.service.openclaw.pairing.url
+  command: openclaw dashboard --
+  register: pairing_url
+
+- debug: "msg=Open this URL in your browser: {{ pairing_url.stdout }}"

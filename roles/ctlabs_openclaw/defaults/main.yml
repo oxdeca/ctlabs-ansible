@@ -10,17 +10,22 @@ versions:
 ctlabs_openclaw:
   defaults:
     pkgs:
-      debian:
+      debian: 
+        - name: curl
         - name: nodejs
+        - name: npm
         - name: git
-      redhat:
-        - name: nodejs
+        - name: build-essential
+        - name: python3-dev
+      redhat: []
     script:
-      - url : https://openclaw.ai/install.sh
-        path: /tmp/install.sh
+      url : https://openclaw.ai/install.sh
+      path: /tmp/install.sh
     config:
     service:
+      name    : openclaw.service
       template: openclaw.service.j2
       file    : "{{ ctg_systemd_dir }}/openclaw.service"
   os:
     - debian12
+    - kali2025

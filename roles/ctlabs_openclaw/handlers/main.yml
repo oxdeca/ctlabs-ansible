@@ -5,7 +5,8 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openclaw.handlers.named.service.reload
-  service:
-    name  : "{{ ctlabs_openclaw.defaults.service[ctg_os_family].name }}"
-    state : reloaded
+- name: ctlabs_openclaw.handlers.openclaw.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_openclaw.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true

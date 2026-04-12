@@ -10,7 +10,7 @@
   apt:
     update_cache: true
 
-- name: ctlabs_openclaw.tasks.package.installed
+- name: ctlabs_openclaw.tasks.package.pkgs.installed
   package:
     name  : "{{ item.name }}"
     state : present
@@ -18,11 +18,8 @@
   register: result
   until   : result is success
 
-- name: ctlabs_openclaw.tasks.install.script.download
-  get_url:
-    url  : "{{ ctlabs_openclaw.defaults.script.url  }}"
-    dest : "{{ ctlabs_openclaw.defaults.script.path }}"
-    mode : '0750'
-
-- name: ctlabs_openclaw.tasks.install.script.run
-  command: "{{ ctlabs_openclaw.defaults.script.path }}"
+- name: ctlabs_openclaw.tasks.package.openclaw.installed
+  npm: 
+    name  : openclaw
+    state : latest
+    global: true

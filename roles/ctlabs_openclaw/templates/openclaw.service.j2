@@ -4,13 +4,20 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/bin/openclaw gateway --port 18789
+ExecStart=/usr/local/bin/openclaw gateway --bind lan --port 18789 --allow-unconfigured
 Restart=always
 RestartSec=5
 TimeoutStopSec=30
 TimeoutStartSec=30
 SuccessExitStatus=0 143
 KillMode=control-group
+
+Environment="GATEWAY_TLS_ENABLED=true"
+Environment="GATEWAY_TLS_CERT_PATH=/etc/ca-ctlabs/h1.ctlabs.internal.crt"
+Environment="GATEWAY_TLS_KEY_PATH=/etc/ca-ctlabs/h1.ctlabs.internal.prv"
+Environment="GATEWAY_TLS_MIN_VERSION=TLSv1.2"
+Environment="GATEWAY_TLS_CIPHERS=HIGH:!aNULL:!MD5"
+Environment="GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=http://192.168.100.166:18789,https://192.168.100.166:18789"
 
 [Install]
 WantedBy=default.target
