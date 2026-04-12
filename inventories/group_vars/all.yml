@@ -5,13 +5,12 @@
 # Description : Variables used for all hosts
 # -----------------------------------------------------------------------------
 
-ctg_facts       : "{{ ansible_local            | default() }}"
 ctg_facts       : >-
                   {{
                     ansible_local
                     if ctg_os_family in ['redhat', 'debian']
                     else {
-                      'ctlabs': (ansible_ctlabs | from_json) if ansible_ctlabs id defined else {},
+                      'ctlabs': (ansible_ctlabs | from_json) if ansible_ctlabs is defined else {},
                       'ctlabs_ad': (ansible_ctlabs_ad | from_json) if ansible_ctlabs_ad is defined else {}
                     }
                   }}
