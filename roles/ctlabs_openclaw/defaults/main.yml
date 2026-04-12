@@ -22,9 +22,9 @@ ctlabs_openclaw:
       url : https://openclaw.ai/install.sh
       path: /tmp/install.sh
     config:
-      dir     : /etc/openclaw
+      dir     : ~/.openclaw
       template: openclaw.json.j2
-      file    : /etc/openclaw/openclaw.json
+      file    : ~/.openclaw/openclaw.json
     service:
       name    : openclaw.service
       template: openclaw.service.j2
