@@ -9,11 +9,11 @@ ExecStart=/usr/local/bin/openclaw gateway \
   --port 18789 \
   --allow-unconfigured \
   --tls-enabled \
-  --tls-cert-path /etc/ca-ctlabs/h1.ctlabs.internal.crt \
-  --tls-key-path /etc/ca-ctlabs/h1.ctlabs.internal.prv \
+  --tls-cert-path /etc/ca-ctlabs/{{ ansible_nodename }}.crt \
+  --tls-key-path /etc/ca-ctlabs/{{ ansible_nodename }}.prv \
   --tls-min-version TLSv1.2 \
   --tls-ciphers "HIGH:!aNULL:!MD5" \
-  --control-ui-allowed-origins "http://192.168.100.166:18789,https://192.168.100.166:18789"
+  --control-ui-allowed-origins "http://{{ ctg_hv }}:18789,https://{{ ctg_hv }}:18789"
 
 Restart=always
 RestartSec=5

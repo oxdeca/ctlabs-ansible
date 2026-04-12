@@ -6,6 +6,15 @@
 # -----------------------------------------------------------------------------
 
 ctg_facts       : "{{ ansible_local            | default() }}"
+ctg_facts       : >-
+                  {{
+                    ansible_local
+                    if ctg_os_family in ['redhat', 'debian']
+                    else {
+                      'ctlabs': (ansible_ctlabs | from_json) if ansible_ctlabs id defined else {},
+                      'ctlabs_ad': (ansible_ctlabs_ad | from_json) if ansible_ctlabs_ad is defined else {}
+                    }
+                  }}
 ctg_project     : "{{ ctg_facts.ctlabs.project | default() }}"
 ctg_env         : "{{ ctg_facts.ctlabs.env     | default() }}"
 
@@ -21,11 +30,21 @@ ctg_virtype     : "{{ ansible_virtualization_type | lower }}"
 
 ctg_date        : "{{ ansible_date_time.date }}"
 ctg_systemd_dir : "/etc/systemd/system"
-ctg_todaysdate  : "{{ lookup('pipe', '/usr/bin/date +%Y%m%d') }}"
-ctg_uxtime      : "{{ lookup('pipe', '/usr/bin/date +%s')   }}"
-
-
-
+ctg_todaysdate  : "{{ '%Y%m%d' | strftime }}"
+ctg_uxtime      : "{{ '%s' | strftime }}"
 ctg_vendor      : "{{ ansible_system_vendor | lower }}"
 
+ctg_host        : >-
+                  {{
+                    (ansible_nodename | default(inventory_hostname))
+                    if ctg_os_family in ['redhat', 'debian']
+                    else (inventory_hostname)
+                  }}
+ctg_ipv4        : >-
+                  {{
+                    (ansible_default_ipv4 | default(ansible_default_ipv4.address[0]))
+                    if ctg_os_family in ['redhat', 'debian']
+                    else (ansible_interfaces[0].ipv4.address)
+                  }}
 ctg_cmd_ip      : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
+ctg_hv          : "{{ lookup('file', '/etc/hosts') | regex_search('^(\\S+).*host\\.containers\\.internal', '\\1') | first }}"
