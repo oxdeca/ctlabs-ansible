@@ -23,8 +23,8 @@
 
 - debug: "msg={{ pairing_url.stdout }}"
 
-- name: ctlabs_openclaw.tasks.service.openclaw.devices
-  command: openclaw devices approve
-  register: device_list
-
-- debug: "msg={{ device_list.stdout }}"
+#- name: ctlabs_openclaw.tasks.service.openclaw.devices
+#  command: openclaw devices list
+#  register: device_list
+#
+#- debug: "msg={{ device_list.stdout }}"
