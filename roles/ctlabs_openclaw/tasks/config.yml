@@ -9,6 +9,7 @@
   file:
     path : "{{ ctlabs_openclaw.defaults.config.dir }}"
     state: directory
+    
 - name: ctlabs_openclaw.tasks.config.openclaw.json
   template:
     src  : "{{ ctlabs_openclaw.defaults.config.template }}"
