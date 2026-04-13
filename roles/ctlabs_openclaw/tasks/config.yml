@@ -21,6 +21,7 @@
     name  : "{{ ctlabs_openclaw.defaults.service.user   }}"
     group : "{{ ctlabs_openclaw.defaults.service.group  }}"
     groups: "{{ ctlabs_openclaw.defaults.service.groups }}"
+    shell : /bin/bash
 
 - name: ctlabs_openclaw.tasks.config.openclaw.dir
   file:
