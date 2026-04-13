@@ -20,8 +20,8 @@ ctlabs_openclaw:
       redhat: []
     config:
       dir     : /home/openclaw/.openclaw
-      template: openclaw.json.j2
       file    : /home/openclaw/.openclaw/openclaw.json
+      template: openclaw.json.j2
     service:
       name    : openclaw.service
       template: openclaw.service.j2
