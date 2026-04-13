@@ -1,7 +1,7 @@
 {
   "agents": {
     "defaults": {
-      "workspace": "/root/.openclaw/workspace",
+      "workspace": "{{ ctlabs_openclaw.defaults.config.dir }}/workspace",
       "models": {
         "mistral/mistral-large-latest": {
           "alias": "Mistral"
@@ -16,8 +16,9 @@
     "mode": "local",
     "tls": {
       "enabled": true,
-      "certPath": "/etc/ca-ctlabs/{{ ansible_nodename }}.crt",
-      "keyPath": "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+      "cert": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.crt }}",
+      "key": "{{ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.key }}",
+      "ca": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{  ctlabs_openclaw.defaults.certs.ca }}"
     },
     "controlUi": {
       "allowedOrigins": [

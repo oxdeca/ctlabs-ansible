@@ -22,6 +22,11 @@ ctlabs_openclaw:
       dir     : /home/openclaw/.openclaw
       file    : /home/openclaw/.openclaw/openclaw.json
       template: openclaw.json.j2
+    certs:
+      dir: /etc/ca-ctlabs
+      crt: "{{ ansible_nodename }}.crt"
+      key: "{{ ansible_nodename }}.prv"
+      ca:  ca.crt
     service:
       name    : openclaw.service
       template: openclaw.service.j2
