@@ -11,6 +11,9 @@
   file        :
     name : "{{ ctlabs_ca.defaults.config.dir }}"
     state: directory
+    owner: "{{ ctlabs_ca.defaults.config.user  }}"
+    group: "{{ ctlabs_ca.defaults.config.group }}"
+    mode : "{{ ctlabs_ca.defaults.config.perms }}"
 
 #
 # CA
