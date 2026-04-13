@@ -29,6 +29,9 @@ ctlabs_openclaw:
       name    : openclaw.service
       template: openclaw.service.j2
       file    : "{{ ctg_systemd_dir }}/openclaw.service"
+      user    : openclaw
+      group   : openclaw
+      groups  : [certs]
   os:
     - debian12
     - kali2025

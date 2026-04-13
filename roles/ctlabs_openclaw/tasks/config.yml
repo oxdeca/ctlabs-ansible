@@ -14,3 +14,38 @@
   template:
     src  : "{{ ctlabs_openclaw.defaults.config.template }}"
     dest : "{{ ctlabs_openclaw.defaults.config.file     }}"
+
+- name: ctlabs_openclaw.tasks.config.gateway.dir
+  file:
+    path : "{{ ctlabs_openclaw.defaults.config.dir }}/gateway"
+    state: directory
+    mode : '0750'
+
+- name: ctlabs_openclaw.tasks.config.pairing.token
+  copy:
+    dest: "{{ ctlabs_openclaw.defaults.config.dir }}/gateway/config.json"
+    content: |
+      {
+        "pairing": {
+          "token"   : "{{ ctlabs_openclaw_pairing_token }}",
+          "enabled" : true
+        }
+      }
+    mode: '0600'
+
+- name: ctlabs_openclaw.tasks.package.group
+  group:
+    name   : "{{ ctlabs_openclaw.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_openclaw.tasks.package.user
+  user:
+    name   : "{{ ctlabs_openclaw.defaults.service.user  }}"
+    group  : "{{ ctlabs_openclaw.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_openclaw.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_openclaw.defaults.service.user   }}"
+    group : "{{ ctlabs_openclaw.defaults.service.group  }}"
+    groups: "{{ ctlabs_openclaw.defaults.service.groups }}"

@@ -4,6 +4,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+User={{ ctlabs_openclaw.defaults.service.user }}
+Group={{ ctlabs_openclaw.defaults.service.group }}
 ExecStart=/usr/local/bin/openclaw gateway --bind lan --port 18789 --allow-unconfigured 
 
 Restart=always
