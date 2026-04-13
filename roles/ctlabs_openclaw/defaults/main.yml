@@ -18,13 +18,10 @@ ctlabs_openclaw:
         - name: build-essential
         - name: python3-dev
       redhat: []
-    script:
-      url : https://openclaw.ai/install.sh
-      path: /tmp/install.sh
     config:
-      dir     : ~/.openclaw
+      dir     : /home/openclaw/.openclaw
       template: openclaw.json.j2
-      file    : ~/.openclaw/openclaw.json
+      file    : /home/openclaw/.openclaw/openclaw.json
     service:
       name    : openclaw.service
       template: openclaw.service.j2
