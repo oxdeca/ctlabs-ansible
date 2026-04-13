@@ -5,10 +5,24 @@
       "models": {
         "mistral/mistral-large-latest": {
           "alias": "Mistral"
-        }
+        },
+        "openrouter/auto": {
+          "alias": "OpenRouter"
+        },
+        "openrouter/free": {},
+        "openrouter/google/gemma-4-31b-it:free": {},
+        "openrouter/qwen/qwen3-coder:free": {},
+        "openrouter/x-ai/grok-4.20": {}
       },
       "model": {
-        "primary": "mistral/mistral-large-latest"
+        "primary": "openrouter/auto",
+        "fallbacks": [
+          "mistral/mistral-large-latest",
+          "openrouter/free",
+          "openrouter/google/gemma-4-31b-it:free",
+          "openrouter/qwen/qwen3-coder:free",
+          "openrouter/x-ai/grok-4.20"
+        ]
       }
     }
   },

@@ -13,7 +13,7 @@
     state: directory
     owner: "{{ ctlabs_ca.defaults.config.user  }}"
     group: "{{ ctlabs_ca.defaults.config.group }}"
-    mode : "{{ ctlabs_ca.defaults.config.perms }}"
+    mode : '0750'
 
 #
 # CA
