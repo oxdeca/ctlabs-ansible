@@ -17,9 +17,11 @@
     state   : started
     enabled : true
 
-- name: ctlabs_openclaw.tasks.service.openclaw.pairing.url
-  command: openclaw dashboard --no-open
-  register: pairing_url
+- name       : ctlabs_openclaw.tasks.service.openclaw.pairing.url
+  become     : true
+  become_user: "{{ ctlabs_openclaw.defaults.service.user }}"
+  command    : openclaw dashboard --no-open
+  register   : pairing_url
 
 - debug: "msg={{ pairing_url.stdout }}"
 
