@@ -20,7 +20,7 @@ ctlabs_openclaw:
         - name: curl
         - name: nodejs
         - name: npm
-          when: "{{ cgt_os == 'kali2025' }}"
+          when: "{{ ctg_os == 'kali2025' }}"
         - name: git
         - name: build-essential
         - name: python3-dev
