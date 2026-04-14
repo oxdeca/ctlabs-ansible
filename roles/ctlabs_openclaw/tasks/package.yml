@@ -34,6 +34,7 @@
 
     
 - name: ctlabs_openclaw.tasks.package.pkgs.installed
+  when: item.when is not defined or item.when
   package:
     name  : "{{ item.name }}"
     state : present
