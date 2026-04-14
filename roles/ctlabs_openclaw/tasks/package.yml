@@ -5,11 +5,34 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openclaw.tasks.package.debian.update.cache
+- name: ctlabs_openclaw.tasks.package.debian
   when: ctg_os_family == 'debian'
-  apt:
-    update_cache: true
+  block:
+    - name: ctlabs_openclaw.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+    
+    - name: ctlabs_openclaw.tasks.package.debian.keydir
+      file:
+        path : /etc/apt/keyrings
+        state: directory
+        mode : '0755'
+    
+    - name: ctlabs_openclaw.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_openclaw.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_openclaw.defaults.repos[ctg_os_family] }}"
+    
+    - name: ctlabs_openclaw.tasks.package.debian.repos.file
+      apt_repository:
+        repo: "deb [signed-by={{ ctlabs_openclaw.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
+        update_cache: yes
+      loop: "{{ ctlabs_openclaw.defaults.repos[ctg_os_family] }}"
 
+
+    
 - name: ctlabs_openclaw.tasks.package.pkgs.installed
   package:
     name  : "{{ item.name }}"
@@ -17,7 +40,7 @@
   loop    : "{{ ctlabs_openclaw.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
-
+    
 - name: ctlabs_openclaw.tasks.package.openclaw.installed
   npm: 
     name  : openclaw
