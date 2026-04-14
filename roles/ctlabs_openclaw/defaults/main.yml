@@ -45,3 +45,4 @@ ctlabs_openclaw:
   os:
     - debian12
     - kali2025
+    - parrot7
