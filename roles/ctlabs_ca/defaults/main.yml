@@ -43,4 +43,5 @@ ctlabs_ca:
     - kali2025
     - ubuntu24
     - parrot6
+    - parrot7
     - alpine3
