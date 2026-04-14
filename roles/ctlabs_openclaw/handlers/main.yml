@@ -10,3 +10,7 @@
     name          : "{{ ctlabs_openclaw.defaults.service.name }}"
     state         : restarted
     daemon_reload : true
+
+- name: ctlabs_openclaw.handlers.apt.update_cache
+  apt:
+    update_cache: yes

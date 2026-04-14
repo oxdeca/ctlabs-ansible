@@ -12,21 +12,23 @@ ctlabs_openclaw:
   defaults:
     repos:
       debian:
-        - name: nodesource
-          url : "https://deb.nodesource.com/{{ versions.nodejs }}"
-          key : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+        - name  : nodesource
+          url   : "https://deb.nodesource.com/{{ versions.nodejs }}"
+          key   : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+          origin: deb.nodesource.com
     pkgs:
       debian: 
         - name: curl
         - name: nodejs
-        - name: npm
-          when: "{{ ctg_os in ['kali2025', 'parrot7'] }}"
+#        - name: npm
+#          when: "{{ ctg_os in ['kali2025', 'parrot7'] }}"
         - name: git
         - name: build-essential
         - name: python3-dev
       redhat: []
     config:
-      keydir: /etc/apt/keyrings
+      prefdir: /etc/apt/preferences.d
+      keydir : /etc/apt/keyrings
       dir     : /home/openclaw/.openclaw
       file    : /home/openclaw/.openclaw/openclaw.json
       template: openclaw.json.j2
