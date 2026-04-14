@@ -33,7 +33,7 @@
 
     - name: ctlabs_openclaw.tasks.package.debian.nodejs.pin
       template:
-        src : nodejs_pin.pref.j2
+        src : nodejs.pref.j2
         dest: "{{ ctlabs_openclaw.defaults.config.prefdir }}/{{ item.name }}.pref"
         mode: '0644'
         owner: root
