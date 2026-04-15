@@ -849,7 +849,7 @@
 # ctlabs_openclaw
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.openclaw
-  hosts : [h1,h2]
+  hosts : [h1,h2,h3]
   tags  : [openclaw]
   roles :
     - roles/ctlabs_openclaw
