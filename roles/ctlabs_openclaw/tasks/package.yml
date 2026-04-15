@@ -8,10 +8,6 @@
 - name: ctlabs_openclaw.tasks.package.debian
   when: ctg_os_family == 'debian'
   block:
-    - name: ctlabs_openclaw.tasks.package.debian.update.cache
-      apt:
-        update_cache: true
-    
     - name: ctlabs_openclaw.tasks.package.debian.keydir
       file:
         path : /etc/apt/keyrings
@@ -41,6 +37,9 @@
       loop: "{{ ctlabs_openclaw.defaults.repos[ctg_os_family] }}"
       notify: ctlabs_openclaw.handlers.apt.update_cache
 
+    - name: ctlabs_openclaw.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
     
 - name: ctlabs_openclaw.tasks.package.pkgs.installed
   when: item.when is not defined or item.when
