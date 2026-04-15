@@ -24,6 +24,7 @@ ctlabs_openclaw:
         - name: python3-dev
       redhat: []
     config:
+      prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings
       dir     : /home/openclaw/.openclaw
       file    : /home/openclaw/.openclaw/openclaw.json
