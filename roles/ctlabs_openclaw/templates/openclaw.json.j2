@@ -30,9 +30,10 @@
     "mode": "local",
     "tls": {
       "enabled": true,
-      "cert": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.crt }}",
-      "key": "{{ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.key }}",
-      "ca": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{  ctlabs_openclaw.defaults.certs.ca }}"
+      "autoGenerate": false,
+      "certPath": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.crt }}",
+      "keyPath": "{{ctlabs_openclaw.defaults.certs.dir }}/{{ ctlabs_openclaw.defaults.certs.key }}",
+      "caPath": "{{ ctlabs_openclaw.defaults.certs.dir }}/{{  ctlabs_openclaw.defaults.certs.ca }}"
     },
     "controlUi": {
       "allowedOrigins": [
@@ -41,7 +42,8 @@
       "allowInsecureAuth": false
     },
     "port": 18789,
-    "bind": "lan",
+    "bind": "custom",
+    "customBindHost": {{ ctg_hv }},
     "tailscale": {
       "mode": "off",
       "resetOnExit": false
