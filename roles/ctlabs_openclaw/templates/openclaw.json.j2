@@ -37,12 +37,12 @@
     },
     "controlUi": {
       "allowedOrigins": [
-        "*"
+        "192.168.0.0/16"
       ],
       "allowInsecureAuth": false
     },
     "port": 18789,
-    "bind": "custom",
+    "bind": "lan",
     "customBindHost": "{{ ctg_ipv4.address }}",
     "tailscale": {
       "mode": "off",
