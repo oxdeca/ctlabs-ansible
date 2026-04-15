@@ -33,7 +33,7 @@ ctlabs_openclaw:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
       key: "{{ ansible_nodename }}.prv"
-      ca:  ca.crt
+      ca:  ca-ctlabs.crt
     service:
       name    : openclaw.service
       template: openclaw.service.j2

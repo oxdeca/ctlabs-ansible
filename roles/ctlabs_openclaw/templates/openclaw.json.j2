@@ -43,7 +43,7 @@
     },
     "port": 18789,
     "bind": "custom",
-    "customBindHost": "{{ ctg_ipv4 }}",
+    "customBindHost": "{{ ctg_ipv4.address }}",
     "tailscale": {
       "mode": "off",
       "resetOnExit": false
