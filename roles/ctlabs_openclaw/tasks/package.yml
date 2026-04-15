@@ -31,10 +31,16 @@
         update_cache: yes
       loop: "{{ ctlabs_openclaw.defaults.repos[ctg_os_family] }}"
 
-    - name: ctlabs_openclaw.tasks.package.debian.nodejs.installed
-      apt:
-        name: nodejs
-        default_release: nodistro
+    - name: ctlabs_openclaw.tasks.package.debian.nodejs.pin
+      template:
+        src : nodejs.pref.j2
+        dest: "{{ ctlabs_openclaw.defaults.config.prefdir }}/{{ item.name }}.pref"
+        mode: '0644'
+        owner: root
+        group: root
+      loop: "{{ ctlabs_openclaw.defaults.repos[ctg_os_family] }}"
+      notify: ctlabs_openclaw.handlers.apt.update_cache
+
     
 - name: ctlabs_openclaw.tasks.package.pkgs.installed
   when: item.when is not defined or item.when

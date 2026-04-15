@@ -19,9 +19,6 @@ ctlabs_openclaw:
       debian: 
         - name: curl
         - name: nodejs
-          when: false
-#        - name: npm
-#          when: "{{ ctg_os in ['kali2025', 'parrot7'] }}"
         - name: git
         - name: build-essential
         - name: python3-dev
