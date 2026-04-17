@@ -1,0 +1,139 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/tasks/init.yml
+# Description : initialize openbao
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openbao.tasks.init.init_status
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+  uri:
+    url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/init"
+    validate_certs  : false
+  register: openbao_init_status
+  retries : 12
+  delay   : 5
+
+- name: ctlabs_openbao.tasks.init.init_status.fact
+  set_fact:
+    ctlabs_openbao_initialized: "{{ openbao_init_status.json.initialized }}"
+
+- name: ctlabs_openbao.tasks.init
+  when: not ctlabs_openbao_initialized
+  block:
+    - name: ctlabs_openbao.tasks.init.initialize
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/init"
+        method          : POST
+        validate_certs  : false
+        return_content  : true
+        headers         : 
+          Host: "{{ ansible_nodename }}"
+        body_format     : json
+        body            : >
+          {
+            "secret_shares"    : 1,
+            "secret_threshold" : 1
+          }
+      register: openbao_init_result
+
+    - name: ctlabs_openbao.tasks.init.copy_init_result
+      when: openbao_init_result is defined
+      copy:
+        mode   : '0400'
+        owner  : root
+        content: |
+          openbao_root_token        : "{{ openbao_init_result.json['root_token']     }}"
+          openbao_unseal_keys_b64   : "{{ openbao_init_result.json['keys_base64'][0] }}"
+          ctlabs_openbao_initialized: true
+        dest: "/root/ctlabs-ansible/.ctlabs_openbao_init_output_{{ ansible_nodename }}.yml"
+      delegate_to: localhost
+
+    - name: ctlabs_openbao.tasks.init.seal_status
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/seal-status"
+        validate_certs : false
+      register: openbao_seal_status
+    
+    - name: ctlabs_openbao.tasks.init.seal_status.fact
+      set_fact:
+        ctlabs_openbao_sealed: "{{ openbao_seal_status.json.sealed }}"
+    
+    - name: ctlabs_openbao.tasks.init.unseal
+      when: ctlabs_openbao_sealed
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/unseal"
+        method          : POST
+        validate_certs  : false
+        return_content  : true
+        headers         : 
+          Host: "{{ ansible_nodename }}"
+        body_format     : json
+        body            : >
+          {
+            "key" : "{{ openbao_init_result.json['keys_base64'][0] }}"
+          }
+      register: openbao_unseal_result
+    
+    # - debug: "msg={{ openbao_unseal_result }}"
+    
+    #
+    # Enable Secrets Engines
+    #
+    
+    - name: ctlabs_openbao.tasks.init.secrets.userpass.enable
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/auth/userpass"
+        method         : POST
+        validate_certs : false
+        status_code    : 204
+        headers        :
+          X-Vault-Token: "{{ openbao_init_result.json['root_token'] }}"
+        body_format    : json
+        body           : |
+          {
+            "type"        : "userpass",
+            "description" : "User/Pass Authentication"
+          }
+    
+    - name: ctlabs_openbao.tasks.init.secerts.userpass.add_user
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/auth/userpass/users/ctlabs"
+        method         : POST
+        validate_certs : false
+        status_code    : 204
+        headers        :
+          X-Vault-Token: "{{ openbao_init_result.json['root_token'] }}"
+        body_format    : json
+        body           : |
+          {
+            "password" : "secret123!",
+            "policies" : "default,ctlabs"
+          }
+    
+    - name: ctlabs_openbao.tasks.init.secrets.userpass.policy.ctlabs
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url             : "{{ ctlabs_openbao.defaults.config.init.url }}/sys/policies/acl/ctlabs"
+        method         : POST
+        validate_certs : false
+        status_code    : 204
+        headers        :
+          X-Vault-Token: "{{ openbao_init_result.json['root_token'] }}"
+        body_format    : json
+        body           : |
+          {
+            "policy" : "{{ lookup('template', 'ctlabs.hcl.j2') | regex_replace('\r?\n', '\\n') | regex_replace('"', '\\"') }}"
+          }

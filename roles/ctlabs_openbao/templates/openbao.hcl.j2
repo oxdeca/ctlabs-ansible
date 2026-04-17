@@ -1,0 +1,18 @@
+{# ---------------------------------------------------------------------------- #}
+{# File        : ctlabs-ansible/roles/ctlabs_openbao/templates/openbao.hcl.j2   #}
+{# Description : client access                                                  #}
+{# ---------------------------------------------------------------------------- #}
+
+ui = {{ ctlabs_openbao.defaults.config.server.gui | lower }}
+
+api_addr = "https://{{ ansible_default_ipv4.address }}:{{ ctlabs_openbao.defaults.config.server.port }}"
+
+storage "file" {
+  path = "{{ ctlabs_openbao.defaults.config.server.data }}"
+}
+
+listener "tcp" {
+  address       = "{{ ansible_default_ipv4.address }}:{{ ctlabs_openbao.defaults.config.server.port }}"
+  tls_cert_file = "{{ ctlabs_openbao.defaults.config.server.cert }}"
+  tls_key_file  = "{{ ctlabs_openbao.defaults.config.server.key  }}"
+}

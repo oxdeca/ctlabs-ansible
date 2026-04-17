@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openbao.tasks.service.openbao.start
+  when: CTLABS_OPENBAO_SERVER == 'true'
+  service:
+    name    : "{{ ctlabs_openbao.defaults.service.name }}"
+    enabled : true
+    state   : started

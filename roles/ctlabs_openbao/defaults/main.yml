@@ -1,0 +1,66 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+# env vars
+CTLABS_OPENBAO_SERVER: false
+CTLABS_OPENBAO_AGENT : false
+CMD_IP_PATH        : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
+
+# role defaults
+ctlabs_openbao:
+  defaults:
+    repos:
+      redhat:
+        - name: openbao
+          type: main
+          url : https://pkgs.openbao.org/rpm/$basearch
+          key : https://openbao.org/assets/openbao-gpg-pub-20240618.asc
+      debian:
+        - name: openbao
+          type: main
+          url : https://pkgs.openbao.org/deb/
+          key : https://openbao.org/assets/openbao-gpg-pub-20240618.asc
+    pkgs:
+      redhat:
+        - name: openbao
+        - name: python3-pip
+      debian:
+        - name: openbao
+        - name: jq
+        - name: python3-pip
+        - name: python3-hvac
+          when: "{{ ctg_os == 'debian12' }}"
+      pips:
+        - hvac
+    files:
+      backup:
+        script: openbao-backup.py
+        dst   : /usr/sbin/openbao-backup.py
+    config:
+      dir   : /etc/openbao.d
+      server:
+        gui      : true
+        bin      : /usr/bin/openbao
+        data     : /opt/openbao/data
+        file     : openbao.hcl
+        template : openbao.hcl.j2
+        port     : 8200
+        cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
+        key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+      client:
+      init:
+        url: "https://{{ ansible_default_ipv4.address }}:8200/v1"
+    service:
+      name  : openbao.service
+      user  : openbao
+      group : openbao
+      groups: [certs]
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

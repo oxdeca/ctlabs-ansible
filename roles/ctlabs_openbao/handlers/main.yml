@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openbao.handlers.service.vault.restart
+  service:
+    name    : "{{ ctlabs_openbao.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_openbao.handlers.service.vault.reload
+  systemd:
+    daemon_reload: true
+

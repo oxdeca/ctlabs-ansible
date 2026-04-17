@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_openbao
+    - ctlabs_openbao.precheck
+    - ctlabs_openbao.package
+    - ctlabs_openbao.config
+    - ctlabs_openbao.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_openbao
+    - ctlabs_openbao.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_openbao
+    - ctlabs_openbao.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_openbao
+    - ctlabs_openbao.service
+
+- import_tasks: init.yml
+  tags:
+    - ctlabs_openbao
+    - ctlabs_openbao.init

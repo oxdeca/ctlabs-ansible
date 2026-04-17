@@ -1,0 +1,23 @@
+path "secret/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "kv/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "auth/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+path "sys/policies/acl/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "sys/mounts/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+path "sys/seal-status" {
+  capabilities = ["read"]
+}

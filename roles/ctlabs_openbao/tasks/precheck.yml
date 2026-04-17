@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openbao/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openbao.tasks.precheck
+  block:
+    - name: ctlabs_openbao.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_openbao.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_openbao.tasks.precheck.skip.unsupported
+      meta: end_host

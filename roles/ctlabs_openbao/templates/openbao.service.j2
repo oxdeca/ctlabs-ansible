@@ -1,0 +1,13 @@
+[Unit]
+  Description= OpenBao Server
+  Documentation= https://opoenbao.org/docs
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_openbao.defaults.service.user }}
+  Group={{ ctlabs_openbao.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_openbao.defaults.config.server.bin }} server -config {{ ctlabs_openbao.defaults.config.dir + '/' + ctlabs_openbao.defaults.config.server.file }}
+
+[Install]
+  WantedBy=multi-user.target
