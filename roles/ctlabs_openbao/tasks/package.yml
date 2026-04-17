@@ -31,15 +31,34 @@
 - name: ctlabs_openbao.tasks.package.debian
   when: ctg_os_family == "debian"
   block:
-    - name: ctlabs_openbao.tasks.package.debian.repo.key
-      apt_key:
-        url: "{{ item.key }}"
+    - name: ctlabs_openbao.tasks.package.debian.keydir
+      file:
+        path : "{{ ctlabs_openbao.defaults.config.keydir }}"
+        state: directory
+        mode : '0755'
+    
+    - name: ctlabs_openbao.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_openbao.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_openbao.defaults.repos[ctg_os_family] }}"
+    
+    - name: ctlabs_openbao.tasks.package.debian.repos.file
+      copy:
+        dest: /etc/apt/sources.list.d/openbao.sources
+        mode: '0644'
+        content: |
+          Types: deb
+          URIs: {{ item.url }}
+          Suites: {{ item.suite }}
+          Components: {{ item.type }}
+          Signed-By: "{{ ctlabs_openbao.defaults.config.keydir }}/{{ item.name }}.asc"
       loop: "{{ ctlabs_openbao.defaults.repos[ctg_os_family] }}"
 
-    - name: ctlabs_openbao.tasks.package.debian.repo.file
-      apt_repository:
-        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
-      loop: "{{ ctlabs_openbao.defaults.repos[ctg_os_family] }}"
+    - name: ctlabs_openbao.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
 
 - name: ctlabs_openbao.tasks.package.install
   package:

@@ -20,10 +20,11 @@ ctlabs_openbao:
           url : https://pkgs.openbao.org/rpm/$basearch
           key : https://openbao.org/assets/openbao-gpg-pub-20240618.asc
       debian:
-        - name: openbao
-          type: main
-          url : https://pkgs.openbao.org/deb/
-          key : https://openbao.org/assets/openbao-gpg-pub-20240618.asc
+        - name : openbao
+          type : main
+          suite: stable
+          url  : https://pkgs.openbao.org/deb/
+          key  : https://openbao.org/assets/openbao-gpg-pub-20240618.asc
     pkgs:
       redhat:
         - name: openbao
@@ -41,6 +42,7 @@ ctlabs_openbao:
         script: openbao-backup.py
         dst   : /usr/sbin/openbao-backup.py
     config:
+      keydir: /etc/apt/keyrings
       dir   : /etc/openbao.d
       server:
         gui      : true

@@ -10,7 +10,7 @@
   block:
     - name: ctlabs_openclaw.tasks.package.debian.keydir
       file:
-        path : /etc/apt/keyrings
+        path : "{{ ctlabs_openclaw.defaults.config.keydir }}"
         state: directory
         mode : '0755'
     
