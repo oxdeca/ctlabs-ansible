@@ -5,13 +5,13 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openbao.handlers.service.vault.restart
+- name: ctlabs_openbao.handlers.service.openbao.restart
   service:
     name    : "{{ ctlabs_openbao.defaults.service.name }}"
     enabled : true
     state   : restarted
 
-- name: ctlabs_openbao.handlers.service.vault.reload
+- name: ctlabs_openbao.handlers.service.openbao.reload
   systemd:
     daemon_reload: true
 
