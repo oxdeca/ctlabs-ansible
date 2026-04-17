@@ -30,11 +30,3 @@
     owner: "{{ ctlabs_gemini_cli.defaults.config.user  }}"
     group: "{{ ctlabs_gemini_cli.defaults.config.group }}"
     mode : '0750'
-    
-- name: ctlabs_gemini_cli.tasks.config.gemini.json
-  template:
-    src  : "{{ ctlabs_gemini_cli.defaults.config.template }}"
-    dest : "{{ ctlabs_gemini_cli.defaults.config.file     }}"
-    owner: "{{ ctlabs_gemini_cli.defaults.config.user    }}"
-    group: "{{ ctlabs_gemini_cli.defaults.config.group   }}"
-    mode : '0600'
