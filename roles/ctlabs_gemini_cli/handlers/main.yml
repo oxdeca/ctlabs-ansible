@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_gemini_cli/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_gemini_cli.handlers.gemini.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_gemini_cli.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true
+
+- name: ctlabs_gemini_cli.handlers.apt.update_cache
+  apt:
+    update_cache: yes

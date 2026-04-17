@@ -5,18 +5,18 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_openclaw.tasks.package.group
+- name: ctlabs_openclaw.tasks.config.group
   group:
     name   : "{{ ctlabs_openclaw.defaults.service.group }}"
     system : true
 
-- name: ctlabs_openclaw.tasks.package.user
+- name: ctlabs_openclaw.tasks.config.user
   user:
     name   : "{{ ctlabs_openclaw.defaults.service.user  }}"
     group  : "{{ ctlabs_openclaw.defaults.service.group }}"
     system : true
 
-- name: ctlabs_openclaw.tasks.package.group.certs.member
+- name: ctlabs_openclaw.tasks.config.group.certs.member
   user:
     name  : "{{ ctlabs_openclaw.defaults.service.user   }}"
     group : "{{ ctlabs_openclaw.defaults.service.group  }}"
@@ -58,5 +58,3 @@
 #        }
 #      }
 #    mode: '0600'
-
-

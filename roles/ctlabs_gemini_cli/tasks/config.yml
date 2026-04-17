@@ -1,0 +1,40 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_gemini_cli/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_gemini_cli.tasks.config.group
+  group:
+    name   : "{{ ctlabs_gemini_cli.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_gemini_cli.tasks.config.user
+  user:
+    name   : "{{ ctlabs_gemini_cli.defaults.config.user  }}"
+    group  : "{{ ctlabs_gemini_cli.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_gemini_cli.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_gemini_cli.defaults.config.user   }}"
+    group : "{{ ctlabs_gemini_cli.defaults.service.group  }}"
+    groups: "{{ ctlabs_gemini_cli.defaults.service.groups }}"
+    shell : /bin/bash
+
+- name: ctlabs_gemini_cli.tasks.config.gemini.dir
+  file:
+    path : "{{ ctlabs_gemini_cli.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_gemini_cli.defaults.service.user  }}"
+    group: "{{ ctlabs_gemini_cli.defaults.service.group }}"
+    mode : '0750'
+    
+- name: ctlabs_gemini_cli.tasks.config.gemini.json
+  template:
+    src  : "{{ ctlabs_gemini_cli.defaults.config.template }}"
+    dest : "{{ ctlabs_gemini_cli.defaults.config.file     }}"
+    owner: "{{ ctlabs_gemini_cli.defaults.service.user    }}"
+    group: "{{ ctlabs_gemini_cli.defaults.service.group   }}"
+    mode : '0600'

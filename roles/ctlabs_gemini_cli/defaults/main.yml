@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_gemini_cli/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  nodejs: node_22.x
+
+ctlabs_gemini_cli:
+  defaults:
+    repos:
+      debian:
+        - name: nodesource
+          url : "https://deb.nodesource.com/{{ versions.nodejs }}"
+          key : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    pkgs:
+      debian: 
+        - name: curl
+        - name: nodejs
+        - name: git
+        - name: build-essential
+        - name: python3-dev
+      redhat: []
+    config:
+      keydir : /etc/apt/keyrings
+      dir     : /home/gemini
+      user    : gemini
+      group   : gemini
+      groups  : [certs]
+    certs:
+      dir: /etc/ca-ctlabs
+      crt: "{{ ansible_nodename }}.crt"
+      key: "{{ ansible_nodename }}.prv"
+      ca:  ca-ctlabs.crt
+    service:
+  os:
+    - debian12
+    - kali2025
+    - parrot7

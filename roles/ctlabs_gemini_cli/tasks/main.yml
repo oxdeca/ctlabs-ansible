@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_gemini_cli/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_gemini_cli
+    - ctlabs_gemini_cli.precheck
+    - ctlabs_gemini_cli.package
+    - ctlabs_gemini_cli.config
+    - ctlabs_gemini_cli.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_gemini_cli
+    - ctlabs_gemini_cli.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_gemini_cli
+    - ctlabs_gemini_cli.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_gemini_cli
+    - ctlabs_gemini_cli.service
