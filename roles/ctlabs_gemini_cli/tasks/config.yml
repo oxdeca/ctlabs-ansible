@@ -19,22 +19,22 @@
 - name: ctlabs_gemini_cli.tasks.config.group.certs.member
   user:
     name  : "{{ ctlabs_gemini_cli.defaults.config.user   }}"
-    group : "{{ ctlabs_gemini_cli.defaults.service.group  }}"
-    groups: "{{ ctlabs_gemini_cli.defaults.service.groups }}"
+    group : "{{ ctlabs_gemini_cli.defaults.config.group  }}"
+    groups: "{{ ctlabs_gemini_cli.defaults.config.groups }}"
     shell : /bin/bash
 
 - name: ctlabs_gemini_cli.tasks.config.gemini.dir
   file:
     path : "{{ ctlabs_gemini_cli.defaults.config.dir }}"
     state: directory
-    owner: "{{ ctlabs_gemini_cli.defaults.service.user  }}"
-    group: "{{ ctlabs_gemini_cli.defaults.service.group }}"
+    owner: "{{ ctlabs_gemini_cli.defaults.config.user  }}"
+    group: "{{ ctlabs_gemini_cli.defaults.config.group }}"
     mode : '0750'
     
 - name: ctlabs_gemini_cli.tasks.config.gemini.json
   template:
     src  : "{{ ctlabs_gemini_cli.defaults.config.template }}"
     dest : "{{ ctlabs_gemini_cli.defaults.config.file     }}"
-    owner: "{{ ctlabs_gemini_cli.defaults.service.user    }}"
-    group: "{{ ctlabs_gemini_cli.defaults.service.group   }}"
+    owner: "{{ ctlabs_gemini_cli.defaults.config.user    }}"
+    group: "{{ ctlabs_gemini_cli.defaults.config.group   }}"
     mode : '0600'
