@@ -53,7 +53,7 @@
           URIs: {{ item.url }}
           Suites: {{ item.suite }}
           Components: {{ item.type }}
-          Signed-By: "{{ ctlabs_openbao.defaults.config.keydir }}/{{ item.name }}.asc"
+          Signed-By: {{ ctlabs_openbao.defaults.config.keydir }}/{{ item.name }}.asc
       loop: "{{ ctlabs_openbao.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_openbao.tasks.package.debian.update.cache
