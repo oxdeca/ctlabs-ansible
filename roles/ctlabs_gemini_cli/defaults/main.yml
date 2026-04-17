@@ -24,6 +24,7 @@ ctlabs_gemini_cli:
         - name: python3-dev
       redhat: []
     config:
+      prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings
       dir     : /home/gemini
       user    : gemini
