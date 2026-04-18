@@ -42,4 +42,6 @@ ctlabs_claude_code:
   os:
     - debian12
     - kali2025
+    - kali2026
+    - parrot6
     - parrot7
