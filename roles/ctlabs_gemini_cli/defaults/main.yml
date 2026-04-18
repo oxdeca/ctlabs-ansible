@@ -22,6 +22,7 @@ ctlabs_gemini_cli:
         - name: git
         - name: build-essential
         - name: python3-dev
+        - name: libsecret-1-dev
       redhat: []
     config:
       prefdir: /etc/apt/preferences.d
