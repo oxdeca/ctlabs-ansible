@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude_code/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude_code.handlers.claude.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_claude_code.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true
+
+- name: ctlabs_claude_code.handlers.apt.update_cache
+  apt:
+    update_cache: yes

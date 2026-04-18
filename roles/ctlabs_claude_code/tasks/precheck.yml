@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude_code/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude_code.tasks.precheck
+  block:
+    - name: ctlabs_claude_code.tasks.precheck.supported_os
+      assert:
+        that: ctg_os is in ctlabs_claude_code.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_claude_code.tasks.precheck.skip.unsupported
+      meta: end_host

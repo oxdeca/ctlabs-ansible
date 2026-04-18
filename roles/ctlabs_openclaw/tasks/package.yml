@@ -52,6 +52,7 @@
     
 - name: ctlabs_openclaw.tasks.package.openclaw.installed
   npm: 
-    name  : openclaw
+    name  : "{{ item.name }}"
     state : latest
     global: true
+  loop: "{{ ctlabs_openclaw.defaults.pkgs.npm }}"

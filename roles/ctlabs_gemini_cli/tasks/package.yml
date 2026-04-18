@@ -52,6 +52,7 @@
     
 - name: ctlabs_gemini_cli.tasks.package.gemini-cli.installed
   npm: 
-    name  : "@google/gemini-cli"
+    name  : "{{ item.name }}"
     state : latest
     global: true
+  loop: "{{ ctlabs_gemini_cli.defaults.pkgs.npm }}"

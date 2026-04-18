@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude_code/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude_code.tasks.config.group
+  group:
+    name   : "{{ ctlabs_claude_code.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_claude_code.tasks.config.user
+  user:
+    name   : "{{ ctlabs_claude_code.defaults.config.user  }}"
+    group  : "{{ ctlabs_claude_code.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_claude_code.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_claude_code.defaults.config.user   }}"
+    group : "{{ ctlabs_claude_code.defaults.config.group  }}"
+    groups: "{{ ctlabs_claude_code.defaults.config.groups }}"
+    shell : /bin/bash
+
+- name: ctlabs_claude_code.tasks.config.claude.dir
+  file:
+    path : "{{ ctlabs_claude_code.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_claude_code.defaults.config.user  }}"
+    group: "{{ ctlabs_claude_code.defaults.config.group }}"
+    mode : '0750'

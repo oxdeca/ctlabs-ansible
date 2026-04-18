@@ -872,3 +872,12 @@
   tags  : [gemini_cli]
   roles :
     - roles/ctlabs_gemini_cli
+
+# -----------------------------------------------------------------------------
+# ctlabs_claude_code
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.claude_code
+  hosts : [h1,h2,h3]
+  tags  : [claude_code]
+  roles :
+    - roles/ctlabs_claude_code
