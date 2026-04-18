@@ -23,6 +23,8 @@ ctlabs_openclaw:
         - name: build-essential
         - name: python3-dev
       redhat: []
+      npm:
+        - name: openclaw
     config:
       prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings

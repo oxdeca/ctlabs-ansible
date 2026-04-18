@@ -24,6 +24,8 @@ ctlabs_gemini_cli:
         - name: python3-dev
         - name: libsecret-1-dev
       redhat: []
+      npm:
+        - name: "@google/gemini-cli"
     config:
       prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings
@@ -40,4 +42,6 @@ ctlabs_gemini_cli:
   os:
     - debian12
     - kali2025
+    - kali2026
+    - parrot6
     - parrot7
