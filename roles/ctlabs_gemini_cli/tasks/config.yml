@@ -30,3 +30,19 @@
     owner: "{{ ctlabs_gemini_cli.defaults.config.user  }}"
     group: "{{ ctlabs_gemini_cli.defaults.config.group }}"
     mode : '0750'
+
+- name: ctlabs_gemini_cli.tasks.config.profile.d
+  template:
+    src  : "{{ ctlabs_gemini_cli.config.profile.template }}"
+    dest : "{{ ctlabs_gemini_cli.config.profile.file     }}"
+
+- name: ctlabs_gemini_cli.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_gemini_cli.defaults.config.settings.dir }}"
+    state: directory
+    mode: '0755'
+
+- name: ctlabs_gemini_cli.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_gemini_cli.config.settings.template }}"
+    dest : "{{ ctlabs_gemini_cli.config.settings.file     }}"

@@ -33,6 +33,13 @@ ctlabs_gemini_cli:
       user    : gemini
       group   : gemini
       groups  : [certs]
+      profile:
+        template: profile_gemini.sh.j2
+        file    : /etc/profile.d/gemini.sh
+      settings:
+        dir     : ~/.gemini
+        template: gemini_settings.json.j2
+        file    : ~/.gemini/settings.json
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
