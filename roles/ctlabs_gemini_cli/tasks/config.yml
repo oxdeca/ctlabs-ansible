@@ -33,8 +33,8 @@
 
 - name: ctlabs_gemini_cli.tasks.config.profile.d
   template:
-    src  : "{{ ctlabs_gemini_cli.config.profile.template }}"
-    dest : "{{ ctlabs_gemini_cli.config.profile.file     }}"
+    src  : "{{ ctlabs_gemini_cli.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_gemini_cli.defaults.config.profile.file     }}"
 
 - name: ctlabs_gemini_cli.tasks.config.settings.dir
   file:
@@ -44,5 +44,5 @@
 
 - name: ctlabs_gemini_cli.tasks.config.settings.file
   template:
-    src  : "{{ ctlabs_gemini_cli.config.settings.template }}"
-    dest : "{{ ctlabs_gemini_cli.config.settings.file     }}"
+    src  : "{{ ctlabs_gemini_cli.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_gemini_cli.defaults.config.settings.file     }}"
