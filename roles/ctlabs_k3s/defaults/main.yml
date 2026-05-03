@@ -9,6 +9,7 @@ versions:
   k3s   : 1.34.3
   helm  : 4.0.4
   nginx : 1.14.1
+  envoy : 1.0.1
 
 ctlabs_k3s:
   defaults:

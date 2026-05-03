@@ -76,29 +76,61 @@
       register: res_argo
       until   : res_argo is success
 
-    - name: ctlabs_k3s.tasks.service.ingress
-      when: ctlabs_k3s_ingress == "nginx"
+    - name: ctlabs_k3s.tasks.servive.gateway
+      when: ctlabs_k3s_gateway == "envoy"
       block:
-        - name: ctlabs_k3s.tasks.service.ingress.download
+        - name: ctlabs_k3s.tasks.service.gateway.api
           get_url:
-            url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
-            dest: /tmp/ingress-deployment.yml
-          register: res_ingress
-          until   : res_ingress is success
+            url  : https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+            dest : /tmp/gateway-api-deployment.yml
+          register: res_gateway-api
+          until   : res_gateway-api is success
 
-        - name: ctlabs_k3s.tasks.service.ingress.install
+        - name: ctlabs_k3s.tasks.service.gateway.api.install
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
-            src: /tmp/ingress-deployment.yml
+            src: /tmp/gateway-api-deployment.yml
 
-        - name: ctlabs_k3s.tasks.service.ingress.lb.file
-          template:
-            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
-            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
+        - name: ctlabs_k3s.tasks.service.gateway.ctrl
+          get_url:
+            url  : https://github.com/envoyproxy/gateway/releases/download/v1.0.1/install.yaml
+            dest : /tmp/gateway-ctrl-deployment.yml
+          register: res_gateway-ctrl
+          until   : res_gateway-ctrl is success
 
-        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
+        - name: ctlabs_k3s.tasks.service.gateway.ctrl.install
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
-            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
+            src: /tmp/gateway-ctrl-deployment.yml
+
+
+#    - name: ctlabs_k3s.tasks.service.ingress
+#      when: ctlabs_k3s_ingress == "nginx"
+#      block:
+#        - name: ctlabs_k3s.tasks.service.ingress.download
+#          get_url:
+#            url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
+#            dest: /tmp/ingress-deployment.yml
+#          register: res_ingress
+#          until   : res_ingress is success
+#
+#        - name: ctlabs_k3s.tasks.service.ingress.install
+#          environment:
+#            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#          kubernetes.core.k8s:
+#            src: /tmp/ingress-deployment.yml
+#
+#        - name: ctlabs_k3s.tasks.service.ingress.lb.file
+#          template:
+#            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
+#            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
+#
+#        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
+#          environment:
+#            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#          kubernetes.core.k8s:
+#            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
+
+

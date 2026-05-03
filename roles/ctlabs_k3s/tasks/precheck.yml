@@ -28,6 +28,14 @@
   set_fact:
     ctlabs_k3s_role: "{{ ctg_facts.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
+- name: ctlabs_k3s.tasks.precheck.k3s_gateway.var
+  set_fact:
+    ctlabs_k3s_gateway: "{{ ctlabs_k3s_gateway | default(ctlabs_k3s.defaults.config.gateway) }}"
+
+- name: ctlabs_k3s.tasks.precheck.k3s_gateway.local_fact
+  set_fact:
+    ctlabs_k3s_gateway: "{{ ctg_facts.ctlabs_k3s.gateway | default(ctlabs_k3s_gateway) }}"
+
 - name: ctlabs_k3s.tasks.precheck.k3s_ingress.var
   set_fact:
     ctlabs_k3s_ingress: "{{ ctlabs_k3s_ingress | default(ctlabs_k3s.defaults.config.ingress) }}"
