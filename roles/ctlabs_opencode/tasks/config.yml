@@ -1,0 +1,48 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opencode/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opencode.tasks.config.group
+  group:
+    name   : "{{ ctlabs_opencode.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_opencode.tasks.config.user
+  user:
+    name   : "{{ ctlabs_opencode.defaults.config.user  }}"
+    group  : "{{ ctlabs_opencode.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_opencode.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_opencode.defaults.config.user   }}"
+    group : "{{ ctlabs_opencode.defaults.config.group  }}"
+    groups: "{{ ctlabs_opencode.defaults.config.groups }}"
+    shell : /bin/bash
+
+- name: ctlabs_opencode.tasks.config.opencode.dir
+  file:
+    path : "{{ ctlabs_opencode.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_opencode.defaults.config.user  }}"
+    group: "{{ ctlabs_opencode.defaults.config.group }}"
+    mode : '0750'
+
+- name: ctlabs_opencode.tasks.config.profile.d
+  template:
+    src  : "{{ ctlabs_opencode.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_opencode.defaults.config.profile.file     }}"
+
+- name: ctlabs_opencode.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_opencode.defaults.config.settings.dir }}"
+    state: directory
+    mode: '0755'
+
+- name: ctlabs_opencode.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_opencode.defaults.config.settings.file     }}"

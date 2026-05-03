@@ -1,0 +1,51 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opencode/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  nodejs: node_22.x
+
+ctlabs_opencode:
+  defaults:
+    repos:
+      debian:
+        - name: nodesource
+          url : "https://deb.nodesource.com/{{ versions.nodejs }}"
+          key : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    pkgs:
+      debian: 
+        - name: curl
+        - name: nodejs
+        - name: git
+      redhat: []
+      npm:
+        - name: "opencode-ai"
+    config:
+      prefdir: /etc/apt/preferences.d
+      keydir : /etc/apt/keyrings
+      dir     : /home/opencode
+      user    : opencode
+      group   : opencode
+      groups  : [certs]
+      profile:
+        template: profile_opencode.sh.j2
+        file    : /etc/profile.d/opencode.sh
+      settings:
+        dir     : ~/.opencode
+        template: opencode.json.j2
+        file    : ~/.config/opencode/opencode.json
+    certs:
+      dir: /etc/ca-ctlabs
+      crt: "{{ ansible_nodename }}.crt"
+      key: "{{ ansible_nodename }}.prv"
+      ca:  ca-ctlabs.crt
+    service:
+  os:
+    - debian12
+    - kali2025
+    - kali2026
+    - parrot6
+    - parrot7

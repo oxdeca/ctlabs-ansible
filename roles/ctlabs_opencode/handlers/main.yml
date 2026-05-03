@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opencode/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opencode.handlers.opencode.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_opencode.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true
+
+- name: ctlabs_opencode.handlers.apt.update_cache
+  apt:
+    update_cache: yes

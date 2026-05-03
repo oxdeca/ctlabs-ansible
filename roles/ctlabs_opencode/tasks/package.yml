@@ -1,0 +1,58 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opencode/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opencode.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_opencode.tasks.package.debian.keydir
+      file:
+        path : "{{ ctlabs_opencode.defaults.config.keydir }}"
+        state: directory
+        mode : '0755'
+    
+    - name: ctlabs_opencode.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_opencode.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_opencode.defaults.repos[ctg_os_family] }}"
+    
+    - name: ctlabs_opencode.tasks.package.debian.repos.file
+      apt_repository:
+        repo: "deb [signed-by={{ ctlabs_opencode.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
+        update_cache: yes
+      loop: "{{ ctlabs_opencode.defaults.repos[ctg_os_family] }}"
+
+    - name: ctlabs_opencode.tasks.package.debian.nodejs.pin
+      template:
+        src : nodejs.pref.j2
+        dest: "{{ ctlabs_opencode.defaults.config.prefdir }}/{{ item.name }}.pref"
+        mode: '0644'
+        owner: root
+        group: root
+      loop: "{{ ctlabs_opencode.defaults.repos[ctg_os_family] }}"
+      notify: ctlabs_opencode.handlers.apt.update_cache
+
+    - name: ctlabs_opencode.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+    
+- name: ctlabs_opencode.tasks.package.pkgs.installed
+  when: item.when is not defined or item.when
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_opencode.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+    
+- name: ctlabs_opencode.tasks.package.gemini-cli.installed
+  npm: 
+    name  : "{{ item.name }}"
+    state : latest
+    global: true
+  loop: "{{ ctlabs_opencode.defaults.pkgs.npm }}"
