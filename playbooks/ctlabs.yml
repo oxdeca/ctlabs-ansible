@@ -881,3 +881,12 @@
   tags  : [claude_code]
   roles :
     - roles/ctlabs_claude_code
+
+# -----------------------------------------------------------------------------
+# ctlabs_opencode
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.opencode
+  hosts : [h1,h2,h3]
+  tags  : [opencode]
+  roles :
+    - roles/ctlabs_opencode
