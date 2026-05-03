@@ -50,7 +50,7 @@
   register: result
   until   : result is success
     
-- name: ctlabs_opencode.tasks.package.gemini-cli.installed
+- name: ctlabs_opencode.tasks.package.opencode.installed
   npm: 
     name  : "{{ item.name }}"
     state : latest

@@ -36,13 +36,13 @@
     src  : "{{ ctlabs_opencode.defaults.config.profile.template }}"
     dest : "{{ ctlabs_opencode.defaults.config.profile.file     }}"
 
-- name: ctlabs_opencode.tasks.config.settings.dir
-  file:
-    path : "{{ ctlabs_opencode.defaults.config.settings.dir }}"
-    state: directory
-    mode: '0755'
-
-- name: ctlabs_opencode.tasks.config.settings.file
-  template:
-    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
-    dest : "{{ ctlabs_opencode.defaults.config.settings.file     }}"
+#- name: ctlabs_opencode.tasks.config.settings.dir
+#  file:
+#    path : "{{ ctlabs_opencode.defaults.config.settings.dir }}"
+#    state: directory
+#    mode: '0755'
+#
+#- name: ctlabs_opencode.tasks.config.settings.file
+#  template:
+#    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
+#    dest : "{{ ctlabs_opencode.defaults.config.settings.file     }}"
