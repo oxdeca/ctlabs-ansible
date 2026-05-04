@@ -38,15 +38,11 @@
         chdir : "{{ ctlabs_ca.defaults.config.dir }}"
       register: "ca_create_output"
 
-#    - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.install
-#      blockinfile:
-#        path : "{{ ctlabs_ca.defaults.config[ctg_os_family].cacerts }}"
-#        block: "{{ lookup('file', ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt') }}"
-
     - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.install
       copy:
-        src : "{{ ctlabs_ca.defaults.config.dir + '/' + ctlabs_ca.defaults.config.ca.name + '.crt' }}"
-        dest: "{{ ctlabs_ca.defaults.config[ctg_os_family].cacerts + '/' + ctlabs_ca.defaults.config.ca.name + '.crt' }}"
+        src : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+        dest: "{{ ctlabs_ca.defaults.config[ctg_os_family].cacerts }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+        mode: '0644'
 
     - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.update
-      command: "{{ ctlabs_ca.defaults.config.{{ctg_os_family}}.update }}"
+      command: "{{ ctlabs_ca.defaults.config[ctg_os_family].update }}"

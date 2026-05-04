@@ -25,13 +25,13 @@ ctlabs_ca:
         bits        : 4096
         encrypt_key : false
       debian:
-        cacerts: /usr/local/share/ca-certificates/
+        cacerts: /usr/local/share/ca-certificates
         update : update-ca-certificates
       redhat:
-        cacerts: /etc/pki/tls/cert.pem
+        cacerts: /etc/pki/ca-trust/source/anchors
         update : update-ca-trust extract
       alpine:
-        cacerts: /usr/local/share/ca-certificates/
+        cacerts: /usr/local/share/ca-certificates
         update : update-ca-certificates
   os:
     - centos7
