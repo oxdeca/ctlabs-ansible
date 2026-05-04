@@ -45,4 +45,4 @@
         mode: '0644'
 
     - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.update
-      command: "{{ ctlabs_ca.defaults.config[ctg_os_family].update }}"
+      command: "{{ ctlabs_ca.defaults.config[ctg_os_family].rebuild }}"

@@ -26,13 +26,13 @@ ctlabs_ca:
         encrypt_key : false
       debian:
         cacerts: /usr/local/share/ca-certificates
-        update : update-ca-certificates
+        rebuild: update-ca-certificates
       redhat:
         cacerts: /etc/pki/ca-trust/source/anchors
-        update : update-ca-trust extract
+        rebuild: update-ca-trust extract
       alpine:
         cacerts: /usr/local/share/ca-certificates
-        update : update-ca-certificates
+        rebuild: update-ca-certificates
   os:
     - centos7
     - centos8
