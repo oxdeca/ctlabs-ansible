@@ -45,7 +45,7 @@ ctlabs_alloy:
       name  : alloy.service
       user  : alloy
       group : alloy
-      groups: [certs]
+      groups: [systemd-journal,certs]
   os:
     - redhat9
     - centos9
