@@ -68,3 +68,14 @@ remote_write:
   - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri }}
     remote_timeout: 5s
 {% endif %}
+
+# -----------------------------------------------------------------------------
+# OTLP Configuration
+# -----------------------------------------------------------------------------
+otlp:
+  # This tells Prometheus to attach these OTel attributes directly as labels on every metric it forwards to Mimir.
+  promote_resource_attributes:
+    - developer
+    - team
+    - environment
+```
