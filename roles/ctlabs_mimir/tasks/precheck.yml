@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_mimir.tasks.precheck.skip.unssupported
       meta: end_host
+
+- name: ctlabs_mimir.tasks.precheck.mtls.client
+  set_fact:
+    ctlabs_mimir_mtls_client: "{{ ctg_facts.ctlabs_mimir.mtls.client | default(false) }}"

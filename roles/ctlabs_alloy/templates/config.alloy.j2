@@ -66,11 +66,13 @@ loki.source.journal "journald" {
 loki.write "default" {
   endpoint {
     url = "{{ ctlabs_alloy_loki_url }}"
+{% if ctlabs_alloy_mtls_client == true %}
     tls_config {
       cert_file = "{{ ctlabs_alloy.defaults.config.tls.crt }}"
       key_file  = "{{ ctlabs_alloy.defaults.config.tls.key }}"
       ca_file   = "{{ ctlabs_alloy.defaults.config.tls.ca }}"
     }
+{%  endif %}
   }
   external_labels = {}
 }

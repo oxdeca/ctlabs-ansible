@@ -11,6 +11,7 @@ datasources:
   - name: mimir
     type: prometheus
     url : "{{ ctlabs_grafana_mimir_url }}"
+{% if ctlabs_grafana_mtls_client == true %}
     access: proxy
     jsonData:
       tlsAuth: true
@@ -19,3 +20,4 @@ datasources:
       tlsClientCert: $__file{{"{" ~ ctlabs_grafana.defaults.config.server.cert ~ "}"}}
       tlsClientKey : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.key  ~ "}"}}
       tlsCACert    : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.ca  ~ "}"}}
+{% endif %}

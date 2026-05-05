@@ -21,7 +21,7 @@
 
 - name: ctlabs_grafana.tasks.precheck.loki_url.local_fact
   set_fact:
-    ctlabs_grafana_loki_url: "{{ ansible_local.ctlabs.grafana.ds.loki_url | default(ctlabs_grafana_loki_url) }}"
+    ctlabs_grafana_loki_url: "{{ ctg_facts.ctlabs.grafana.ds.loki_url | default(ctlabs_grafana_loki_url) }}"
 
 - name: ctlabs_grafana.tasks.precheck.mimir_url.var
   set_fact:
@@ -29,5 +29,8 @@
 
 - name: ctlabs_grafana.tasks.precheck.mimir_url.local_fact
   set_fact:
-    ctlabs_grafana_mimir_url: "{{ ansible_local.ctlabs.grafana.ds.mimir_url | default(ctlabs_grafana_mimir_url) }}"
+    ctlabs_grafana_mimir_url: "{{ ctg_facts.ctlabs.grafana.ds.mimir_url | default(ctlabs_grafana_mimir_url) }}"
 
+- name: ctlabs_grafana.tasks.precheck.mtls.client
+  set_fact:
+    ctlabs_grafana_mtls_client: "{{ ctg_facts.ctlabs_grafana.mtls.client | default(false) }}"
