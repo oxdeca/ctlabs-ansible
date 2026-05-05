@@ -8,6 +8,10 @@
 # -----------------------------------------------------------------------------
 - job_name: node_exporter
   scheme: https
+  tls_config:
+    ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
+    cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
+    key_file : {{ ctlabs_prometheus.defaults.config.server.tls.key }}
   static_configs:
     - targets:
 {%   for target in ctlabs_prometheus.defaults.config.node_exporter.targets %}
