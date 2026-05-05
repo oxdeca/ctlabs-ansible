@@ -16,6 +16,6 @@ datasources:
       tlsAuth: true
       tlsAuthWithCACert: true
     secureJsonData:
-      tlsClientCert: $__file{{{ ctlabs_grafana.defaults.config.server.cert }}}
-      tlsClientKey : $__file{{{ ctlabs_grafana.defaults.config.server.key }}}
-      tlsCACert    : $__file{{{ ctlabs_grafana.defaults.config.server.ca }}}
+      tlsClientCert: "$__file{ {{ ctlabs_grafana.defaults.config.server.cert }} }"
+      tlsClientKey : "$__file{ {{ ctlabs_grafana.defaults.config.server.key }} }"
+      tlsCACert    : "$__file{ {{ ctlabs_grafana.defaults.config.server.ca }} }"
