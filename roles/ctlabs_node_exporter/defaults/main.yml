@@ -49,6 +49,6 @@ ctlabs_node_exporter:
     - debian12
     - kali2024
     - kali2025
-    - kali2027
+    - kali2026
     - parrot6
     - parrot7
