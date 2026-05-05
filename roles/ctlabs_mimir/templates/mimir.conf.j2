@@ -44,8 +44,10 @@ server:
   http_listen_port: 9009
   log_level: error
   http_tls_config:
-    cert_file: {{ ctlabs_mimir.defaults.config.server.tls.crt }}
-    key_file : {{ ctlabs_mimir.defaults.config.server.tls.key }}
+    cert_file       : {{ ctlabs_mimir.defaults.config.server.tls.crt }}
+    key_file        : {{ ctlabs_mimir.defaults.config.server.tls.key }}
+    client_ca_file  : {{ ctlabs_mimir.defaults.config.server.tls.ca }}
+    client_auth_type: RequireAndVerifyClientCert
 
 store_gateway:
   sharding_ring:

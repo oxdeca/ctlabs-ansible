@@ -5,7 +5,6 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
-
 ctlabs_alloy:
   defaults:
     repos:
@@ -38,6 +37,10 @@ ctlabs_alloy:
       template : config.alloy.j2
       loki_url : https://loki.ctlabs.internal:3100/loki/api/v1/push
       templates: []
+      tls:
+        crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+        key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+        ca : /etc/ca-ctlabs/ca-ctlabs.crt
     service:
       name  : alloy.service
       user  : alloy

@@ -5,6 +5,9 @@
 # Description : ctlabs_slapd defaults file
 # ------------------------------------------------------------------------------
 
+versions:
+  openldap: 2.6.8
+
 ctlabs_slapd:
   defaults:
     pkgs:
@@ -12,8 +15,8 @@ ctlabs_slapd:
         - name : slapd
         - name : ldap-utils
       redhat:
-        - name : openldap-servers
-        - name : openldap-clients
+        - name : "openldap-servers-{{ versions.openldap }}"
+        - name : "openldap-clients-{{ versions.openldap }}"
     files:
       - src: switch_slapd_config.sh
         dst: /root/switch_slapd_config.sh

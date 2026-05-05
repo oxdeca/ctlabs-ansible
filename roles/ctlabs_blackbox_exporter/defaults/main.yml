@@ -32,6 +32,7 @@ ctlabs_blackbox_exporter:
         tls:
           crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+          ca : /etc/ca-ctlabs/ca-ctlabs.crt
     service:
       name     : blackbox_exporter.service
       template : blackbox_exporter.service.j2

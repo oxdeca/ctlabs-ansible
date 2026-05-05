@@ -6,5 +6,7 @@
 # ------------------------------------------------------------------------------
 
 tls_server_config:
-  cert_file: {{ ctlabs_node_exporter.defaults.config.server.tls.crt }}
-  key_file : {{ ctlabs_node_exporter.defaults.config.server.tls.key }}
+  cert_file       : {{ ctlabs_node_exporter.defaults.config.server.tls.crt }}
+  key_file        : {{ ctlabs_node_exporter.defaults.config.server.tls.key }}
+  client_ca_file  : {{ ctlabs_node_exporter.defaults.config.server.tls.ca }} 
+  client_auth_type: RequireAndVerifyClientCert

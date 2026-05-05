@@ -11,4 +11,10 @@ datasources:
   - name: mimir
     type: prometheus
     url : "{{ ctlabs_grafana_mimir_url }}"
-
+    access: proxy
+    jsonData:
+      tlsAuth: true
+      tlsAuthWithCACert: true
+      clientCertFile: {{ ctlabs_grafana.defaults.config.server.cert }}
+      clientKeyFile : {{ ctlabs_grafana.defaults.config.server.key }}
+      caCertFile    : {{ ctlabs_grafana.defaults.config.server.ca }}

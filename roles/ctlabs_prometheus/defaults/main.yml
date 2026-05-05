@@ -36,6 +36,7 @@ ctlabs_prometheus:
         tls      :
           crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+          ca : /etc/ca-ctlabs/ca-ctlabs.crt
       receiver:
         targets :
       node_exporter:
