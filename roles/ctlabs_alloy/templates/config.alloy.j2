@@ -67,9 +67,9 @@ loki.write "default" {
   endpoint {
     url = "{{ ctlabs_alloy_loki_url }}"
     tls_config {
-      cert_file = {{ ctlabs_alloy.defaults.config.tls.crt }}
-      key_file  = {{ ctlabs_alloy.defaults.config.tls.key }}
-      ca_file   = {{ ctlabs_alloy.defaults.config.tls.ca }}
+      cert_file = "{{ ctlabs_alloy.defaults.config.tls.crt }}"
+      key_file  = "{{ ctlabs_alloy.defaults.config.tls.key }}"
+      ca_file   = "{{ ctlabs_alloy.defaults.config.tls.ca }}"
     }
   }
   external_labels = {}

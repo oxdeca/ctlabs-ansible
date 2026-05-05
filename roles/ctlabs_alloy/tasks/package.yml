@@ -52,3 +52,9 @@
   loop    : "{{ ctlabs_alloy.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
+
+- name: ctlabs_alloy.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_alloy.defaults.service.user   }}"
+    group : "{{ ctlabs_alloy.defaults.service.group  }}"
+    groups: "{{ ctlabs_alloy.defaults.service.groups }}"
