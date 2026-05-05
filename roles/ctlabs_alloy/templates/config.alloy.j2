@@ -6,12 +6,12 @@
 
 loki.process "journald" {
   forward_to = [loki.write.default.receiver]
-    stage.match {
-      selector = "{unit=~\"session-.*\\\\.scope\"}"
-      stage.template {
-        source   = "merged_scope_unit"
-        template = "session.scope"
-      }
+  stage.match {
+    selector = "{unit=~\"session-.*\\\\.scope\"}"
+    stage.template {
+      source   = "merged_scope_unit"
+      template = "session.scope"
+    }
     stage.labels {
       values = {
         unit = "merged_scope_unit",
