@@ -15,7 +15,7 @@
     - name: ctlabs_prometheus.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_prometheus.tasks.precheck.mtls.client
+- name: ctlabs_prometheus.tasks.precheck.mtls
   set_fact:
     ctlabs_prometheus_mtls: "{{ ctg_facts.ctlabs_prometheus.mtls | default(ctlabs_prometheus.defaults.config.server.tls.mtls) }}"
 

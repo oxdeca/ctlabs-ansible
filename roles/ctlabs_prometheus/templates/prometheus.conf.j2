@@ -53,7 +53,7 @@ scrape_configs:
 remote_write:
   - url: {{ ctg_facts.ctlabs_prometheus.config.remote_write.uri | default(ctlabs_prometheus.defaults.config.remote_write.uri) }}
     remote_timeout: 5s
-{%   if ctlabs_prometheus_mtls_client == true %}
+{%   if ctlabs_prometheus_mtls == true %}
     tls_config:
       ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
       cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
