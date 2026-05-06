@@ -10,10 +10,10 @@
   ExecStart={{ ctlabs_prometheus.defaults.config.bin }} --config.file {{ ctlabs_prometheus.defaults.config.cfgdir + '/' + ctlabs_prometheus.defaults.config.file }} \
     --web.config.file {{ ctlabs_prometheus.defaults.config.server.file }} \
     --web.enable-otlp-receiver \
-{% if   ctg_facts.ctlabs_prometheus_mode == 'receiver' %}
+{% if   ctlabs_prometheus_mode == 'receiver' %}
     --web.enable-remote-write-receiver \
     --storage.tsdb.retention 2h
-{% elif ctg_facts.ctlabs_prometheus_mode == 'agent' %}
+{% elif ctlabs_prometheus_mode == 'agent' %}
     --enable-feature agent
     --agent
 {% endif %}
