@@ -5,6 +5,8 @@
 # Description : description
 # ------------------------------------------------------------------------------
 
+versions:
+  grafana: 12.4.3
 
 ctlabs_grafana:
   defaults:
@@ -17,7 +19,7 @@ ctlabs_grafana:
           sslcacert : /etc/pki/tls/certs/ca-bundle.crt
     pkgs:
       redhat:
-        - name: grafana
+        - name: "grafana-{{ versions.grafana }}"
     config:
       ds:
         dir : /etc/grafana/provisioning/datasources
