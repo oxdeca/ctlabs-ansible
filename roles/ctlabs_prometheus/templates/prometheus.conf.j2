@@ -36,12 +36,10 @@ scrape_configs:
   static_configs:
     - targets: 
       - {{ ansible_nodename }}:9090
-{% if ctlabs_prometheus_mtls_client == true %}
-  tls_config:
-    ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
-    cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
-    key_file : {{ ctlabs_prometheus.defaults.config.server.tls.key }}
-{% endif %}
+#  tls_config:
+#    ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
+#    cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
+#    key_file : {{ ctlabs_prometheus.defaults.config.server.tls.key }}
 
 {# -------- INCLUDES -------- #}
 {%- for template in ctlabs_prometheus.defaults.config.templates %}

@@ -33,4 +33,4 @@
 
 - name: ctlabs_grafana.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_grafana_mtls_client: "{{ ctg_facts.ctlabs_grafana.mtls.client | default(false) }}"
+    ctlabs_grafana_mtls_client: "{{ ctg_facts.ctlabs_grafana.mtls.client | default(true) }}"

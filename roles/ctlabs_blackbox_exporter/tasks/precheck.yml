@@ -17,4 +17,4 @@
 
 - name: ctlabs_blackbox_exporter.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_blackbox_exporter_mtls_client: "{{ ctg_facts.ctlabs_blackbox_exporter.mtls.client | default(false) }}"
+    ctlabs_blackbox_exporter_mtls_client: "{{ ctg_facts.ctlabs_blackbox_exporter.mtls.client | default(true) }}"

@@ -25,4 +25,4 @@
 
 - name: ctlabs_alloy.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_alloy_mtls_client: "{{ ctg_facts.ctlabs_alloy.mtls.client | default(false) }}"
+    ctlabs_alloy_mtls_client: "{{ ctg_facts.ctlabs_alloy.mtls.client | default(true) }}"

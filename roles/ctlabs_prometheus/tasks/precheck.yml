@@ -17,4 +17,4 @@
 
 - name: ctlabs_prometheus.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_prometheus_mtls_client: "{{ ctg_facts.ctlabs_prometheus.mtls.client | default(false) }}"
+    ctlabs_prometheus_mtls_client: "{{ ctg_facts.ctlabs_prometheus.mtls.client | default(true) }}"

@@ -8,7 +8,5 @@
 tls_server_config:
   cert_file       : {{ ctlabs_prometheus.defaults.config.server.tls.crt }}
   key_file        : {{ ctlabs_prometheus.defaults.config.server.tls.key }}
-{% if ctlabs_prometheus_mtls_client == true %}
-  client_ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca }} 
-  client_auth_type: RequireAndVerifyClientCert
-{% endif %}
+#  client_ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca }} 
+#  client_auth_type: RequireAndVerifyClientCert
