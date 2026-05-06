@@ -23,6 +23,6 @@
   set_fact:
     ctlabs_alloy_loki_url: "{{ ctg_facts.ctlabs_alloy.loki.url | default(ctlabs_alloy_loki_url) }}"
 
-- name: ctlabs_alloy.tasks.precheck.mtls.client
+- name: ctlabs_alloy.tasks.precheck.mtls
   set_fact:
-    ctlabs_alloy_mtls_client: "{{ ctg_facts.ctlabs_alloy.mtls.client | default(true) }}"
+    ctlabs_alloy_mtls: "{{ ctg_facts.ctlabs_alloy.mtls | default(ctlabs_alloy.defaults.config.tls.mtls) }}"

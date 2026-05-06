@@ -8,7 +8,7 @@
 tls_server_config:
   cert_file       : {{ ctlabs_blackbox_exporter.defaults.config.server.tls.crt }}
   key_file        : {{ ctlabs_blackbox_exporter.defaults.config.server.tls.key }}
-{% if ctlabs_blackbox_exporter_mtls_client == true %}
+{% if ctlabs_blackbox_exporter_mtls == true %}
   client_ca_file  : {{ ctlabs_blackbox_exporter.defaults.config.server.tls.ca }} 
   client_auth_type: RequireAndVerifyClientCert
 {% endif %}
