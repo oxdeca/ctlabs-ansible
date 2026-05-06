@@ -29,6 +29,7 @@ ctlabs_node_exporter:
         file     : /etc/node_exporter/web-config.yml
         template : web-config.yml.j2
         tls:
+          mtls: true
           crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
           ca : /etc/ca-ctlabs/ca-ctlabs.crt

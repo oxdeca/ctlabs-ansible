@@ -2,13 +2,13 @@
 {# File: ctlabs_prometheus/templates/10_node_exporter.job.j2                 #}
 {# ------------------------------------------------------------------------- #}
 
-{%- if ansible_local.ctlabs_prometheus.config.node_exporter is defined %}
+{%- if ctg_facts.ctlabs_prometheus.config.node_exporter is defined %}
 # -----------------------------------------------------------------------------
 # job: node_exporter
 # -----------------------------------------------------------------------------
 - job_name: node_exporter
   scheme: https
-{%  if ctlabs_prometheus_mtls_client == true %}
+{%  if ctlabs_prometheus_mtls == true %}
   tls_config:
     ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
     cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}

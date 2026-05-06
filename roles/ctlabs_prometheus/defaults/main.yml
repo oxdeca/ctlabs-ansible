@@ -33,12 +33,12 @@ ctlabs_prometheus:
       server :
         file     : /etc/prometheus/web-config.yml
         template : web-config.yml.j2
-        tls      :
+        tls:
+          mtls: true
           crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
           key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
           ca : /etc/ca-ctlabs/ca-ctlabs.crt
-      receiver:
-        targets :
+      mode: agent
       node_exporter:
         domain : ctlabs.internal
         targets: "{{ groups['hosts'] }}"

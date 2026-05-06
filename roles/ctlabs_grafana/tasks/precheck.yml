@@ -31,6 +31,6 @@
   set_fact:
     ctlabs_grafana_mimir_url: "{{ ctg_facts.ctlabs.grafana.ds.mimir_url | default(ctlabs_grafana_mimir_url) }}"
 
-- name: ctlabs_grafana.tasks.precheck.mtls.client
+- name: ctlabs_grafana.tasks.precheck.mtls
   set_fact:
-    ctlabs_grafana_mtls_client: "{{ ctg_facts.ctlabs_grafana.mtls.client | default(true) }}"
+    ctlabs_grafana_mtls: "{{ ctg_facts.ctlabs_grafana.mtls | default(ctlabs_grafana.defaults.config.server.tls.mtls) }}"

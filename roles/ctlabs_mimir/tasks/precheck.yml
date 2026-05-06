@@ -17,4 +17,4 @@
 
 - name: ctlabs_mimir.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_mimir_mtls_client: "{{ ctg_facts.ctlabs_mimir.mtls.client | default(true) }}"
+    ctlabs_mimir_mtls: "{{ ctg_facts.ctlabs_mimir.mtls | default(ctlabs_mimir.defaults.config.server.tls.mtls) }}"

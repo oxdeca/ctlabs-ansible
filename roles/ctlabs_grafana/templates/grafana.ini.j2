@@ -2,8 +2,8 @@
 
 [server]
   protocol  = https
-  cert_file = {{ ctlabs_grafana.defaults.config.server.cert }}
-  cert_key  = {{ ctlabs_grafana.defaults.config.server.key  }}
+  cert_file = {{ ctlabs_grafana.defaults.config.server.tls.cert }}
+  cert_key  = {{ ctlabs_grafana.defaults.config.server.tls.key  }}
 
 [server.custom_response_headers]
 [database]

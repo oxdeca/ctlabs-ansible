@@ -2,7 +2,7 @@
 {# File: ctlabs_prometheus/templates/10_goflow2.job.j2                       #}
 {# ------------------------------------------------------------------------- #}
 
-{%- if ansible_local.ctlabs_prometheus.config.goflow2 is defined %}
+{%- if ctg_facts.ctlabs_prometheus.config.goflow2 is defined %}
 # -----------------------------------------------------------------------------
 # job: goflow2
 # -----------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 {# File: ctlabs_prometheus/templates/10_blackbox_exporter.job.j2             #}
 {# ------------------------------------------------------------------------- #}
 
-{%- if ansible_local.ctlabs_prometheus.config.blackbox_exporter is defined %}
+{%- if ctg_facts.ctlabs_prometheus.config.blackbox_exporter is defined %}
 # -----------------------------------------------------------------------------
 # job: blackbox_exporter
 # -----------------------------------------------------------------------------
@@ -11,7 +11,7 @@
   metrics_path : /probe
   params       :
     module: [http_2xx]
-{% if ctlabs_prometheus_mtls_client == true %}
+{% if ctlabs_prometheus_mtls == true %}
   tls_config:
     ca_file  : {{ ctlabs_prometheus.defaults.config.server.tls.ca  }}
     cert_file: {{ ctlabs_prometheus.defaults.config.server.tls.crt }}

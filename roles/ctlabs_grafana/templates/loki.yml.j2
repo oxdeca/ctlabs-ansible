@@ -11,13 +11,13 @@ datasources:
   - name: Loki
     type: loki
     url : "{{ ctlabs_grafana_loki_url }}"
-{% if ctlabs_grafana_mtls_client == true %}
+{% if ctlabs_grafana_mtls == true %}
     access: proxy
     jsonData:
       tlsAuth: true
       tlsAuthWithCACert: true
     secureJsonData:
-      tlsClientCert: $__file{{"{" ~ ctlabs_grafana.defaults.config.server.cert ~ "}"}}
-      tlsClientKey : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.key  ~ "}"}}
-      tlsCACert    : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.ca  ~ "}"}}
+      tlsClientCert: $__file{{"{" ~ ctlabs_grafana.defaults.config.server.tls.cert ~ "}"}}
+      tlsClientKey : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.tls.key  ~ "}"}}
+      tlsCACert    : $__file{{"{" ~ ctlabs_grafana.defaults.config.server.tls.ca  ~ "}"}}
 {% endif %}

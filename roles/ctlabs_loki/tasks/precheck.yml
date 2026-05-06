@@ -17,4 +17,4 @@
 
 - name: ctlabs_loki.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_loki_mtls_client: "{{ ctg_facts.ctlabs_loki.mtls.client | default(true) }}"
+    ctlabs_loki_mtls: "{{ ctg_facts.ctlabs_loki.mtls | default(ctlabs_loki.defaults.config.server.tls.mtls) }}"

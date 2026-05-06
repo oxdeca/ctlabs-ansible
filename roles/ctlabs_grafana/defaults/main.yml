@@ -43,9 +43,11 @@ ctlabs_grafana:
         file     : /etc/grafana/grafana.ini
         template : grafana.ini.j2
         proto    : https
-        cert     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
-        key      : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
-        ca       : /etc/ca-ctlabs/ca-ctlabs.crt
+        tls:
+          mtls: true
+          cert: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+          key : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+          ca  : /etc/ca-ctlabs/ca-ctlabs.crt
       smtp:
         host     : 
         user     :

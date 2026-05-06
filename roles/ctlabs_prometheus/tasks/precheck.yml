@@ -17,4 +17,8 @@
 
 - name: ctlabs_prometheus.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_prometheus_mtls_client: "{{ ctg_facts.ctlabs_prometheus.mtls.client | default(true) }}"
+    ctlabs_prometheus_mtls: "{{ ctg_facts.ctlabs_prometheus.mtls | default(ctlabs_prometheus.defaults.config.server.tls.mtls) }}"
+
+- name: ctlabs_prometheus.tasks.precheck.mode
+  set_fact:
+    ctlabs_prometheus_mode: "{{ ctg_facts.ctlabs_prometheus.mode | default(ctlabs_prometheus.defaults.config.mode) }}"

@@ -17,4 +17,4 @@
 
 - name: ctlabs_node_exporter.tasks.precheck.mtls.client
   set_fact:
-    ctlabs_node_exporter_mtls_client: "{{ ctg_facts.ctlabs_node_exporter.mtls.client | default(true) }}"
+    ctlabs_node_exporter_mtls: "{{ ctg_facts.ctlabs_node_exporter.mtls | default(ctlabs_node_exporter.defaults.config.server.tls.mtls) }}"

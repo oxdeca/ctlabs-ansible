@@ -49,9 +49,9 @@ scrape_configs:
 # -----------------------------------------------------------------------------
 # Remote Write
 # -----------------------------------------------------------------------------
-{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'agent' %}
+{% if ctlabs_prometheus_mode == 'agent' %}
 remote_write:
-  - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri | default(ctlabs_prometheus.defaults.config.remote_write.uri) }}
+  - url: {{ ctg_facts.ctlabs_prometheus.config.remote_write.uri | default(ctlabs_prometheus.defaults.config.remote_write.uri) }}
     remote_timeout: 5s
 {%   if ctlabs_prometheus_mtls_client == true %}
     tls_config:
@@ -61,9 +61,9 @@ remote_write:
 {%   endif %}
 {% endif %}
 
-{% if ansible_local.ctlabs_prometheus is defined and ansible_local.ctlabs_prometheus.mode == 'receiver' %}
+{% if ctlabs_prometheus_mode == 'receiver' %}
 remote_write:
-  - url: {{ ansible_local.ctlabs_prometheus.config.remote_write.uri }}
+  - url: {{ ctg_facts.ctlabs_prometheus.config.remote_write.uri }}
     remote_timeout: 5s
 {% endif %}
 
