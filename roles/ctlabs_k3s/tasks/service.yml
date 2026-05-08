@@ -180,31 +180,35 @@
                     backendRefs:
                       - name: argocd-server
                         port: 80
-              
-
-
-
-    - name: ctlabs_k3s.tasks.service.argocd
-      vars:
-        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      kubernetes.core.helm:
-        name: argocd
-        chart_ref: argo/argo-cd
-        release_namespace: argo
-        create_namespace: true
-        values:
-          global:
-            domain: "{{ ctlabs_k3s_server_url | default('') }}"
-          configs:
-            params:
-              server.insecure: true
-              server.baseUrl: "https://{{ ctlabs_k3s_server_url | default('192.168.30.31') }}"
-          server:
-            ingress:
-              enabled: "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
-              ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
+         
+        - name: ctlabs_k3s.tasks.service.argocd.gateway.traefik.tls.patch
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s_json_patch:
+            kind: Gateway
+            namespace: kube-system
+            name: traefik-gateway
+            patch:
+              - op: replace
+                path: /spec/listeners
+                value:
+                  - name: web
+                    port: 8000
+                    protocol: HTTP
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+                  - name: websecure
+                    port: 8443
+                    protocol: HTTPS
+                    tls:
+                      mode: Terminate
+                      certificateRefs:
+                        - name: argocd-tls
+                          namespace: argo
+                    allowedRoutes:
+                      namespaces:
+                        from: All     
 
 
     - name: ctlabs_k3s.tasks.service.gateway_envoy
