@@ -45,11 +45,20 @@
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
       ansible.builtin.wait_for:
-        host   : "{{ ansible_nodename }}"
-        port   : 6443
-        #state  : started
-        #timeout: 300 
-        delay  : 10 
+        host: "{{ ansible_nodename }}"
+        port: 6443
+        delay: 10
+
+    - name: ctlabs_k3s.tasks.service.cluster.api_ready
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      shell: /usr/bin/k3s kubectl cluster-info
+      register: cluster_info
+      until: cluster_info.rc == 0
+      retries: 10
+      delay: 10 
 
     - name: ctlabs_k3s.tasks.service.argocd
       vars:
@@ -69,68 +78,179 @@
               argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
             params:
               server.insecure: true
+              server.baseUrl: "https://{{ ctlabs_k3s_server_url | default('192.168.30.31') }}"
           server:
             ingress:
-              enabled         : true
-              ingressClassName: "{{ ctlabs_k3s_ingress }}"
-      register: res_argo
-      until   : res_argo is success
+              enabled: "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
+              ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
 
-    - name: ctlabs_k3s.tasks.servive.gateway
-      when: ctlabs_k3s_gateway == "envoy"
+    - name: ctlabs_k3s.tasks.service.gateway_api
+      when: ctlabs_k3s_ingress_type == "gateway_api"
       block:
-        - name: ctlabs_k3s.tasks.service.gateway.api
-          get_url:
-            url  : https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
-            dest : /tmp/gateway-api-deployment.yml
-          register: res_gateway_api
-          until   : res_gateway_api is success
+        - name: ctlabs_k3s.tasks.service.gateway_api.traefik
+          when: ctlabs_k3s_ingress_provider == "traefik"
+          block:
+            - name: ctlabs_k3s.tasks.service.gateway_api.traefik.manifest
+              template:
+                src: k3s-traefik-config.yml.j2
+                dest: /var/lib/rancher/k3s/server/manifests/k3s-traefik-config.yaml
 
-        - name: ctlabs_k3s.tasks.service.gateway.api.install
+        - name: ctlabs_k3s.tasks.service.argocd.gateway_objects
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          block:
+            - name: ctlabs_k3s.tasks.service.argocd.tls_secret
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: argocd-tls
+                    namespace: argo
+                  type: kubernetes.io/tls
+                  data:
+                    tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/k3s1.ctlabs.internal.crt') | b64encode }}"
+                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/k3s1.ctlabs.internal.key') | b64encode }}"
+    
+        - name: ctlabs_k3s.tasks.service.argocd.reference_grant
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
-            src: /tmp/gateway-api-deployment.yml
+            state: present
+            definition:
+              apiVersion: gateway.networking.k8s.io/v1beta1
+              kind: ReferenceGrant
+              metadata:
+                name: argocd-grant
+                namespace: argo
+              spec:
+                from:
+                  - group: gateway.networking.k8s.io
+                    kind: Gateway
+                    namespace: kube-system
+                to:
+                  - group: ""
+                    kind: Secret
 
-        - name: ctlabs_k3s.tasks.service.gateway.ctrl
+        - name: ctlabs_k3s.tasks.service.gateway.attachment_grant
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: gateway.networking.k8s.io/v1beta1
+              kind: ReferenceGrant
+              metadata:
+                name: allow-argo-routes
+                namespace: kube-system # Target namespace is where the Gateway lives
+              spec:
+                from:
+                  - group: gateway.networking.k8s.io
+                    kind: HTTPRoute
+                    namespace: argo # Source namespace is where the Route lives
+                to:
+                  - group: gateway.networking.k8s.io
+                    kind: Gateway
+
+        - name: ctlabs_k3s.tasks.service.argocd.httproute
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            state: present
+            definition: 
+              apiVersion: gateway.networking.k8s.io/v1
+              kind: HTTPRoute
+              metadata:
+                name: argocd-server
+                namespace: argo
+              spec:
+                parentRefs:
+                  - name: traefik-gateway
+                    namespace: kube-system
+                    sectionName: web
+                  - name: traefik-gateway
+                    namespace: kube-system
+                    sectionName: websecure
+                rules:
+                  - matches:
+                      - path:
+                          type: PathPrefix
+                          value: /
+                    backendRefs:
+                      - name: argocd-server
+                        port: 80
+              
+
+
+
+    - name: ctlabs_k3s.tasks.service.argocd
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      kubernetes.core.helm:
+        name: argocd
+        chart_ref: argo/argo-cd
+        release_namespace: argo
+        create_namespace: true
+        values:
+          global:
+            domain: "{{ ctlabs_k3s_server_url | default('') }}"
+          configs:
+            params:
+              server.insecure: true
+              server.baseUrl: "https://{{ ctlabs_k3s_server_url | default('192.168.30.31') }}"
+          server:
+            ingress:
+              enabled: "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
+              ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
+
+
+    - name: ctlabs_k3s.tasks.service.gateway_envoy
+      when:
+        - ctlabs_k3s_ingress_type == "gateway_api"
+        - ctlabs_k3s_ingress_provider == "envoy-gateway"
+      block:
+        - name: ctlabs_k3s.tasks.service.gateway_envoy.install
           get_url:
             url  : https://github.com/envoyproxy/gateway/releases/download/v1.0.1/install.yaml
             dest : /tmp/gateway-ctrl-deployment.yml
           register: res_gateway_ctrl
           until   : res_gateway_ctrl is success
 
-        - name: ctlabs_k3s.tasks.service.gateway.ctrl.install
+        - name: ctlabs_k3s.tasks.service.gateway_envoy.deploy
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
             src: /tmp/gateway-ctrl-deployment.yml
 
 
-#    - name: ctlabs_k3s.tasks.service.ingress
-#      when: ctlabs_k3s_ingress == "nginx"
-#      block:
-#        - name: ctlabs_k3s.tasks.service.ingress.download
-#          get_url:
-#            url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
-#            dest: /tmp/ingress-deployment.yml
-#          register: res_ingress
-#          until   : res_ingress is success
-#
-#        - name: ctlabs_k3s.tasks.service.ingress.install
-#          environment:
-#            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-#          kubernetes.core.k8s:
-#            src: /tmp/ingress-deployment.yml
-#
-#        - name: ctlabs_k3s.tasks.service.ingress.lb.file
-#          template:
-#            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
-#            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
-#
-#        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
-#          environment:
-#            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-#          kubernetes.core.k8s:
-#            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
+    - name: ctlabs_k3s.tasks.service.ingress
+      when:
+        - ctlabs_k3s_ingress_type == "ingress"
+        - ctlabs_k3s_ingress_provider == "nginx"
+      block:
+        - name: ctlabs_k3s.tasks.service.ingress.download
+          get_url:
+            url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
+            dest: /tmp/ingress-deployment.yml
+          register: res_ingress
+          until   : res_ingress is success
 
+        - name: ctlabs_k3s.tasks.service.ingress.install
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            src: /tmp/ingress-deployment.yml
 
+        - name: ctlabs_k3s.tasks.service.ingress.lb.file
+          template:
+            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
+            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
+
+        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          kubernetes.core.k8s:
+            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"

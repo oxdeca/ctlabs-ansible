@@ -28,21 +28,17 @@
   set_fact:
     ctlabs_k3s_role: "{{ ctg_facts.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
-- name: ctlabs_k3s.tasks.precheck.k3s_gateway.var
+- name: ctlabs_k3s.tasks.precheck.k3s.ingress_type
   set_fact:
-    ctlabs_k3s_gateway: "{{ ctlabs_k3s_gateway | default(ctlabs_k3s.defaults.config.gateway) }}"
+    ctlabs_k3s_ingress_type: "{{ ctg_facts.ctlabs_k3s.ingress.type | default(ctlabs_k3s.defaults.config.ingress.type) }}"
 
-- name: ctlabs_k3s.tasks.precheck.k3s_gateway.local_fact
+- name: ctlabs_k3s.tasks.precheck.k3s_ingress.provider
   set_fact:
-    ctlabs_k3s_gateway: "{{ ctg_facts.ctlabs_k3s.gateway | default(ctlabs_k3s_gateway) }}"
+    ctlabs_k3s_ingress_provider: "{{ ctg_facts.ctlabs_k3s.ingress.provider | default(ctlabs_k3s.defaults.config.ingress.provider) }}"
 
-- name: ctlabs_k3s.tasks.precheck.k3s_ingress.var
-  set_fact:
-    ctlabs_k3s_ingress: "{{ ctlabs_k3s_ingress | default(ctlabs_k3s.defaults.config.ingress) }}"
-
-- name: ctlabs_k3s.tasks.precheck.k3s_ingress.local_fact
-  set_fact:
-    ctlabs_k3s_ingress: "{{ ctg_facts.ctlabs_k3s.ingress | default(ctlabs_k3s_ingress) }}"
+- name: ctlabs_k3s.tasks.precheck.debug.ingress
+  debug:
+    msg: "ingress_type={{ ctlabs_k3s_ingress_type }}, ingress_provider={{ ctlabs_k3s_ingress_provider }}"
 
 #- debug: "msg={{ ctlabs_k3s_role }}"
 

@@ -40,14 +40,11 @@ ctlabs_k3s:
         lb :
           template: ingress-controller-lb.yml.j2
           file    : /tmp/ingress-controller-lb.yml
-    gateway:
-      api:
-      controller:
-        url: 
     config:
       role   : server
-      ingress: traefik
-      gateway: envoy
+      ingress:
+        type    : "gateway_api"  # Options: 'ingress', 'gateway_api'
+        provider: "traefik"      # Options: 'traefik', 'nginx', 'envoy-gateway'
       server:
         url: "https://{{ ansible_nodename }}:6443"
         token: /var/lib/rancher/k3s/server/token
