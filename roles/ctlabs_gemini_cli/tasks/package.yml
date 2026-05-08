@@ -5,6 +5,19 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_gemini_cli.tasks.package.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_gemini_cli.tasks.package.redhat.repos.file
+      yum_repository:
+        name           : "{{ item.name }}"
+        description    : "{{ item.desc }}"
+        baseurl        : "{{ item.url  }}"
+        gpgkey         : "{{ item.key  }}"
+        gpgcheck       : true
+        module_hotfixes: true
+      loop: "{{ ctlabs_gemini_cli.defaults.repos[ctg_os_family] }}"
+
 - name: ctlabs_gemini_cli.tasks.package.debian
   when: ctg_os_family == 'debian'
   block:

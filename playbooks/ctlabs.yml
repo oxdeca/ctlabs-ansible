@@ -868,7 +868,7 @@
 # ctlabs_gemini_cli
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.gemini_cli
-  hosts : [h1,h2,h3]
+  hosts : [ansible,h1,h2,h3]
   tags  : [gemini_cli]
   roles :
     - roles/ctlabs_gemini_cli
