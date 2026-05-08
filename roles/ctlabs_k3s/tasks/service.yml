@@ -110,105 +110,101 @@
                     namespace: argo
                   type: kubernetes.io/tls
                   data:
-                    tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/k3s1.ctlabs.internal.crt') | b64encode }}"
-                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/k3s1.ctlabs.internal.key') | b64encode }}"
+                    tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
+                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
     
-        - name: ctlabs_k3s.tasks.service.argocd.reference_grant
-          environment:
-            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          kubernetes.core.k8s:
-            state: present
-            definition:
-              apiVersion: gateway.networking.k8s.io/v1beta1
-              kind: ReferenceGrant
-              metadata:
-                name: argocd-grant
-                namespace: argo
-              spec:
-                from:
-                  - group: gateway.networking.k8s.io
-                    kind: Gateway
-                    namespace: kube-system
-                to:
-                  - group: ""
-                    kind: Secret
+            - name: ctlabs_k3s.tasks.service.argocd.reference_grant
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  kind: ReferenceGrant
+                  metadata:
+                    name: argocd-grant
+                    namespace: argo
+                  spec:
+                    from:
+                      - group: gateway.networking.k8s.io
+                        kind: Gateway
+                        namespace: kube-system
+                    to:
+                      - group: ""
+                        kind: Secret
 
-        - name: ctlabs_k3s.tasks.service.gateway.attachment_grant
-          environment:
-            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          kubernetes.core.k8s:
-            state: present
-            definition:
-              apiVersion: gateway.networking.k8s.io/v1beta1
-              kind: ReferenceGrant
-              metadata:
-                name: allow-argo-routes
-                namespace: kube-system # Target namespace is where the Gateway lives
-              spec:
-                from:
-                  - group: gateway.networking.k8s.io
-                    kind: HTTPRoute
-                    namespace: argo # Source namespace is where the Route lives
-                to:
-                  - group: gateway.networking.k8s.io
-                    kind: Gateway
+            - name: ctlabs_k3s.tasks.service.gateway.attachment_grant
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  kind: ReferenceGrant
+                  metadata:
+                    name: allow-argo-routes
+                    namespace: kube-system # Target namespace is where the Gateway lives
+                  spec:
+                    from:
+                      - group: gateway.networking.k8s.io
+                        kind: HTTPRoute
+                        namespace: argo # Source namespace is where the Route lives
+                    to:
+                      - group: gateway.networking.k8s.io
+                        kind: Gateway
 
-        - name: ctlabs_k3s.tasks.service.argocd.httproute
-          environment:
-            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          kubernetes.core.k8s:
-            state: present
-            definition: 
-              apiVersion: gateway.networking.k8s.io/v1
-              kind: HTTPRoute
-              metadata:
-                name: argocd-server
-                namespace: argo
-              spec:
-                parentRefs:
-                  - name: traefik-gateway
+            - name: ctlabs_k3s.tasks.service.argocd.gateway
+              when: ctlabs_k3s_ingress_provider == "traefik"
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1
+                  kind: Gateway
+                  metadata:
+                    name: traefik-gateway
                     namespace: kube-system
-                    sectionName: web
-                  - name: traefik-gateway
-                    namespace: kube-system
-                    sectionName: websecure
-                rules:
-                  - matches:
-                      - path:
-                          type: PathPrefix
-                          value: /
-                    backendRefs:
-                      - name: argocd-server
-                        port: 80
-         
-        - name: ctlabs_k3s.tasks.service.argocd.gateway.traefik.tls.patch
-          environment:
-            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          kubernetes.core.k8s_json_patch:
-            kind: Gateway
-            namespace: kube-system
-            name: traefik-gateway
-            patch:
-              - op: replace
-                path: /spec/listeners
-                value:
-                  - name: web
-                    port: 8000
-                    protocol: HTTP
-                    allowedRoutes:
-                      namespaces:
-                        from: All
-                  - name: websecure
-                    port: 8443
-                    protocol: HTTPS
-                    tls:
-                      mode: Terminate
-                      certificateRefs:
-                        - name: argocd-tls
-                          namespace: argo
-                    allowedRoutes:
-                      namespaces:
-                        from: All     
+                  spec:
+                    gatewayClassName: traefik
+                    listeners:
+                      - name: web
+                        port: 8000
+                        protocol: HTTP
+                        allowedRoutes:
+                          namespaces:
+                            from: All
+                      - name: websecure
+                        port: 8443
+                        protocol: HTTPS
+                        tls:
+                          mode: Terminate
+                          certificateRefs:
+                            - name: argocd-tls
+                              namespace: argo
+                        allowedRoutes:
+                          namespaces:
+                            from: All
+
+            - name: ctlabs_k3s.tasks.service.argocd.httproute
+              kubernetes.core.k8s:
+                state: present
+                definition: 
+                  apiVersion: gateway.networking.k8s.io/v1
+                  kind: HTTPRoute
+                  metadata:
+                    name: argocd-server
+                    namespace: argo
+                  spec:
+                    parentRefs:
+                      - name: traefik-gateway
+                        namespace: kube-system
+                        sectionName: web
+                      - name: traefik-gateway
+                        namespace: kube-system
+                        sectionName: websecure
+                    rules:
+                      - matches:
+                          - path:
+                              type: PathPrefix
+                              value: /
+                        backendRefs:
+                          - name: argocd-server
+                            port: 80
 
 
     - name: ctlabs_k3s.tasks.service.gateway_envoy
@@ -239,22 +235,22 @@
           get_url:
             url : "{{ ctlabs_k3s.defaults.ingress.nginx.url }}"
             dest: /tmp/ingress-deployment.yml
-          register: res_ingress
-          until   : res_ingress is success
 
-        - name: ctlabs_k3s.tasks.service.ingress.install
+        - name: ctlabs_k3s.tasks.service.ingress.lb.present
+          template:
+            src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
+            dest: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
+
+        - name: ctlabs_k3s.tasks.service.ingress.deploy
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
+            state: present
             src: /tmp/ingress-deployment.yml
 
-        - name: ctlabs_k3s.tasks.service.ingress.lb.file
-          template:
-            src  : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.template }}"
-            dest : "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file     }}"
-
-        - name:  ctlabs_k3s.tasks.service.ingress.lb.install
+        - name: ctlabs_k3s.tasks.service.ingress.lb.deploy
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           kubernetes.core.k8s:
+            state: present
             src: "{{ ctlabs_k3s.defaults.ingress.nginx.lb.file }}"
