@@ -4,7 +4,7 @@ To setup single-/multi-node k3s cluster.
 
 ## Local facts
 
-___Server___
+### Server
 
 ```json
 { 
@@ -13,7 +13,49 @@ ___Server___
 }
 ```
 
-___Agent (Worker)___
+__Ingress__
+
+1. Gateway API (**Default**)
+
+**gatewayclass traefik**
+```json
+{ 
+  "role"  : "server",
+  "plane" : "control",
+  "ingress" : {
+    "type"     : "gateway_api",
+    "provider" : "traefik"
+  }
+}
+```
+
+2. Ingress Controller
+
+**nginx-ingress**
+```json
+{ 
+  "role"  : "server",
+  "plane" : "control",
+  "ingress" : {
+    "type"     : "ingress",
+    "provider" : "nginx"
+  }
+}
+```
+
+**traefik-ingress**
+```json
+{ 
+  "role"  : "server",
+  "plane" : "control",
+  "ingress" : {
+    "type"     : "ingress",
+    "provider" : "traefik"
+  }
+}
+```
+
+### Agent (Worker)
 
 ```json
 {

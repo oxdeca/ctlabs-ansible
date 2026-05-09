@@ -84,6 +84,9 @@
               enabled: "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
               ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
 
+    # ------------------------------------------------------------------------------
+    # GATEWAY-API using TRAEFIK GATEWAYCLASS
+    # ------------------------------------------------------------------------------
     - name: ctlabs_k3s.tasks.service.gateway_api
       when: ctlabs_k3s_ingress_type == "gateway_api"
       block:
