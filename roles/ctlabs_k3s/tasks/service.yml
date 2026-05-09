@@ -85,7 +85,7 @@
               ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
 
     # ------------------------------------------------------------------------------
-    # GATEWAY-API using TRAEFIK GATEWAYCLASS
+    # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE
     # ------------------------------------------------------------------------------
     - name: ctlabs_k3s.tasks.service.gateway_api
       when: ctlabs_k3s_ingress_type == "gateway_api"
