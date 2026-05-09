@@ -15,6 +15,11 @@ ctlabs_claude_code:
         - name: nodesource
           url : "https://deb.nodesource.com/{{ versions.nodejs }}"
           key : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+      redhat:
+        - name: nodesource
+          desc: NodeSource Repository
+          url : "https://rpm.nodesource.com/pub_{{ versions.nodejs.split('_')[1] }}/nodistro/nodejs/$basearch"
+          key : https://rpm.nodesource.com/gpgkey/ns-operations-public.key
     pkgs:
       debian: 
         - name: curl
@@ -23,7 +28,13 @@ ctlabs_claude_code:
         - name: build-essential
         - name: python3-dev
         - name: libsecret-1-dev
-      redhat: []
+      redhat:
+        - name: nodejs
+        - name: git
+        - name: make
+        - name: gcc-c++
+        - name: python3-devel
+        - name: libsecret-devel
       npm:
         - name: "@anthropic-ai/claude-code"
     config:
@@ -45,3 +56,4 @@ ctlabs_claude_code:
     - kali2026
     - parrot6
     - parrot7
+    - centos9
