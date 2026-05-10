@@ -365,6 +365,19 @@
             "server_url"  : "https://rke21.ctlabs.internal:9345"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.kind.single.local_facts
+      when: ansible_hostname in ['kind1']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_kind.fact
+        content: |
+          {
+            "plane"   : "single",
+            "ingress" : {
+              "type"     : "ingress",
+              "provider" : "nginx"
+            }
+          }
+
     - name: ctlabs.playbooks.ctlabs.setup.foreman.server.local_facts
       when: ansible_hostname in ['fm1']
       copy:
@@ -710,6 +723,15 @@
   tags  : [minikube]
   roles :
     - roles/ctlabs_minikube
+
+# -----------------------------------------------------------------------------
+# ctlabs_kind
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.kind
+  hosts : [kind1]
+  tags  : [kind]
+  roles :
+    - roles/ctlabs_kind
 
 # -----------------------------------------------------------------------------
 # ctlabs_k3s server

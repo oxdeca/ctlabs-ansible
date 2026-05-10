@@ -11,7 +11,7 @@
       assert:
         that: ctg_os is in ctlabs_kind.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
-    
+
     - name: ctlabs_kind.tasks.precheck.virtype
       assert:
         that     : ctg_virtype is in ctlabs_kind.virtype
@@ -19,3 +19,31 @@
   rescue:
     - name: ctlabs_kind.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_kind.tasks.precheck.plane
+  set_fact:
+    ctlabs_kind_plane: "{{ ctg_facts.ctlabs_kind.plane | default(ctlabs_kind.defaults.config.plane) }}"
+
+- name: ctlabs_kind.tasks.precheck.name
+  set_fact:
+    ctlabs_kind_name: "{{ ctg_facts.ctlabs_kind.name | default(ctlabs_kind.defaults.config.name) }}"
+
+- name: ctlabs_kind.tasks.precheck.image
+  set_fact:
+    ctlabs_kind_image: "{{ ctg_facts.ctlabs_kind.image | default(ctlabs_kind.defaults.config.image) }}"
+
+- name: ctlabs_kind.tasks.precheck.nodes
+  set_fact:
+    ctlabs_kind_nodes: "{{ ctg_facts.ctlabs_kind.nodes | default(ctlabs_kind.defaults.config.node.count) }}"
+
+- name: ctlabs_kind.tasks.precheck.ingress_type
+  set_fact:
+    ctlabs_kind_ingress_type: "{{ ctg_facts.ctlabs_kind.ingress.type | default(ctlabs_kind.defaults.config.ingress.type) }}"
+
+- name: ctlabs_kind.tasks.precheck.ingress_provider
+  set_fact:
+    ctlabs_kind_ingress_provider: "{{ ctg_facts.ctlabs_kind.ingress.provider | default(ctlabs_kind.defaults.config.ingress.provider) }}"
+
+- name: ctlabs_kind.tasks.precheck.vars
+  debug:
+    msg: "plane={{ ctlabs_kind_plane }}, name={{ ctlabs_kind_name }}, image={{ ctlabs_kind_image }}, nodes={{ ctlabs_kind_nodes }}, ingress_type={{ ctlabs_kind_ingress_type }}, ingress_provider={{ ctlabs_kind_ingress_provider }}"

@@ -1,0 +1,9 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.handlers.iptables.save
+  shell: iptables-save > /etc/iptables/rules.v4

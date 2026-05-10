@@ -1,0 +1,6 @@
+# /etc/profile.d/kind.sh
+
+export KUBECONFIG=/root/.kube/config
+
+alias kc={{ ctlabs_kind.defaults.pkgs.kubectl.path }}
+alias kcw="kc -o wide"

@@ -4,3 +4,13 @@
 # File        : ctlabs-ansible/roles/ctlabs_kind/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.config.profile
+  template:
+    src  : "{{ ctlabs_kind.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_kind.defaults.config.profile.file     }}"
+
+- name: ctlabs_kind.tasks.config.cluster
+  template:
+    src  : "{{ ctlabs_kind.defaults.config.cluster.template }}"
+    dest : "{{ ctlabs_kind.defaults.config.cluster.file     }}"

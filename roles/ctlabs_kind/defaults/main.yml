@@ -6,15 +6,22 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  kind   : 0.31.0
-  kubectl: 1.31.1
-  helm   : 3.16.1
+  kind        : 0.31.0
+  k8s         : 1.35.0
+  kubectl     : 1.35.0
+  helm        : 4.1.4
+  nginx       : 1.15.0
+  traefik     : 40.0.0
+  gateway_api : 1.5.0
+  envoy       : 1.7.2
+
 
 ctlabs_kind:
   defaults:
     pkgs:
       debian:
         - name: podman
+        - name: python3-kubernetes
       redhat:
         - name: podman
       kind:
@@ -27,13 +34,66 @@ ctlabs_kind:
         path   : /usr/bin/kubectl
         mode   : '0750'
       helm:
-        version: 
+        version:
         url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
         tmptar : /tmp/helm.tar.gz
         tmpdir : /tmp
         tardir : /tmp/linux-amd64
         path   : /usr/bin/helm
         mode   : '0750'
+    config:
+      plane   : "single"           # "single" or "multi"
+      name    : "ctlabs"
+      image   : "kindest/node:v{{ versions.k8s }}"
+      profile :
+        template : kind.profile.j2
+        file     : /etc/profile.d/kind.sh
+      cluster :
+        template : kind-cluster.yml.j2
+        file     : /tmp/kind-cluster.yml
+      node    :
+        count   : 1
+      ingress:
+        type    : "ingress"         # "ingress" or "gateway_api"
+        provider: "nginx"           # "nginx", "traefik" or "envoy-gateway"
+
+    ingress:
+      nginx:
+        url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.nginx }}/deploy/static/provider/kind/deploy.yaml"
+        file: /tmp/ingress-nginx-deploy.yaml
+      gateway_api:
+        crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
+        file: /tmp/gateway-api-crds.yaml
+      traefik:
+        repo    : https://traefik.github.io/charts
+        chart   : traefik/traefik
+        version : "{{ versions.traefik }}"
+        ns      : traefik
+      envoy:
+        repo    : https://docker.io/envoyproxy/gateway-helm
+        name    : envoy-gateway
+        chart   : oci://docker.io/envoyproxy/gateway-helm
+        version : "v{{ versions.envoy }}"
+        ns      : envoy-gateway-system
+    helm:
+      - ns   : argo
+        name : argo
+        chart: argo/argo-cd
+        repo : https://argoproj.github.io/argo-helm
+    argocd:
+      repo    : https://argoproj.github.io/argo-helm
+      chart   : argo/argo-cd
+      ns      : argo
+      name    : argocd
+      admin_password_hash: '$2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2'
+      default_ip: '192.168.30.71'
+    service:
+      main:
+        cluster:
+          config : /tmp/kind-cluster.yml
+    proxy:
+      interface: enp0s2
+      tmp_archive: /tmp/argo-image.tar
   os:
     - centos9
     - redhat9
