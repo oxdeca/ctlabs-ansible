@@ -112,6 +112,12 @@
         release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
         create_namespace : true
         wait             : true
+        values           :
+          ports:
+            web:
+              hostPort: 80
+            websecure:
+              hostPort: 443
 
 # ------------------------------------------------------------------------------
 # gateway-api: envoy-gateway
@@ -182,6 +188,35 @@
         name    : traefik
         repo_url: "{{ ctlabs_kind.defaults.ingress.traefik.repo }}"
 
+    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.extract
+      kubernetes.core.helm_template:
+        name             : traefik
+        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
+        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
+        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
+        release_values   :
+          providers:
+            kubernetesGateway:
+              enabled: true
+      register: traefik_template
+
+    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.parse
+      set_fact:
+        traefik_images: "{{ traefik_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.pull
+      containers.podman.podman_image:
+        name: "{{ item }}"
+      loop: "{{ traefik_images }}"
+
+    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.load
+      shell: >
+        rm -f {{ ctlabs_kind.defaults.proxy.tmp_archive }} &&
+        podman save {{ item }} -o {{ ctlabs_kind.defaults.proxy.tmp_archive }}
+        && kind load image-archive {{ ctlabs_kind.defaults.proxy.tmp_archive }}
+        --name {{ ctlabs_kind_name }}
+      loop: "{{ traefik_images }}"
+
     - name: ctlabs_kind.tasks.service.gateway_api.traefik.install
       environment:
         KUBECONFIG: /root/.kube/config
@@ -192,10 +227,16 @@
         release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
         create_namespace : true
         wait             : true
+        skip_crds        : true
         values           :
           providers:
             kubernetesGateway:
               enabled: true
+          ports:
+            web:
+              hostPort: 80
+            websecure:
+              hostPort: 443
 
 # ------------------------------------------------------------------------------
 # argocd
@@ -256,6 +297,119 @@
           ingressClassName: "{{ ctlabs_kind_ingress_provider }}"
           hosts:
             - "{{ ansible_default_ipv4.address | default(ctlabs_kind.defaults.argocd.default_ip) }}"
+
+- name: ctlabs_kind.tasks.service.argocd.gateway_api
+  when:
+    - ctlabs_kind_ingress_type == "gateway_api"
+    - ctlabs_kind_ingress_provider == "traefik"
+  environment:
+    KUBECONFIG: /root/.kube/config
+  block:
+    - name: ctlabs_kind.tasks.service.argocd.tls_secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: argocd-tls
+            namespace: argo
+          type: kubernetes.io/tls
+          data:
+            tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
+            tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.prv') | b64encode }}"
+
+    - name: ctlabs_kind.tasks.service.argocd.gateway
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: Gateway
+          metadata:
+            name: traefik-gateway
+            namespace: traefik
+          spec:
+            gatewayClassName: traefik
+            listeners:
+              - name: web
+                port: 8000
+                protocol: HTTP
+                allowedRoutes:
+                  namespaces:
+                    from: All
+              - name: websecure
+                port: 8443
+                protocol: HTTPS
+                tls:
+                  mode: Terminate
+                  certificateRefs:
+                    - name: argocd-tls
+                      namespace: argo
+                allowedRoutes:
+                  namespaces:
+                    from: All
+
+    - name: ctlabs_kind.tasks.service.argocd.reference_grant
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          metadata:
+            name: argocd-grant
+            namespace: argo
+          spec:
+            from:
+              - group: gateway.networking.k8s.io
+                kind: Gateway
+                namespace: traefik
+            to:
+              - group: ""
+                kind: Secret
+
+    - name: ctlabs_kind.tasks.service.argocd.route_attachment_grant
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          metadata:
+            name: allow-argo-routes
+            namespace: traefik
+          spec:
+            from:
+              - group: gateway.networking.k8s.io
+                kind: HTTPRoute
+                namespace: argo
+            to:
+              - group: gateway.networking.k8s.io
+                kind: Gateway
+
+    - name: ctlabs_kind.tasks.service.argocd.httproute
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: argocd-server
+            namespace: argo
+          spec:
+            parentRefs:
+              - name: traefik-gateway
+                namespace: traefik
+                sectionName: web
+              - name: traefik-gateway
+                namespace: traefik
+                sectionName: websecure
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+                backendRefs:
+                  - name: argocd-server
+                    port: 80
 
 # ------------------------------------------------------------------------------
 # host proxy (iptables DNAT for kind container nodeports)
