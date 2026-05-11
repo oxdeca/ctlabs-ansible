@@ -304,7 +304,10 @@
           {
             "plane"   : "control",
             "role"    : "server",
-            "ingress" : "nginx"
+            "ingress" : {
+              "type"     : "gateway_api",
+              "provider" : "traefik"
+            }
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.control.local_facts
@@ -338,7 +341,11 @@
         content: |
           {
             "plane" : "control",
-            "role"  : "server"
+            "role"  : "server",
+            "ingress" : {
+              "type"     : "gateway_api",
+              "provider" : "traefik"
+            }
           }
 
     - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
@@ -373,8 +380,8 @@
           {
             "plane"   : "single",
             "ingress" : {
-              "type"     : "ingress",
-              "provider" : "nginx"
+              "type"     : "gateway_api",
+              "provider" : "traefik"
             }
           }
 

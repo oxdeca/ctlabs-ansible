@@ -38,7 +38,7 @@
 
 - name: ctlabs_k3s.tasks.precheck.argocd_hostname
   set_fact:
-    ctlabs_k3s_argocd_host: "{{ ctg_facts.ctlabs_k3s.argocd.host | default(ctlabs_kind.defaults.argocd.host) }}"
+    ctlabs_k3s_argocd_host: "{{ ctg_facts.ctlabs_k3s.argocd.host | default(ctlabs_k3s.defaults.argocd.host) }}"
 
 - name: ctlabs_k3s.tasks.precheck.debug.ingress
   debug:
