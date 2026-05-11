@@ -44,6 +44,10 @@
   set_fact:
     ctlabs_kind_ingress_provider: "{{ ctg_facts.ctlabs_kind.ingress.provider | default(ctlabs_kind.defaults.config.ingress.provider) }}"
 
+- name: ctlabs_kind.tasks.precheck.argocd_hostname
+  set_fact:
+    ctlabs_kind_argocd_hostname: "{{ ctg_facts.ctlabs_kind.argocd.hostname | default(ansible_default_ipv4.address | default(ctlabs_kind.defaults.argocd.ingress_hostname)) }}"
+
 - name: ctlabs_kind.tasks.precheck.vars
   debug:
     msg: "plane={{ ctlabs_kind_plane }}, name={{ ctlabs_kind_name }}, image={{ ctlabs_kind_image }}, nodes={{ ctlabs_kind_nodes }}, ingress_type={{ ctlabs_kind_ingress_type }}, ingress_provider={{ ctlabs_kind_ingress_provider }}"

@@ -275,28 +275,44 @@
         --name {{ ctlabs_kind_name }}
       loop: "{{ argocd_images }}"
 
-- name: ctlabs_kind.tasks.service.argocd
+- name: ctlabs_kind.tasks.service.argocd.ingress.remove
   environment:
     KUBECONFIG: /root/.kube/config
-  kubernetes.core.helm:
-    name             : "{{ ctlabs_kind.defaults.argocd.name }}"
-    chart_ref        : "{{ ctlabs_kind.defaults.argocd.chart }}"
-    release_namespace: "{{ ctlabs_kind.defaults.argocd.ns }}"
-    create_namespace : true
-    wait             : true
-    values           :
+  kubernetes.core.k8s:
+    state: absent
+    api_version: networking.k8s.io/v1
+    kind: Ingress
+    name: argocd-server
+    namespace: argo
+
+- name: ctlabs_kind.tasks.service.argocd.values
+  copy:
+    dest: /tmp/argocd-values.yml
+    content: |
       configs:
         secret:
           argocdServerAdminPassword: "{{ ctlabs_kind.defaults.argocd.admin_password_hash }}"
         params:
           server.insecure: true
-          server.baseUrl: "https://{{ ansible_default_ipv4.address | default(ctlabs_kind.defaults.argocd.default_ip) }}"
+          server.baseUrl: "https://{{ ctlabs_kind_argocd_hostname }}"
+      global:
+        domain: "{{ ctlabs_kind_argocd_hostname }}"
       server:
         ingress:
-          enabled         : true
+          enabled: true
           ingressClassName: "{{ ctlabs_kind_ingress_provider }}"
-          hosts:
-            - "{{ ansible_default_ipv4.address | default(ctlabs_kind.defaults.argocd.default_ip) }}"
+          hostname: "{{ ctlabs_kind_argocd_hostname }}"
+
+- name: ctlabs_kind.tasks.service.argocd.deploy
+  environment:
+    KUBECONFIG: /root/.kube/config
+  command: >
+    helm upgrade --install
+    --namespace {{ ctlabs_kind.defaults.argocd.ns }}
+    --values /tmp/argocd-values.yml
+    --create-namespace --reset-values --wait
+    {{ ctlabs_kind.defaults.argocd.name }}
+    {{ ctlabs_kind.defaults.argocd.chart }}
 
 - name: ctlabs_kind.tasks.service.argocd.gateway_api
   when:

@@ -86,7 +86,8 @@ ctlabs_kind:
       ns      : argo
       name    : argocd
       admin_password_hash: '$2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2'
-      default_ip: '192.168.30.71'
+      default_ip      : "{{ ansible_default_ipv4.address }}"
+      ingress_hostname: "{{ ansible_default_ipv4.address }}"
     service:
       main:
         cluster:
