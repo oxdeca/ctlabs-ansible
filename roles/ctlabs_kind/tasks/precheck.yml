@@ -46,7 +46,7 @@
 
 - name: ctlabs_kind.tasks.precheck.argocd_hostname
   set_fact:
-    ctlabs_kind_argocd_hostname: "{{ ctg_facts.ctlabs_kind.argocd.hostname | default(ansible_default_ipv4.address | default(ctlabs_kind.defaults.argocd.ingress_hostname)) }}"
+    ctlabs_kind_argocd_host: "{{ ctg_facts.ctlabs_kind.argocd.host | default(ctlabs_kind.defaults.argocd.host) }}"
 
 - name: ctlabs_kind.tasks.precheck.vars
   debug:

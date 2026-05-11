@@ -78,11 +78,14 @@
               argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
             params:
               server.insecure: true
-              server.baseUrl: "https://{{ ctlabs_k3s_server_url | default('192.168.30.31') }}"
+              server.baseUrl: "https://{{ ctlabs_k3s_server_url | default(ansible_default_ipv4.address) }}"
+          global:
+            domain: "{{ ctlabs_k3s_argocd_host }}"
           server:
             ingress:
-              enabled: "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
+              enabled         : "{{ false if ctlabs_k3s_ingress_type == 'gateway_api' else true }}"
               ingressClassName: "{{ ctlabs_k3s_ingress_provider }}"
+              hostname        : "{{ ctlabs_k3s_argocd_host }}"
 
     # ------------------------------------------------------------------------------
     # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE

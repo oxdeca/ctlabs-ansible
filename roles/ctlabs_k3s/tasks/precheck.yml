@@ -36,6 +36,10 @@
   set_fact:
     ctlabs_k3s_ingress_provider: "{{ ctg_facts.ctlabs_k3s.ingress.provider | default(ctlabs_k3s.defaults.config.ingress.provider) }}"
 
+- name: ctlabs_k3s.tasks.precheck.argocd_hostname
+  set_fact:
+    ctlabs_k3s_argocd_host: "{{ ctg_facts.ctlabs_k3s.argocd.host | default(ctlabs_kind.defaults.argocd.host) }}"
+
 - name: ctlabs_k3s.tasks.precheck.debug.ingress
   debug:
     msg: "ingress_type={{ ctlabs_k3s_ingress_type }}, ingress_provider={{ ctlabs_k3s_ingress_provider }}"

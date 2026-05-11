@@ -40,6 +40,8 @@ ctlabs_k3s:
         lb :
           template: ingress-controller-lb.yml.j2
           file    : /tmp/ingress-controller-lb.yml
+    argocd:
+      host: argocd.ctlabs.internal
     config:
       role   : server
       ingress:

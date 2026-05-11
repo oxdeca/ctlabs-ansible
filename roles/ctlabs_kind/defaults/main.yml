@@ -56,7 +56,6 @@ ctlabs_kind:
       ingress:
         type    : "ingress"         # "ingress" or "gateway_api"
         provider: "nginx"           # "nginx", "traefik" or "envoy-gateway"
-
     ingress:
       nginx:
         url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.nginx }}/deploy/static/provider/kind/deploy.yaml"
@@ -85,9 +84,9 @@ ctlabs_kind:
       chart   : argo/argo-cd
       ns      : argo
       name    : argocd
+      host    : argocd.ctlabs.internal
+      default_ip: "{{ ansible_default_ipv4.address }}"
       admin_password_hash: '$2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2'
-      default_ip      : "{{ ansible_default_ipv4.address }}"
-      ingress_hostname: argocd.ctlabs.internal
     service:
       main:
         cluster:

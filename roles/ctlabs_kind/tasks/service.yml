@@ -294,14 +294,14 @@
           argocdServerAdminPassword: "{{ ctlabs_kind.defaults.argocd.admin_password_hash }}"
         params:
           server.insecure: true
-          server.baseUrl: "https://{{ ctlabs_kind_argocd_hostname }}"
+          server.baseUrl: "https://{{ ctlabs_kind_argocd_host }}"
       global:
-        domain: "{{ ctlabs_kind_argocd_hostname }}"
+        domain: "{{ ctlabs_kind_argocd_host }}"
       server:
         ingress:
           enabled: true
           ingressClassName: "{{ ctlabs_kind_ingress_provider }}"
-          hostname: "{{ ctlabs_kind_argocd_hostname }}"
+          hostname: "{{ ctlabs_kind_argocd_host }}"
 
 - name: ctlabs_kind.tasks.service.argocd.deploy
   environment:
