@@ -102,6 +102,31 @@
         name    : traefik
         repo_url: "{{ ctlabs_kind.defaults.ingress.traefik.repo }}"
 
+    - name: ctlabs_kind.tasks.service.ingress.traefik.images.extract
+      kubernetes.core.helm_template:
+        name             : traefik
+        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
+        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
+        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
+      register: traefik_ingress_template
+
+    - name: ctlabs_kind.tasks.service.ingress.traefik.images.parse
+      set_fact:
+        traefik_ingress_images: "{{ traefik_ingress_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+    - name: ctlabs_kind.tasks.service.ingress.traefik.images.pull
+      containers.podman.podman_image:
+        name: "{{ item }}"
+      loop: "{{ traefik_ingress_images }}"
+
+    - name: ctlabs_kind.tasks.service.ingress.traefik.images.load
+      shell: >
+        rm -f {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }} &&
+        podman save {{ item }} -o {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }}
+        && kind load image-archive {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }}
+        --name {{ ctlabs_kind_name }}
+      loop: "{{ traefik_ingress_images }}"
+
     - name: ctlabs_kind.tasks.service.ingress.traefik.install
       environment:
         KUBECONFIG: /root/.kube/config

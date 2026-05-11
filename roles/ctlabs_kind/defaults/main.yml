@@ -94,6 +94,7 @@ ctlabs_kind:
     proxy:
       interface: enp0s2
       tmp_archive: /tmp/argo-image.tar
+      traefik_tmp_archive: /tmp/traefik-image.tar
   os:
     - centos9
     - redhat9
