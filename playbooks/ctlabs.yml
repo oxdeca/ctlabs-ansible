@@ -888,7 +888,7 @@
 # ctlabs_openclaw
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.openclaw
-  hosts : [h1,h2,h3]
+  hosts : [ansible,h1,h2,h3]
   tags  : [openclaw]
   roles :
     - roles/ctlabs_openclaw
@@ -906,7 +906,7 @@
 # ctlabs_claude_code
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.claude_code
-  hosts : [h1,h2,h3]
+  hosts : [ansible,h1,h2,h3]
   tags  : [claude_code]
   roles :
     - roles/ctlabs_claude_code
@@ -915,7 +915,7 @@
 # ctlabs_opencode
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.opencode
-  hosts : [h1,h2,h3]
+  hosts : [ansible,h1,h2,h3]
   tags  : [opencode]
   roles :
     - roles/ctlabs_opencode
