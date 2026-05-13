@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditd.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_auditd.defaults.service.name }}"
+    state   : restarted

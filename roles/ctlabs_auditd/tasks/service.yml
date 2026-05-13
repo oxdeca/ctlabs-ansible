@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditd.tasks.service.start
+  service:
+    name    : "{{ ctlabs_auditd.defaults.service.name }}"
+    enabled : true
+    state   : started

@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/tasks/package.yml
+# Description : install packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditd.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_auditd.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success

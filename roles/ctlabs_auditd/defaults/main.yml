@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+# role defaults
+ctlabs_auditd:
+  defaults:
+    virtype:
+      - kvm
+    pkgs:
+      redhat:
+        - name: audit
+      debian:
+        - name: auditd
+    rules:
+      dir : /etc/audit/rules.d
+      file: ctlabs-auditd.rules
+    config:
+      dir      : /etc/audit
+    service:
+      name: auditd
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

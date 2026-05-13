@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditd.tasks.precheck
+  block:
+    - name: ctlabs_auditd.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_auditd.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+
+    - name: ctlabs_auditd.tasks.precheck.virtype.supported
+      assert:
+        that     : ctg_virtype in ctlabs_auditd.defaults.virtype
+        fail_msg : "virtype[{{ ctg_virtype }}] is not supported!"
+  rescue:
+    - name: ctlabs_auditd.tasks.precheck.skip.unsupported
+      meta: end_host

@@ -1,0 +1,37 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditd/templates/ctlabs-auditd.rules.j2
+# Description : auditd rules - identity, privilege escalation, network, audit
+# ------------------------------------------------------------------------------
+#
+# Base config (-D, -b, -f) provided by system's existing rules files
+# in /etc/audit/rules.d/ — only watch rules are defined here.
+
+# Identity and Authentication Files
+-w /etc/group                     -p wa -k identity
+-w /etc/passwd                    -p wa -k identity
+-w /etc/gshadow                   -p wa -k identity
+-w /etc/shadow                    -p wa -k identity
+-w /etc/security/opasswd          -p wa -k identity
+
+# Privilege Escalation Configuration
+-w /etc/sudoers                   -p wa -k actions
+-w /etc/sudoers.d/                -p wa -k actions
+
+# Network and Security Configurations
+-w /etc/ssh/sshd_config           -p wa -k ssh_config
+-w /etc/issue                     -p wa -k system-locale
+-w /etc/issue.net                 -p wa -k system-locale
+-w /etc/hosts                     -p wa -k system-locale
+-w /etc/selinux/                  -p wa -k MAC-policy
+
+# Audit System Configuration
+-w /etc/audit/                    -p wa -k auditconfig
+
+# Smart DNS tampering detection (human users only, auid>=1000)
+# Note: On Debian/Ubuntu, /etc/resolv.conf is often a symlink to
+# /run/systemd/resolve/stub-resolv.conf. Test to ensure the watch
+# stays attached across symlink recreations.
+-a always,exit -F path=/etc/resolv.conf -F perm=wa -F auid>=1000 -F auid!=4294967295 -k dns_tampering
+
+# Immutability (-e 2) intentionally omitted — enabling it would require
+# a system reboot to change rules. Enable manually if policy demands it.
