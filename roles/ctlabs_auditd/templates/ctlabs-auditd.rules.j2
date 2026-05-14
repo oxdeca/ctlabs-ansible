@@ -35,3 +35,11 @@
 
 # Immutability (-e 2) intentionally omitted — enabling it would require
 # a system reboot to change rules. Enable manually if policy demands it.
+
+# Monitor software management execution by human users
+{% if ctg_os == 'redhat7' %}
+-a always,exit -F path=/usr/bin/yum -F perm=x -F auid>=1000 -F auid!=4294967295 -k software_mgmt
+{% else %}
+-a always,exit -F path=/usr/bin/dnf -F perm=x -F auid>=1000 -F auid!=4294967295 -k software_mgmt
+{% endif %}
+-a always,exit -F path=/usr/bin/rpm -F perm=x -F auid>=1000 -F auid!=4294967295 -k software_mgmt

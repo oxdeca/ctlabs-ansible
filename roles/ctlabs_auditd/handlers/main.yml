@@ -5,7 +5,10 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
+# Use this handler if you update /etc/audit/auditd.conf
 - name: ctlabs_auditd.handlers.service.restart
-  service:
-    name    : "{{ ctlabs_auditd.defaults.service.name }}"
-    state   : restarted
+  ansible.builtin.command: service {{ ctlabs_auditd.defaults.service.name }} restart
+
+# Use this handler if you update /etc/audit/rules.d/ files
+- name: ctlabs_auditd.handlers.rules.reload
+  ansible.builtin.command: /sbin/augenrules --load
