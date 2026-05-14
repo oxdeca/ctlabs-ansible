@@ -18,6 +18,17 @@
         dest : "{{ ctlabs_alloy.defaults.config.dir }}/{{ ctlabs_alloy.defaults.config.file }}"
       notify: ctlabs_alloy.handlers.alloy.service.restart
 
+    - name: ctlabs_alloy.tasks.config.disable_usage_report
+      copy:
+        dest: "{{ ctlabs_alloy.defaults.config.dropin.dir }}/{{ ctlabs_alloy.defaults.config.dropin.file }}"
+        content: |
+          [Service]
+          Environment=ALLOY_DISABLE_USAGE_REPORT=true
+        mode: "0644"
+      notify:
+        - ctlabs_alloy.handlers.systemd.reload
+        - ctlabs_alloy.handlers.alloy.service.restart
+
 - name: ctlabs_alloy.tasks.config.journald.fix_perms
   when: ctg_os == 'centos9'
   file:

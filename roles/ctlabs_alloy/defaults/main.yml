@@ -37,6 +37,9 @@ ctlabs_alloy:
       template : config.alloy.j2
       loki_url : https://loki.ctlabs.internal:3100/loki/api/v1/push
       templates: []
+      dropin:
+        dir  : "{{ ctg_systemd_dir }}/alloy.service.d"
+        file : disable-usage-report.conf
       tls:
         mtls: true
         crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
