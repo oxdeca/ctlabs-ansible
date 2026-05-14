@@ -14,7 +14,7 @@
 
     - name: ctlabs_auditd.tasks.precheck.virtype.supported
       assert:
-        that     : ctg_virtype in ctlabs_auditd.defaults.virtype
+        that     : ctg_virtype in ctlabs_auditd.virtype
         fail_msg : "virtype[{{ ctg_virtype }}] is not supported!"
   rescue:
     - name: ctlabs_auditd.tasks.precheck.skip.unsupported

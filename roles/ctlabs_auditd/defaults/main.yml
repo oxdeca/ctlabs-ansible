@@ -8,8 +8,6 @@
 # role defaults
 ctlabs_auditd:
   defaults:
-    virtype:
-      - kvm
     pkgs:
       redhat:
         - name: audit
@@ -27,3 +25,5 @@ ctlabs_auditd:
     - centos9
     - debian11
     - debian12
+  virtype:
+    - kvm
