@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postfix/tests/test_postfix.yml
+# Description : test playbook for ctlabs_postfix (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_postfix.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: redhat9
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

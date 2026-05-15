@@ -18,7 +18,7 @@ home_mailbox             = mail/
 recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
 recipient_bcc_maps       = regexp:/etc/postfix/recipient_bcc
 transport_maps           = hash:/etc/postfix/transport
-{% if ctlabs_postfix.defaults.dkim.enable %}
+{% if ctlabs_postfix_dkim_enable %}
 smtpd_milters           = {{ ctlabs_postfix.defaults.dkim.milter.smtpd_milters }}
 non_smtpd_milters       = {{ ctlabs_postfix.defaults.dkim.milter.non_smtpd_milters }}
 milter_protocol         = {{ ctlabs_postfix.defaults.dkim.milter.milter_protocol }}

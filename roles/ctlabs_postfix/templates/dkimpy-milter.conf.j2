@@ -4,8 +4,8 @@
 # -----------------------------------------------------------------------------
 
 Domain                  *
-Selector                {{ ctlabs_postfix.defaults.dkim.selector }}
-Socket                  {{ ctlabs_postfix.defaults.dkim.socket }}
+Selector                {{ ctlabs_postfix_dkim_selector }}
+Socket                  {{ ctlabs_postfix_dkim_socket }}
 KeyFile                 {{ ctlabs_postfix.defaults.dkim.keys.dir }}/%{d}/%{s}.key
 Canonicalization        relaxed/simple
 OversignHeaders         From

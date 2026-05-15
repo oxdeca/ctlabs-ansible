@@ -31,7 +31,7 @@
 
 - name: ctlabs_postfix.tasks.dkim.keys.generate
   openssl_privatekey:
-    path : "{{ ctlabs_postfix.defaults.dkim.keys.dir }}/{{ ctlabs_postfix.defaults.dkim.selector }}.key"
+    path : "{{ ctlabs_postfix.defaults.dkim.keys.dir }}/{{ ctlabs_postfix_dkim_selector }}.key"
     size : "{{ ctlabs_postfix.defaults.dkim.keys.bits }}"
     mode : '0600'
 
