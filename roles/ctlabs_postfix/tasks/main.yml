@@ -13,6 +13,7 @@
     - ctlabs_postfix.config
     - ctlabs_postfix.service
     - ctlabs_postfix.helper
+    - ctlabs_postfix.dkim
 
 - import_tasks: package.yml
   tags:
@@ -33,3 +34,9 @@
   tags:
     - ctlabs_postfix
     - ctlabs_postfix.helper
+
+- import_tasks: dkim.yml
+  when: ctlabs_postfix.defaults.dkim.enable
+  tags:
+    - ctlabs_postfix
+    - ctlabs_postfix.dkim

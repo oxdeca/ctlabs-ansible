@@ -33,3 +33,8 @@
 - name: ctlabs_postfix.handlers.systemd.reload
   systemd:
     daemon_reload: true
+
+- name: ctlabs_postfix.handlers.dkimpy_milter.restart
+  service:
+    name  : "{{ ctlabs_postfix.defaults.dkim.service.name }}"
+    state : restarted

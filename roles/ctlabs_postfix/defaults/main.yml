@@ -40,6 +40,25 @@ ctlabs_postfix:
         group   : ctlabs
         template: muttrc.j2
         file    : /home/ctlabs/.muttrc
+    dkim:
+      enable  : false
+      pkgs:
+        - name : "{{ 'python3-dkimpy-milter' if ansible_distribution_major_version | int >= 8 else 'dkimpy-milter' }}"
+      config:
+        dir : /etc/dkimpy-milter
+        file: dkimpy-milter.conf
+      socket    : inet:localhost:8891
+      selector  : default
+      milter:
+        smtpd_milters       : inet:localhost:8891
+        non_smtpd_milters   : inet:localhost:8891
+        milter_protocol     : 2
+        milter_default_action: accept
+      keys:
+        dir   : /etc/dkimpy-milter/keys
+        bits  : 2048
+      service:
+        name: dkimpy-milter
     service:
       name      : postfix.service
       templates : postfix.service.j2

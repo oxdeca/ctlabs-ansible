@@ -1,0 +1,11 @@
+# -----------------------------------------------------------------------------
+# File       : /etc/dkimpy-milter/dkimpy-milter.conf
+# Description: dkimpy-milter configuration
+# -----------------------------------------------------------------------------
+
+Domain                  *
+Selector                {{ ctlabs_postfix.defaults.dkim.selector }}
+Socket                  {{ ctlabs_postfix.defaults.dkim.socket }}
+KeyFile                 {{ ctlabs_postfix.defaults.dkim.keys.dir }}/%{d}/%{s}.key
+Canonicalization        relaxed/simple
+OversignHeaders         From
