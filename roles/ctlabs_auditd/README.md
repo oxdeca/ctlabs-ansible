@@ -22,3 +22,11 @@ Template rendered to `/etc/audit/rules.d/ctlabs-auditd.rules`, covering:
 - **dns_tampering** — /etc/resolv.conf (auid>=1000 only)
 
 Base configuration (`-D`, `-b 8192`, `-f 1`) is inherited from the OS-provided rules file in `/etc/audit/rules.d/`.
+
+## Tests
+
+```sh
+pytest -sv roles/ctlabs_auditd/tests
+```
+
+Validates template file existence and `--syntax-check` of the role via a localhost playbook.
