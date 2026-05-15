@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_nginx/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_nginx.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_nginx.defaults.service[ctg_os_family].name }}"
+    state : reloaded
+
+- name: ctlabs_nginx.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_nginx.defaults.service[ctg_os_family].name }}"
+    enabled : true
+    state   : restarted

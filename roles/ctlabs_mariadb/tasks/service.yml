@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mariadb.tasks.service.running
+  systemd:
+    name    : "{{ ctlabs_mariadb.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

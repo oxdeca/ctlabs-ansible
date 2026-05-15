@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_php.tasks.config.ini
+  template:
+    src  : "{{ ctlabs_php.defaults.config[ctg_os_family].ini.template }}"
+    dest : "{{ ctlabs_php.defaults.config[ctg_os_family].ini.file     }}"
+  notify: ctlabs_php.handlers.fpm.restart
+
+- name: ctlabs_php.tasks.config.pool
+  template:
+    src  : "{{ ctlabs_php.defaults.config[ctg_os_family].pool.template }}"
+    dest : "{{ ctlabs_php.defaults.config[ctg_os_family].pool.file     }}"
+  notify: ctlabs_php.handlers.fpm.restart

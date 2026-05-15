@@ -1,0 +1,53 @@
+; ------------------------------------------------------------------------------
+; File       : /etc/php/php.ini
+; Description : PHP configuration
+; ------------------------------------------------------------------------------
+
+[PHP]
+engine = On
+short_open_tag = Off
+precision = 14
+output_buffering = 4096
+zlib.output_compression = Off
+implicit_flush = Off
+unserialize_max_depth = -1
+serialize_precision = -1
+disable_functions =
+disable_classes =
+zend.enable_gc = On
+
+[Date]
+date.timezone = America/Toronto
+
+[PHP-FPM]
+allow_url_fopen = On
+allow_url_include = Off
+
+[Session]
+session.save_handler = files
+session.save_path = /var/lib/php/sessions
+session.use_strict_mode = 1
+session.use_cookies = 1
+session.use_only_cookies = 1
+session.name = PHPSESSID
+session.auto_start = 0
+session.cookie_lifetime = 0
+session.cookie_secure = 0
+session.cookie_httponly = 1
+session.cookie_samesite = Lax
+session.sid_length = 48
+session.sid_bits_per_character = 6
+
+[mail function]
+SMTP = localhost
+smtp_port = 25
+sendmail_path = /usr/sbin/sendmail -t -i
+mail.force_extra_parameters =
+
+[mbstring]
+mbstring.language = Neutral
+mbstring.internal_encoding = UTF-8
+mbstring.encoding_translation = Off
+mbstring.detect_order = auto
+mbstring.substitute_character = none
+mbstring.func_overload = 0

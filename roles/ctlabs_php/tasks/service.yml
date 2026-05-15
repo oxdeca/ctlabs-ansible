@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/tasks/service.yml
+# Description : services
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_php.tasks.service.running
+  service:
+    name    : "{{ ctlabs_php.defaults.service[ctg_os_family].name }}"
+    enabled : true
+    state   : started

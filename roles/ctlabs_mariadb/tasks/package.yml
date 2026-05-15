@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mariadb.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_mariadb.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success

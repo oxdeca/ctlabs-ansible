@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tests/test_mailpiler.yml
+# Description : test playbook for ctlabs_mailpiler (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: container
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

@@ -1,0 +1,51 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/config.yml
+# Description : configuration
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.tasks.config.mysql.piler_db
+  mysql_db:
+    name  : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}"
+    state : present
+
+- name: ctlabs_mailpiler.tasks.config.mysql.piler_user
+  mysql_user:
+    name      : "{{ ctlabs_mailpiler.defaults.mysql.piler_user }}"
+    password  : "{{ ctlabs_mailpiler.defaults.mysql.piler_password }}"
+    priv      : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}.*:ALL"
+    host      : localhost
+    state     : present
+
+- name: ctlabs_mailpiler.tasks.config.mysql.schema
+  copy:
+    src  : /usr/share/doc/piler/db/mysql.sql
+    dest : /tmp/piler_mysql.sql
+    remote_src: true
+
+- name: ctlabs_mailpiler.tasks.config.mysql.schema.load
+  mysql_db:
+    name       : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}"
+    state      : import
+    target     : /tmp/piler_mysql.sql
+
+- name: ctlabs_mailpiler.tasks.config.piler.dir
+  file:
+    path  : /var/piler
+    state : directory
+    mode  : '0755'
+
+- name: ctlabs_mailpiler.tasks.config.piler.dir.imap
+  file:
+    path  : /var/piler/imap
+    state : directory
+    owner : piler
+    group : piler
+    mode  : '0750'
+
+- name: ctlabs_mailpiler.tasks.config.nginx.vhost
+  template:
+    src  : "{{ ctlabs_mailpiler.defaults.config.nginx.template }}"
+    dest : "{{ ctlabs_mailpiler.defaults.config.nginx.file }}"
+  notify: ctlabs_nginx.handlers.service.reload

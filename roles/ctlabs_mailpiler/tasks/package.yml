@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.tasks.package.piler.download
+  get_url:
+    url  : "{{ ctlabs_mailpiler.defaults.piler.url }}"
+    dest : "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/piler_{{ versions.piler }}_amd64.deb"
+
+- name: ctlabs_mailpiler.tasks.package.piler.installed
+  apt:
+    deb  : "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/piler_{{ versions.piler }}_amd64.deb"
+    state: present

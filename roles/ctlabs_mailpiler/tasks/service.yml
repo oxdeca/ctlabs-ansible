@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/service.yml
+# Description : services
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.tasks.service.piler.running
+  service:
+    name    : "{{ ctlabs_mailpiler.defaults.service.piler.name }}"
+    enabled : true
+    state   : started
+
+- name: ctlabs_mailpiler.tasks.service.pilersearch.running
+  service:
+    name    : "{{ ctlabs_mailpiler.defaults.service.pilersearch.name }}"
+    enabled : true
+    state   : started

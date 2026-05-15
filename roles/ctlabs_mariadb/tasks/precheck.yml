@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mariadb.tasks.precheck
+  block:
+    - name: ctlabs_mariadb.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_mariadb.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_mariadb.tasks.precheck.skip.unsupported
+      meta: end_host

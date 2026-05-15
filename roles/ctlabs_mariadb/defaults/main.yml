@@ -1,0 +1,33 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_mariadb:
+  defaults:
+    pkgs:
+      debian:
+        - name : mariadb-server
+      redhat:
+        - name : mariadb-server
+    service:
+      name  : mariadb.service
+      user  : mysql
+      group : mysql
+    config:
+      dir:
+        debian: /etc/mysql/mariadb.conf.d
+        redhat: /etc/my.cnf.d
+      file: 50-server.cnf
+      template: 50-server.cnf.j2
+      datadir: /var/lib/mysql
+      socket: /var/lib/mysql/mysql.sock
+      port: 3306
+      bind: 127.0.0.1
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

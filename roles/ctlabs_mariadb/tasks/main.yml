@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_mariadb
+    - ctlabs_mariadb.precheck
+    - ctlabs_mariadb.package
+    - ctlabs_mariadb.config
+    - ctlabs_mariadb.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_mariadb
+    - ctlabs_mariadb.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_mariadb
+    - ctlabs_mariadb.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_mariadb
+    - ctlabs_mariadb.service

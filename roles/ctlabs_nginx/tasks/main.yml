@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_nginx/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_nginx
+    - ctlabs_nginx.precheck
+    - ctlabs_nginx.package
+    - ctlabs_nginx.config
+    - ctlabs_nginx.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_nginx
+    - ctlabs_nginx.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_nginx
+    - ctlabs_nginx.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_nginx
+    - ctlabs_nginx.service

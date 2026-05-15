@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.handlers.piler.restart
+  service:
+    name  : "{{ ctlabs_mailpiler.defaults.service.piler.name }}"
+    state : restarted
+
+- name: ctlabs_mailpiler.handlers.pilersearch.restart
+  service:
+    name  : "{{ ctlabs_mailpiler.defaults.service.pilersearch.name }}"
+    state : restarted

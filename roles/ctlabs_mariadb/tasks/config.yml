@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mariadb.tasks.config.deploy
+  template:
+    src  : "{{ ctlabs_mariadb.defaults.config.template }}"
+    dest : "{{ ctlabs_mariadb.defaults.config.dir[ctg_os_family] }}/{{ ctlabs_mariadb.defaults.config.file }}"
+  notify: ctlabs_mariadb.handlers.service.restart

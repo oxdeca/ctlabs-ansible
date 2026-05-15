@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_php
+    - ctlabs_php.precheck
+    - ctlabs_php.package
+    - ctlabs_php.config
+    - ctlabs_php.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_php
+    - ctlabs_php.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_php
+    - ctlabs_php.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_php
+    - ctlabs_php.service

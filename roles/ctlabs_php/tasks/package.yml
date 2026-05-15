@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_php.tasks.package.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_php.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success

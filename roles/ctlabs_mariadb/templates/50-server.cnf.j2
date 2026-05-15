@@ -1,0 +1,39 @@
+# -----------------------------------------------------------------------------
+# File       : /etc/mysql/mariadb.conf.d/50-server.cnf
+# Description: MariaDB server configuration
+# -----------------------------------------------------------------------------
+
+[client]
+port    = {{ ctlabs_mariadb.defaults.config.port }}
+socket  = {{ ctlabs_mariadb.defaults.config.socket }}
+
+[mysqld]
+user    = {{ ctlabs_mariadb.defaults.service.user }}
+port    = {{ ctlabs_mariadb.defaults.config.port }}
+socket  = {{ ctlabs_mariadb.defaults.config.socket }}
+pid_file = /var/run/mysqld/mysqld.pid
+basedir = /usr
+datadir = {{ ctlabs_mariadb.defaults.config.datadir }}
+
+bind_address = {{ ctlabs_mariadb.defaults.config.bind }}
+
+skip_external_locking
+skip_name_resolve
+
+max_connections        = 100
+max_allowed_packet     = 64M
+thread_cache_size      = 128
+sort_buffer_size       = 2M
+bulk_insert_buffer_size = 16M
+
+myisam_sort_buffer_size = 64M
+
+log_error = /var/log/mysql/error.log
+
+innodb_buffer_pool_size  = 256M
+innodb_log_file_size     = 64M
+innodb_flush_log_at_trx_commit = 1
+innodb_flush_method      = O_DIRECT
+
+character_set_server     = utf8mb4
+collation_server         = utf8mb4_unicode_ci

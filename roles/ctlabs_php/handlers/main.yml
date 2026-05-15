@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_php.handlers.fpm.restart
+  service:
+    name  : "{{ ctlabs_php.defaults.service[ctg_os_family].name }}"
+    state : restarted
+
+- name: ctlabs_php.handlers.fpm.reload
+  service:
+    name  : "{{ ctlabs_php.defaults.service[ctg_os_family].name }}"
+    state : reloaded

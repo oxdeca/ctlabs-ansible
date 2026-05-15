@@ -1,0 +1,69 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  php: 8.2
+
+ctlabs_php:
+  defaults:
+    pkgs:
+      debian:
+        - name : "php{{ versions.php }}-fpm"
+        - name : "php{{ versions.php }}-cli"
+        - name : "php{{ versions.php }}-common"
+        - name : "php{{ versions.php }}-mysql"
+        - name : "php{{ versions.php }}-xml"
+        - name : "php{{ versions.php }}-mbstring"
+        - name : "php{{ versions.php }}-curl"
+        - name : "php{{ versions.php }}-gd"
+        - name : "php{{ versions.php }}-zip"
+        - name : "php{{ versions.php }}-bz2"
+        - name : "php{{ versions.php }}-intl"
+        - name : composer
+      redhat:
+        - name : php
+        - name : php-fpm
+        - name : php-cli
+        - name : php-mysqlnd
+        - name : php-xml
+        - name : php-mbstring
+        - name : php-curl
+        - name : php-gd
+        - name : php-zip
+        - name : php-bz2
+        - name : php-intl
+    service:
+      debian:
+        name  : "php{{ versions.php }}-fpm.service"
+        user  : www-data
+        group : www-data
+      redhat:
+        name  : php-fpm.service
+        user  : apache
+        group : apache
+    config:
+      debian:
+        ini:
+          template: php.ini.j2
+          file    : "/etc/php/{{ versions.php }}/fpm/php.ini"
+        pool:
+          template: php-fpm-pool.conf.j2
+          file    : "/etc/php/{{ versions.php }}/fpm/pool.d/www.conf"
+        socket_dir: "/run/php"
+      redhat:
+        ini:
+          template: php.ini.j2
+          file    : /etc/php.ini
+        pool:
+          template: php-fpm-pool.conf.j2
+          file    : /etc/php-fpm.d/www.conf
+        socket_dir: "/run/php-fpm"
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

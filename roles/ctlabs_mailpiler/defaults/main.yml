@@ -1,0 +1,40 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/defaults/main.yml
+# Description : defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  piler: 1.4.8
+
+ctlabs_mailpiler:
+  defaults:
+    piler:
+      url    : "https://github.com/jsuto/piler/releases/download/piler-{{ versions.piler }}/piler_{{ versions.piler }}-noble-2e863b0_amd64.deb"
+      tmpdir : /tmp
+    pkgs:
+      debian:
+        - name: unzip
+        - name: gnupg
+    config:
+      dir : /etc/piler
+      file: piler.conf
+      nginx:
+        template: piler-nginx.conf.j2
+        file    : /etc/nginx/conf.d/nginx.d/piler.conf
+    mysql:
+      root_password: ""
+      piler_db     : piler
+      piler_user   : piler
+      piler_password: piler
+    service:
+      piler:
+        name: piler
+      pilersearch:
+        name: pilersearch
+  os:
+    - debian12
+  virtype:
+    - kvm
+    - container

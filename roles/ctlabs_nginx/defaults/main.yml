@@ -1,0 +1,52 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_nginx/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+ctlabs_nginx:
+  defaults:
+    pkgs:
+      debian:
+        - name : nginx
+      redhat:
+        - name : nginx
+    service:
+      debian:
+        name  : nginx.service
+        user  : www-data
+        group : www-data
+      redhat:
+        name  : nginx.service
+        user  : nginx
+        group : nginx
+    config:
+      servername : "{{ ansible_hostname }}.ctlabs.internal"
+      debian:
+        dir      : /etc/nginx
+        conf_dir : /etc/nginx/conf.d
+        sites_dir: /etc/nginx/sites-enabled
+        template : nginx.conf.j2
+        file     : /etc/nginx/nginx.conf
+        log:
+          dir   : /var/log/nginx
+          error : error.log
+          access: access.log
+        dhparam: /etc/nginx/dhparam.pem
+      redhat:
+        dir      : /etc/nginx
+        conf_dir : /etc/nginx/conf.d
+        sites_dir: /etc/nginx/default.d
+        template : nginx.conf.j2
+        file     : /etc/nginx/nginx.conf
+        log:
+          dir   : /var/log/nginx
+          error : error.log
+          access: access.log
+        dhparam: /etc/nginx/dhparam.pem
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

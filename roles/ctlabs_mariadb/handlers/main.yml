@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mariadb/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_mariadb.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_mariadb.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_mariadb.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_mariadb.defaults.service.name }}"
+    state : reloaded

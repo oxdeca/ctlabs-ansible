@@ -1,0 +1,31 @@
+---
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_php/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_php.tasks.precheck
+  block:
+    - name: ctlabs_php.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_php.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_php.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_php.tasks.precheck.fpm_user.var
+  set_fact:
+    ctlabs_php_fpm_user: "{{ ctlabs_php_fpm_user | default(ctlabs_php.defaults.service[ctg_os_family].user) }}"
+
+- name: ctlabs_php.tasks.precheck.fpm_user.fact
+  set_fact:
+    ctlabs_php_fpm_user: "{{ ctg_facts.ctlabs_php.fpm_user | default(ctlabs_php_fpm_user) }}"
+
+- name: ctlabs_php.tasks.precheck.fpm_group.var
+  set_fact:
+    ctlabs_php_fpm_group: "{{ ctlabs_php_fpm_group | default(ctlabs_php.defaults.service[ctg_os_family].group) }}"
+
+- name: ctlabs_php.tasks.precheck.fpm_group.fact
+  set_fact:
+    ctlabs_php_fpm_group: "{{ ctg_facts.ctlabs_php.fpm_group | default(ctlabs_php_fpm_group) }}"

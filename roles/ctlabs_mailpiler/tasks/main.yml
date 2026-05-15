@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/main.yml
+# Description : default task
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_mailpiler
+    - ctlabs_mailpiler.precheck
+    - ctlabs_mailpiler.package
+    - ctlabs_mailpiler.config
+    - ctlabs_mailpiler.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_mailpiler
+    - ctlabs_mailpiler.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_mailpiler
+    - ctlabs_mailpiler.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_mailpiler
+    - ctlabs_mailpiler.service
