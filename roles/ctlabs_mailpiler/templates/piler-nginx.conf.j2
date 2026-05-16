@@ -1,12 +1,12 @@
 # -----------------------------------------------------------------------------
-# File       : /etc/nginx/conf.d/nginx.d/piler.conf
+# File       : /etc/nginx/conf.d/piler.conf
 # Description : nginx vhost for piler web UI
 # -----------------------------------------------------------------------------
 
 server {
   listen 80;
   server_name piler.{{ ansible_nodename.split('.')[1:] | join('.') }};
-  root /usr/share/piler/webui;
+  root /var/piler/www;
   index index.php;
 
   access_log /var/log/nginx/piler_access.log;
@@ -18,7 +18,7 @@ server {
 
   location ~ \.php$ {
     include fastcgi_params;
-    fastcgi_pass unix:/run/php/php-fpm.sock;
+    fastcgi_pass {{ ctlabs_mailpiler.defaults.config.nginx.php_socket[ctg_os_family] }};
     fastcgi_index index.php;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   }

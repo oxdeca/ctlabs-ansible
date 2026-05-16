@@ -14,7 +14,7 @@
 
 ## Configuration
 
-Site configs live in `{{ conf_dir }}/nginx.d/` (e.g. `/etc/nginx/conf.d/nginx.d/`) and are auto-included by the main `nginx.conf`.
+Site configs are deployed directly into `{{ conf_dir }}/` (e.g. `/etc/nginx/conf.d/`) and are auto-included by the main `nginx.conf`.
 
 ## Tests
 

@@ -1,16 +1,16 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_manticore/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_mailpiler.tasks.precheck
+- name: ctlabs_manticore.tasks.precheck
   block:
-    - name: ctlabs_mailpiler.tasks.precheck.os.supported
+    - name: ctlabs_manticore.tasks.precheck.os.supported
       assert:
-        that: ctg_os in ctlabs_mailpiler.os
+        that: ctg_os in ctlabs_manticore.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
   rescue:
-    - name: ctlabs_mailpiler.tasks.precheck.skip.unsupported
+    - name: ctlabs_manticore.tasks.precheck.skip.unsupported
       meta: end_host

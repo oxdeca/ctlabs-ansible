@@ -2,50 +2,120 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/config.yml
-# Description : configuration
+# Description : configure piler, mysql, nginx, manticore
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_mailpiler.tasks.config.mariadb.bind
+  replace:
+    path  : /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: "^bind_address = .+"
+    replace: "bind_address = {{ ctlabs_mailpiler.defaults.mysql.bind }}"
+  delegate_to: db1
+
+- name: ctlabs_mailpiler.tasks.config.mariadb.restart
+  service:
+    name  : mariadb
+    state : restarted
+  delegate_to: db1
+
+- name: ctlabs_mailpiler.tasks.config.mysql.deps
+  apt:
+    name  : python3-pymysql
+    state : present
+  delegate_to: db1
 
 - name: ctlabs_mailpiler.tasks.config.mysql.piler_db
   mysql_db:
     name  : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}"
     state : present
+  delegate_to: db1
 
 - name: ctlabs_mailpiler.tasks.config.mysql.piler_user
   mysql_user:
     name      : "{{ ctlabs_mailpiler.defaults.mysql.piler_user }}"
     password  : "{{ ctlabs_mailpiler.defaults.mysql.piler_password }}"
     priv      : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}.*:ALL"
-    host      : localhost
+    host      : '%'
     state     : present
+  delegate_to: db1
 
 - name: ctlabs_mailpiler.tasks.config.mysql.schema
   copy:
-    src  : /usr/share/doc/piler/db/mysql.sql
-    dest : /tmp/piler_mysql.sql
-    remote_src: true
+    src : db-mysql.sql
+    dest: /tmp/piler_mysql.sql
+  delegate_to: db1
 
 - name: ctlabs_mailpiler.tasks.config.mysql.schema.load
-  mysql_db:
-    name       : "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}"
-    state      : import
-    target     : /tmp/piler_mysql.sql
+  shell: mysql -f "{{ ctlabs_mailpiler.defaults.mysql.piler_db }}" < /tmp/piler_mysql.sql
+  delegate_to: db1
 
-- name: ctlabs_mailpiler.tasks.config.piler.dir
+- name: ctlabs_mailpiler.tasks.config.piler.dirs
   file:
-    path  : /var/piler
+    path  : "{{ item.path }}"
     state : directory
-    mode  : '0755'
+    owner : "{{ item.owner | default('root') }}"
+    group : "{{ item.group | default(item.owner | default('root')) }}"
+    mode  : "{{ item.mode }}"
+  loop: "{{ ctlabs_mailpiler.defaults.config.dirs }}"
 
-- name: ctlabs_mailpiler.tasks.config.piler.dir.imap
-  file:
-    path  : /var/piler/imap
-    state : directory
-    owner : piler
-    group : piler
-    mode  : '0750'
+- name: ctlabs_mailpiler.tasks.config.piler.conf
+  copy:
+    src : /etc/piler/piler.conf.dist
+    dest: /etc/piler/piler.conf
+    remote_src: true
+    mode: '0640'
+  notify: ctlabs_mailpiler.handlers.piler.restart
+
+- name: ctlabs_mailpiler.tasks.config.piler.conf.mysqlhost
+  lineinfile:
+    path : /etc/piler/piler.conf
+    line : 'mysqlhost={{ ctlabs_mailpiler.defaults.mysql.host }}'
+    insertafter: '^mysqluser='
+
+- name: ctlabs_mailpiler.tasks.config.piler.conf.mysqlsocket
+  replace:
+    path : /etc/piler/piler.conf
+    regexp: '^(mysqlsocket=).*'
+    replace: 'mysqlsocket='
+
+- name: ctlabs_mailpiler.tasks.config.piler.conf.mysqlpwd
+  replace:
+    path : /etc/piler/piler.conf
+    regexp: '^(mysqlpwd=).*'
+    replace: 'mysqlpwd={{ ctlabs_mailpiler.defaults.mysql.piler_password }}'
+
+- name: ctlabs_mailpiler.tasks.config.piler.conf.hostid
+  replace:
+    path : /etc/piler/piler.conf
+    regexp: '^(hostid=).*'
+    replace: 'hostid={{ ansible_fqdn }}'
+
+- name: ctlabs_mailpiler.tasks.config.piler.conf.clean.clamd
+  replace:
+    path : /etc/piler/piler.conf
+    regexp: '^clamd_socket=.*'
+    replace: '# clamd_socket removed for 1.4.8'
+
+- name: ctlabs_mailpiler.tasks.config.piler.key
+  shell: >
+    openssl req -x509 -newkey rsa:2048
+    -keyout /etc/piler/piler.key -out /etc/piler/piler.pem
+    -days 3650 -nodes -subj '/CN=piler/O=ctlabs'
+  args:
+    creates:
+      - /etc/piler/piler.pem
+      - /etc/piler/piler.key
 
 - name: ctlabs_mailpiler.tasks.config.nginx.vhost
   template:
     src  : "{{ ctlabs_mailpiler.defaults.config.nginx.template }}"
     dest : "{{ ctlabs_mailpiler.defaults.config.nginx.file }}"
   notify: ctlabs_nginx.handlers.service.reload
+
+- name: ctlabs_mailpiler.tasks.config.search.conf
+  template:
+    src  : manticore.conf.j2
+    dest : /etc/piler/manticore.conf
+    owner: piler
+    group: piler
+    mode : '0640'

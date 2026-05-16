@@ -1,0 +1,203 @@
+# -----------------------------------------------------------------------------
+# File       : /etc/piler/manticore.conf
+# Description : Manticore/Sphinx search daemon config for piler
+# -----------------------------------------------------------------------------
+
+source base
+{
+   type = mysql
+   sql_host = {{ ctlabs_mailpiler.defaults.mysql.host }}
+   sql_db = {{ ctlabs_mailpiler.defaults.mysql.piler_db }}
+   sql_user = {{ ctlabs_mailpiler.defaults.mysql.piler_user }}
+   sql_pass = {{ ctlabs_mailpiler.defaults.mysql.piler_password }}
+
+   sql_attr_uint = size
+   sql_attr_uint = sent
+   sql_attr_uint = attachments
+}
+
+source delta : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query_pre  = REPLACE INTO sph_counter SELECT 1, IFNULL(MAX(id), 0) FROM sph_index
+   sql_query_post_index  = DELETE FROM sph_index WHERE id<=(SELECT max_doc_id FROM sph_counter WHERE counter_id=1)
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id <= (SELECT max_doc_id FROM sph_counter WHERE counter_id=1)
+
+   sql_query_killlist = SELECT `id` FROM `metadata` WHERE `deleted`=1
+}
+
+source main1 : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
+}
+
+source main2 : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
+}
+
+source main3 : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
+}
+
+source main4 : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
+}
+
+source dailydelta : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query = SELECT id, `from` as sender, `to` as rcpt, `fromdomain` as senderdomain, `todomain` as rcptdomain, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
+}
+
+source tag : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query  = SELECT `_id`, `id` AS iid, `uid`, `tag` FROM `tag`
+
+   sql_attr_uint = iid
+   sql_attr_uint = uid
+}
+
+source note : base
+{
+   sql_query_pre = SET NAMES utf8mb4
+   sql_query  = SELECT `_id`, `id` AS iid, `uid`, `note` FROM `note`
+
+   sql_attr_uint = iid
+   sql_attr_uint = uid
+}
+
+index main1
+{
+        source                  = main1
+        path                    = /var/piler/sphinx/main1
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index main2
+{
+        source                  = main2
+        path                    = /var/piler/sphinx/main2
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index main3
+{
+        source                  = main3
+        path                    = /var/piler/sphinx/main3
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index main4
+{
+        source                  = main4
+        path                    = /var/piler/sphinx/main4
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index dailydelta1
+{
+        source                  = dailydelta
+        path                    = /var/piler/sphinx/dailydelta1
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index delta1
+{
+        source                  = delta
+        path                    = /var/piler/sphinx/delta1
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+        killlist_target = main1:kl,main2:kl,main3:kl,main4:kl,dailydelta1:kl
+}
+
+index tag1
+{
+        source                  = tag
+        path                    = /var/piler/sphinx/tag1
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+index note1
+{
+        source                  = note
+        path                    = /var/piler/sphinx/note1
+        min_prefix_len          = 5
+        min_word_len            = 1
+        charset_table           = 0..9, english, _, \
+                                  U+C1->U+E1, U+C4->U+E4, U+C5->U+E5, U+C6->U+E6, U+C9->U+E9, U+CD->U+ED, U+D3->U+F3, U+D6->U+F6, U+D8->U+F8, \
+                                  U+DA->U+FA, U+DC->U+FC, U+0150->U+0151, U+0152->U+0153, U+0170->U+0171, U+01E2->U+E6, U+01E3->U+E6, U+01FC->U+E6, \
+                                  U+01FD->U+E6, U+1D01->U+E6, U+1D02->U+E6, U+1D2D->U+E6, U+1D46->U+E6, \
+                                  U+DF, U+E1, U+E4, U+E5, U+E6, U+E9, U+ED, U+00F3, U+F6, U+F8, U+FA, U+FC, U+0151, U+0153, U+0171
+}
+
+indexer
+{
+        mem_limit               = 256M
+}
+
+searchd
+{
+        listen                  = 127.0.0.1:9312
+        listen                  = 127.0.0.1:9306:mysql41
+        log                     = /dev/null
+        binlog_path             = /var/piler/sphinx
+        binlog_max_log_size     = 16M
+        binlog_flush            = 2
+        read_timeout            = 5
+        max_children            = 30
+        pid_file                = /var/run/piler/searchd.pid
+        seamless_rotate         = 1
+        preopen_indexes         = 1
+        unlink_old              = 1
+        thread_stack            = 512k
+        workers                 = thread_pool
+}

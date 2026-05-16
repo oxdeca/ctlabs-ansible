@@ -1,4 +1,5 @@
 ---
+
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_php/tasks/precheck.yml
 # Description : prechecks

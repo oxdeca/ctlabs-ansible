@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_manticore/tasks/package.yml
+# Description : install manticore packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_manticore.tasks.package.repo
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_manticore.tasks.package.repo.installed
+      dnf:
+        name : "{{ ctlabs_manticore.defaults.repo.redhat.url }}"
+        state: present
+        disable_gpg_check: true
+
+    - name: ctlabs_manticore.tasks.package.system.installed
+      dnf:
+        name  : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_manticore.defaults.pkgs.redhat }}"
+
+- name: ctlabs_manticore.tasks.package.system.installed
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_manticore.tasks.package.repo.download
+      get_url:
+        url : https://repo.manticoresearch.com/manticore-repo.noarch.deb
+        dest: /tmp/manticore-repo.noarch.deb
+
+    - name: ctlabs_manticore.tasks.package.repo.installed
+      apt:
+        deb: /tmp/manticore-repo.noarch.deb
+        state: present
+
+    - name: ctlabs_manticore.tasks.package.system.installed
+      apt:
+        name  : "{{ item.name }}"
+        state : present
+        update_cache: true
+      loop: "{{ ctlabs_manticore.defaults.pkgs.debian }}"

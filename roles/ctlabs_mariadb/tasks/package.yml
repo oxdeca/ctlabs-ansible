@@ -5,6 +5,11 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_mariadb.tasks.package.cache.update
+  apt:
+    update_cache: true
+  when: ctg_os_family == 'debian'
+
 - name: ctlabs_mariadb.tasks.package.installed
   package:
     name  : "{{ item.name }}"

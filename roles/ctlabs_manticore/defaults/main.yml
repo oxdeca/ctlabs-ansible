@@ -1,0 +1,20 @@
+---
+
+ctlabs_manticore:
+  defaults:
+    repo:
+      redhat:
+        url: https://repo.manticoresearch.com/manticore-repo.noarch.rpm
+      debian:
+        url: https://repo.manticoresearch.com/manticore-repo.noarch.deb
+    pkgs:
+      redhat:
+        - name: manticore
+        - name: manticore-extra
+      debian:
+        - name: manticore-server
+        - name: manticore-server-core
+        - name: manticore-extra
+  os:
+    - debian12
+    - centos9

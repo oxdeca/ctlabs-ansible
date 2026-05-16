@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_manticore/tasks/main.yml
+# Description : default task
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_manticore
+    - ctlabs_manticore.precheck
+    - ctlabs_manticore.package
+    - ctlabs_manticore.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_manticore
+    - ctlabs_manticore.package
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_manticore
+    - ctlabs_manticore.service

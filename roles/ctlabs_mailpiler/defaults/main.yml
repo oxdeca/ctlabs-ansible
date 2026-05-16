@@ -11,23 +11,55 @@ versions:
 ctlabs_mailpiler:
   defaults:
     piler:
-      url    : "https://github.com/jsuto/piler/releases/download/piler-{{ versions.piler }}/piler_{{ versions.piler }}-noble-2e863b0_amd64.deb"
-      tmpdir : /tmp
+      debian:
+        file: "ctlabs_piler-{{ versions.piler }}.amd64.deb"
+      redhat:
+        file: "ctlabs_piler-{{ versions.piler }}.x86_64.rpm"
+      tmpdir: /tmp
     pkgs:
       debian:
         - name: unzip
         - name: gnupg
+        - name: python3-mysqldb
+      redhat:
+        - name: python3-PyMySQL
     config:
       dir : /etc/piler
       file: piler.conf
       nginx:
         template: piler-nginx.conf.j2
-        file    : /etc/nginx/conf.d/nginx.d/piler.conf
+        file    : /etc/nginx/conf.d/piler.conf
+        php_socket:
+          debian: "unix:/run/php/php-fpm.sock"
+          redhat: "unix:/run/php/php-fpm.sock"
+      dirs:
+        - path: /var/piler
+          mode: '0755'
+        - path: /var/piler/store
+          owner: piler
+          mode: '0750'
+        - path: /var/piler/tmp
+          owner: piler
+          mode: '0750'
+        - path: /var/piler/imap
+          owner: piler
+          mode: '0750'
+        - path: /var/piler/sphinx
+          owner: piler
+          mode: '0750'
+        - path: /var/run/piler
+          owner: piler
+          mode: '0755'
     mysql:
+      host        : "{{ hostvars['db1']['ansible_eth1']['ipv4']['address'] | default('192.168.20.156') }}"
+      bind        : 0.0.0.0
       root_password: ""
       piler_db     : piler
       piler_user   : piler
       piler_password: piler
+    schema:
+      debian: /usr/share/doc/piler/db/mysql.sql
+      redhat: /usr/share/piler/db-mysql.sql
     service:
       piler:
         name: piler
@@ -35,6 +67,4 @@ ctlabs_mailpiler:
         name: pilersearch
   os:
     - debian12
-  virtype:
-    - kvm
-    - container
+    - centos9

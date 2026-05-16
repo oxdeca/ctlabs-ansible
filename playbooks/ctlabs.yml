@@ -543,6 +543,24 @@
     - roles/ctlabs_httpd
 
 # -----------------------------------------------------------------------------
+# ctlabs_nginx
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.nginx
+  hosts : [www1, www2, nb1, nb2, gua1, gua2, h3, h4]
+  tags  : nginx
+  roles :
+    - roles/ctlabs_nginx
+
+# -----------------------------------------------------------------------------
+# ctlabs_php
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.php
+  hosts : [www1, www2, nb1, nb2, gua1, gua2, h3, h4]
+  tags  : php
+  roles :
+    - roles/ctlabs_php
+
+# -----------------------------------------------------------------------------
 # ctlabs_guacamole
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.guacamole
@@ -660,6 +678,24 @@
     - roles/ctlabs_postfix
 
 # -----------------------------------------------------------------------------
+# ctlabs_manticore
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.manticore
+  hosts : [h3, h4,mail1, mail2]
+  tags  : manticore
+  roles :
+    - roles/ctlabs_manticore
+
+# -----------------------------------------------------------------------------
+# ctlabs_mailpiler
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.mailpiler
+  hosts : [h3, h4,mail1, mail2]
+  tags  : mailpiler
+  roles :
+    - roles/ctlabs_mailpiler
+
+# -----------------------------------------------------------------------------
 # ctlabs_postgresql
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.postgresql
@@ -667,6 +703,15 @@
   tags  : postgresql
   roles :
     - roles/ctlabs_postgresql
+
+# -----------------------------------------------------------------------------
+# ctlabs_mariadb
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.mariadb
+  hosts : [db1, db2]
+  tags  : mariadb
+  roles :
+    - roles/ctlabs_mariadb
 
 # -----------------------------------------------------------------------------
 # ctlabs_redis

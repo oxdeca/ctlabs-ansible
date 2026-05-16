@@ -36,4 +36,4 @@ http {
   error_log   {{ ctlabs_nginx.defaults.config[ctg_os_family].log.dir }}/{{ ctlabs_nginx.defaults.config[ctg_os_family].log.error }};
 
   include {{ ctlabs_nginx.defaults.config[ctg_os_family].conf_dir }}/*.conf;
-  include {{ ctlabs_nginx.defaults.config[ctg_os_family].conf_dir }}/nginx.d/*.conf;
+}

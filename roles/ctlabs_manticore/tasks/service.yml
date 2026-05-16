@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_manticore/tasks/service.yml
+# Description : manticore service (disabled by default — pilersearch wraps searchd)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_manticore.tasks.service.manticore.stopped
+  service:
+    name    : manticore
+    enabled : false
+    state   : stopped
+  failed_when: false

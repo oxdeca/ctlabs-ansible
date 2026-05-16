@@ -2,15 +2,51 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_mailpiler/tasks/package.yml
-# Description : packages
+# Description : install piler and system packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_mailpiler.tasks.package.piler.download
-  get_url:
-    url  : "{{ ctlabs_mailpiler.defaults.piler.url }}"
-    dest : "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/piler_{{ versions.piler }}_amd64.deb"
+- name: ctlabs_mailpiler.tasks.package.system.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_mailpiler.defaults.system_pkgs[ctg_os_family] }}"
 
-- name: ctlabs_mailpiler.tasks.package.piler.installed
-  apt:
-    deb  : "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/piler_{{ versions.piler }}_amd64.deb"
-    state: present
+- name: ctlabs_mailpiler.tasks.package.piler.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_mailpiler.tasks.package.piler.copy.deb
+      copy:
+        src : "{{ ctlabs_mailpiler.defaults.piler.debian.file }}"
+        dest: "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/{{ ctlabs_mailpiler.defaults.piler.debian.file }}"
+
+    - name: ctlabs_mailpiler.tasks.package.piler.installed.deb
+      apt:
+        deb: "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/{{ ctlabs_mailpiler.defaults.piler.debian.file }}"
+        state: present
+
+- name: ctlabs_mailpiler.tasks.package.piler.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_mailpiler.tasks.package.piler.copy.rpm
+      copy:
+        src : "{{ ctlabs_mailpiler.defaults.piler.redhat.file }}"
+        dest: "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/{{ ctlabs_mailpiler.defaults.piler.redhat.file }}"
+
+    - name: ctlabs_mailpiler.tasks.package.piler.installed.rpm
+      dnf:
+        name : "{{ ctlabs_mailpiler.defaults.piler.tmpdir }}/{{ ctlabs_mailpiler.defaults.piler.redhat.file }}"
+        state: present
+        disable_gpg_check: true
+
+    - name: ctlabs_mailpiler.tasks.package.piler.group
+      group:
+        name  : piler
+        system: true
+
+    - name: ctlabs_mailpiler.tasks.package.piler.user
+      user:
+        name  : piler
+        group : piler
+        shell : /sbin/nologin
+        home  : /var/piler
+        system: true

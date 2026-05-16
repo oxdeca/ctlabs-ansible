@@ -11,12 +11,6 @@
     dest : "{{ ctlabs_nginx.defaults.config[ctg_os_family].file     }}"
   notify: ctlabs_nginx.handlers.service.reload
 
-- name: ctlabs_nginx.tasks.config.include_dir
-  file:
-    path  : "{{ ctlabs_nginx.defaults.config[ctg_os_family].conf_dir }}/nginx.d"
-    state : directory
-    mode  : '0755'
-
 - name: ctlabs_nginx.tasks.config.dhparam
   command: "openssl dhparam -out {{ ctlabs_nginx.defaults.config[ctg_os_family].dhparam }} 2048"
   args:
