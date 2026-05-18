@@ -1,0 +1,24 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_openarchiver/templates/         #}
+{#               openarchiver-worker.service.j2                              #}
+{# Description : systemd unit for OpenArchiver workers                       #}
+{# ------------------------------------------------------------------------- #}
+
+[Unit]
+Description=OpenArchiver Workers
+After=network.target postgresql.service valkey.service meilisearch.service
+Wants=postgresql.service valkey.service meilisearch.service
+
+[Service]
+Type=simple
+User={{ ctlabs_openarchiver.defaults.service.user }}
+Group={{ ctlabs_openarchiver.defaults.service.user }}
+WorkingDirectory={{ ctlabs_openarchiver.defaults.source.dir }}
+EnvironmentFile={{ ctlabs_openarchiver.defaults.config.env_file }}
+ExecStart=/usr/bin/pnpm run start:workers
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

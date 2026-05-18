@@ -1,0 +1,24 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_openarchiver/templates/         #}
+{#               openarchiver-web.service.j2                                 #}
+{# Description : systemd unit for OpenArchiver web                           #}
+{# ------------------------------------------------------------------------- #}
+
+[Unit]
+Description=OpenArchiver Web
+After=network.target postgresql.service meilisearch.service tika-server.service
+Wants=postgresql.service meilisearch.service tika-server.service
+
+[Service]
+Type=simple
+User={{ ctlabs_openarchiver.defaults.service.user }}
+Group={{ ctlabs_openarchiver.defaults.service.user }}
+WorkingDirectory={{ ctlabs_openarchiver.defaults.source.dir }}
+EnvironmentFile={{ ctlabs_openarchiver.defaults.config.env_file }}
+ExecStart=/usr/bin/pnpm run start:oss
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

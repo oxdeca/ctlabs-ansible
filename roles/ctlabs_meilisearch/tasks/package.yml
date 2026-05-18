@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_meilisearch/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_meilisearch.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_meilisearch.defaults.download.url }}"
+    dest : "{{ ctlabs_meilisearch.defaults.download.dir }}/meilisearch"
+    mode : '0755'
+
+- name: ctlabs_meilisearch.tasks.package.user
+  user:
+    name    : "{{ ctlabs_meilisearch.defaults.service.user }}"
+    system  : true
+    home    : "{{ ctlabs_meilisearch.defaults.config.db_path }}"
+    shell   : /usr/sbin/nologin
+    create_home: false
+
+- name: ctlabs_meilisearch.tasks.package.datadir
+  file:
+    path   : "{{ ctlabs_meilisearch.defaults.config.db_path }}"
+    state  : directory
+    owner  : "{{ ctlabs_meilisearch.defaults.service.user }}"
+    group  : "{{ ctlabs_meilisearch.defaults.service.user }}"
+    mode   : '0755'
+
+- name: ctlabs_meilisearch.tasks.package.configdir
+  file:
+    path   : "{{ ctlabs_meilisearch.defaults.config.env_file | dirname }}"
+    state  : directory
+    mode   : '0755'

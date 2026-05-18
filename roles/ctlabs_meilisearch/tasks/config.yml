@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_meilisearch/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_meilisearch.tasks.config.env
+  template:
+    src  : meilisearch.env.j2
+    dest : "{{ ctlabs_meilisearch.defaults.config.env_file }}"
+  notify: ctlabs_meilisearch.handlers.service.restart

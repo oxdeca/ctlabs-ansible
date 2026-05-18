@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_meilisearch/tests/test_meilisearch.yml
+# Description : test playbook for ctlabs_meilisearch (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_meilisearch.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

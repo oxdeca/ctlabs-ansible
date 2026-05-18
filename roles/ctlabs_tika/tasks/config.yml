@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tika/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tika.tasks.config.service
+  template:
+    src  : tika-server.service.j2
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_tika.defaults.service.name }}"
+  notify: ctlabs_tika.handlers.service.restart

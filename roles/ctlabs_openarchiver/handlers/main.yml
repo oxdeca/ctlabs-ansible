@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openarchiver.handlers.apt.update_cache
+  apt:
+    update_cache: yes
+
+- name: ctlabs_openarchiver.handlers.service.web.restart
+  service:
+    name    : "{{ ctlabs_openarchiver.defaults.service.web.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_openarchiver.handlers.service.worker.restart
+  service:
+    name    : "{{ ctlabs_openarchiver.defaults.service.worker.name }}"
+    enabled : true
+    state   : restarted

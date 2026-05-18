@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tika/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  tika: 3.2.2
+
+ctlabs_tika:
+  defaults:
+    pkgs:
+      debian:
+        - name : openjdk-17-jre-headless
+      redhat:
+        - name : java-17-openjdk-headless
+    download:
+      url : "https://dlcdn.apache.org/tika/{{ versions.tika }}/tika-server-standard-{{ versions.tika }}.jar"
+      jar : /opt/tika/tika-server.jar
+    config:
+      dir  : /opt/tika
+      addr : "127.0.0.1"
+      port : 9998
+    service:
+      name : tika-server.service
+      user : tika
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

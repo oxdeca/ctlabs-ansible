@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tika/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tika.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_tika.defaults.service.name }}"
+    enabled : true
+    state   : restarted

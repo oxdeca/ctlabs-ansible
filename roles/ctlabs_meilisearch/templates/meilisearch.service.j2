@@ -1,0 +1,22 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_meilisearch/templates/          #}
+{#               meilisearch.service.j2                                      #}
+{# Description : systemd unit for meilisearch                                #}
+{# ------------------------------------------------------------------------- #}
+
+[Unit]
+Description=Meilisearch
+After=network.target
+
+[Service]
+Type=simple
+User={{ ctlabs_meilisearch.defaults.service.user }}
+Group={{ ctlabs_meilisearch.defaults.service.user }}
+ExecStart={{ ctlabs_meilisearch.defaults.download.bin }}
+EnvironmentFile={{ ctlabs_meilisearch.defaults.config.env_file }}
+Restart=on-failure
+RestartSec=5
+WorkingDirectory={{ ctlabs_meilisearch.defaults.config.db_path }}
+
+[Install]
+WantedBy=multi-user.target

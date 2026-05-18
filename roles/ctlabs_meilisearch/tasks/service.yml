@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_meilisearch/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_meilisearch.tasks.service.unit
+  template:
+    src  : meilisearch.service.j2
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_meilisearch.defaults.service.name }}"
+  notify: ctlabs_meilisearch.handlers.service.restart
+
+- name: ctlabs_meilisearch.tasks.service.started
+  systemd:
+    name    : "{{ ctlabs_meilisearch.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

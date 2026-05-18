@@ -1,0 +1,83 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  openarchiver: 1.0.0
+  nodejs      : node_22.x
+  pnpm        : 10.13.1
+
+ctlabs_openarchiver:
+  defaults:
+    repos:
+      debian:
+        - name: nodesource
+          url : "https://deb.nodesource.com/{{ versions.nodejs }}"
+          key : https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+      redhat:
+        - name: nodesource
+          desc: NodeSource Repository
+          url : "https://rpm.nodesource.com/pub_{{ versions.nodejs.split('_')[1] }}/nodistro/nodejs/$basearch"
+          key : https://rpm.nodesource.com/gpgkey/ns-operations-public.key
+    pkgs:
+      debian:
+        - name : curl
+        - name : git
+        - name : nodejs
+      redhat:
+        - name : nodejs
+        - name : git
+    source:
+      repo : https://github.com/LogicLabs-OU/OpenArchiver.git
+      dir  : /opt/open-archiver
+    config:
+      prefdir : /etc/apt/preferences.d
+      keydir  : /etc/apt/keyrings
+      env_file : /opt/open-archiver/.env
+      app:
+      app:
+        url: http://localhost:3000
+        port_backend : 4000
+        port_frontend: 3000
+      db:
+        name: open_archive
+        user: admin
+        pass: secret123!
+        host: localhost
+        port: 5432
+      redis:
+        host    : localhost
+        port    : 6379
+        password: secret123!
+        tls     : false
+      meilisearch:
+        host: http://localhost:7700
+        key : secret123!
+      tika:
+        url: http://localhost:9998
+      jwt:
+        secret    : secret123!
+        expires_in: 7d
+      encryption:
+        key: 0ffc544482eafe17a071a030c561646860f39f2cf77a96765dbc003a16536b6d
+      storage:
+        dir             : /var/data/open-archiver
+        encryption_key  : d7f8cb350630cc353ff3c3d8145193a9779e88ea09533074bcf90d0d4583b718
+        type            : local
+        body_size_limit : 100M
+    service:
+      user  : openarchiver
+      web   :
+        name     : openarchiver-web.service
+        template : openarchiver-web.service.j2
+      worker:
+        name     : openarchiver-worker.service
+        template : openarchiver-worker.service.j2
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

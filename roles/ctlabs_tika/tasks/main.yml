@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tika/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_tika
+    - ctlabs_tika.precheck
+    - ctlabs_tika.package
+    - ctlabs_tika.config
+    - ctlabs_tika.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_tika
+    - ctlabs_tika.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_tika
+    - ctlabs_tika.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_tika
+    - ctlabs_tika.service

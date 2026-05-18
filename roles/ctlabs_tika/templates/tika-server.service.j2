@@ -1,0 +1,20 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_tika/templates/                 #}
+{#               tika-server.service.j2                                      #}
+{# Description : systemd unit for Apache Tika server                         #}
+{# ------------------------------------------------------------------------- #}
+
+[Unit]
+Description=Apache Tika Server
+After=network.target
+
+[Service]
+Type=simple
+User={{ ctlabs_tika.defaults.service.user }}
+Group={{ ctlabs_tika.defaults.service.user }}
+ExecStart=/usr/bin/java -jar {{ ctlabs_tika.defaults.download.jar }} --host {{ ctlabs_tika.defaults.config.addr }} --port {{ ctlabs_tika.defaults.config.port }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

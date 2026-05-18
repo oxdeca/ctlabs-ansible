@@ -1,0 +1,115 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openarchiver.tasks.package.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_openarchiver.tasks.package.redhat.repos.file
+      yum_repository:
+        name           : "{{ item.name }}"
+        description    : "{{ item.desc }}"
+        baseurl        : "{{ item.url  }}"
+        gpgkey         : "{{ item.key  }}"
+        gpgcheck       : true
+        module_hotfixes: true
+      loop: "{{ ctlabs_openarchiver.defaults.repos[ctg_os_family] }}"
+
+- name: ctlabs_openarchiver.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_openarchiver.tasks.package.debian.keydir
+      file:
+        path : "{{ ctlabs_openarchiver.defaults.config.keydir }}"
+        state: directory
+        mode : '0755'
+
+    - name: ctlabs_openarchiver.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_openarchiver.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_openarchiver.defaults.repos[ctg_os_family] }}"
+
+    - name: ctlabs_openarchiver.tasks.package.debian.repos.file
+      apt_repository:
+        repo: "deb [signed-by={{ ctlabs_openarchiver.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
+        update_cache: yes
+      loop: "{{ ctlabs_openarchiver.defaults.repos[ctg_os_family] }}"
+
+    - name: ctlabs_openarchiver.tasks.package.debian.nodejs.pin
+      template:
+        src : nodejs.pref.j2
+        dest: "{{ ctlabs_openarchiver.defaults.config.prefdir }}/{{ item.name }}.pref"
+        mode: '0644'
+        owner: root
+        group: root
+      loop: "{{ ctlabs_openarchiver.defaults.repos[ctg_os_family] }}"
+      notify: ctlabs_openarchiver.handlers.apt.update_cache
+
+    - name: ctlabs_openarchiver.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+
+- name: ctlabs_openarchiver.tasks.package.deps.installed
+  package:
+    name    : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_openarchiver.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_openarchiver.tasks.package.corepack.enable
+  command:
+    cmd: /usr/bin/corepack enable
+  changed_when: false
+
+- name: ctlabs_openarchiver.tasks.package.pnpm.prepare
+  command:
+    cmd: "/usr/bin/corepack prepare pnpm@{{ versions.pnpm }} --activate"
+  changed_when: false
+
+- name: ctlabs_openarchiver.tasks.package.source.clone
+  git:
+    repo  : "{{ ctlabs_openarchiver.defaults.source.repo }}"
+    dest  : "{{ ctlabs_openarchiver.defaults.source.dir }}"
+    force : true
+  register: oa_git
+
+- name: ctlabs_openarchiver.tasks.package.group
+  group:
+    name  : "{{ ctlabs_openarchiver.defaults.service.user }}"
+    system: true
+
+- name: ctlabs_openarchiver.tasks.package.user
+  user:
+    name        : "{{ ctlabs_openarchiver.defaults.service.user }}"
+    group       : "{{ ctlabs_openarchiver.defaults.service.user }}"
+    system      : true
+    home        : "{{ ctlabs_openarchiver.defaults.source.dir }}"
+    shell       : /usr/sbin/nologin
+    create_home : false
+
+- name: ctlabs_openarchiver.tasks.package.storage.dir
+  file:
+    path  : "{{ ctlabs_openarchiver.defaults.config.storage.dir }}"
+    state : directory
+    owner : "{{ ctlabs_openarchiver.defaults.service.user }}"
+    group : "{{ ctlabs_openarchiver.defaults.service.user }}"
+    mode  : '0755'
+
+- name: ctlabs_openarchiver.tasks.package.pnpm.install
+  command:
+    cmd: pnpm install --frozen-lockfile
+    chdir: "{{ ctlabs_openarchiver.defaults.source.dir }}"
+  register: oa_pnpm_install
+  changed_when: "'Already up to date' not in oa_pnpm_install.stdout"
+
+- name: ctlabs_openarchiver.tasks.package.build
+  command:
+    cmd: pnpm run build:oss
+    chdir: "{{ ctlabs_openarchiver.defaults.source.dir }}"
+  when: oa_git.changed

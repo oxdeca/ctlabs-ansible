@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_openarchiver
+    - ctlabs_openarchiver.precheck
+    - ctlabs_openarchiver.package
+    - ctlabs_openarchiver.config
+    - ctlabs_openarchiver.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_openarchiver
+    - ctlabs_openarchiver.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_openarchiver
+    - ctlabs_openarchiver.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_openarchiver
+    - ctlabs_openarchiver.service

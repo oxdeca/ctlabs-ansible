@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_meilisearch/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  meilisearch: 1.38.0
+
+ctlabs_meilisearch:
+  defaults:
+    pkgs:
+      debian:
+        - name: meilisearch
+      redhat:
+        - name: meilisearch
+    download:
+      url : "https://github.com/meilisearch/meilisearch/releases/download/v{{ versions.meilisearch }}/meilisearch-linux-amd64"
+      dir : /usr/local/bin
+      bin : /usr/local/bin/meilisearch
+    config:
+      env_file : /etc/meilisearch/meilisearch.env
+      db_path  : /var/lib/meilisearch
+      addr     : "127.0.0.1:7700"
+      key      : secret123!
+      snapshot_interval: 86400
+    service:
+      name : meilisearch.service
+      user : meilisearch
+  os:
+    - redhat9
+    - centos9
+    - debian12

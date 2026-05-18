@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openarchiver.tasks.service.web.install
+  template:
+    src  : "{{ ctlabs_openarchiver.defaults.service.web.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_openarchiver.defaults.service.web.name }}"
+  notify: ctlabs_openarchiver.handlers.service.web.restart
+
+- name: ctlabs_openarchiver.tasks.service.worker.install
+  template:
+    src  : "{{ ctlabs_openarchiver.defaults.service.worker.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_openarchiver.defaults.service.worker.name }}"
+  notify: ctlabs_openarchiver.handlers.service.worker.restart
+
+- name: ctlabs_openarchiver.tasks.service.web.started
+  systemd:
+    name    : "{{ ctlabs_openarchiver.defaults.service.web.name }}"
+    enabled : true
+    masked  : false
+    state   : started
+
+- name: ctlabs_openarchiver.tasks.service.worker.started
+  systemd:
+    name    : "{{ ctlabs_openarchiver.defaults.service.worker.name }}"
+    enabled : true
+    masked  : false
+    state   : started

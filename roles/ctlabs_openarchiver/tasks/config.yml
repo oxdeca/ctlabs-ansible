@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openarchiver.tasks.config.env
+  template:
+    src  : openarchiver.env.j2
+    dest : "{{ ctlabs_openarchiver.defaults.config.env_file }}"
+  notify:
+    - ctlabs_openarchiver.handlers.service.web.restart
+    - ctlabs_openarchiver.handlers.service.worker.restart
+
+- name: ctlabs_openarchiver.tasks.config.db.migrate
+  command:
+    cmd: /usr/local/bin/pnpm db:migrate
+    chdir: "{{ ctlabs_openarchiver.defaults.source.dir }}"
+  when: oa_pnpm_install.changed or oa_env_stat.stat.exists == false

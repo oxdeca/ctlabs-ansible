@@ -1,0 +1,13 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tika/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tika.tasks.service.started
+  systemd:
+    name    : "{{ ctlabs_tika.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

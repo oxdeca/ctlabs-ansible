@@ -1,0 +1,25 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_openarchiver/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_openarchiver.tasks.precheck
+  block:
+    - name: ctlabs_openarchiver.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_openarchiver.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_openarchiver.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_openarchiver.tasks.precheck.env.stat
+  stat:
+    path: "{{ ctlabs_openarchiver.defaults.config.env_file }}"
+  register: oa_env_stat
+
+- name: ctlabs_openarchiver.tasks.precheck.env.set_fact
+  set_fact:
+    oa_env_exists: "{{ oa_env_stat.stat.exists }}"
