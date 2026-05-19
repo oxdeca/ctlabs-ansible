@@ -964,3 +964,12 @@
   tags  : [opencode]
   roles :
     - roles/ctlabs_opencode
+
+# -----------------------------------------------------------------------------
+# ctlabs_wazuh
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.wazuh
+  hosts : all:!rhosts
+  tags  : [wazuh]
+  roles :
+    - roles/ctlabs_wazuh
