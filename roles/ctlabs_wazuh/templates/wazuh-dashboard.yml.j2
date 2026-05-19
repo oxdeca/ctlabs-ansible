@@ -7,20 +7,20 @@ server.host: {{ ctlabs_wazuh_dashboard_host | default(ctlabs_wazuh.defaults.conf
 server.port: {{ ctlabs_wazuh.defaults.config.dashboard.port }}
 
 opensearch.hosts:
-  - https://{{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}:{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}
+  - https://{{ ctlabs_wazuh_indexer_http_host | default(ansible_default_ipv4.address) }}:{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}
 
 opensearch.ssl.verificationMode: certificate
 opensearch.ssl.certificateAuthorities:
-  - /etc/wazuh-indexer/certs/root-ca.pem
-opensearch.ssl.certificate: /etc/wazuh-indexer/certs/dashboard.pem
-opensearch.ssl.key: /etc/wazuh-indexer/certs/dashboard-key.pem
+  - /etc/ca-ctlabs/ca-ctlabs.crt
+opensearch.ssl.certificate: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt
+opensearch.ssl.key: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.prv
 
 opensearch.username: kibanaserver
 opensearch.password: kibanaserver
 
 server.ssl.enabled: true
-server.ssl.certificate: /etc/wazuh-indexer/certs/dashboard.pem
-server.ssl.key: /etc/wazuh-indexer/certs/dashboard-key.pem
+server.ssl.certificate: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt
+server.ssl.key: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.prv
 
 opensearch.requestHeadersAllowlist: ["securitytenant","Authorization"]
 
@@ -28,7 +28,4 @@ opensearch_security.multitenancy.enabled: true
 opensearch_security.multitenancy.tenants.preferred: ["Private", "Global"]
 opensearch_security.readonly_mode.roles: ["kibana_read_only"]
 
-uiSettings.overrides.defaultRoute: /app/wazuh-dashboard
-
-server.basePath: /wazuh
-server.rewriteBasePath: true
+uiSettings.overrides.defaultRoute: /app/wz-home

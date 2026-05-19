@@ -22,13 +22,14 @@
   when: ctg_os_family == "debian"
   block:
     - name: ctlabs_wazuh.tasks.package.debian.repo.key
-      apt_key:
-        url: "{{ item.key }}"
+      get_url:
+        url : "{{ item.key }}"
+        dest: "/etc/apt/trusted.gpg.d/{{ item.name }}.asc"
       loop: "{{ ctlabs_wazuh.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_wazuh.tasks.package.debian.repo.file
       apt_repository:
-        repo : "deb {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+        repo : "deb [signed-by=/etc/apt/trusted.gpg.d/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
       loop: "{{ ctlabs_wazuh.defaults.repos[ctg_os_family] }}"
 
 - name: ctlabs_wazuh.tasks.package.install
@@ -39,8 +40,17 @@
   register: result
   until   : result is success
 
+- name: ctlabs_wazuh.tasks.package.user.primary_group
+  user:
+    name  : "{{ ctlabs_wazuh.defaults.service.user }}"
+    group : "{{ ctlabs_wazuh.defaults.service.group }}"
+
 - name: ctlabs_wazuh.tasks.package.group.certs.member
   user:
-    name  : "{{ ctlabs_wazuh.defaults.service.user   }}"
-    group : "{{ ctlabs_wazuh.defaults.service.group  }}"
+    name  : "{{ item }}"
     groups: "{{ ctlabs_wazuh.defaults.service.groups }}"
+    append: true
+  loop:
+    - wazuh-indexer
+    - wazuh-dashboard
+  when: ctlabs_wazuh_role == "server"

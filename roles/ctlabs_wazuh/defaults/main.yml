@@ -6,38 +6,10 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  wazuh: 4.12.0
+  wazuh: 4.14.5
 
 ctlabs_wazuh:
   defaults:
-    config:
-      role: agent
-      indexer:
-        cluster:
-          name: wazuh
-          node:
-            name: node-1
-        network:
-          host: 127.0.0.1
-        path:
-          data: /var/lib/wazuh-indexer
-          logs: /var/log/wazuh-indexer
-        ports:
-          http: 9200
-          transport: 9300
-      manager:
-        addr: 0.0.0.0
-        port: 1514
-        registration_port: 1515
-        api:
-          port: 55000
-      dashboard:
-        host: 0.0.0.0
-        port: 443
-      agent:
-        server_addr: 127.0.0.1
-        server_port: 1514
-        registration_port: 1515
     repos:
       redhat:
         - name: wazuh
@@ -63,10 +35,40 @@ ctlabs_wazuh:
           - name: wazuh-dashboard
         agent:
           - name: wazuh-agent
+    config:
+      role: agent
+      indexer:
+        cluster:
+          name: wazuh
+          node:
+            name: node-1
+        network:
+          host: 127.0.0.1
+        path:
+          data: /var/lib/wazuh-indexer
+          logs: /var/log/wazuh-indexer
+        ports:
+          http: 9200
+          transport: 9300
+      manager:
+        addr: "{{ ansible_nodename }}"
+        port: 1514
+        registration_port: 1515
+        api:
+          port: 55000
+      dashboard:
+        host: "{{ ansible_nodename }}"
+        port: 443
+      agent:
+        server_addr: 127.0.0.1
+        server_port: 1514
+        registration_port: 1515
+      ca:
+        domain: ctlabs.internal
     service:
       user: wazuh
       group: wazuh
-      groups: ossec
+      groups: [certs]
     dirs:
       - path: /etc/wazuh-indexer
         mode: '0750'
@@ -79,4 +81,6 @@ ctlabs_wazuh:
   os:
     - redhat9
     - centos9
+    - debian11
     - debian12
+    - parrot7

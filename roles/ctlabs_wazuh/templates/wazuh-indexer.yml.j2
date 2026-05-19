@@ -6,27 +6,27 @@
 path.data: {{ ctlabs_wazuh.defaults.config.indexer.path.data }}
 path.logs: {{ ctlabs_wazuh.defaults.config.indexer.path.logs }}
 
-network.host: {{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}
+http.host: {{ ctlabs_wazuh_indexer_http_host | default(ansible_default_ipv4.address) }}
 http.port: {{ ctlabs_wazuh.defaults.config.indexer.ports.http }}
+transport.host: {{ ctlabs_wazuh_indexer_transport_host | default(ansible_default_ipv4.address) }}
 transport.port: {{ ctlabs_wazuh.defaults.config.indexer.ports.transport }}
 
 discovery.type: single-node
 
-plugins.security.ssl.http.enabled: true
-plugins.security.ssl.http.pemcert_file: /etc/wazuh-indexer/certs/indexer.pem
-plugins.security.ssl.http.pemkey_file: /etc/wazuh-indexer/certs/indexer-key.pem
-plugins.security.ssl.http.pemtrustedcas_file: /etc/wazuh-indexer/certs/root-ca.pem
-plugins.security.ssl.transport.enabled: true
-plugins.security.ssl.transport.pemcert_file: /etc/wazuh-indexer/certs/indexer.pem
-plugins.security.ssl.transport.pemkey_file: /etc/wazuh-indexer/certs/indexer-key.pem
-plugins.security.ssl.transport.pemtrustedcas_file: /etc/wazuh-indexer/certs/root-ca.pem
-plugins.security.ssl.transport.enforce_hostname_verification: false
-plugins.security.allow_unsafe_democertificates: true
-plugins.security.authcz.admin_dn:
-  - "CN=admin,OU=Wazuh,O=Wazuh,L=California,C=US"
+cluster.routing.allocation.disk.threshold_enabled: false
 
-plugins.security.check_snapshot_restore: false
-plugins.security.enable_snapshot_restore_privilege: true
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt
+plugins.security.ssl.http.pemkey_filepath: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.prv
+plugins.security.ssl.http.pemtrustedcas_filepath: /etc/ca-ctlabs/ca-ctlabs.crt
+plugins.security.ssl.transport.enabled: true
+plugins.security.ssl.transport.pemcert_filepath: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt
+plugins.security.ssl.transport.pemkey_filepath: /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.prv
+plugins.security.ssl.transport.pemtrustedcas_filepath: /etc/ca-ctlabs/ca-ctlabs.crt
+plugins.security.ssl.transport.enforce_hostname_verification: false
+plugins.security.authcz.admin_dn:
+  - "{{ ctlabs_wazuh_admin_subject }}"
+
 plugins.security.restapi.roles_enabled:
   - "all_access"
   - "security_rest_api_access"

@@ -15,6 +15,15 @@
 - name: ctlabs_wazuh.tasks.config.server
   when: ctlabs_wazuh_role == "server"
   block:
+    - name: ctlabs_wazuh.tasks.config.server.certs.admin_subject
+      command:
+        cmd: openssl x509 -in /etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt -subject -noout
+      register: ctlabs_wazuh_admin_subject_result
+
+    - name: ctlabs_wazuh.tasks.config.server.certs.set_admin_subject
+      set_fact:
+        ctlabs_wazuh_admin_subject: "{{ ctlabs_wazuh_admin_subject_result.stdout[8:] }}"
+
     - name: ctlabs_wazuh.tasks.config.server.indexer
       template:
         src  : wazuh-indexer.yml.j2
@@ -43,6 +52,17 @@
       file:
         path : /var/ossec/etc/client.keys
         state: absent
+
+    - name: ctlabs_wazuh.tasks.config.agent.vrf_dropin.cleanup
+      file:
+        path : /etc/systemd/system/wazuh-agent.service.d/vrf.conf
+        state: absent
+      register: ctlabs_wazuh_vrf_cleanup
+
+    - name: ctlabs_wazuh.tasks.config.agent.systemd_reload
+      systemd:
+        daemon_reload: true
+      when: ctlabs_wazuh_vrf_cleanup is changed
 
     - name: ctlabs_wazuh.tasks.config.agent.ossec
       template:

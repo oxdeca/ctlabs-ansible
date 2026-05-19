@@ -42,3 +42,8 @@
   when: ctlabs_wazuh_role == "server"
   set_fact:
     ctlabs_wazuh_dashboard_host: "{{ ctg_facts.ctlabs_wazuh.dashboard.host | default(ctlabs_wazuh.defaults.config.dashboard.host) }}"
+
+- name: ctlabs_wazuh.tasks.precheck.apt_release
+  when: ctg_os_family == "debian"
+  set_fact:
+    ctlabs_wazuh_apt_release: "{{ ctg_facts.ctlabs_wazuh.apt_release | default(ansible_distribution_release) }}"

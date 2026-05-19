@@ -19,6 +19,13 @@
         port : "{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}"
         host : "{{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}"
         delay: 10
+        timeout: 120
+
+    - name: ctlabs_wazuh.tasks.service.server.indexer.security_init
+      shell:
+        cmd: /usr/share/wazuh-indexer/bin/indexer-security-init.sh && touch /etc/wazuh-indexer/.security-initialized
+      args:
+        creates: /etc/wazuh-indexer/.security-initialized
 
     - name: ctlabs_wazuh.tasks.service.server.manager.started
       service:

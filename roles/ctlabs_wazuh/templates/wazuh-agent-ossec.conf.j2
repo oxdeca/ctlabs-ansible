@@ -9,67 +9,25 @@
       <port>{{ ctlabs_wazuh.defaults.config.agent.server_port }}</port>
       <protocol>tcp</protocol>
     </server>
-    <config-profile>{{ ctg_os | default('debian') }}</config-profile>
+    <config-profile>{{ ctg_os_distro }}</config-profile>
     <notify_time>10</notify_time>
     <time-reconnect>60</time-reconnect>
     <auto_restart>yes</auto_restart>
     <crypto_method>aes</crypto_method>
   </client>
 
-  <logcollector>
-    <localfile>
-      <log_format>syslog</log_format>
-      <location>/var/log/syslog</location>
-    </localfile>
-    <localfile>
-      <log_format>syslog</log_format>
-      <location>/var/log/messages</location>
-    </localfile>
-    <localfile>
-      <log_format>audit</log_format>
-      <location>/var/log/audit/audit.log</location>
-    </localfile>
-  </logcollector>
-
-  <rootcheck>
-    <disabled>no</disabled>
-    <rootcheck_files>etc/shared/rootkit_files.txt</rootcheck_files>
-    <rootcheck_trojans>etc/shared/rootkit_trojans.txt</rootcheck_trojans>
-    <system_audit>etc/shared/system_audit_rcl.txt</system_audit>
-    <system_audit>etc/shared/cis_debian_linux_rcl.txt</system_audit>
-    <system_audit>etc/shared/cis_rhel_linux_rcl.txt</system_audit>
-    <system_audit>etc/shared/cis_rhel7_linux_rcl.txt</system_audit>
-  </rootcheck>
-
-  <wodle name="syscollector">
-    <disabled>no</disabled>
-    <interval>1h</interval>
-    <scan_on_start>yes</scan_on_start>
-    <hardware>yes</hardware>
-    <operating_system>yes</operating_system>
-    <network>yes</network>
-    <packages>yes</packages>
-    <ports all="no">yes</ports>
-    <processes>yes</processes>
-  </wodle>
-
-  <wodle name="vulnerability-detector">
-    <disabled>no</disabled>
-    <interval>5m</interval>
-    <run_on_start>yes</run_on_start>
-    <feed name="ubuntu">
-      <disabled>no</disabled>
-      <update_interval>1h</update_interval>
-    </feed>
-    <feed name="debian">
-      <disabled>no</disabled>
-      <update_interval>1h</update_interval>
-    </feed>
-    <feed name="redhat">
-      <disabled>no</disabled>
-      <update_interval>1h</update_interval>
-    </feed>
-  </wodle>
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/syslog</location>
+  </localfile>
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/messages</location>
+  </localfile>
+  <localfile>
+    <log_format>audit</log_format>
+    <location>/var/log/audit/audit.log</location>
+  </localfile>
 
   <syscheck>
     <disabled>no</disabled>
@@ -81,7 +39,6 @@
     <ignore>/etc/hosts.deny</ignore>
     <ignore>/etc/mail/statistics</ignore>
     <ignore>/etc/random-seed</ignore>
-    <ignore>/etc/random-seed</ignore>
     <ignore>/etc/adjtime</ignore>
     <ignore>/etc/httpd/logs</ignore>
     <ignore>/etc/utmpx</ignore>
@@ -92,6 +49,33 @@
     <nodiff>/etc/ssl/private.key</nodiff>
     <skip_nfs>yes</skip_nfs>
   </syscheck>
+
+  <rootcheck>
+    <disabled>no</disabled>
+    <check_files>yes</check_files>
+    <check_trojans>yes</check_trojans>
+    <check_dev>yes</check_dev>
+    <check_sys>yes</check_sys>
+    <check_pids>yes</check_pids>
+    <check_ports>yes</check_ports>
+    <check_if>yes</check_if>
+  </rootcheck>
+
+  <sca>
+    <enabled>yes</enabled>
+  </sca>
+
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <hardware>yes</hardware>
+    <os>yes</os>
+    <network>yes</network>
+    <packages>yes</packages>
+    <ports all="no">yes</ports>
+    <processes>yes</processes>
+  </wodle>
 
   <localfile>
     <log_format>full_command</log_format>

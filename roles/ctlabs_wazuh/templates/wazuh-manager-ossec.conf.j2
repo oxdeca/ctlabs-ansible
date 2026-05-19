@@ -68,10 +68,10 @@
 
   <remote>
     <connection>syslog</connection>
-    <port>{{ ctlabs_wazuh.defaults.config.manager.port }}</port>
+    <port>514</port>
     <protocol>tcp</protocol>
     <allowed-ips>0.0.0.0/0</allowed-ips>
-    <local_ip>{{ ctlabs_wazuh_manager_addr | default(ctlabs_wazuh.defaults.config.manager.addr) }}</local_ip>
+    <local_ip>{{ ctlabs_wazuh_manager_addr }}</local_ip>
   </remote>
 
   <remote>
@@ -79,7 +79,7 @@
     <port>{{ ctlabs_wazuh.defaults.config.manager.port }}</port>
     <protocol>tcp</protocol>
     <allowed-ips>0.0.0.0/0</allowed-ips>
-    <local_ip>{{ ctlabs_wazuh_manager_addr | default(ctlabs_wazuh.defaults.config.manager.addr) }}</local_ip>
+    <local_ip>{{ ctlabs_wazuh_manager_addr }}</local_ip>
   </remote>
 
   <auth>
@@ -107,7 +107,7 @@
     <interval>1h</interval>
     <scan_on_start>yes</scan_on_start>
     <hardware>yes</hardware>
-    <operating_system>yes</operating_system>
+    <os>yes</os>
     <network>yes</network>
     <packages>yes</packages>
     <ports all="no">yes</ports>
@@ -155,14 +155,14 @@
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>https://{{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}:{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}</host>
+      <host>https://{{ ctlabs_wazuh_indexer_http_host | default(ansible_default_ipv4.address) }}:{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}</host>
     </hosts>
     <ssl>
       <certificate_authorities>
-        <ca>/etc/wazuh-indexer/certs/root-ca.pem</ca>
+        <ca>/etc/ca-ctlabs/ca-ctlabs.crt</ca>
       </certificate_authorities>
-      <certificate>/etc/wazuh-indexer/certs/wazuh-server.pem</certificate>
-      <key>/etc/wazuh-indexer/certs/wazuh-server-key.pem</key>
+      <certificate>/etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.crt</certificate>
+      <key>/etc/ca-ctlabs/{{ ansible_hostname }}.{{ ctlabs_wazuh.defaults.config.ca.domain }}.prv</key>
     </ssl>
   </indexer>
 </ossec_config>
