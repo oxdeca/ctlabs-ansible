@@ -36,11 +36,11 @@ milter_default_action = accept
 __/etc/ansible/facts.d/ctlabs_opendkim.fact__
 
 ```json
-  {
-    "domain"   : "example.com",
-    "selector" : "20260519",
-    "algorithm": "rsa",
-    "bits"     " 4096"
-  }
+{
+  "domain"   : "ctlabs.internal",
+  "selector" : "20260519",
+  "algorithm": "rsa",
+  "bits"     " 4096"
+}
 ```
 

@@ -413,6 +413,19 @@
             "server_addr" : "wazuh1.ctlabs.internal"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.opendkim.local_facts
+      when: ansible_hostname in ['mail1']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_opendkim.fact
+        content: |
+          {
+            "domain"   : "ctlabs.internal",
+            "selector" : "20260519",
+            "algorithm": "rsa",
+            "bits"     " 4096"
+          }
+
+
 # -----------------------------------------------------------------------------
 # ctlabs_ca
 # -----------------------------------------------------------------------------
@@ -688,10 +701,19 @@
     - roles/ctlabs_postfix
 
 # -----------------------------------------------------------------------------
+# ctlabs_opendkim
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.opendkim
+  hosts : [mail1, mail2]
+  tags  : opendkim
+  roles :
+    - roles/ctlabs_opendkim
+
+# -----------------------------------------------------------------------------
 # ctlabs_manticore
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.manticore
-  hosts : [h3, h4,mail1, mail2]
+  hosts : [h3, h4, mail1, mail2]
   tags  : manticore
   roles :
     - roles/ctlabs_manticore
@@ -700,7 +722,7 @@
 # ctlabs_mailpiler
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.mailpiler
-  hosts : [h3, h4,mail1, mail2]
+  hosts : [h3, h4, mail1, mail2]
   tags  : mailpiler
   roles :
     - roles/ctlabs_mailpiler
