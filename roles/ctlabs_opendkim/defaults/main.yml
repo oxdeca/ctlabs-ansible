@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/defaults/main.yml
+# Description : defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_opendkim:
+  settings:
+    config:
+      path: /etc/opendkim
+      file: opendkim.conf
+      mode: sv
+      socket: unix:/run/opendkim/opendkim.sock
+      key_table: /etc/opendkim/KeyTable
+      signing_table: refile:/etc/opendkim/SigningTable
+      trusted_hosts: refile:/etc/opendkim/TrustedHosts
+    keys:
+      path: /etc/opendkim/keys
+      algorithm: ed25519
+      bits: 2048
+    pkgs:
+      redhat:
+        - name: opendkim
+        - name: opendkim-tools
+      debian:
+        - name: opendkim
+        - name: opendkim-tools
+    service:
+      name: opendkim
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

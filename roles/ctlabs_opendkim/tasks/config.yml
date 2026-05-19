@@ -1,0 +1,58 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/tasks/config.yml
+# Description : configuration
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opendkim.tasks.config.dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: opendkim
+    group: opendkim
+  loop:
+    - "{{ ctlabs_opendkim['settings']['config']['path'] }}"
+    - "{{ ctlabs_opendkim['settings']['keys']['path'] }}"
+    - "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}"
+
+- name: ctlabs_opendkim.tasks.config.keys.generate
+  ansible.builtin.command: >
+    opendkim-genkey -D {{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}
+    -d {{ ctlabs_opendkim_domain }}
+    -s {{ ctlabs_opendkim_selector }}
+    -a {{ ctlabs_opendkim['settings']['keys']['algorithm'] }}
+    -b {{ ctlabs_opendkim['settings']['keys']['bits'] }}
+  args:
+    creates: "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private"
+  notify: ctlabs_opendkim.handlers.service.restart
+
+- name: ctlabs_opendkim.tasks.config.keys.owner
+  ansible.builtin.file:
+    path: "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}"
+    state: directory
+    recurse: true
+    owner: opendkim
+    group: opendkim
+
+- name: ctlabs_opendkim.tasks.config.file
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ ctlabs_opendkim['settings']['config']['path'] }}/{{ item }}"
+    owner: root
+    group: opendkim
+    mode: '0640'
+  loop:
+    - opendkim.conf
+    - KeyTable
+    - SigningTable
+    - TrustedHosts
+  notify: ctlabs_opendkim.handlers.service.restart
+
+- name: ctlabs_opendkim.tasks.config.postfix_user
+  ansible.builtin.user:
+    name: postfix
+    groups: opendkim
+    append: true
+  notify: ctlabs_opendkim.handlers.service.postfix_reload

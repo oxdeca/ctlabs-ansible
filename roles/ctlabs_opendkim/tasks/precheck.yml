@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/tasks/precheck.yml
+# Description : precheck
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opendkim.tasks.precheck.supported_os
+  ansible.builtin.assert:
+    that: ctg_os in ctlabs_opendkim.os
+    fail_msg: "OS [{{ ctg_os }}] is not supported!"
+
+- name: ctlabs_opendkim.tasks.precheck.resolve.domain
+  ansible.builtin.set_fact:
+    ctlabs_opendkim_domain: "{{ ctg_facts.ctlabs_opendkim.domain | default(ansible_domain) | default(ansible_hostname) }}"
+
+- name: ctlabs_opendkim.tasks.precheck.resolve.selector
+  ansible.builtin.set_fact:
+    ctlabs_opendkim_selector: "{{ ctg_facts.ctlabs_opendkim.selector | default('default') }}"

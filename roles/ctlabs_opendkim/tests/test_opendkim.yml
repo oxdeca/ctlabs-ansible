@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/tests/test_opendkim.yml
+# Description : test playbook for syntax check
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opendkim.tests.syntax_check
+  hosts: localhost
+  connection: local
+  vars:
+    ctg_os: redhat9
+    ctg_os_family: redhat
+    ctg_facts:
+      ctlabs_opendkim:
+        domain: example.com
+        selector: default
+  roles:
+    - ctlabs_opendkim

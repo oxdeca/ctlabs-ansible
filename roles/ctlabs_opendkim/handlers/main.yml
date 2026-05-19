@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opendkim.handlers.service.restart
+  ansible.builtin.service:
+    name: "{{ ctlabs_opendkim['settings']['service']['name'] }}"
+    state: restarted
+
+- name: ctlabs_opendkim.handlers.service.postfix_reload
+  ansible.builtin.service:
+    name: postfix
+    state: reloaded

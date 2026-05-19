@@ -1,0 +1,8 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/meta/main.yml
+# Description : role dependencies
+# ------------------------------------------------------------------------------
+
+dependencies: []

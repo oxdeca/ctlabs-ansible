@@ -1,0 +1,6 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/templates/KeyTable.j2
+# Description : KeyTable template
+# ------------------------------------------------------------------------------
+
+{{ ctlabs_opendkim_selector }}._domainkey.{{ ctlabs_opendkim_domain }} {{ ctlabs_opendkim_domain }}:{{ ctlabs_opendkim_selector }}:{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private

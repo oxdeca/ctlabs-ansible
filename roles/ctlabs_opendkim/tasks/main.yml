@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/tasks/main.yml
+# Description : main
+# ------------------------------------------------------------------------------
+
+- ansible.builtin.import_tasks: precheck.yml
+  tags: [ctlabs_opendkim, ctlabs_opendkim.precheck]
+
+- ansible.builtin.import_tasks: package.yml
+  tags: [ctlabs_opendkim, ctlabs_opendkim.package]
+
+- ansible.builtin.import_tasks: config.yml
+  tags: [ctlabs_opendkim, ctlabs_opendkim.config]
+
+- ansible.builtin.import_tasks: service.yml
+  tags: [ctlabs_opendkim, ctlabs_opendkim.service]
