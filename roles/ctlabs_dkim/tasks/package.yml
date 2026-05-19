@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.tasks.package.installed
+  dnf:
+    name      : "{{ item.name }}"
+    enablerepo: "{{ item.repo | default(omit) }}"
+    state     : present
+  loop: "{{ ctlabs_dkim.defaults.pkgs }}"
+
+- name: ctlabs_dkim.tasks.package.pip.installed
+  pip:
+    name: "{{ ctlabs_dkim.defaults.pip.pkg }}"
+    state: present

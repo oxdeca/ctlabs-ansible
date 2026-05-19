@@ -34,9 +34,3 @@
   tags:
     - ctlabs_postfix
     - ctlabs_postfix.helper
-
-- import_tasks: dkim.yml
-  when: ctlabs_postfix_dkim_enable
-  tags:
-    - ctlabs_postfix
-    - ctlabs_postfix.dkim

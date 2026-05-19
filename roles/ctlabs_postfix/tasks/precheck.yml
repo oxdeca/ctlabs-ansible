@@ -14,27 +14,3 @@
   rescue:
     - name: ctlabs_postfix.tasks.precheck.skip.unsupported
       meta: end_host
-
-- name: ctlabs_postfix.tasks.precheck.dkim.enable.var
-  set_fact:
-    ctlabs_postfix_dkim_enable: "{{ ctlabs_postfix_dkim_enable | default(ctlabs_postfix.defaults.dkim.enable) }}"
-
-- name: ctlabs_postfix.tasks.precheck.dkim.enable.fact
-  set_fact:
-    ctlabs_postfix_dkim_enable: "{{ ctg_facts.ctlabs_postfix.dkim.enable | default(ctlabs_postfix_dkim_enable) }}"
-
-- name: ctlabs_postfix.tasks.precheck.dkim.selector.var
-  set_fact:
-    ctlabs_postfix_dkim_selector: "{{ ctlabs_postfix_dkim_selector | default(ctlabs_postfix.defaults.dkim.selector) }}"
-
-- name: ctlabs_postfix.tasks.precheck.dkim.selector.fact
-  set_fact:
-    ctlabs_postfix_dkim_selector: "{{ ctg_facts.ctlabs_postfix.dkim.selector | default(ctlabs_postfix_dkim_selector) }}"
-
-- name: ctlabs_postfix.tasks.precheck.dkim.socket.var
-  set_fact:
-    ctlabs_postfix_dkim_socket: "{{ ctlabs_postfix_dkim_socket | default(ctlabs_postfix.defaults.dkim.socket) }}"
-
-- name: ctlabs_postfix.tasks.precheck.dkim.socket.fact
-  set_fact:
-    ctlabs_postfix_dkim_socket: "{{ ctg_facts.ctlabs_postfix.dkim.socket | default(ctlabs_postfix_dkim_socket) }}"

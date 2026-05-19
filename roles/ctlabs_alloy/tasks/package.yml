@@ -30,7 +30,7 @@
   block:
     - name: ctlabs_alloy.tasks.package.debian.keyring.dir
       file:
-        path: "{{ ctlabs_alloy.defaults.config.apt_keys }}"
+        path: "{{ ctlabs_alloy.defaults.config.keydir }}"
         state: directory
 
     - name: ctlabs_alloy.tasks.package.debian.repos.key
@@ -53,7 +53,7 @@
 
 #    - name: ctlabs_alloy.tasks.package.debian.repo.file
 #      apt_repository:
-#        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
+#        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
 #      loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
 
 

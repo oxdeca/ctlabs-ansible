@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.tasks.precheck
+  block:
+    - name: ctlabs_dkim.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_dkim.os
+        fail_msg : "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_dkim.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_dkim.tasks.precheck.selector.var
+  set_fact:
+    ctlabs_dkim_selector: "{{ ctlabs_dkim_selector | default(ctlabs_dkim.defaults.selector) }}"
+
+- name: ctlabs_dkim.tasks.precheck.selector.fact
+  set_fact:
+    ctlabs_dkim_selector: "{{ ctg_facts.ctlabs_dkim.selector | default(ctlabs_dkim_selector) }}"
+
+- name: ctlabs_dkim.tasks.precheck.socket.var
+  set_fact:
+    ctlabs_dkim_socket: "{{ ctlabs_dkim_socket | default(ctlabs_dkim.defaults.socket) }}"
+
+- name: ctlabs_dkim.tasks.precheck.socket.fact
+  set_fact:
+    ctlabs_dkim_socket: "{{ ctg_facts.ctlabs_dkim.socket | default(ctlabs_dkim_socket) }}"

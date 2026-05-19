@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_dkim.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_dkim.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

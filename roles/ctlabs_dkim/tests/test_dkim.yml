@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tests/test_dkim.yml
+# Description : test playbook for ctlabs_dkim (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: redhat9
+    ctg_os_family: redhat
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

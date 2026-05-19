@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.tasks.service.dropin.dir
+  ansible.builtin.file:
+    path  : /etc/systemd/system/dkimpy-milter.service.d
+    state : directory
+    mode  : '0755'
+
+- name: ctlabs_dkim.tasks.service.dropin
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/dkimpy-milter.service.d/override.conf
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/sbin/ip vrf exec default /usr/local/bin/dkimpy-milter /usr/local/etc/dkimpy-milter/dkimpy-milter.conf
+      PIDFile=
+    mode: '0644'
+
+- name: ctlabs_dkim.tasks.service.daemon.reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: ctlabs_dkim.tasks.service.running
+  ansible.builtin.systemd:
+    name    : "{{ ctlabs_dkim.defaults['service']['name'] }}"
+    enabled : true
+    state   : restarted

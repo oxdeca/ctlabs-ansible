@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/defaults/main.yml
+# Description : defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_dkim:
+  defaults:
+    pkgs:
+      - name : gcc
+      - name : sendmail-milter-devel
+        repo : crb
+      - name : python3-pip
+      - name : python3-devel
+      - name : python3-wheel
+      - name : python3-cryptography
+    pip:
+      pkg: dkimpy-milter
+    config:
+      dir : /usr/local/etc/dkimpy-milter
+      file: dkimpy-milter.conf
+      socket    : inet:8891@127.0.0.1
+    selector  : default
+    keys:
+      dir   : /etc/dkimpy-milter/keys
+      bits  : 2048
+    service:
+      name: dkimpy-milter
+  os:
+    - redhat8
+    - redhat9
+    - centos8
+    - centos9

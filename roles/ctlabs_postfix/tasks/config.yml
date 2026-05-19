@@ -25,6 +25,12 @@
   loop: "{{ ctlabs_postfix.defaults.config.maps }}"
   notify: "ctlabs_postfix.handlers.postmap.{{ item.name }}"
 
+- name: ctlabs_postfix.tasks.config.maps.db
+  command: "{{ ctlabs_postfix.defaults.config.postmap }} {{ ctlabs_postfix.defaults.config.dir }}/{{ item.name }}"
+  loop: "{{ ctlabs_postfix.defaults.config.maps }}"
+  changed_when: false
+  when: item.name not in ['recipient_bcc', 'recipient_canonical']
+
 - name: ctlabs_postfix.tasks.config.archive.dir.exists
   file:
     path  : "{{ ctlabs_postfix.defaults.config.archive.dir   }}"

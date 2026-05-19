@@ -1,0 +1,61 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/config.yml
+# Description : configuration
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.tasks.config.user
+  ansible.builtin.user:
+    name        : dkimpy-milter
+    system      : true
+    create_home : false
+    shell       : /sbin/nologin
+
+- name: ctlabs_dkim.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_dkim.defaults.config.dir }}"
+    state : directory
+    mode  : '0755'
+
+- name: ctlabs_dkim.tasks.config.file
+  template:
+    src  : dkimpy-milter.conf.j2
+    dest : "{{ ctlabs_dkim.defaults.config.dir }}/{{ ctlabs_dkim.defaults.config.file }}"
+  notify: ctlabs_dkim.handlers.service.restart
+
+- name: ctlabs_dkim.tasks.config.keys.dir
+  file:
+    path  : "{{ ctlabs_dkim.defaults['keys']['dir'] }}"
+    state : directory
+    mode  : '0755'
+    owner : dkimpy-milter
+    group : dkimpy-milter
+
+- name: ctlabs_dkim.tasks.config.keys.generate
+  openssl_privatekey:
+    path : "{{ ctlabs_dkim.defaults['keys']['dir'] }}/{{ ctlabs_dkim_selector }}.key"
+    size : "{{ ctlabs_dkim.defaults['keys']['bits'] }}"
+    mode : '0600'
+
+- name: ctlabs_dkim.tasks.config.keys.owner
+  file:
+    path  : "{{ ctlabs_dkim.defaults['keys']['dir'] }}/{{ ctlabs_dkim_selector }}.key"
+    state : file
+    owner : dkimpy-milter
+    group : dkimpy-milter
+
+- name: ctlabs_dkim.tasks.config.rundir
+  file:
+    path  : /run/dkimpy-milter
+    state : directory
+    mode  : '0755'
+    owner : dkimpy-milter
+    group : dkimpy-milter
+
+- name: ctlabs_dkim.tasks.config.tmpfiles
+  ansible.builtin.copy:
+    dest: /etc/tmpfiles.d/dkimpy-milter.conf
+    content: |
+      d /run/dkimpy-milter 0755 dkimpy-milter dkimpy-milter -
+    mode: '0644'

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/main.yml
+# Description : main tasks
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_dkim
+    - ctlabs_dkim.precheck
+    - ctlabs_dkim.package
+    - ctlabs_dkim.config
+    - ctlabs_dkim.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_dkim
+    - ctlabs_dkim.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_dkim
+    - ctlabs_dkim.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_dkim
+    - ctlabs_dkim.service
