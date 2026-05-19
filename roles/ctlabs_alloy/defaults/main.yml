@@ -25,7 +25,6 @@ ctlabs_alloy:
       redhat:
         - name: alloy
       debian:
-        - name: python3-apt
         - name: alloy
     config:
       keydir: /etc/apt/keyrings
