@@ -18,15 +18,17 @@ ctlabs_alloy:
         - name   : grafana
           desc   : grafana repo
           type   : main
+          suite  : stable
           url    : https://apt.grafana.com 
           key    : https://rpm.grafana.com/gpg.key
     pkgs:
       redhat:
         - name: alloy
       debian:
+        - name: python3-apt
         - name: alloy
     config:
-      apt_keys: /etc/apt/keyrings
+      keydir: /etc/apt/keyrings
       journald:
         dir  : /var/log/journal
         owner: root

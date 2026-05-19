@@ -33,16 +33,28 @@
         path: "{{ ctlabs_alloy.defaults.config.apt_keys }}"
         state: directory
 
-    - name: ctlabs_alloy.tasks.package.debian.repo.key
+    - name: ctlabs_alloy.tasks.package.debian.repos.key
       get_url:
         url  : "{{ item.key }}"
-        dest : "{{ ctlabs_alloy.defaults.config.apt_keys  }}/{{ item.name }}.asc"
+        dest : "{{ ctlabs_alloy.defaults.config.keydir  }}/{{ item.name }}.asc"
       loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
 
-    - name: ctlabs_alloy.tasks.package.debian.repo.file
-      apt_repository:
-        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
-      loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
+    - name: ctlabs_alloy.tasks.package.debian.repos.file
+      copy:
+        dest: /etc/apt/sources.list.d/alloy.sources
+        mode: '0644'
+        content: |
+          Types: deb
+          URIs: {{ item.url }}
+          Suites: {{ item.suite }}
+          Components: {{ item.type }}
+          Signed-By: {{ ctlabs_alloy.defaults.config.keydir }}/{{ item.name }}.asc
+      loop: "{{ ctlabs_alloy.defaults.repos[ctg_os_family] }}"      
+
+#    - name: ctlabs_alloy.tasks.package.debian.repo.file
+#      apt_repository:
+#        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
+#      loop: "{{ ctlabs_alloy.defaults.repos.debian }}"
 
 
 - name: ctlabs_alloy.tasks.package.install

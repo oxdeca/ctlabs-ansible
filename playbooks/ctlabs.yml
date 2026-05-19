@@ -403,6 +403,16 @@
             "role" : "proxy"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.wazuh.agent.local_facts
+      when: "ansible_hostname in groups['hosts'] and ansible_hostname != 'wazuh1.ctlabs.internal'"
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_wazuh.fact
+        content: |
+          {
+            "role"        : "agent",
+            "server_addr" : "wazuh1.ctlabs.internal"
+          }
+
 # -----------------------------------------------------------------------------
 # ctlabs_ca
 # -----------------------------------------------------------------------------
@@ -969,7 +979,7 @@
 # ctlabs_wazuh
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.wazuh
-  hosts : all:!rhosts
+  hosts : [hosts]
   tags  : [wazuh]
   roles :
     - roles/ctlabs_wazuh
