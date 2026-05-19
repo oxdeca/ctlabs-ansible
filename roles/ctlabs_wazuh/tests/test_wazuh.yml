@@ -1,0 +1,15 @@
+---
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/tests/test_wazuh.yml
+# Description : test playbook for ctlabs_wazuh (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wazuh.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

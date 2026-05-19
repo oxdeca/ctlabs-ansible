@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_wazuh/tasks/package.yml
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/tasks/package.yml
 # Description : install packages
 # ------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop    : "{{ ctlabs_wazuh.defaults.pkgs[ctg_os_family] }}"
+  loop    : "{{ ctlabs_wazuh.defaults.pkgs[ctg_os_family][ctlabs_wazuh_role] }}"
   register: result
   until   : result is success
 

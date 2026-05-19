@@ -1,0 +1,168 @@
+<!--
+  File        : ctlabs-ansible/roles/ctlabs_wazuh/templates/wazuh-manager-ossec.conf.j2
+  Description : /var/ossec/etc/ossec.conf template (manager)
+-->
+<ossec_config>
+  <global>
+    <jsonout_output>yes</jsonout_output>
+    <alerts_log>yes</alerts_log>
+    <logall>no</logall>
+    <logall_json>no</logall_json>
+    <email_notification>no</email_notification>
+    <smtp_server>smtp.example.local</smtp_server>
+    <email_from>wazuh@example.local</email_from>
+    <email_to>admin@example.local</email_to>
+    <email_maxperhour>12</email_maxperhour>
+    <email_log_source>alerts.log</email_log_source>
+  </global>
+
+  <alerts>
+    <log_alert_level>3</log_alert_level>
+    <email_alert_level>12</email_alert_level>
+  </alerts>
+
+  <command>
+    <name>host-deny</name>
+    <executable>host-deny.sh</executable>
+    <expect>srcip</expect>
+    <timeout_allowed>yes</timeout_allowed>
+  </command>
+
+  <command>
+    <name>firewall-drop</name>
+    <executable>firewall-drop.sh</executable>
+    <expect>srcip</expect>
+    <timeout_allowed>yes</timeout_allowed>
+  </command>
+
+  <command>
+    <name>win_route</name>
+    <executable>route-null.sh</executable>
+    <expect>srcip</expect>
+    <timeout_allowed>yes</timeout_allowed>
+  </command>
+
+  <active-response>
+    <disabled>yes</disabled>
+    <command>host-deny</command>
+    <location>local</location>
+    <level>10</level>
+    <timeout>600</timeout>
+  </active-response>
+
+  <active-response>
+    <disabled>yes</disabled>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <level>10</level>
+    <timeout>600</timeout>
+  </active-response>
+
+  <active-response>
+    <disabled>yes</disabled>
+    <command>win_route</command>
+    <location>local</location>
+    <level>10</level>
+    <timeout>600</timeout>
+  </active-response>
+
+  <remote>
+    <connection>syslog</connection>
+    <port>{{ ctlabs_wazuh.defaults.config.manager.port }}</port>
+    <protocol>tcp</protocol>
+    <allowed-ips>0.0.0.0/0</allowed-ips>
+    <local_ip>{{ ctlabs_wazuh_manager_addr | default(ctlabs_wazuh.defaults.config.manager.addr) }}</local_ip>
+  </remote>
+
+  <remote>
+    <connection>secure</connection>
+    <port>{{ ctlabs_wazuh.defaults.config.manager.port }}</port>
+    <protocol>tcp</protocol>
+    <allowed-ips>0.0.0.0/0</allowed-ips>
+    <local_ip>{{ ctlabs_wazuh_manager_addr | default(ctlabs_wazuh.defaults.config.manager.addr) }}</local_ip>
+  </remote>
+
+  <auth>
+    <disabled>no</disabled>
+    <port>{{ ctlabs_wazuh.defaults.config.manager.registration_port }}</port>
+    <use_source_ip>yes</use_source_ip>
+    <force_insert>yes</force_insert>
+    <force_time>0</force_time>
+    <purge>yes</purge>
+    <use_password>no</use_password>
+    <limit_maxagents>yes</limit_maxagents>
+  </auth>
+
+  <ruleset>
+    <decoder_dir>ruleset/decoders</decoder_dir>
+    <rule_dir>ruleset/rules</rule_dir>
+    <rule_exclude>0215-policy_rules.xml</rule_exclude>
+    <list>etc/lists/audit-keys</list>
+    <list>etc/lists/amazon/aws-eventnames</list>
+    <list>etc/lists/security-eventchannel</list>
+  </ruleset>
+
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <hardware>yes</hardware>
+    <operating_system>yes</operating_system>
+    <network>yes</network>
+    <packages>yes</packages>
+    <ports all="no">yes</ports>
+    <processes>yes</processes>
+  </wodle>
+
+  <wodle name="vulnerability-detector">
+    <disabled>no</disabled>
+    <interval>5m</interval>
+    <run_on_start>yes</run_on_start>
+    <feed name="ubuntu">
+      <disabled>no</disabled>
+      <update_interval>1h</update_interval>
+    </feed>
+    <feed name="debian">
+      <disabled>no</disabled>
+      <update_interval>1h</update_interval>
+    </feed>
+    <feed name="redhat">
+      <disabled>no</disabled>
+      <update_interval>1h</update_interval>
+    </feed>
+    <feed name="centos">
+      <disabled>no</disabled>
+      <update_interval>1h</update_interval>
+    </feed>
+  </wodle>
+
+  <localfile>
+    <log_format>command</log_format>
+    <command>df -P</command>
+    <frequency>360</frequency>
+  </localfile>
+  <localfile>
+    <log_format>full_command</log_format>
+    <command>netstat -tulpn | sed 's/\([[:print:]]\)/\1/g'</command>
+    <frequency>360</frequency>
+  </localfile>
+  <localfile>
+    <log_format>full_command</log_format>
+    <command>last -n 20</command>
+    <frequency>360</frequency>
+  </localfile>
+
+  <indexer>
+    <enabled>yes</enabled>
+    <hosts>
+      <host>https://{{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}:{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}</host>
+    </hosts>
+    <ssl>
+      <certificate_authorities>
+        <ca>/etc/wazuh-indexer/certs/root-ca.pem</ca>
+      </certificate_authorities>
+      <certificate>/etc/wazuh-indexer/certs/wazuh-server.pem</certificate>
+      <key>/etc/wazuh-indexer/certs/wazuh-server-key.pem</key>
+    </ssl>
+  </indexer>
+</ossec_config>

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_wazuh/tasks/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/tasks/main.yml
 # Description : main task file
 # ------------------------------------------------------------------------------
 

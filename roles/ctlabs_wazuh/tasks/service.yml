@@ -1,0 +1,50 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/tasks/service.yml
+# Description : service management
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wazuh.tasks.service.server
+  when: ctlabs_wazuh_role == "server"
+  block:
+    - name: ctlabs_wazuh.tasks.service.server.indexer.started
+      service:
+        name  : wazuh-indexer
+        state : started
+        enabled: true
+
+    - name: ctlabs_wazuh.tasks.service.server.indexer.ready
+      wait_for:
+        port : "{{ ctlabs_wazuh.defaults.config.indexer.ports.http }}"
+        host : "{{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}"
+        delay: 10
+
+    - name: ctlabs_wazuh.tasks.service.server.manager.started
+      service:
+        name  : wazuh-manager
+        state : started
+        enabled: true
+
+    - name: ctlabs_wazuh.tasks.service.server.dashboard.started
+      service:
+        name  : wazuh-dashboard
+        state : started
+        enabled: true
+
+- name: ctlabs_wazuh.tasks.service.agent
+  when: ctlabs_wazuh_role == "agent"
+  block:
+    - name: ctlabs_wazuh.tasks.service.agent.authd.register
+      expect:
+        command: /var/ossec/bin/agent-auth -m {{ ctlabs_wazuh_agent_server_addr }} -p {{ ctlabs_wazuh.defaults.config.agent.registration_port }}
+        responses:
+          Question: ""
+      failed_when: false
+      changed_when: false
+
+    - name: ctlabs_wazuh.tasks.service.agent.started
+      service:
+        name  : wazuh-agent
+        state : started
+        enabled: true

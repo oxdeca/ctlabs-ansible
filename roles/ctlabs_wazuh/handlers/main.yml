@@ -1,0 +1,34 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/handlers/main.yml
+# Description : main handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wazuh.handlers.indexer.restart
+  systemd:
+    name: wazuh-indexer
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: ctlabs_wazuh.handlers.manager.restart
+  systemd:
+    name: wazuh-manager
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: ctlabs_wazuh.handlers.dashboard.restart
+  systemd:
+    name: wazuh-dashboard
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: ctlabs_wazuh.handlers.agent.restart
+  systemd:
+    name: wazuh-agent
+    state: restarted
+    enabled: true
+    daemon_reload: true

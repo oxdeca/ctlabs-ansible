@@ -1,0 +1,51 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/templates/wazuh-indexer.yml.j2
+# Description : /etc/wazuh-indexer/opensearch.yml template
+# ------------------------------------------------------------------------------
+
+path.data: {{ ctlabs_wazuh.defaults.config.indexer.path.data }}
+path.logs: {{ ctlabs_wazuh.defaults.config.indexer.path.logs }}
+
+network.host: {{ ctlabs_wazuh_indexer_network_host | default(ctlabs_wazuh.defaults.config.indexer.network.host) }}
+http.port: {{ ctlabs_wazuh.defaults.config.indexer.ports.http }}
+transport.port: {{ ctlabs_wazuh.defaults.config.indexer.ports.transport }}
+
+discovery.type: single-node
+
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_file: /etc/wazuh-indexer/certs/indexer.pem
+plugins.security.ssl.http.pemkey_file: /etc/wazuh-indexer/certs/indexer-key.pem
+plugins.security.ssl.http.pemtrustedcas_file: /etc/wazuh-indexer/certs/root-ca.pem
+plugins.security.ssl.transport.enabled: true
+plugins.security.ssl.transport.pemcert_file: /etc/wazuh-indexer/certs/indexer.pem
+plugins.security.ssl.transport.pemkey_file: /etc/wazuh-indexer/certs/indexer-key.pem
+plugins.security.ssl.transport.pemtrustedcas_file: /etc/wazuh-indexer/certs/root-ca.pem
+plugins.security.ssl.transport.enforce_hostname_verification: false
+plugins.security.allow_unsafe_democertificates: true
+plugins.security.authcz.admin_dn:
+  - "CN=admin,OU=Wazuh,O=Wazuh,L=California,C=US"
+
+plugins.security.check_snapshot_restore: false
+plugins.security.enable_snapshot_restore_privilege: true
+plugins.security.restapi.roles_enabled:
+  - "all_access"
+  - "security_rest_api_access"
+
+plugins.security.system_indices.enabled: true
+plugins.security.system_indices.indices:
+  - ".plugins-ml-config"
+  - ".opendistro-alerting-config"
+  - ".opendistro-alerting-alerting"
+  - ".opendistro-anomaly-detector"
+  - ".opendistro-anomaly-checkpoints"
+  - ".opendistro-anomaly-detection-state"
+  - ".opendistro-reports-config"
+  - ".opendistro-reports-instances"
+  - ".opendistro-reports-definitions"
+  - ".opendistro-notifications-config"
+  - ".opendistro-notifications-alerting"
+  - ".opendistro-ism-config"
+  - ".opendistro-asynchronous-search-response"
+  - ".replication-metadata-store"
+
+node.max_local_storage_nodes: 1

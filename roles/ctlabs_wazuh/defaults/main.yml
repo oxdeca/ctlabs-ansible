@@ -1,0 +1,82 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  wazuh: 4.12.0
+
+ctlabs_wazuh:
+  defaults:
+    config:
+      role: agent
+      indexer:
+        cluster:
+          name: wazuh
+          node:
+            name: node-1
+        network:
+          host: 127.0.0.1
+        path:
+          data: /var/lib/wazuh-indexer
+          logs: /var/log/wazuh-indexer
+        ports:
+          http: 9200
+          transport: 9300
+      manager:
+        addr: 0.0.0.0
+        port: 1514
+        registration_port: 1515
+        api:
+          port: 55000
+      dashboard:
+        host: 0.0.0.0
+        port: 443
+      agent:
+        server_addr: 127.0.0.1
+        server_port: 1514
+        registration_port: 1515
+    repos:
+      redhat:
+        - name: wazuh
+          url: https://packages.wazuh.com/4.x/yum/
+          key: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+      debian:
+        - name: wazuh
+          url: https://packages.wazuh.com/4.x/apt/
+          key: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+          type: main
+    pkgs:
+      redhat:
+        server:
+          - name: wazuh-indexer
+          - name: wazuh-manager
+          - name: wazuh-dashboard
+        agent:
+          - name: wazuh-agent
+      debian:
+        server:
+          - name: wazuh-indexer
+          - name: wazuh-manager
+          - name: wazuh-dashboard
+        agent:
+          - name: wazuh-agent
+    service:
+      user: wazuh
+      group: wazuh
+      groups: ossec
+    dirs:
+      - path: /etc/wazuh-indexer
+        mode: '0750'
+      - path: /var/lib/wazuh-indexer
+        mode: '0750'
+      - path: /var/log/wazuh-indexer
+        mode: '0750'
+      - path: /etc/wazuh-dashboard
+        mode: '0750'
+  os:
+    - redhat9
+    - centos9
+    - debian12

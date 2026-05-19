@@ -1,6 +1,52 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs_wazuh/tasks/config.yml
+# File        : ctlabs-ansible/roles/ctlabs_wazuh/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_wazuh.tasks.config.dirs
+  file:
+    path : "{{ item.path }}"
+    state: directory
+    mode : "{{ item.mode }}"
+  loop: "{{ ctlabs_wazuh.defaults.dirs }}"
+
+- name: ctlabs_wazuh.tasks.config.server
+  when: ctlabs_wazuh_role == "server"
+  block:
+    - name: ctlabs_wazuh.tasks.config.server.indexer
+      template:
+        src  : wazuh-indexer.yml.j2
+        dest : /etc/wazuh-indexer/opensearch.yml
+        mode : '0640'
+      notify: ctlabs_wazuh.handlers.indexer.restart
+
+    - name: ctlabs_wazuh.tasks.config.server.manager
+      template:
+        src  : wazuh-manager-ossec.conf.j2
+        dest : /var/ossec/etc/ossec.conf
+        mode : '0640'
+      notify: ctlabs_wazuh.handlers.manager.restart
+
+    - name: ctlabs_wazuh.tasks.config.server.dashboard
+      template:
+        src  : wazuh-dashboard.yml.j2
+        dest : /etc/wazuh-dashboard/opensearch_dashboards.yml
+        mode : '0640'
+      notify: ctlabs_wazuh.handlers.dashboard.restart
+
+- name: ctlabs_wazuh.tasks.config.agent
+  when: ctlabs_wazuh_role == "agent"
+  block:
+    - name: ctlabs_wazuh.tasks.config.agent.authd.clear
+      file:
+        path : /var/ossec/etc/client.keys
+        state: absent
+
+    - name: ctlabs_wazuh.tasks.config.agent.ossec
+      template:
+        src  : wazuh-agent-ossec.conf.j2
+        dest : /var/ossec/etc/ossec.conf
+        mode : '0640'
+      notify: ctlabs_wazuh.handlers.agent.restart
