@@ -16,12 +16,17 @@ ctlabs_opendkim:
         - name: opendkim-tools
     config:
       dir : /etc/opendkim
-      file: opendkim.conf
+      template: opendkim.conf.j2
+      file    : /etc/opendkim.conf
       mode: sv
       socket: unix:/run/opendkim/opendkim.sock
-      key_table: /etc/opendkim/KeyTable
+      key_table    : /etc/opendkim/KeyTable
       signing_table: refile:/etc/opendkim/SigningTable
       trusted_hosts: refile:/etc/opendkim/TrustedHosts
+      files:
+        - KeyTable
+        - SigningTable
+        - TrustedHosts
     key:
       dir   : /etc/opendkim/keys
       type  : ed25519

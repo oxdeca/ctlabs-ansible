@@ -8,7 +8,7 @@ Mode {{ ctlabs_opendkim.defaults.config.mode }}
 Syslog yes
 SyslogSuccess yes
 LogWhy yes
-UserID opendkim:opendkim
+UserID {{ ctlabs_opendkim.defaults.service.user }}:{{ ctlabs_opendkim.defaults.service.group }}
 Socket {{ ctlabs_opendkim.defaults.config.socket }}
 Umask 002
 Canonicalization relaxed/simple
