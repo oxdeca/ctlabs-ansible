@@ -26,11 +26,11 @@ if [ -n "${RCPT}" ]; then
   if [ -f "${FILE}" ]; then
     ${CAT} -  >> ${FILE}
   else
-    ${INSTALL} -D -m 0640 -o mail -g promtail <( ${CAT} - ) "${FILE}"
+    ${INSTALL} -D -m 0640 -o {{ ctlabs_postfix.defaults.helper.user }} -g {{ ctlabs_postfix.defaults.helper.group }} <( ${CAT} - ) "${FILE}"
 
-    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}
-    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}/${MONTH}
-    ${CHOWN} mail.promtail ${BASEDIR}/${YEAR}/${MONTH}/${DAY}
+    ${CHOWN} {{ ctlabs_postfix.defaults.helper.user }}.{{ ctlabs_postfix.defaults.helper.group }} ${BASEDIR}/${YEAR}
+    ${CHOWN} {{ ctlabs_postfix.defaults.helper.user }}.{{ ctlabs_postfix.defaults.helper.group }} ${BASEDIR}/${YEAR}/${MONTH}
+    ${CHOWN} {{ ctlabs_postfix.defaults.helper.user }}.{{ ctlabs_postfix.defaults.helper.group }} ${BASEDIR}/${YEAR}/${MONTH}/${DAY}
 
     ${CHMOD} 0750 ${BASEDIR}/${YEAR}
     ${CHMOD} 0750 ${BASEDIR}/${YEAR}/${MONTH}

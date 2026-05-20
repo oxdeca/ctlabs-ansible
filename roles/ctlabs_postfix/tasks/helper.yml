@@ -7,19 +7,19 @@
 
 
 - name: ctlabs_postfix.tasks.helper.logger.install
-  copy:
+  template:
     src  : logger.rb
     dest : /root/logger.rb
     mode : 0750
 
 - name: ctlabs_postfix.tasks.helper.mailer.install
-  copy:
+  template:
     src  : mailer.rb
     dest : /root/mailer.rb
     mode : 0750
 
 - name: ctlabs_postfix.tasks.helper.archive.install
-  copy:
+  template:
     src  : email_archive.sh
     dest : /usr/bin/email_archive.sh
     mode : 0755

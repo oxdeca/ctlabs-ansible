@@ -1,0 +1,9 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_postfix/meta/main.yml
+# Description : role dependencies
+# ------------------------------------------------------------------------------
+
+dependencies:
+  - ctlabs_alloy

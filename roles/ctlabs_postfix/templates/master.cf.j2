@@ -62,7 +62,7 @@ anvil       unix  -       -       n       -       1       anvil
 scache      unix  -       -       n       -       1       scache
 
 archivemail unix  -       n       n       -       -       pipe
-  flags=BDRhu user=mail:promtail argv=/usr/bin/email_archive.sh ${recipient}
+  flags=BDRhu user={{ ctlabs_postfix.defaults.helper.user }}:{{ ctlabs_postfix.defaults.helper.group }} argv=/usr/bin/email_archive.sh ${recipient}
 #  flags=BDRhu user=mail argv=/usr/sbin/cronolog /var/email_archive/{{ ansible_nodename }}/%Y/%m/%d/${recipient}
 
 {% if ctlabs_postfix_transport_google %}

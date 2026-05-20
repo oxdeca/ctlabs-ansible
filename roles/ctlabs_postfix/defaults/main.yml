@@ -43,6 +43,9 @@ ctlabs_postfix:
         group   : ctlabs
         template: muttrc.j2
         file    : /home/ctlabs/.muttrc
+    helper:
+      user : mail
+      group: alloy
     service:
       name      : postfix.service
       templates : postfix.service.j2
