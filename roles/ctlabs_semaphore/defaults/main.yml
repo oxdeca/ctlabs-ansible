@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  semaphore: 2.16.17
+  semaphore: 2.18.4
 
 ctlabs_semaphore:
   defaults:
