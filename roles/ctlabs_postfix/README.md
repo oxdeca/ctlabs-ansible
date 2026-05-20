@@ -13,10 +13,6 @@
 
 - OS: redhat7, redhat8, redhat9, centos7, centos8, centos9
 
-## DKIM
-
-DKIM signing is handled by the separate `ctlabs_dkim` role (declared as a dependency in `meta/main.yml`). See `roles/ctlabs_dkim/README.md`.
-
 ## Tests
 
 ```sh
