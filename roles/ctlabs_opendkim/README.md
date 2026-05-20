@@ -20,8 +20,8 @@ This role installs and configures OpenDKIM for email signing and verification.
 |---------------------------------------|------------------|----------------------|
 | `ctg_facts.ctlabs_opendkim.domain`    | `ansible_domain` | Domain name for DKIM |
 | `ctg_facts.ctlabs_opendkim.selector`  | `default`        | DKIM selector        |
-| `ctg_facts.ctlabs_opendkim.algorithm` | `ed25519`        | Key algorithm        |
-| `ctg_facts.ctlabs_opendkim.bits`      | `2048`           | Key length (for RSA) |
+| `ctg_facts.ctlabs_opendkim.type`      | `ed25519`        | Key algorithm        |
+| `ctg_facts.ctlabs_opendkim.length`    | `4096`           | Key length (for RSA) |
 
 ## Postfix Integration
 

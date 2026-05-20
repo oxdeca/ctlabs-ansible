@@ -5,10 +5,15 @@
 # Description : precheck
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_opendkim.tasks.precheck.supported_os
-  ansible.builtin.assert:
-    that: ctg_os in ctlabs_opendkim.os
-    fail_msg: "OS [{{ ctg_os }}] is not supported!"
+- name: ctlabs_opendkim.tasks.precheck
+  block:
+    - name: ctlabs_opendkim.tasks.precheck.supported_os
+      ansible.builtin.assert:
+        that: ctg_os in ctlabs_opendkim.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_opendkim.tasks.precheck.skip.unsupported
+      meta: end_host
 
 - name: ctlabs_opendkim.tasks.precheck.resolve.domain
   ansible.builtin.set_fact:
@@ -17,3 +22,11 @@
 - name: ctlabs_opendkim.tasks.precheck.resolve.selector
   ansible.builtin.set_fact:
     ctlabs_opendkim_selector: "{{ ctg_facts.ctlabs_opendkim.selector | default('default') }}"
+
+- name: ctlabs_opendkim.tasks.precheck.resolve.key.type
+  ansible.builtin.set_fact:
+    ctlabs_opendkim_key_type: "{{ ctg_facts.ctlabs_opendkim.key.type | default(ctlabs_opendkim.defaults.key.type) }}"
+
+- name: ctlabs_opendkim.tasks.precheck.resolve.key.length
+  ansible.builtin.set_fact:
+    ctlabs_opendkim_key_length: "{{ ctg_facts.ctlabs_opendkim.key.length | default(ctlabs_opendkim.defaults.key.length) }}"

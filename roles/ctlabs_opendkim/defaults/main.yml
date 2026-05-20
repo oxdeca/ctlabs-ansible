@@ -6,19 +6,7 @@
 # ------------------------------------------------------------------------------
 
 ctlabs_opendkim:
-  settings:
-    config:
-      path: /etc/opendkim
-      file: opendkim.conf
-      mode: sv
-      socket: unix:/run/opendkim/opendkim.sock
-      key_table: /etc/opendkim/KeyTable
-      signing_table: refile:/etc/opendkim/SigningTable
-      trusted_hosts: refile:/etc/opendkim/TrustedHosts
-    keys:
-      path: /etc/opendkim/keys
-      algorithm: ed25519
-      bits: 2048
+  defaults:
     pkgs:
       redhat:
         - name: opendkim
@@ -26,8 +14,22 @@ ctlabs_opendkim:
       debian:
         - name: opendkim
         - name: opendkim-tools
+    config:
+      dir : /etc/opendkim
+      file: opendkim.conf
+      mode: sv
+      socket: unix:/run/opendkim/opendkim.sock
+      key_table: /etc/opendkim/KeyTable
+      signing_table: refile:/etc/opendkim/SigningTable
+      trusted_hosts: refile:/etc/opendkim/TrustedHosts
+    key:
+      dir   : /etc/opendkim/keys
+      type  : ed25519
+      length: 2048
     service:
-      name: opendkim
+      name : opendkim
+      user : opendkim
+      group: opendkim
   os:
     - redhat9
     - centos9

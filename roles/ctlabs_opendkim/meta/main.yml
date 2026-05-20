@@ -5,4 +5,5 @@
 # Description : role dependencies
 # ------------------------------------------------------------------------------
 
-dependencies: []
+dependencies:
+  - ctlabs_postfix

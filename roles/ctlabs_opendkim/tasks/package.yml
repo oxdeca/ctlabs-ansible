@@ -8,12 +8,12 @@
 - name: ctlabs_opendkim.tasks.package.install.redhat
   when: ctg_os_family == 'redhat'
   ansible.builtin.dnf:
-    name: "{{ ctlabs_opendkim['settings']['pkgs']['redhat'] | map(attribute='name') | list }}"
+    name: "{{ ctlabs_opendkim.defaults.pkgs.redhat | map(attribute='name') | list }}"
     state: present
     enablerepo: epel,crb
 
 - name: ctlabs_opendkim.tasks.package.install.debian
   when: ctg_os_family == 'debian'
   ansible.builtin.apt:
-    name: "{{ ctlabs_opendkim['settings']['pkgs']['debian'] | map(attribute='name') | list }}"
+    name: "{{ ctlabs_opendkim.defaults.pkgs.debian | map(attribute='name') | list }}"
     state: present

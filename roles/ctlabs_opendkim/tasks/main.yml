@@ -5,14 +5,25 @@
 # Description : main
 # ------------------------------------------------------------------------------
 
-- ansible.builtin.import_tasks: precheck.yml
-  tags: [ctlabs_opendkim, ctlabs_opendkim.precheck]
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_opendkim
+    - ctlabs_opendkim.precheck
+    - ctlabs_opendkim.package
+    - ctlabs_opendkim.config
+    - ctlabs_opendkim.service
 
-- ansible.builtin.import_tasks: package.yml
-  tags: [ctlabs_opendkim, ctlabs_opendkim.package]
+- import_tasks: package.yml
+  tags:
+    - ctlabs_opendkim
+    - ctlabs_opendkim.package
 
-- ansible.builtin.import_tasks: config.yml
-  tags: [ctlabs_opendkim, ctlabs_opendkim.config]
+- import_tasks: config.yml
+  tags:
+    - ctlabs_opendkim
+    - ctlabs_opendkim.config
 
-- ansible.builtin.import_tasks: service.yml
-  tags: [ctlabs_opendkim, ctlabs_opendkim.service]
+- import_tasks: service.yml
+  tags:
+    - ctlabs_opendkim
+    - ctlabs_opendkim.service

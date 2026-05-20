@@ -7,6 +7,6 @@
 
 - name: ctlabs_opendkim.tasks.service.start
   ansible.builtin.service:
-    name: "{{ ctlabs_opendkim['settings']['service']['name'] }}"
+    name: "{{ ctlabs_opendkim.defaults.service.name }}"
     state: started
     enabled: true

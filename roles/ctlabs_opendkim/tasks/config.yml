@@ -10,36 +10,36 @@
     path: "{{ item }}"
     state: directory
     mode: '0755'
-    owner: opendkim
-    group: opendkim
+    owner: "{{ ctlabs_opendkim.defaults.service.user }}"
+    group: "{{ ctlabs_opendkim.defaults.service.group }}"
   loop:
-    - "{{ ctlabs_opendkim['settings']['config']['path'] }}"
-    - "{{ ctlabs_opendkim['settings']['keys']['path'] }}"
-    - "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}"
+    - "{{ ctlabs_opendkim.defaults.config.dir }}"
+    - "{{ ctlabs_opendkim.defaults.key.dir }}"
+    - "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}"
 
-- name: ctlabs_opendkim.tasks.config.keys.generate
+- name: ctlabs_opendkim.tasks.config.key.generate
   ansible.builtin.command: >
-    opendkim-genkey -D {{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}
+    opendkim-genkey -D {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}
     -d {{ ctlabs_opendkim_domain }}
     -s {{ ctlabs_opendkim_selector }}
-    -a {{ ctlabs_opendkim['settings']['keys']['algorithm'] }}
-    -b {{ ctlabs_opendkim['settings']['keys']['bits'] }}
+    -a {{ ctlabs_opendkim.defaults.key.type }}
+    -b {{ ctlabs_opendkim.defaults.key.length }}
   args:
-    creates: "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private"
+    creates: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private"
   notify: ctlabs_opendkim.handlers.service.restart
 
-- name: ctlabs_opendkim.tasks.config.keys.owner
+- name: ctlabs_opendkim.tasks.config.key.owner
   ansible.builtin.file:
-    path: "{{ ctlabs_opendkim['settings']['keys']['path'] }}/{{ ctlabs_opendkim_domain }}"
+    path: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}"
     state: directory
     recurse: true
-    owner: opendkim
-    group: opendkim
+    owner: "{{ ctlabs_opendkim.defaults.service.user }}"
+    group: "{{ ctlabs_opendkim.defaults.service.group }}"
 
 - name: ctlabs_opendkim.tasks.config.file
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "{{ ctlabs_opendkim['settings']['config']['path'] }}/{{ item }}"
+    dest: "{{ ctlabs_opendkim.defaults.config.dir }}/{{ item }}"
     owner: root
     group: opendkim
     mode: '0640'
