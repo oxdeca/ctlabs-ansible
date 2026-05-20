@@ -51,6 +51,10 @@
           Signed-By: {{ ctlabs_alloy.defaults.config.keydir }}/{{ item.name }}.asc
       loop: "{{ ctlabs_alloy.defaults.repos[ctg_os_family] }}"      
 
+    - name: ctlabs_alloy.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+
 #    - name: ctlabs_alloy.tasks.package.debian.repo.file
 #      apt_repository:
 #        repo: "deb [signed-by={{ ctlabs_alloy.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} stable {{ item.type }}"
