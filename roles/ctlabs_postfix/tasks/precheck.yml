@@ -18,3 +18,7 @@
 - name: ctlabs_postfix.tasks.precheck.relayhost
   set_fact:
     ctlabs_postfix_relayhost: "{{ ctg_facts.ctlabs_postfix.relayhost | default('') }}"
+
+- name: ctlabs_postfix.tasks.precheck.transport.google
+  set_fact:
+    ctlabs_postfix_transport_google: "{{ ctg_facts.ctlabs_postfix.transport.google | default(false) }}"

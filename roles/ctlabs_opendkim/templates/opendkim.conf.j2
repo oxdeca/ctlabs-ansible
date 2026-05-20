@@ -4,20 +4,23 @@
 # ------------------------------------------------------------------------------
 
 PidFile /run/opendkim/opendkim.pid
-Mode {{ ctlabs_opendkim.defaults.config.mode }}
-Syslog yes
-SyslogSuccess yes
-LogWhy yes
-UserID {{ ctlabs_opendkim.defaults.service.user }}:{{ ctlabs_opendkim.defaults.service.group }}
-Socket {{ ctlabs_opendkim.defaults.config.socket }}
-Umask 002
-Canonicalization relaxed/simple
+Syslog             yes
+SyslogSuccess      yes
+LogWhy             yes
+
+Mode               {{ ctlabs_opendkim.defaults.config.mode }}
+Canonicalization   relaxed/simple
+
+Socket             {{ ctlabs_opendkim.defaults.config.socket }}
+UserID             {{ ctlabs_opendkim.defaults.service.user }}:{{ ctlabs_opendkim.defaults.service.group }}
+Umask              002
+
+ExternalIgnoreList {{ ctlabs_opendkim.defaults.config.trusted_hosts }}
+InternalHosts      {{ ctlabs_opendkim.defaults.config.trusted_hosts }}
+
+KeyTable           {{ ctlabs_opendkim.defaults.config.key_table }}
+SigningTable       {{ ctlabs_opendkim.defaults.config.signing_table }}
 
 # Selector and KeyFile commented out as we use KeyTable
-#Selector {{ ctlabs_opendkim_selector }}
-#KeyFile {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private
-
-KeyTable {{ ctlabs_opendkim.defaults.config.key_table }}
-SigningTable {{ ctlabs_opendkim.defaults.config.signing_table }}
-ExternalIgnoreList {{ ctlabs_opendkim.defaults.config.trusted_hosts }}
-InternalHosts {{ ctlabs_opendkim.defaults.config.trusted_hosts }}
+#Selector           {{ ctlabs_opendkim_selector }}
+#KeyFile            {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private

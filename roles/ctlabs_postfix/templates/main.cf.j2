@@ -31,3 +31,18 @@ smtp_sasl_security_options = noanonymous
 smtp_tls_security_level    = encrypt
 smtp_tls_wrappermode       = yes
 smtp_tls_loglevel          = 1
+
+biff                       = no
+
+{% if ctlabs_postfix_transport_google %}
+google_initial_destination_concurrency = 1
+google_destination_concurrency_limit   = 5
+google_destination_recipient_limit     = 20
+google_destination_rate_delay          = 1s
+
+#smtp-gmail_destination_rate_delay          = 12s
+#smtp-gmail_destination_concurrency_limit   = 1
+#smtp-gmail_destination_recipient_limit     = 2
+#smtp-gmail_initial_destination_concurrency = 1
+{% endif %}
+

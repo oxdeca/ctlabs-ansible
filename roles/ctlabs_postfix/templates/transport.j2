@@ -4,3 +4,7 @@
 # -----------------------------------------------------------------------------
 
 bcchost.ctlabs.internal      archivemail:
+{% if ctlabs_postfix_transport_google %}
+gmail.com                    google:
+googlemail.com               google:
+{% endif %}
