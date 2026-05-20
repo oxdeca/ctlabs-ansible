@@ -15,7 +15,7 @@ Canonicalization relaxed/simple
 
 # Selector and KeyFile commented out as we use KeyTable
 #Selector {{ ctlabs_opendkim_selector }}
-#KeyFile {{ ctlabs_opendkim.defaults.key.path }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private
+#KeyFile {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private
 
 KeyTable {{ ctlabs_opendkim.defaults.config.key_table }}
 SigningTable {{ ctlabs_opendkim.defaults.config.signing_table }}
