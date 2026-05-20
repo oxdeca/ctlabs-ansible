@@ -2,25 +2,22 @@
 # File : /etc/postfix/main.cf
 # -----------------------------------------------------------------------------
 
-myhostname               = {{ ansible_nodename }}
-mydomain                 = {{ ansible_nodename.split('.')[1:] | join('.') }}
-myorigin                 = $mydomain
+myhostname                 = {{ ansible_nodename }}
+mydomain                   = {{ ansible_nodename.split('.')[1:] | join('.') }}
+myorigin                   = $mydomain
 
-inet_interfaces          = localhost
-inet_protocols           = ipv4
+inet_interfaces            = {{ ctg_ipv4 }}, localhost
+inet_protocols             = ipv4
 
-relayhost                = {{ ctlabs_postfix_relayhost }}
-mydestination            = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
+relayhost                  = {{ ctlabs_postfix_relayhost }}
+mydestination              = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
 
-mailbox_size_limit       = 0
-home_mailbox             = mail/
+mailbox_size_limit         = 0
+home_mailbox               = mail/
 
-recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
-recipient_bcc_maps       = regexp:/etc/postfix/recipient_bcc
-transport_maps           = hash:/etc/postfix/transport
-smtpd_milters            = unix:/run/opendkim/opendkim.sock
-non_smtpd_milters        = $smtpd_milters
-milter_default_action    = accept
+recipient_canonical_maps   = regexp:/etc/postfix/recipient_canonical
+recipient_bcc_maps         = regexp:/etc/postfix/recipient_bcc
+transport_maps             = hash:/etc/postfix/transport
 
 # Enable SASL authentication
 smtp_sasl_auth_enable      = yes
@@ -31,6 +28,13 @@ smtp_sasl_security_options = noanonymous
 smtp_tls_security_level    = encrypt
 smtp_tls_wrappermode       = yes
 smtp_tls_loglevel          = 1
+
+smtpd_banner               = $myhostname ESMTP
+smtpd_helo_restrictions    = permit_mynetworks
+smtpd_relay_restrictions   = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_milters              = unix:/run/opendkim/opendkim.sock
+non_smtpd_milters          = $smtpd_milters
+milter_default_action      = accept
 
 biff                       = no
 
