@@ -9,6 +9,6 @@
   package:
     name  : "{{ item.name }}"
     state : present
-  loop    : "{{ ctlabs_postfix.defaults.pkgs }}"
+  loop    : "{{ ctlabs_postfix.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success

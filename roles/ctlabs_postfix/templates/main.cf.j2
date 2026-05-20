@@ -9,7 +9,7 @@ myorigin                 = $mydomain
 inet_interfaces          = localhost
 inet_protocols           = ipv4
 
-relayhost                =
+relayhost                = {{ ctlabs_postfix_relayhost }}
 mydestination            = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
 
 mailbox_size_limit       = 0
@@ -21,3 +21,13 @@ transport_maps           = hash:/etc/postfix/transport
 smtpd_milters            = unix:/run/opendkim/opendkim.sock
 non_smtpd_milters        = $smtpd_milters
 milter_default_action    = accept
+
+# Enable SASL authentication
+smtp_sasl_auth_enable      = yes
+smtp_sasl_password_maps    = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+
+# TLS Configurations for Implicit TLS (Port 465)
+smtp_tls_security_level    = encrypt
+smtp_tls_wrappermode       = yes
+smtp_tls_loglevel          = 1

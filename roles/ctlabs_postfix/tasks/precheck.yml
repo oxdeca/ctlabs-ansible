@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_postfix.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_postfix.tasks.precheck.relayhost
+  set_fact:
+    ctlabs_postfix_relayhost: "{{ ctg_facts.ctlabs_postfix.relayhost | default('') }}"
