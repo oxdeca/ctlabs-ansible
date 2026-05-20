@@ -422,7 +422,7 @@
             "domain"   : "ctlabs.internal",
             "selector" : "20260519",
             "algorithm": "rsa",
-            "bits"     " 4096"
+            "bits"     : "4096"
           }
 
 
