@@ -5,6 +5,12 @@
 # Description : default task
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_postfix.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_postfix.defaults.service.user   }}"
+    group : "{{ ctlabs_postfix.defaults.service.group  }}"
+    groups: "{{ ctlabs_postfix.defaults.service.groups }}"
+
 - name: ctlabs_postfix.tasks.config.groups
   group:
     name   : "{{ item }}"

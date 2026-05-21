@@ -56,8 +56,11 @@ ctlabs_postfix:
       user : mail
       group: alloy
     service:
-      name      : postfix.service
-      templates : postfix.service.j2
+      name     : postfix.service
+      templates: postfix.service.j2
+      user     : postfix
+      group    : postfix
+      groups   : [certs]
   os:
     - redhat7
     - redhat8
