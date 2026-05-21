@@ -28,7 +28,7 @@
     
     - name: ctlabs_containerd.tasks.package.deb.repo.file
       apt_repository:
-        repo : "deb [signed-by={{ ctlabs_containerd.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}" 
+        repo : "deb [signed-by={{ ctlabs_containerd.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ctg_os_release }} {{ item.type }}" 
       loop: "{{ ctlabs_containerd.defaults.repos.debian }}"
 
 - name: ctlabs_containerd.tasks.package.install

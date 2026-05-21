@@ -40,7 +40,7 @@
 
     - name: ctlabs_atlantis.tasks.package.debian.repo.file
       apt_repository:
-        repo : "deb [signed-by={{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ansible_distribution_release }} {{ item.type }}"
+        repo : "deb [signed-by={{ ctlabs_atlantis.defaults.config.apt_keys }}/{{ item.name }}.asc] {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
       loop: "{{ ctlabs_atlantis.defaults.repos.debian }}"
 
 #

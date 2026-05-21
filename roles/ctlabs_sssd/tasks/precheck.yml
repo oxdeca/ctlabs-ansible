@@ -21,4 +21,4 @@
 
 - name: ctlabs_sssd.tasks.precheck.backend
   set_fact:
-    ctlabs_sssd_backend: "{{ ansible_local.ctlabs_sssd.backend | default(CTLABS_SSSD_BACKEND) }}"
+    ctlabs_sssd_backend: "{{ ctg_facts.ctlabs_sssd.backend | default(CTLABS_SSSD_BACKEND) }}"

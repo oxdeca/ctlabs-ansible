@@ -14,7 +14,7 @@
     
     - name: ctlabs_foreman.tasks.precheck.role.check
       assert:
-        that: ansible_local.ctlabs_foreman.role in [ 'server', 'proxy' ]
+        that: ctg_facts.ctlabs_foreman.role in [ 'server', 'proxy' ]
         fail_msg: "No role specified. ['server', 'proxy']"
   rescue:
     - name: ctlabs_foreman.tasks.precheck.skip.unsupported

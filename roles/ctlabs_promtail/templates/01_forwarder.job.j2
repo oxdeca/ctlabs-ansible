@@ -3,7 +3,7 @@
 {# ------------------------------------------------------------------------- #}
 
 
-{%- if ansible_local.ctlabs_promtail.config.forwarder is defined %}
+{%- if ctg_facts.ctlabs_promtail.config.forwarder is defined %}
 # -----------------------------------------------------------------------------
 # Promtail Forwarder (Syslog)
 #  -> To set the right labels we need multiple forwarders
@@ -20,7 +20,7 @@
 {% endif -%}
 
 
-{%- if ansible_local.ctlabs_promtail.config.win_forwarder is defined %}
+{%- if ctg_facts.ctlabs_promtail.config.win_forwarder is defined %}
 # -----------------------------------------------------------------------------
 # Promtail Forwarder (Windows Event Logs)
 #  -> receives event logs from windows hosts and forwards them to loki

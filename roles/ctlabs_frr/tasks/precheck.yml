@@ -21,7 +21,7 @@
 
 - name: ctlabs_frr.tasks.precheck.daemons.enabled.local_fact
   set_fact:
-    ctlabs_frr_daemons_enabled: "{{ ansible_local.ctlabs_frr.daemons.enabled | default(ctlabs_frr_daemons_enabled) }}"
+    ctlabs_frr_daemons_enabled: "{{ ctg_facts.ctlabs_frr.daemons.enabled | default(ctlabs_frr_daemons_enabled) }}"
 
 - name: ctlabs_frr.tasks.precheck.daemons.profile.var
   set_fact:
@@ -29,4 +29,4 @@
 
 - name: ctlabs_frr.tasks.precheck.daemons.profile.local_fact
   set_fact:
-    ctlabs_frr_daemons_profile: "{{ ansible_local.ctlabs_frr.daemons.profile | default(ctlabs_frr_daemons_profile) }}"
+    ctlabs_frr_daemons_profile: "{{ ctg_facts.ctlabs_frr.daemons.profile | default(ctlabs_frr_daemons_profile) }}"

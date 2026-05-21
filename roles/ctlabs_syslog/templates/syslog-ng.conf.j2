@@ -28,7 +28,7 @@ source s_sys {
 };
 
 
-{% if ansible_local.syslog is defined and ansible_local.syslog.server %}
+{% if ctg_facts.syslog is defined and ctg_facts.syslog.server %}
 # -----------------------------------------------------------------------------
 # Server Configuration
 # -----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ log {source(pluto); destination(remote_logs); };
 # -----------------------------------------------------------------------------
 {% endif %}
 
-{% if ansible_local.syslog is defined and ansible_local.syslog.client %}
+{% if ctg_facts.syslog is defined and ctg_facts.syslog.client %}
 # -----------------------------------------------------------------------------
 #  Client Configuration
 # -----------------------------------------------------------------------------
@@ -77,7 +77,7 @@ destination promtail {
 };
 
 
-{% if ansible_local.syslog is defined and ansible_local.syslog.server %}
+{% if ctg_facts.syslog is defined and ctg_facts.syslog.server %}
 log { source(pluto);  destination(promtail); };
 {% endif %}
 #log { source(s_sys); destination(promtail); };

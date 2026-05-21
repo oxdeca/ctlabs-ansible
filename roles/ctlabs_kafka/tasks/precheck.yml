@@ -24,4 +24,4 @@
 
 - name: ctlabs_kafka.tasks.precheck.kafka.server_address.local_fact
   set_fact:
-    ctlabs_kafka_server_address: "{{ ansible_local.ctlabs_kafka.kafka.server_address | default(ctlabs_kafka_server_address) }}"
+    ctlabs_kafka_server_address: "{{ ctg_facts.ctlabs_kafka.kafka.server_address | default(ctlabs_kafka_server_address) }}"

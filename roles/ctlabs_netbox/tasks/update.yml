@@ -21,7 +21,7 @@
     netbox_token : "{{ ctlabs_netbox.defaults.config.update.token }}"
     data:
       name                 : "{{ intentory_hostname }}"
-      site                 : "{{ ansible_local.site | default('GCP') }}"
+      site                 : "{{ ctg_facts.site | default('GCP') }}"
       platform             : "{{ ctg_os }}"
       comments             : "{{ ansible_virtualization_type }}"
       memory               : "{{ ansible_memtotal_mb }}"

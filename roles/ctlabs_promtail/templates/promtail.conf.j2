@@ -29,9 +29,9 @@ scrape_configs:
     labels:
       job           : journald
       host          : {{ ansible_hostname }}
-      site_group    : {{ ansible_local.ctlabs.site_group    | default('') }}
-      site          : {{ ansible_local.ctlabs.site          | default('') }}
-      cluster_group : {{ ansible_local.ctlabs.cluster_group | default('') }}
+      site_group    : {{ ctg_facts.ctlabs.site_group    | default('') }}
+      site          : {{ ctg_facts.ctlabs.site          | default('') }}
+      cluster_group : {{ ctg_facts.ctlabs.cluster_group | default('') }}
   relabel_configs:
     - source_labels: ['__journal__systemd_unit']
       target_label: unit

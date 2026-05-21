@@ -9,13 +9,13 @@ log syslog informational
 no ipv6 forwarding
 
 {# BGP -#}
-{% if ansible_local.ctlabs_frr.router.bgp is defined %}
-router bgp {{ ansible_local.ctlabs_frr.router.bgp.local_asn }}
-  bgp router-id {{ ansible_local.ctlabs_frr.router.bgp.local_ip }}
-  neighbor {{ ansible_local.ctlabs_frr.router.bgp.remote_ip }} remote-as {{ ansible_local.ctlabs_frr.router.bgp.remote_asn }}
-{%   if ansible_local.ctlabs_frr.router.bgp.nets %}
+{% if ctg_facts.ctlabs_frr.router.bgp is defined %}
+router bgp {{ ctg_facts.ctlabs_frr.router.bgp.local_asn }}
+  bgp router-id {{ ctg_facts.ctlabs_frr.router.bgp.local_ip }}
+  neighbor {{ ctg_facts.ctlabs_frr.router.bgp.remote_ip }} remote-as {{ ctg_facts.ctlabs_frr.router.bgp.remote_asn }}
+{%   if ctg_facts.ctlabs_frr.router.bgp.nets %}
   address-family ipv4 unicast
-{%     for net in ansible_local.ctlabs_frr.router.bgp.nets %}
+{%     for net in ctg_facts.ctlabs_frr.router.bgp.nets %}
   network {{ net }}
 {%     endfor %}
 {%   endif %}
@@ -23,9 +23,9 @@ router bgp {{ ansible_local.ctlabs_frr.router.bgp.local_asn }}
 {% endif %}
 
 {# OSPF -#}
-{% if ansible_local.ctlabs_frr.router.ospf is defined %}
+{% if ctg_facts.ctlabs_frr.router.ospf is defined %}
 router ospf
-{%   for net in ansible_local.ctlabs_frr.router.ospf.nets %}
+{%   for net in ctg_facts.ctlabs_frr.router.ospf.nets %}
   network {{ net }} area 0
 {%   endfor %}
 {% endif %}

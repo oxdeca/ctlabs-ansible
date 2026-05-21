@@ -7,8 +7,8 @@
   id_provider              = ldap
   auth_provider            = ldap
 
-  ldap_uri                 = {{ ansible_local.ctlabs_sssd.uri  | default(ctlabs_sssd.defaults.config.ldap.uri)  }}
-  ldap_search_base         = {{ ansible_local.ctlabs_sssd.base | default(ctlabs_sssd.defaults.config.ldap.base) }}
+  ldap_uri                 = {{ ctg_facts.ctlabs_sssd.uri  | default(ctlabs_sssd.defaults.config.ldap.uri)  }}
+  ldap_search_base         = {{ ctg_facts.ctlabs_sssd.base | default(ctlabs_sssd.defaults.config.ldap.base) }}
   ldap_id_use_start_tls    = true
   ldap_pwd_policy          =
 

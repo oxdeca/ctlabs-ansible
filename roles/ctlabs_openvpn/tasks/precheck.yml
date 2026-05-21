@@ -14,7 +14,7 @@
     
     - name: ctlabs_openvpn.tasks.precheck.type.check
       assert:
-        that: ansible_local.ctlabs_openvpn.type in [ 'server', 'client' ]
+        that: ctg_facts.ctlabs_openvpn.type in [ 'server', 'client' ]
         fail_msg: "No type specified. ['server', 'client']"
   rescue:
     - name: ctlabs_openvpn.tasks.precheck.skip.unsupported
