@@ -346,7 +346,8 @@
               "type"     : "gateway_api",
               "provider" : "traefik",
               "traefik"  : {
-                "service_type" : "LoadBalancer"
+                "host_network" : true,
+                "service_type" : "ClusterIP"
               }
             }
           }

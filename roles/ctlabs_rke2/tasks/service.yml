@@ -138,6 +138,13 @@
                   providers:
                     kubernetesGateway:
                       enabled: true
+                  deployment:
+                    hostNetwork: "{{ ctlabs_rke2_traefik_host_network }}"
+                  ports:
+                    web:
+                      hostPort: "{{ ctlabs_rke2_traefik_host_network | ternary(8000, none) }}"
+                    websecure:
+                      hostPort: "{{ ctlabs_rke2_traefik_host_network | ternary(8443, none) }}"
                   service:
                     type: "{{ ctlabs_rke2_traefik_service_type }}"
 

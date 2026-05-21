@@ -46,6 +46,7 @@ ctlabs_rke2:
         chart        : traefik/traefik
         version      : "{{ versions.traefik }}"
         ns           : traefik
+        host_network : false
         service_type : ClusterIP
     argocd:
       host: argocd.ctlabs.internal

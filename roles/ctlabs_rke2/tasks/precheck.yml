@@ -43,6 +43,10 @@
   set_fact:
     ctlabs_rke2_traefik_service_type: "{{ ctg_facts.ctlabs_rke2['ingress']['traefik']['service_type'] | default(ctlabs_rke2['defaults']['ingress']['traefik']['service_type']) }}"
 
+- name: ctlabs_rke2.tasks.precheck.traefik_host_network
+  set_fact:
+    ctlabs_rke2_traefik_host_network: "{{ ctg_facts.ctlabs_rke2['ingress']['traefik']['host_network'] | default(ctlabs_rke2['defaults']['ingress']['traefik']['host_network']) }}"
+
 - name: ctlabs_rke2.tasks.precheck.argocd_hostname
   set_fact:
     ctlabs_rke2_argocd_host: "{{ ctg_facts.ctlabs_rke2['argocd']['host'] | default(ctlabs_rke2['defaults']['argocd']['host']) }}"
