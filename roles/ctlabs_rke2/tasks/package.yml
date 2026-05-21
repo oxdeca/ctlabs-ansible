@@ -5,6 +5,11 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_rke2.tasks.package.debian.update.cache
+  when: ctg_os_family == 'debian'
+  apt:
+    update_cache: true
+
 - name: ctlabs_rke2.tasks.package.install
   package:
     name  : "{{ item.name }}"
