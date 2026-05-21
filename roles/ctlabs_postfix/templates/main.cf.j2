@@ -36,7 +36,7 @@ biff                                   = no
 #append_dot_mydomain                    = no
 
 # --- TLS Settings ---
-smtp_tls_CAfile                        = "{{ ctlabs_postfix.defaults.config.tls.ca }}"
+smtp_tls_CAfile                        = {{ ctlabs_postfix.defaults.config.tls.ca }}
 smtp_tls_session_cache_database        = btree:${data_directory}/smtp_scache
 smtp_tls_loglevel                      = 1
 
