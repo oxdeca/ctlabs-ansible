@@ -13,7 +13,7 @@ ctlabs_semaphore:
     pkgs:
       - name    : semaphore
         version : "{{ versions.semaphore }}"
-        url     : "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ versions.semaphore }}/semaphore_{{ versions.semaphore }}_linux_amd64.rpm"
+        url     : "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ versions.semaphore }}/semaphore_community_{{ versions.semaphore }}_linux_amd64.rpm"
     config:
       dir        : /etc/semaphore
       bin        : /usr/bin/semaphore
