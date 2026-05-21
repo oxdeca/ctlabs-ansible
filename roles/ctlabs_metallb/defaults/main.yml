@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_metallb/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  metallb: 0.14.9
+
+ctlabs_metallb:
+  defaults:
+    helm:
+      repo    : https://metallb.github.io/metallb
+      chart   : metallb/metallb
+      version : "{{ versions.metallb }}"
+      ns      : metallb-system
+    pool:
+      name     : default
+      addresses:
+        - 192.168.30.240-192.168.30.250
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
+  os:
+    - redhat9
+    - centos9
+    - debian12

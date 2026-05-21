@@ -344,7 +344,10 @@
             "role"  : "server",
             "ingress" : {
               "type"     : "gateway_api",
-              "provider" : "traefik"
+              "provider" : "traefik",
+              "traefik"  : {
+                "service_type" : "LoadBalancer"
+              }
             }
           }
 
@@ -852,6 +855,15 @@
   tags  : rke2-agent
   roles :
     - roles/ctlabs_rke2
+
+# -----------------------------------------------------------------------------
+# ctlabs_metallb
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.metallb
+  hosts : [rke21]
+  tags  : [metallb]
+  roles :
+    - roles/ctlabs_metallb
 
 # -----------------------------------------------------------------------------
 # ctlabs_containerd

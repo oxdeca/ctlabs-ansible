@@ -42,10 +42,11 @@ ctlabs_rke2:
         crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
         file: /tmp/gateway-api-crds.yaml
       traefik:
-        repo    : https://traefik.github.io/charts
-        chart   : traefik/traefik
-        version : "{{ versions.traefik }}"
-        ns      : traefik
+        repo         : https://traefik.github.io/charts
+        chart        : traefik/traefik
+        version      : "{{ versions.traefik }}"
+        ns           : traefik
+        service_type : ClusterIP
     argocd:
       host: argocd.ctlabs.internal
     config:

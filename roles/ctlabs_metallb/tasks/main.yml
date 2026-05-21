@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_metallb/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_metallb
+    - ctlabs_metallb.precheck
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_metallb
+    - ctlabs_metallb.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_metallb
+    - ctlabs_metallb.config

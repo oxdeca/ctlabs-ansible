@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_metallb/tasks/package.yml
+# Description : helm install
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_metallb.tasks.package.helm_repo.add
+  kubernetes.core.helm_repository:
+    name : metallb
+    repo_url : "{{ ctlabs_metallb.defaults.helm.repo }}"
+
+- name: ctlabs_metallb.tasks.package.helm.install
+  environment:
+    KUBECONFIG: "{{ ctlabs_metallb.defaults.kubeconfig }}"
+  kubernetes.core.helm:
+    name             : metallb
+    chart_ref        : "{{ ctlabs_metallb.defaults.helm.chart }}"
+    chart_version    : "{{ ctlabs_metallb.defaults.helm.version }}"
+    release_namespace: "{{ ctlabs_metallb.defaults.helm.ns }}"
+    create_namespace : true
+    wait             : true
+    wait_timeout     : 5m
+
+- name: ctlabs_metallb.tasks.package.ready
+  environment:
+    KUBECONFIG: "{{ ctlabs_metallb.defaults.kubeconfig }}"
+  kubernetes.core.k8s_info:
+    kind      : Pod
+    namespace : "{{ ctlabs_metallb.defaults.helm.ns }}"
+    wait      : true
+    wait_sleep: 10
+    wait_timeout: 300
+    label_selectors:
+      - app.kubernetes.io/component = controller

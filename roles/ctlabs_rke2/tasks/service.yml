@@ -139,7 +139,7 @@
                     kubernetesGateway:
                       enabled: true
                   service:
-                    type: ClusterIP
+                    type: "{{ ctlabs_rke2_traefik_service_type }}"
 
             - name: ctlabs_rke2.tasks.service.gateway_api.traefik.ready
               vars:

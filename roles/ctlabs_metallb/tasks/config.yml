@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_metallb/tasks/config.yml
+# Description : IP pool + L2Advertisement
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_metallb.tasks.config.pool
+  environment:
+    KUBECONFIG: "{{ ctlabs_metallb.defaults.kubeconfig }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: "{{ ctlabs_metallb.defaults.pool.name }}"
+        namespace: "{{ ctlabs_metallb.defaults.helm.ns }}"
+      spec:
+        addresses: "{{ ctlabs_metallb.defaults.pool.addresses }}"
+
+- name: ctlabs_metallb.tasks.config.l2_advertisement
+  environment:
+    KUBECONFIG: "{{ ctlabs_metallb.defaults.kubeconfig }}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: "{{ ctlabs_metallb.defaults.pool.name }}"
+        namespace: "{{ ctlabs_metallb.defaults.helm.ns }}"
+      spec:
+        ipAddressPools:
+          - "{{ ctlabs_metallb.defaults.pool.name }}"
