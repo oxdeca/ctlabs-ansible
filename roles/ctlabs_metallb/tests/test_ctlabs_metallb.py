@@ -1,5 +1,3 @@
----
-
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_metallb/tests/test_ctlabs_metallb.py
 # Description : tests

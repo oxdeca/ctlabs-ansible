@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rke2/tests/test_rke2.yml
+# Description : test playbook for ctlabs_rke2 (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_rke2.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"
