@@ -34,6 +34,10 @@ ctlabs_postfix:
           template : recipient_bcc.j2
         - name     : recipient_canonical
           template : recipient_canonical.j2
+      tls:
+        ca : /etc/ca-ctlabs/ca.crt
+        crt: "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+        key: "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
       archive:
         dir  : /var/email_archive
         user : mail
@@ -43,6 +47,11 @@ ctlabs_postfix:
         group   : ctlabs
         template: muttrc.j2
         file    : /home/ctlabs/.muttrc
+      networks:
+        - localhost
+        - "{{ ctg_ipv4 }}/32"
+      smtp:
+        wrappermode: false
     helper:
       user : mail
       group: alloy

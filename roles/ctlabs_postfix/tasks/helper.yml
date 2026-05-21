@@ -8,19 +8,19 @@
 
 - name: ctlabs_postfix.tasks.helper.logger.install
   template:
-    src  : logger.rb
+    src  : logger.rb.j2
     dest : /root/logger.rb
     mode : 0750
 
 - name: ctlabs_postfix.tasks.helper.mailer.install
   template:
-    src  : mailer.rb
+    src  : mailer.rb.j2
     dest : /root/mailer.rb
     mode : 0750
 
 - name: ctlabs_postfix.tasks.helper.archive.install
   template:
-    src  : email_archive.sh
+    src  : email_archive.sh.j2
     dest : /usr/bin/email_archive.sh
     mode : 0755
 

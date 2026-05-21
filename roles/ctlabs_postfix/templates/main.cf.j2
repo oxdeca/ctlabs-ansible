@@ -2,51 +2,73 @@
 # File : /etc/postfix/main.cf
 # -----------------------------------------------------------------------------
 
-myhostname                 = {{ ansible_nodename }}
-mydomain                   = {{ ansible_nodename.split('.')[1:] | join('.') }}
-myorigin                   = $mydomain
+myhostname                             = {{ ansible_nodename }}
+mydomain                               = {{ ansible_nodename.split('.')[1:] | join('.') }}
+#myorigin                               = $mydomain
 
-inet_interfaces            = {{ ctg_ipv4 }}, localhost
-inet_protocols             = ipv4
+inet_interfaces                        = {{ ctg_ipv4 }}, localhost
+inet_protocols                         = ipv4
 
-relayhost                  = {{ ctlabs_postfix_relayhost }}
-mydestination              = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
+relayhost                              = {{ ctlabs_postfix_relayhost }}
+mydestination                          = $myhostname, localhost.$mydomain, localhost, $mydomain, bcchost.$mydomain
 
-mailbox_size_limit         = 0
-home_mailbox               = mail/
+mynetworks_style                       = subnet
+mynetworks                             = {{ ctlabs_postfix_networks }}
 
-recipient_canonical_maps   = regexp:/etc/postfix/recipient_canonical
-recipient_bcc_maps         = regexp:/etc/postfix/recipient_bcc
-transport_maps             = hash:/etc/postfix/transport
+mailbox_size_limit                     = 0
+message_size_limit                     = 51200000
+home_mailbox                           = mail/
 
-# Enable SASL authentication
-smtp_sasl_auth_enable      = yes
-smtp_sasl_password_maps    = hash:/etc/postfix/sasl_passwd
-smtp_sasl_security_options = noanonymous
-
-# TLS Configurations for Implicit TLS (Port 465)
-smtp_tls_security_level    = encrypt
-smtp_tls_wrappermode       = yes
-smtp_tls_loglevel          = 1
-
-smtpd_banner               = $myhostname ESMTP
-smtpd_helo_restrictions    = permit_mynetworks
-smtpd_relay_restrictions   = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
-smtpd_milters              = unix:/run/opendkim/opendkim.sock
-non_smtpd_milters          = $smtpd_milters
-milter_default_action      = accept
-
-biff                       = no
+recipient_canonical_maps               = regexp:/etc/postfix/recipient_canonical
+recipient_bcc_maps                     = regexp:/etc/postfix/recipient_bcc
+recipient_delimiter                    = +
+transport_maps                         = hash:/etc/postfix/transport
 
 {% if ctlabs_postfix_transport_google %}
 google_initial_destination_concurrency = 1
 google_destination_concurrency_limit   = 5
 google_destination_recipient_limit     = 20
 google_destination_rate_delay          = 1s
-
-#smtp-gmail_destination_rate_delay          = 12s
-#smtp-gmail_destination_concurrency_limit   = 1
-#smtp-gmail_destination_recipient_limit     = 2
-#smtp-gmail_initial_destination_concurrency = 1
 {% endif %}
 
+biff                                   = no
+#header_checks                          = regexp:/etc/postfix/header_checks
+#append_dot_mydomain                    = no
+
+# --- TLS Settings ---
+smtp_tls_CAfile                        = "{{ ctlabs_postfix.defaults.config.tls.ca }}"
+smtp_tls_session_cache_database        = btree:${data_directory}/smtp_scache
+smtp_tls_loglevel                      = 1
+
+{% if ctlabs_postfix_relayhost %}
+# Relayhost is defined: Mandatory encryption is enforced
+{%   if ctlabs_postfix_smtp_wrappermode %}
+smtp_tls_wrappermode                   = yes
+smtp_tls_security_level                = encrypt
+{%   else %}
+smtp_tls_security_level                = encrypt
+{%   endif %}
+{% else %}
+# No relayhost defined: Direct internet MX delivery requires opportunistic TLS
+smtp_tls_security_level                = may
+{% endif %}
+
+smtpd_tls_cert_file                    = "{{ ctlabs_postfix.defaults.config.tls.crt }}"
+smtpd_tls_key_file                     = "{{ ctlabs_postfix.defaults.config.tls.key }}"
+smtpd_tls_security_level               = may
+smtpd_tls_session_cache_database       = btree:${data_directory}/smtpd_scache
+
+# --- SASL Authentication ---
+smtp_sasl_auth_enable                  = yes
+smtp_sasl_mechanism_filter             = plain
+smtp_sasl_password_maps                = hash:/etc/postfix/sasl_password
+smtp_sasl_security_options             = noanonymous
+
+# --- SMTPD Restrictions ---
+smtpd_banner                           = $myhostname ESMTP
+smtpd_helo_restrictions                = permit_mynetworks
+smtpd_relay_restrictions               = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+disable_vrfy_command                   = yes
+smtpd_milters                          = unix:/run/opendkim/opendkim.sock
+non_smtpd_milters                      = $smtpd_milters
+milter_default_action                  = accept

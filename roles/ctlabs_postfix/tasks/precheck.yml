@@ -22,3 +22,11 @@
 - name: ctlabs_postfix.tasks.precheck.transport.google
   set_fact:
     ctlabs_postfix_transport_google: "{{ ctg_facts.ctlabs_postfix.transport.google | default(false) }}"
+
+- name: ctlabs_postfix.tasks.precheck.networks
+  set_fact:
+    ctlabs_postfix_networks: "{{ ctg_facts.ctlabs_postfix.networks | default(ctlabs_postfix.defaults.config.networks) }}"
+
+- name: ctlabs_postfix.tasks.precheck.smtp.wrappermode
+  set_fact:
+    ctlabs_postfix_smtp_wrappermode: "{{ ctg_facts.ctlabs_postfix.smtp.wrappermode | default(ctlabs_postfix.defaults.config.smtp.wrappermode) }}"
