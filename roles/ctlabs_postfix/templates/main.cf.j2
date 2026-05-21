@@ -19,8 +19,8 @@ mailbox_size_limit                     = 0
 message_size_limit                     = 51200000
 home_mailbox                           = mail/
 
-recipient_canonical_maps               = {{ 'pcre' if ctg_os_family == 'redhat' and (ctg_os_version|int) > 7 else 'regexp' }}:/etc/postfix/recipient_canonical
-recipient_bcc_maps                     = {{ 'pcre' if ctg_os_family == 'redhat' and (ctg_os_version|int) > 7 else 'regexp' }}:/etc/postfix/recipient_bcc
+recipient_canonical_maps               = pcre:/etc/postfix/recipient_canonical
+recipient_bcc_maps                     = pcre:/etc/postfix/recipient_bcc
 recipient_delimiter                    = +
 transport_maps                         = hash:/etc/postfix/transport
 
