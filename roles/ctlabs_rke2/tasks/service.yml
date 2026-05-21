@@ -106,7 +106,13 @@
         - name: ctlabs_rke2.tasks.service.gateway_api.crds.apply
           environment:
             KUBECONFIG: /etc/rancher/rke2/rke2.yaml
-          shell: /usr/bin/rke2 kubectl apply --server-side -f /tmp/gateway-api-crds.yaml
+          shell: >
+            {{ ctlabs_rke2.defaults.pkgs.kubectl.path }} apply
+            --server-side -f {{ ctlabs_rke2.defaults.ingress.gateway_api.file }}
+          register: gw_crds
+          until  : gw_crds is success
+          retries: 3
+          delay  : 5
 
         - name: ctlabs_rke2.tasks.service.gateway_api.traefik
           when: ctlabs_rke2_ingress_provider == "traefik"
@@ -139,7 +145,7 @@
           block:
             - name: ctlabs_rke2.tasks.service.gateway_api.envoy.install
               get_url:
-                url  : https://github.com/envoyproxy/gateway/releases/download/v1.0.1/install.yaml
+                url  : "https://github.com/envoyproxy/gateway/releases/download/v{{ versions.envoy }}/install.yaml"
                 dest : /tmp/gateway-ctrl-deployment.yml
               register: res_envoy_dl
               until   : res_envoy_dl is success

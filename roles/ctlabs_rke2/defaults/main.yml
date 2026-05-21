@@ -22,6 +22,8 @@ ctlabs_rke2:
         uri  : "https://github.com/rancher/rke2/releases/download/v{{ versions.rke2 }}+rke2r1/rke2.linux-amd64"
         path : /usr/bin/rke2
         mode : '0750'
+      kubectl:
+        path: /var/lib/rancher/rke2/bin/kubectl
       helm:
         version: 
         url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
