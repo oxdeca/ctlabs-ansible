@@ -30,7 +30,7 @@ ctlabs_picode:
         - name: git
         - name: make
       npm:
-        - name: "picode"
+        - name: "@judepayne/picode"
     config:
       prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings
