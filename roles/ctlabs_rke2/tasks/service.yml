@@ -134,11 +134,26 @@
                 release_namespace: traefik
                 create_namespace : true
                 skip_crds        : true
-                wait             : true
                 values:
                   providers:
                     kubernetesGateway:
                       enabled: true
+                  service:
+                    type: ClusterIP
+
+            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.ready
+              vars:
+                ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+              environment:
+                KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+              kubernetes.core.k8s_info:
+                kind      : Pod
+                namespace : traefik
+                label_selectors:
+                  - app.kubernetes.io/name=traefik
+                wait      : true
+                wait_sleep: 10
+                wait_timeout: 600
 
         - name: ctlabs_rke2.tasks.service.gateway_api.envoy
           when: ctlabs_rke2_ingress_provider == "envoy-gateway"
