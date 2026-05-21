@@ -50,6 +50,7 @@
         delay : 10 
 
     - name: ctlabs_rke2.tasks.service.cluster.ingress.ready
+      when: ctlabs_rke2_ingress_type == "ingress"
       vars:
         ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
       environment:
@@ -75,7 +76,7 @@
         atomic            : true
         values:
           global:
-            domain:
+            domain: "{{ ctlabs_rke2_argocd_host }}"
           configs:
             secret:
               argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
@@ -83,7 +84,179 @@
               server.insecure: true
           server:
             ingress:
-              enabled         : true
-              ingressClassName: nginx
+              enabled         : "{{ false if ctlabs_rke2_ingress_type == 'gateway_api' else true }}"
+              ingressClassName: "{{ ctlabs_rke2_ingress_provider }}"
+              hostname        : "{{ ctlabs_rke2_argocd_host }}"
       register: res_argo
       until   : res_argo is success
+
+    # ------------------------------------------------------------------------------
+    # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE
+    # ------------------------------------------------------------------------------
+    - name: ctlabs_rke2.tasks.service.gateway_api
+      when: ctlabs_rke2_ingress_type == "gateway_api"
+      block:
+        - name: ctlabs_rke2.tasks.service.gateway_api.crds.download
+          get_url:
+            url  : "{{ ctlabs_rke2.defaults.ingress.gateway_api.crds }}"
+            dest : "{{ ctlabs_rke2.defaults.ingress.gateway_api.file }}"
+          register: res_crds_dl
+          until   : res_crds_dl is success
+
+        - name: ctlabs_rke2.tasks.service.gateway_api.crds.apply
+          environment:
+            KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+          shell: kubectl apply --server-side -f /tmp/gateway-api-crds.yaml
+
+        - name: ctlabs_rke2.tasks.service.gateway_api.traefik
+          when: ctlabs_rke2_ingress_provider == "traefik"
+          block:
+            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.helm_repo
+              kubernetes.core.helm_repository:
+                name    : traefik
+                repo_url: https://traefik.github.io/charts
+
+            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.install
+              vars:
+                ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+              environment:
+                KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+              kubernetes.core.helm:
+                name             : traefik
+                chart_ref        : traefik/traefik
+                chart_version    : "{{ versions['traefik'] }}"
+                release_namespace: traefik
+                create_namespace : true
+                skip_crds        : true
+                wait             : true
+                values:
+                  providers:
+                    kubernetesGateway:
+                      enabled: true
+
+        - name: ctlabs_rke2.tasks.service.gateway_api.envoy
+          when: ctlabs_rke2_ingress_provider == "envoy-gateway"
+          block:
+            - name: ctlabs_rke2.tasks.service.gateway_api.envoy.install
+              get_url:
+                url  : https://github.com/envoyproxy/gateway/releases/download/v1.0.1/install.yaml
+                dest : /tmp/gateway-ctrl-deployment.yml
+              register: res_envoy_dl
+              until   : res_envoy_dl is success
+
+            - name: ctlabs_rke2.tasks.service.gateway_api.envoy.deploy
+              environment:
+                KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+              kubernetes.core.k8s:
+                src: /tmp/gateway-ctrl-deployment.yml
+
+        - name: ctlabs_rke2.tasks.service.argocd.gateway_objects
+          environment:
+            KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+          block:
+            - name: ctlabs_rke2.tasks.service.argocd.tls_secret
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: argocd-tls
+                    namespace: argo
+                  type: kubernetes.io/tls
+                  data:
+                    tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
+                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
+
+            - name: ctlabs_rke2.tasks.service.argocd.reference_grant
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  kind: ReferenceGrant
+                  metadata:
+                    name: argocd-grant
+                    namespace: argo
+                  spec:
+                    from:
+                      - group: gateway.networking.k8s.io
+                        kind: Gateway
+                        namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                    to:
+                      - group: ""
+                        kind: Secret
+
+            - name: ctlabs_rke2.tasks.service.gateway.attachment_grant
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  kind: ReferenceGrant
+                  metadata:
+                    name: allow-argo-routes
+                    namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                  spec:
+                    from:
+                      - group: gateway.networking.k8s.io
+                        kind: HTTPRoute
+                        namespace: argo
+                    to:
+                      - group: gateway.networking.k8s.io
+                        kind: Gateway
+
+            - name: ctlabs_rke2.tasks.service.argocd.gateway
+              when: ctlabs_rke2_ingress_provider == "traefik"
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1
+                  kind: Gateway
+                  metadata:
+                    name: traefik-gateway
+                    namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                  spec:
+                    gatewayClassName: traefik
+                    listeners:
+                      - name: web
+                        port: 8000
+                        protocol: HTTP
+                        allowedRoutes:
+                          namespaces:
+                            from: All
+                      - name: websecure
+                        port: 8443
+                        protocol: HTTPS
+                        tls:
+                          mode: Terminate
+                          certificateRefs:
+                            - name: argocd-tls
+                              namespace: argo
+                        allowedRoutes:
+                          namespaces:
+                            from: All
+
+            - name: ctlabs_rke2.tasks.service.argocd.httproute
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: gateway.networking.k8s.io/v1
+                  kind: HTTPRoute
+                  metadata:
+                    name: argocd-server
+                    namespace: argo
+                  spec:
+                    parentRefs:
+                      - name: traefik-gateway
+                        namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                        sectionName: web
+                      - name: traefik-gateway
+                        namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                        sectionName: websecure
+                    rules:
+                      - matches:
+                          - path:
+                              type: PathPrefix
+                              value: /
+                        backendRefs:
+                          - name: argocd-server
+                            port: 80

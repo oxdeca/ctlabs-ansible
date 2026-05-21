@@ -6,8 +6,11 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  rke2 : 1.33.3
-  helm : 3.16.1
+  rke2        : 1.33.3
+  helm        : 3.16.1
+  gateway_api : 1.5.0
+  traefik     : 40.0.0
+  envoy       : 1.0.1
 
 ctlabs_rke2:
   defaults:
@@ -32,8 +35,22 @@ ctlabs_rke2:
         name : argo
         chart: argo/argo-cd
         repo : https://argoproj.github.io/argo-helm
+    ingress:
+      gateway_api:
+        crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
+        file: /tmp/gateway-api-crds.yaml
+      traefik:
+        repo    : https://traefik.github.io/charts
+        chart   : traefik/traefik
+        version : "{{ versions.traefik }}"
+        ns      : traefik
+    argocd:
+      host: argocd.ctlabs.internal
     config:
       role: server
+      ingress:
+        type    : "gateway_api"  # Options: 'ingress', 'gateway_api'
+        provider: "traefik"      # Options: 'traefik', 'nginx', 'envoy-gateway'
       server:
         url: "https://{{ ansible_nodename }}:9345"
         token: /var/lib/rancher/rke2/server/token

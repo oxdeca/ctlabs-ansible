@@ -8,7 +8,11 @@ Type=simple
 
 User=root
 
+{% if ctlabs_rke2_ingress_provider == "nginx" %}
 ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
+{% else %}
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server --disable=rke2-ingress-nginx
+{% endif %}
 
 Restart=always
 RestartSec=5
