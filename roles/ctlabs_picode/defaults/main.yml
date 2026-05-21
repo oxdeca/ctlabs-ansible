@@ -30,6 +30,7 @@ ctlabs_picode:
         - name: git
         - name: make
       npm:
+        - name: "@earendil-works/pi-coding-agent"
         - name: "@judepayne/picode"
     config:
       prefdir: /etc/apt/preferences.d
