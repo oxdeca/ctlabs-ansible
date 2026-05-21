@@ -122,6 +122,11 @@
                 name    : traefik
                 repo_url: https://traefik.github.io/charts
 
+            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.values
+              template:
+                src  : traefik-values.yml.j2
+                dest : /tmp/ctlabs-rke2-traefik-values.yml
+
             - name: ctlabs_rke2.tasks.service.gateway_api.traefik.install
               vars:
                 ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
@@ -134,19 +139,8 @@
                 release_namespace: traefik
                 create_namespace : true
                 skip_crds        : true
-                values:
-                  providers:
-                    kubernetesGateway:
-                      enabled: true
-                  deployment:
-                    hostNetwork: "{{ ctlabs_rke2_traefik_host_network }}"
-                  ports:
-                    web:
-                      hostPort: "{{ ctlabs_rke2_traefik_host_network | ternary(8000, none) }}"
-                    websecure:
-                      hostPort: "{{ ctlabs_rke2_traefik_host_network | ternary(8443, none) }}"
-                  service:
-                    type: "{{ ctlabs_rke2_traefik_service_type }}"
+                values_files:
+                  - /tmp/ctlabs-rke2-traefik-values.yml
 
             - name: ctlabs_rke2.tasks.service.gateway_api.traefik.ready
               vars:
@@ -194,7 +188,7 @@
                   type: kubernetes.io/tls
                   data:
                     tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
-                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
+                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.prv') | b64encode }}"
 
             - name: ctlabs_rke2.tasks.service.argocd.reference_grant
               kubernetes.core.k8s:

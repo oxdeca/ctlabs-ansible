@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+providers:
+  kubernetesGateway:
+    enabled: true
+deployment:
+  hostNetwork: {{ ctlabs_rke2_traefik_host_network | lower }}
+ports:
+  web:
+    port: 8000
+{% if ctlabs_rke2_traefik_host_network %}
+    hostPort: 8000
+{% endif %}
+  websecure:
+    port: 8443
+{% if ctlabs_rke2_traefik_host_network %}
+    hostPort: 8443
+{% endif %}
+service:
+  type: {{ ctlabs_rke2_traefik_service_type }}
