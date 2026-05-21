@@ -39,12 +39,12 @@ ctlabs_picode:
       group   : picode
       groups  : [certs]
       profile:
-        template: profile_opencode.sh.j2
+        template: profile.picode.sh.j2
         file    : /etc/profile.d/picode.sh
       settings:
-        dir     : ~/.opencode
-        template: opencode.json.j2
-        file    : ~/.config/opencode/picode.json
+        dir     : ~/.picode
+        template: picode.json.j2
+        file    : ~/.config/picode/picode.json
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
