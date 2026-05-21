@@ -5,6 +5,23 @@
 # Description : main ctlabs_postfix tasks file.
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_postfix.tasks.package.group
+  group:
+    name   : "{{ ctlabs_postfix.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_postfix.tasks.package.user
+  user:
+    name   : "{{ ctlabs_postfix.defaults.service.user  }}"
+    group  : "{{ ctlabs_postfix.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_postfix.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_postfix.defaults.service.user   }}"
+    group : "{{ ctlabs_postfix.defaults.service.group  }}"
+    groups: "{{ ctlabs_postfix.defaults.service.groups }}"
+
 - name: ctlabs_postfix.tasks.package.installed
   package:
     name  : "{{ item.name }}"

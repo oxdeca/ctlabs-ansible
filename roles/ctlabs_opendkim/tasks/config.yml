@@ -53,7 +53,7 @@
   notify: ctlabs_opendkim.handlers.service.restart
 
 - name: ctlabs_opendkim.tasks.config.postfix_user
-  ansible.builtin.user:
+  user:
     name: postfix
     groups: "{{ ctlabs_opendkim.defaults.service.group }}"
     append: true
