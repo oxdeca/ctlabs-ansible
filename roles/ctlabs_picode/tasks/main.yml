@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_picode/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_picode
+    - ctlabs_picode.precheck
+    - ctlabs_picode.package
+    - ctlabs_picode.config
+    - ctlabs_picode.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_picode
+    - ctlabs_picode.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_picode
+    - ctlabs_picode.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_picode
+    - ctlabs_picode.service

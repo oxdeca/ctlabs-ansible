@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_picode/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_picode.tasks.precheck
+  block:
+    - name: ctlabs_picode.tasks.precheck.supported_os
+      assert:
+        that: ctg_os is in ctlabs_picode.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_picode.tasks.precheck.skip.unsupported
+      meta: end_host

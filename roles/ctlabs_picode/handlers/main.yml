@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_picode/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_picode.handlers.opencode.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_picode.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true
+
+- name: ctlabs_picode.handlers.apt.update_cache
+  apt:
+    update_cache: yes
