@@ -53,8 +53,8 @@ smtp_tls_security_level                = encrypt
 smtp_tls_security_level                = may
 {% endif %}
 
-smtpd_tls_cert_file                    = "{{ ctlabs_postfix.defaults.config.tls.crt }}"
-smtpd_tls_key_file                     = "{{ ctlabs_postfix.defaults.config.tls.key }}"
+smtpd_tls_cert_file                    = {{ ctlabs_postfix.defaults.config.tls.crt }}
+smtpd_tls_key_file                     = {{ ctlabs_postfix.defaults.config.tls.key }}
 smtpd_tls_security_level               = may
 smtpd_tls_session_cache_database       = btree:${data_directory}/smtpd_scache
 
