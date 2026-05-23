@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_zap/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_zap.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_zap.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+    
+    - name: ctlabs_zap.tasks.package.debian.pkgs.install
+      when: item.name is defined
+      apt:
+        name   : "{{ item.name }}"
+        state : present
+      loop: "{{ ctlabs_zap.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+    
+    - name: ctlabs_zap.tasks.package.debian.zap.install
+      unarchive:
+        url  : "{{ ctlabs_zap.defaults.zap.url }}"
+        dest : "{{ ctlabs_zap.defaults.zap.dir }}"
+        mode : '0750'
+        owner: root
+
+    - name: ctlabs_zap.tasks.package.debian.zap.bin
+      file:
+        src : "{{ ctlabs_zap.defaults.zap.file }}"
+        dest: "{{ ctlabs_zap.defaults.zap.link }}"
+        state: link
