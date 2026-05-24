@@ -1,0 +1,60 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ghidra.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_ghidra.tasks.package.debian.prereqs.install
+      apt:
+        name:
+          - apt-transport-https
+          - gpg
+        state: present
+        update_cache: true
+
+    - name: ctlabs_ghidra.tasks.package.debian.adoptium.key
+      apt_key:
+        url: "{{ ctlabs_ghidra.defaults.adoptium.repo.key_url }}"
+        keyring: "{{ ctlabs_ghidra.defaults.adoptium.repo.keyring }}"
+        state: present
+
+    - name: ctlabs_ghidra.tasks.package.debian.adoptium.repo
+      apt_repository:
+        repo: "deb {{ ctlabs_ghidra.defaults.adoptium.repo.url }} {{ ansible_distribution_release }} main"
+        filename: "{{ ctlabs_ghidra.defaults.adoptium.repo.filename }}"
+        state: present
+        update_cache: true
+
+    - name: ctlabs_ghidra.tasks.package.debian.pkgs.install
+      when: item.name is defined
+      apt:
+        name: "{{ item.name }}"
+        state: present
+      loop: "{{ ctlabs_ghidra.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until: result is success
+
+    - name: ctlabs_ghidra.tasks.package.debian.ghidra.download
+      get_url:
+        url: "{{ ctlabs_ghidra.defaults.ghidra.url }}"
+        dest: "/tmp/{{ ctlabs_ghidra.defaults.ghidra.archive }}"
+        mode: '0644'
+
+    - name: ctlabs_ghidra.tasks.package.debian.ghidra.extract
+      unarchive:
+        src: "/tmp/{{ ctlabs_ghidra.defaults.ghidra.archive }}"
+        dest: "{{ ctlabs_ghidra.defaults.ghidra.parent_dir }}"
+        remote_src: true
+        creates: "{{ ctlabs_ghidra.defaults.ghidra.parent_dir }}/{{ ctlabs_ghidra.defaults.ghidra.dir }}/{{ ctlabs_ghidra.defaults.ghidra.bin_path }}"
+
+    - name: ctlabs_ghidra.tasks.package.debian.ghidra.symlink
+      file:
+        src: "{{ ctlabs_ghidra.defaults.ghidra.parent_dir }}/{{ ctlabs_ghidra.defaults.ghidra.dir }}/{{ ctlabs_ghidra.defaults.ghidra.bin_path }}"
+        dest: "{{ ctlabs_ghidra.defaults.ghidra.link }}"
+        state: link
+        force: true
+        follow: false

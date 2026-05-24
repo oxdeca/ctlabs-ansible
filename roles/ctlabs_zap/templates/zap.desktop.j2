@@ -1,0 +1,13 @@
+{# ---------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_zap/templates/zap.desktop.j2
+# Description : XFCE4 desktop entry for OWASP ZAP
+# --------------------------------------------------------------------------- #}
+
+[Desktop Entry]
+Name={{ ctlabs_zap.defaults.desktop.name }}
+Comment={{ ctlabs_zap.defaults.desktop.comment }}
+Exec=/usr/local/bin/zap-darcula
+Icon={{ ctlabs_zap.defaults.desktop.icon }}
+Terminal=false
+Type=Application
+Categories={{ ctlabs_zap.defaults.desktop.categories }}

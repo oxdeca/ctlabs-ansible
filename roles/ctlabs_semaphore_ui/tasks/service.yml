@@ -1,0 +1,20 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/tasks/service.yml
+# Description : default variables
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore_ui.tasks.service.create
+  template:
+    src  : "{{ ctlabs_semaphore_ui.defaults.service.template }}"
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_semaphore_ui.defaults.service.name }}"
+  notify: ctlabs_semaphore_ui.handlers.systemd.reload
+
+- name: ctlabs_semaphore_ui.tasks.service.start
+  service:
+    name  : "{{ ctlabs_semaphore_ui.defaults.service.name }}"
+    state : started
+
+- name: ctlabs_semaphore_ui.tasks.service.admin
+  command: "semaphore user add --admin --name ctlabs --login ctlabs --password 'secret123!' --email admin@ctlabs.internal --config {{ ctlabs_semaphore_ui.defaults.config.dir }}/{{ ctlabs_semaphore_ui.defaults.config.file }}"

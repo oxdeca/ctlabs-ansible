@@ -21,3 +21,8 @@
   tags:
     - ctlabs_zap
     - ctlabs_zap.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_zap
+    - ctlabs_zap.service

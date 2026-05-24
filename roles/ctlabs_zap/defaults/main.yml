@@ -6,31 +6,43 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  java: 17
+  java: 21
   zap: 2.17.0
 
 ctlabs_zap:
   defaults:
+    adoptium:
+      repo:
+        url: "https://packages.adoptium.net/artifactory/deb"
+        keyring: /etc/apt/trusted.gpg.d/adoptium.gpg
+        key_url: "https://packages.adoptium.net/artifactory/api/gpg/key/public"
+        filename: adoptium
     pkgs:
       redhat:
         - name: "java-{{ versions.java }}-openjdk"
       debian:
-        - name: "openjdk-{{ versions.java }}-jre"
+        - name: "temurin-{{ versions.java }}-jre"
         - name: firefox-esr
     zap:
       url: "https://download.opensuse.org/repositories/home:/cabelo/Debian_12/amd64/zap_{{ versions.zap }}-1_amd64.deb"
       tmpdir: "/tmp"
       deb_file: "zap_{{ versions.zap }}-1_amd64.deb"
-      bin_path: "/opt/ZAP_{{ versions.zap }}/zap.sh"
+      bin_path: "/usr/share/zap/zap.sh"
       link: "/usr/local/bin/zap"
     config:
       port: 8080
       api_key: secret123!
+      dir: /var/lib/zap
     service:
       name: zap.service
       user: zap
       group: zap
-      description: OWASP ZAP
+      description: OWASP ZAP Proxy
+    desktop:
+      name: OWASP ZAP
+      comment: Zed Attack Proxy - Web Application Security Scanner
+      icon: /usr/share/zap/zap.ico
+      categories: Development;Security;
   os:
     - debian12
   virtype:

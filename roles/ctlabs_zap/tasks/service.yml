@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_zap/tasks/service.yml
+# Description : systemd service setup
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_zap.tasks.service.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_zap.tasks.service.systemd.deploy
+      template:
+        src: zap.service.j2
+        dest: "{{ ctg_systemd_dir }}/{{ ctlabs_zap.defaults.service.name }}"
+        mode: '0644'
+      notify: ctlabs_zap.handlers.service.restart
+
+    - name: ctlabs_zap.tasks.service.systemd.enable
+      systemd:
+        name: "{{ ctlabs_zap.defaults.service.name }}"
+        enabled: true
+        daemon_reload: true
+        state: started

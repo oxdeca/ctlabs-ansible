@@ -1,14 +1,14 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_semaphore/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/defaults/main.yml
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
 versions:
   semaphore: 2.18.4
 
-ctlabs_semaphore:
+ctlabs_semaphore_ui:
   defaults:
     pkgs:
       - name    : semaphore

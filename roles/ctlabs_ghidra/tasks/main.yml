@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_ghidra
+    - ctlabs_ghidra.precheck
+    - ctlabs_ghidra.package
+    - ctlabs_ghidra.config
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_ghidra
+    - ctlabs_ghidra.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_ghidra
+    - ctlabs_ghidra.config

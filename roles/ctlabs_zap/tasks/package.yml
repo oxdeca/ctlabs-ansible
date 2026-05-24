@@ -8,10 +8,27 @@
 - name: ctlabs_zap.tasks.package.debian
   when: ctg_os_family == 'debian'
   block:
-    - name: ctlabs_zap.tasks.package.debian.update.cache
+    - name: ctlabs_zap.tasks.package.debian.prereqs.install
       apt:
+        name:
+          - apt-transport-https
+          - gpg
+        state: present
         update_cache: true
-    
+
+    - name: ctlabs_zap.tasks.package.debian.adoptium.key
+      apt_key:
+        url: "{{ ctlabs_zap.defaults.adoptium.repo.key_url }}"
+        keyring: "{{ ctlabs_zap.defaults.adoptium.repo.keyring }}"
+        state: present
+
+    - name: ctlabs_zap.tasks.package.debian.adoptium.repo
+      apt_repository:
+        repo: "deb {{ ctlabs_zap.defaults.adoptium.repo.url }} {{ ansible_distribution_release }} main"
+        filename: "{{ ctlabs_zap.defaults.adoptium.repo.filename }}"
+        state: present
+        update_cache: true
+
     - name: ctlabs_zap.tasks.package.debian.pkgs.install
       when: item.name is defined
       apt:
@@ -20,20 +37,21 @@
       loop: "{{ ctlabs_zap.defaults.pkgs[ctg_os_family] }}"
       register: result
       until: result is success
-    
+
     - name: ctlabs_zap.tasks.package.debian.zap.download
       get_url:
         url: "{{ ctlabs_zap.defaults.zap.url }}"
         dest: "{{ ctlabs_zap.defaults.zap.tmpdir }}/{{ ctlabs_zap.defaults.zap.deb_file }}"
         mode: '0755'
-    
+
     - name: ctlabs_zap.tasks.package.debian.zap.install
       apt:
         deb: "{{ ctlabs_zap.defaults.zap.tmpdir }}/{{ ctlabs_zap.defaults.zap.deb_file }}"
-    
+
     - name: ctlabs_zap.tasks.package.debian.zap.symlink
       file:
         src: "{{ ctlabs_zap.defaults.zap.bin_path }}"
         dest: "{{ ctlabs_zap.defaults.zap.link }}"
         state: link
         force: true
+        follow: false

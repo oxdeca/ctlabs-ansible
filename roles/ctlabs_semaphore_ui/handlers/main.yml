@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore_ui.handlers.semaphore.service.restart
+  service:
+    name    : "{{ ctlabs_semaphore_ui.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_semaphore_ui.handlers.semaphore.service.reload
+  service:
+    name  : "{{ ctlabs_semaphore_ui.defaults.service.name }}"
+    state : reloaded
+
+- name: ctlabs_semaphore_ui.handlers.systemd.reload
+  systemd:
+    daemon_reload: true

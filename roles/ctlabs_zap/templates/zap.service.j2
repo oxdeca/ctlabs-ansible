@@ -1,19 +1,20 @@
 {# ---------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_zap/templates/zap.service.j2
-# Description : systemd unit for OWASP ZAP
-# --------------------------------------------------------------------------- #}
+ # File        : ctlabs-ansible/roles/ctlabs_zap/templates/zap.service.j2
+ # Description : systemd unit for OWASP ZAP daemon proxy
+ # --------------------------------------------------------------------------- #}
 
 [Unit]
-Description={{ ctlabs_zap.defaults.service.description | default('OWASP ZAP') }}
+Description={{ ctlabs_zap.defaults.service.description }}
 After=network.target
 
 [Service]
 Type=simple
-User={{ ctlabs_zap.defaults.service.user | default('root') }}
-Group={{ ctlabs_zap.defaults.service.group | default('root') }}
-ExecStart={{ ctlabs_zap.defaults.zap.link }} -daemon -port {{ ctlabs_zap.defaults.config.port }} -config api.key={{ ctlabs_zap.defaults.config.api_key }}
+User={{ ctlabs_zap.defaults.service.user }}
+Group={{ ctlabs_zap.defaults.service.group }}
+ExecStart={{ ctlabs_zap.defaults.zap.link }} -daemon -port {{ ctlabs_zap.defaults.config.port }} -dir {{ ctlabs_zap.defaults.config.dir }} -config api.key={{ ctlabs_zap.defaults.config.api_key }}
 Restart=on-failure
 RestartSec=5
+WorkingDirectory={{ ctlabs_zap.defaults.config.dir }}
 
 [Install]
 WantedBy=multi-user.target

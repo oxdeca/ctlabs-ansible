@@ -1,0 +1,13 @@
+{# ---------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/templates/ghidra.desktop.j2
+# Description : XFCE4 desktop entry for Ghidra
+# --------------------------------------------------------------------------- #}
+
+[Desktop Entry]
+Name={{ ctlabs_ghidra.defaults.desktop.name }}
+Comment={{ ctlabs_ghidra.defaults.desktop.comment }}
+Exec={{ ctlabs_ghidra.defaults.ghidra.link }}
+Icon={{ ctlabs_ghidra.defaults.desktop.icon }}
+Terminal=false
+Type=Application
+Categories={{ ctlabs_ghidra.defaults.desktop.categories }}

@@ -1,0 +1,47 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  java: 21
+  ghidra: 12.1
+  ghidra_release: PUBLIC
+  ghidra_date: 20260513
+
+ctlabs_ghidra:
+  defaults:
+    adoptium:
+      repo:
+        url: "https://packages.adoptium.net/artifactory/deb"
+        keyring: /etc/apt/trusted.gpg.d/adoptium.gpg
+        key_url: "https://packages.adoptium.net/artifactory/api/gpg/key/public"
+        filename: adoptium
+    pkgs:
+      redhat:
+        - name: "java-{{ versions.java }}-openjdk"
+        - name: unzip
+      debian:
+        - name: "temurin-{{ versions.java }}-jdk"
+        - name: unzip
+    ghidra:
+      version: "{{ versions.ghidra }}"
+      release: "{{ versions.ghidra_release }}"
+      date: "{{ versions.ghidra_date }}"
+      url: "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_{{ versions.ghidra }}_build/ghidra_{{ versions.ghidra }}_{{ versions.ghidra_release }}_{{ versions.ghidra_date }}.zip"
+      archive: "ghidra_{{ versions.ghidra }}_{{ versions.ghidra_release }}_{{ versions.ghidra_date }}.zip"
+      dir: "ghidra_{{ versions.ghidra }}_{{ versions.ghidra_release }}"
+      parent_dir: "/opt"
+      bin_path: "ghidraRun"
+      link: "/usr/local/bin/ghidra"
+    desktop:
+      name: Ghidra
+      comment: NSA Reverse Engineering Platform
+      icon: /opt/ghidra_12.1_PUBLIC/support/ghidra.png
+      categories: Development;Security;
+  os:
+    - debian12
+  virtype:
+    - kvm

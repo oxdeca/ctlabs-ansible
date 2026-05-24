@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ghidra.tasks.config.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_ghidra.tasks.config.java_home.set
+      replace:
+        path: "{{ ctlabs_ghidra.defaults.ghidra.parent_dir }}/{{ ctlabs_ghidra.defaults.ghidra.dir }}/support/launch.properties"
+        regexp: '^JAVA_HOME_OVERRIDE=.*'
+        replace: "JAVA_HOME_OVERRIDE=/usr/lib/jvm/temurin-{{ versions.java }}-jdk-amd64"
+
+    - name: ctlabs_ghidra.tasks.config.icon.extract
+      script: files/extract_ghidra_png.py
+      args:
+        creates: "{{ ctlabs_ghidra.defaults.ghidra.parent_dir }}/{{ ctlabs_ghidra.defaults.ghidra.dir }}/support/ghidra.png"
+
+    - name: ctlabs_ghidra.tasks.config.desktop.deploy
+      template:
+        src: ghidra.desktop.j2
+        dest: /usr/share/applications/ghidra.desktop
+        mode: '0644'

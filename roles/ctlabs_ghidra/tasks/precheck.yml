@@ -1,21 +1,21 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_zap/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_zap.tasks.precheck
+- name: ctlabs_ghidra.tasks.precheck
   block:
-    - name: ctlabs_zap.tasks.precheck.os.supported
+    - name: ctlabs_ghidra.tasks.precheck.os.supported
       assert:
-        that: ctg_os is in ctlabs_zap.os
+        that: ctg_os is in ctlabs_ghidra.os
         fail_msg: "OS[{{ ctg_os }}] is not supported!"
 
-    - name: ctlabs_zap.tasks.precheck.virtype.supported
+    - name: ctlabs_ghidra.tasks.precheck.virtype.supported
       assert:
-        that: ctg_virtype in ctlabs_zap.virtype
+        that: ctg_virtype in ctlabs_ghidra.virtype
         fail_msg: "virtype[{{ ctg_virtype }}] is not supported!"
   rescue:
-    - name: ctlabs_zap.tasks.precheck.skip.unsupported
+    - name: ctlabs_ghidra.tasks.precheck.skip.unsupported
       meta: end_host

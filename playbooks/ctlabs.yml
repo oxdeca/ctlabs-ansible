@@ -441,14 +441,12 @@
     - roles/ctlabs_ca
 
 # -----------------------------------------------------------------------------
-# semaphore
-# -----------------------------------------------------------------------------
-    
-- name  : ctlabs.playbooks.ctlabs.semaphore
+# semaphore-ui
+- name  : ctlabs.playbooks.ctlabs.semaphore_ui
   hosts : ansible
-  tags  : semaphore
+  tags  : semaphore_ui
   roles :
-    - roles/ctlabs_semaphore
+    - roles/ctlabs_semaphore_ui
 
 # -----------------------------------------------------------------------------
 # ctlabs_openbao
@@ -1027,3 +1025,21 @@
   tags  : [wazuh]
   roles :
     - roles/ctlabs_wazuh
+
+# -----------------------------------------------------------------------------
+# ctlabs_zap
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.zap
+  hosts : [burp1,burp2]
+  tags  : [zap]
+  roles :
+    - roles/ctlabs_zap
+
+# -----------------------------------------------------------------------------
+# ctlabs_ghidra
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.ghidra
+  hosts : [burp1,burp2]
+  tags  : [ghidra]
+  roles :
+    - roles/ctlabs_ghidra

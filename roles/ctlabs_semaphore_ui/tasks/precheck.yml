@@ -1,16 +1,16 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_semaphore/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_semaphore.tasks.precheck
+- name: ctlabs_semaphore_ui.tasks.precheck
   block:
-    - name: ctlabs_semaphore.tasks.precheck.os.supported
+    - name: ctlabs_semaphore_ui.tasks.precheck.os.supported
       assert:
-        that: ctg_os is in ctlabs_semaphore.os
+        that: ctg_os is in ctlabs_semaphore_ui.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
   rescue:
-    - name: ctlabs_semaphore.tasks.precheck.skip.unsupported
+    - name: ctlabs_semaphore_ui.tasks.precheck.skip.unsupported
       meta: end_host

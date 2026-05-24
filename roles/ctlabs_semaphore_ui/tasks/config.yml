@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore_ui.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_semaphore_ui.defaults.config.dir }}"
+    state : directory
+
+- name: ctlabs_semaphore_ui.tasks.config.db.dir
+  file:
+    path  : "{{ ctlabs_semaphore_ui.defaults.config.db.dir }}"
+    owner : "{{ ctlabs_semaphore_ui.defaults.service.user  }}"
+    state : directory
+
+- name: ctlabs_semaphore_ui.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_semaphore_ui.defaults.service.user   }}"
+    group : "{{ ctlabs_semaphore_ui.defaults.service.group  }}"
+    groups: "{{ ctlabs_semaphore_ui.defaults.service.groups }}"
+
+- name: ctlabs_semaphore_ui.tasks.config.file
+  template:
+    src  : "{{ ctlabs_semaphore_ui.defaults.config.template }}"
+    dest : "{{ ctlabs_semaphore_ui.defaults.config.dir }}/{{ ctlabs_semaphore_ui.defaults.config.file }}"
+  notify: ctlabs_semaphore_ui.handlers.semaphore.service.restart

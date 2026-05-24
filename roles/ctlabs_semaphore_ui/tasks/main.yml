@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_semaphore_ui
+    - ctlabs_semaphore_ui.precheck
+    - ctlabs_semaphore_ui.package
+    - ctlabs_semaphore_ui.config
+    - ctlabs_semaphore_ui.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_semaphore_ui
+    - ctlabs_semaphore_ui.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_semaphore_ui
+    - ctlabs_semaphore_ui.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_semaphore_ui
+    - ctlabs_semaphore_ui.service

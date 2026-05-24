@@ -1,11 +1,10 @@
 ---
-
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_zap/tests/test_zap.yml
-# Description : test playbook for ctlabs_zap (syntax-check target)
+# File        : ctlabs-ansible/roles/ctlabs_ghidra/tests/test_ghidra.yml
+# Description : test playbook for ctlabs_ghidra (syntax-check target)
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_zap.test.run
+- name: ctlabs_ghidra.test.run
   hosts: localhost
   connection: local
   gather_facts: true

@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_semaphore_ui/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_semaphore_ui.tasks.package.install
+  yum:
+    name              : "{{ item.url if item.url is defined else item.name }}"
+    disable_gpg_check : true
+    state             : present
+  loop    : "{{ ctlabs_semaphore_ui.defaults.pkgs }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_semaphore_ui.tasks.package.group
+  group:
+    name   : "{{ ctlabs_semaphore_ui.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_semaphore_ui.tasks.package.user
+  user:
+    name   : "{{ ctlabs_semaphore_ui.defaults.service.user  }}"
+    group  : "{{ ctlabs_semaphore_ui.defaults.service.group }}"
+    system : true

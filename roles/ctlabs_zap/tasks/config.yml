@@ -4,3 +4,43 @@
 # File        : ctlabs-ansible/roles/ctlabs_zap/tasks/config.yml
 # Description : configurations
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_zap.tasks.config.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_zap.tasks.config.group.create
+      group:
+        name: "{{ ctlabs_zap.defaults.service.group }}"
+        system: true
+        state: present
+
+    - name: ctlabs_zap.tasks.config.user.create
+      user:
+        name: "{{ ctlabs_zap.defaults.service.user }}"
+        group: "{{ ctlabs_zap.defaults.service.group }}"
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+        state: present
+
+    - name: ctlabs_zap.tasks.config.dir.create
+      file:
+        path: "{{ ctlabs_zap.defaults.config.dir }}"
+        state: directory
+        owner: "{{ ctlabs_zap.defaults.service.user }}"
+        group: "{{ ctlabs_zap.defaults.service.group }}"
+        mode: '0750'
+
+    - name: ctlabs_zap.tasks.config.wrapper.deploy
+      copy:
+        dest: /usr/local/bin/zap-darcula
+        content: |
+          #!/bin/sh
+          exec /usr/local/bin/zap -config view.lookAndFeel="Flat Darcula" -config view.lookAndFeelClass="com.formdev.flatlaf.FlatDarculaLaf" "$@"
+        mode: '0755'
+
+    - name: ctlabs_zap.tasks.config.desktop.deploy
+      template:
+        src: zap.desktop.j2
+        dest: /usr/share/applications/zap.desktop
+        mode: '0644'
