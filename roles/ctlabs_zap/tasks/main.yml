@@ -11,7 +11,6 @@
     - ctlabs_zap.precheck
     - ctlabs_zap.package
     - ctlabs_zap.config
-    - ctlabs_zap.service
 
 - import_tasks: package.yml
   tags:
@@ -22,8 +21,3 @@
   tags:
     - ctlabs_zap
     - ctlabs_zap.config
-
-- import_tasks: service.yml
-  tags:
-    - ctlabs_zap
-    - ctlabs_zap.service
