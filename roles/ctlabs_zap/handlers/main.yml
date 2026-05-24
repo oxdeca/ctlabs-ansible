@@ -1,0 +1,12 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_zap/handlers/main.yml
+# Description : handlers for zap role
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_zap.handlers.service.restart
+  systemd:
+    name: "{{ ctlabs_zap.defaults.service.name }}"
+    state: restarted
+    daemon_reload: true

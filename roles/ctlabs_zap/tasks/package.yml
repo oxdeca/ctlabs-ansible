@@ -15,21 +15,25 @@
     - name: ctlabs_zap.tasks.package.debian.pkgs.install
       when: item.name is defined
       apt:
-        name   : "{{ item.name }}"
-        state : present
+        name: "{{ item.name }}"
+        state: present
       loop: "{{ ctlabs_zap.defaults.pkgs[ctg_os_family] }}"
       register: result
-      until   : result is success
+      until: result is success
+    
+    - name: ctlabs_zap.tasks.package.debian.zap.download
+      get_url:
+        url: "{{ ctlabs_zap.defaults.zap.url }}"
+        dest: "{{ ctlabs_zap.defaults.zap.tmpdir }}/{{ ctlabs_zap.defaults.zap.deb_file }}"
+        mode: '0755'
     
     - name: ctlabs_zap.tasks.package.debian.zap.install
-      unarchive:
-        url  : "{{ ctlabs_zap.defaults.zap.url }}"
-        dest : "{{ ctlabs_zap.defaults.zap.dir }}"
-        mode : '0750'
-        owner: root
-
-    - name: ctlabs_zap.tasks.package.debian.zap.bin
+      apt:
+        deb: "{{ ctlabs_zap.defaults.zap.tmpdir }}/{{ ctlabs_zap.defaults.zap.deb_file }}"
+    
+    - name: ctlabs_zap.tasks.package.debian.zap.symlink
       file:
-        src : "{{ ctlabs_zap.defaults.zap.file }}"
+        src: "{{ ctlabs_zap.defaults.zap.bin_path }}"
         dest: "{{ ctlabs_zap.defaults.zap.link }}"
         state: link
+        force: true

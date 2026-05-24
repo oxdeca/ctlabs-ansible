@@ -17,9 +17,20 @@ ctlabs_zap:
       debian:
         - name: "openjdk-{{ versions.java }}-jre"
         - name: firefox-esr
-        - url: "https://download.opensuse.org/repositories/home:/cabelo/Debian_12/amd64/zap_{{ versions.zap }}-1_amd64.deb"
+    zap:
+      url: "https://download.opensuse.org/repositories/home:/cabelo/Debian_12/amd64/zap_{{ versions.zap }}-1_amd64.deb"
+      tmpdir: "/tmp"
+      deb_file: "zap_{{ versions.zap }}-1_amd64.deb"
+      bin_path: "/opt/ZAP_{{ versions.zap }}/zap.sh"
+      link: "/usr/local/bin/zap"
     config:
+      port: 8080
+      api_key: secret123!
     service:
+      name: zap.service
+      user: zap
+      group: zap
+      description: OWASP ZAP
   os:
     - debian12
   virtype:
