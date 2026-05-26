@@ -61,3 +61,18 @@
     groups: "{{ ctlabs_opendkim.defaults.service.group }}"
     append: true
   notify: ctlabs_opendkim.handlers.service.postfix_reload
+
+- name: ctlabs_opendkim.tasks.config.dns.read
+  slurp:
+    src: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.txt"
+  register: ctlabs_opendkim_txt_file
+
+#- name: ctlabs_opendkim.tasks.config.dns.cloudflare
+#  cloudflare_dns:
+#    zone     : "{{ ctlabs_opendkim_domain }}"
+#    record   : "{{ ctlabs_opendkim_selector }}._domainkey"
+#    type     : TXT
+#    value    : "{{ (ctlabs_opendkim_txt_file['content'] | b64decode) | regex_findall('\"([^\"]+)\"') | join('') }}"
+#    api_token: "{{ ctlabs_opendkim_cloudflare_api_key }}"
+#  delegate_to: localhost
+#  become     : false
