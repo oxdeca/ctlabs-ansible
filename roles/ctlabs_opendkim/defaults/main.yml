@@ -11,9 +11,11 @@ ctlabs_opendkim:
       redhat:
         - name: opendkim
         - name: opendkim-tools
+        - name: python3-cryptography
       debian:
         - name: opendkim
         - name: opendkim-tools
+        - name: python3-cryptography
     config:
       dir : /etc/opendkim
       template: opendkim.conf.j2
@@ -28,9 +30,9 @@ ctlabs_opendkim:
         - SigningTable
         - TrustedHosts
     key:
-      dir   : /etc/opendkim/keys
-      type  : ed25519
-      length: 2048
+      dir: /etc/opendkim/keys
+      type: ed25519
+      length: 256
     service:
       name : opendkim
       user : opendkim

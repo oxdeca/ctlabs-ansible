@@ -21,12 +21,21 @@
 
 - name: ctlabs_opendkim.tasks.precheck.resolve.selector
   ansible.builtin.set_fact:
-    ctlabs_opendkim_selector: "{{ ctg_facts.ctlabs_opendkim.selector | default('default') }}"
+    ctlabs_opendkim_selector: "{{ ctg_facts.ctlabs_opendkim.selector | default(ansible_nodename | hash('md5')) }}"
 
-- name: ctlabs_opendkim.tasks.precheck.resolve.key.type
+- name: ctlabs_opendkim.tasks.precheck.resolve.algorithm
   ansible.builtin.set_fact:
-    ctlabs_opendkim_key_type: "{{ ctg_facts.ctlabs_opendkim.key.type | default(ctlabs_opendkim.defaults.key.type) }}"
+    ctlabs_opendkim_key_algorithm: "{{ ctg_facts.ctlabs_opendkim.algorithm | default(ctlabs_opendkim.defaults.key.type) }}"
 
-- name: ctlabs_opendkim.tasks.precheck.resolve.key.length
+- name: ctlabs_opendkim.tasks.precheck.resolve.key_type
   ansible.builtin.set_fact:
-    ctlabs_opendkim_key_length: "{{ ctg_facts.ctlabs_opendkim.key.length | default(ctlabs_opendkim.defaults.key.length) }}"
+    ctlabs_opendkim_key_type: >-
+      {{
+        'Ed25519' if ctlabs_opendkim_key_algorithm == 'ed25519'
+        else 'RSA' if ctlabs_opendkim_key_algorithm == 'rsa'
+        else ctlabs_opendkim_key_algorithm | capitalize
+      }}
+
+- name: ctlabs_opendkim.tasks.precheck.resolve.length
+  ansible.builtin.set_fact:
+    ctlabs_opendkim_key_length: "{{ ctg_facts.ctlabs_opendkim.length | default(ctlabs_opendkim.defaults.key.length) }}"

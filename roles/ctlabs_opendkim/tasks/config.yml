@@ -18,23 +18,26 @@
     - "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}"
 
 - name: ctlabs_opendkim.tasks.config.key.generate
-  ansible.builtin.command: >
-    opendkim-genkey -D {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}
-    -d {{ ctlabs_opendkim_domain }}
-    -s {{ ctlabs_opendkim_selector }}
-    -a {{ ctlabs_opendkim.defaults.key.type }}
-    -b {{ ctlabs_opendkim.defaults.key.length }}
-  args:
-    creates: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private"
-  notify: ctlabs_opendkim.handlers.service.restart
-
-- name: ctlabs_opendkim.tasks.config.key.owner
-  ansible.builtin.file:
-    path: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}"
-    state: directory
-    recurse: true
+  community.crypto.openssl_privatekey:
+    path: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private"
+    type: "{{ ctlabs_opendkim_key_type }}"
+    size: "{{ ctlabs_opendkim_key_length | int }}"
+    mode: '0640'
     owner: "{{ ctlabs_opendkim.defaults.service.user }}"
     group: "{{ ctlabs_opendkim.defaults.service.group }}"
+  register: ctlabs_opendkim_key_gen
+  notify: ctlabs_opendkim.handlers.service.restart
+
+- name: ctlabs_opendkim.tasks.config.key.dns_record
+  ansible.builtin.script: >-
+    files/dkim_dns_record.py
+    {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.private
+    {{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.txt
+    {{ ctlabs_opendkim_selector }}
+    {{ ctlabs_opendkim_domain }}
+    {{ ctlabs_opendkim_key_algorithm }}
+  args:
+    creates: "{{ ctlabs_opendkim.defaults.key.dir }}/{{ ctlabs_opendkim_domain }}/{{ ctlabs_opendkim_selector }}.txt"
 
 - name: ctlabs_opendkim.tasks.config.file
   template:

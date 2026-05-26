@@ -423,10 +423,7 @@
         dest: /etc/ansible/facts.d/ctlabs_opendkim.fact
         content: |
           {
-            "domain"   : "ctlabs.internal",
-            "selector" : "20260519",
-            "algorithm": "rsa",
-            "bits"     : "4096"
+            "domain"   : "ctlabs.internal"
           }
 
 
