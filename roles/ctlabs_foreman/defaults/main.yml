@@ -6,8 +6,8 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  foreman: 3.18
-  katello: 4.20
+  foreman: 3.17
+  katello: 4.19
   puppet : 8
 
 ctlabs_foreman:
