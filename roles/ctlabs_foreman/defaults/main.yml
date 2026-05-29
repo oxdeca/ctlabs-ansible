@@ -6,8 +6,8 @@
 # ------------------------------------------------------------------------------
 
 versions:
-  foreman: 3.15
-  katello: 4.17
+  foreman: 3.18
+  katello: 4.20
   puppet : 8
 
 ctlabs_foreman:
@@ -19,22 +19,6 @@ ctlabs_foreman:
         - url  : "https://yum.theforeman.org/releases/{{ versions.foreman }}/el9/x86_64/foreman-release.rpm"
         - url  : "https://yum.theforeman.org/katello/{{ versions.katello }}/katello/el9/x86_64/katello-repos-latest.rpm"
         - name : foreman-installer-katello
-      foreman:
-        cli:
-          # --enable-foreman-cli-openscap
-          - openscap
-        plugins:
-          # --enable-foreman-plugin-remote-execution
-          - remote-execution
-          - ansible
-          - discovery
-          - openscap
-          - webhooks
-          - netbox
-        proxy-plugins:
-          # --enable-foreman-proxy-plugin-remove-execution-script
-          - remote-execution-script
-          - openscap-puppet-module true
     install:
       cmd     : /usr/sbin/foreman-installer
       scenario: foreman # katello
@@ -56,6 +40,7 @@ ctlabs_foreman:
           --enable-foreman-plugin-google
           --enable-foreman-plugin-kubevirt
           --enable-foreman-compute-libvirt
+          --enable-foreman-cli-openscap
       proxy:
         flags: >
           --enable-foreman-proxy-plugin-ansible
