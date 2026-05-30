@@ -47,7 +47,7 @@ ctlabs_claude_code:
       settings: 
         dir     : ~/.claude
         template: settings.json.j2
-        file    : ~/.claude/settings.json.j2
+        file    : ~/.claude/settings.json
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
