@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_claude_code.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_claude_code.tasks.precheck.fact.openrouter_api_key
+  set_fact:
+    ctlabs_claude_code_openrouter_api_key: "{{ ctg_facts.ctlabs_claude_code.openrouter.api_key|default() }}"

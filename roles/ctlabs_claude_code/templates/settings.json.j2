@@ -1,0 +1,13 @@
+{ 
+  "env": {
+    "ANTHROPIC_BASE_URL"                   : "https://openrouter.ai/api",
+    "ANTHROPIC_AUTH_TOKEN"                 : "{{ ctlabs_claude_code_openrouter_api_key }}",
+    "ANTHROPIC_API_KEY"                    : "",
+    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK" : "1"
+  },
+  "model"      : "openrouter/free",
+  "statusLine" : {
+    "format" : "{% raw %}{{user}}@{{host}}:{{dir}}#{% endraw %}"
+  },
+  "theme": "dark"
+}

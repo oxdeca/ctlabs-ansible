@@ -30,3 +30,14 @@
     owner: "{{ ctlabs_claude_code.defaults.config.user  }}"
     group: "{{ ctlabs_claude_code.defaults.config.group }}"
     mode : '0750'
+
+- name: ctlabs_claude_code.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_claude_code.defaults.config.settings.dir }}"
+    state: directory
+    mode: '0755'
+
+- name: ctlabs_claude_code.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_claude_code.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_claude_code.defaults.config.settings.file     }}"

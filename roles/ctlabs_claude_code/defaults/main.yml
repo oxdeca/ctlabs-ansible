@@ -40,10 +40,14 @@ ctlabs_claude_code:
     config:
       prefdir: /etc/apt/preferences.d
       keydir : /etc/apt/keyrings
-      dir     : /home/claude
-      user    : claude
-      group   : claude
-      groups  : [certs]
+      dir    : /home/claude
+      user   : claude
+      group  : claude
+      groups : [certs]
+      settings: 
+        dir     : ~/.claude
+        template: settings.json.j2
+        file    : ~/.claude/settings.json.j2
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
