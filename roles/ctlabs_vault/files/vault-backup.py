@@ -93,12 +93,12 @@ def backup_snap():
     backup_file = os.path.join(BACKUP_DIR, f"vault-snap-{timestamp}.tar.gz")
     
     logging.info("Starting SNAPSHOT Backup...")
-    run_cmd(["systemctl", "stop", "vault"])
+    run_cmd(["systemctl", "stop", "vault-server"])
     
     # tar -czvf backup_file -C DATA_DIR .
     run_cmd(["tar", "-czvf", backup_file, "-C", DATA_DIR, "."])
     
-    run_cmd(["systemctl", "start", "vault"])
+    run_cmd(["systemctl", "start", "vault-server"])
     logging.info(f"Snapshot created successfully: {backup_file}")
     cleanup_old_backups()
 
@@ -107,12 +107,12 @@ def backup_full():
     backup_file = os.path.join(BACKUP_DIR, f"vault-full-{timestamp}.tar.gz")
     
     logging.info("Starting FULL Backup (Data + Config)...")
-    run_cmd(["systemctl", "stop", "vault"])
+    run_cmd(["systemctl", "stop", "vault-server"])
     
     # tar -czvf backup_file DATA_DIR CONFIG_DIR
     run_cmd(["tar", "-czvf", backup_file, DATA_DIR, CONFIG_DIR])
     
-    run_cmd(["systemctl", "start", "vault"])
+    run_cmd(["systemctl", "start", "vault-server"])
     logging.info(f"Full backup created successfully: {backup_file}")
     cleanup_old_backups()
 
@@ -122,7 +122,7 @@ def restore_snap(filepath):
         sys.exit(1)
         
     logging.info(f"Starting SNAPSHOT Restore from {filepath}...")
-    run_cmd(["systemctl", "stop", "vault"])
+    run_cmd(["systemctl", "stop", "vault-server"])
     
     logging.info("Clearing existing data directory...")
     clear_directory(DATA_DIR)
@@ -133,7 +133,7 @@ def restore_snap(filepath):
     logging.info("Fixing permissions...")
     run_cmd(["chown", "-R", f"{VAULT_USER}:{VAULT_GROUP}", DATA_DIR])
     
-    run_cmd(["systemctl", "start", "vault"])
+    run_cmd(["systemctl", "start", "vault-server"])
     logging.info("Snapshot restore complete. You must now unseal Vault.")
 
 def restore_full(filepath):
@@ -142,7 +142,7 @@ def restore_full(filepath):
         sys.exit(1)
         
     logging.info(f"Starting FULL Restore from {filepath}...")
-    run_cmd(["systemctl", "stop", "vault"])
+    run_cmd(["systemctl", "stop", "vault-server"])
     
     logging.info("Clearing existing data and config directories...")
     clear_directory(DATA_DIR)
@@ -156,7 +156,7 @@ def restore_full(filepath):
     run_cmd(["chown", "-R", f"{VAULT_USER}:{VAULT_GROUP}", DATA_DIR])
     run_cmd(["chown", "-R", f"{VAULT_USER}:{VAULT_GROUP}", CONFIG_DIR])
     
-    run_cmd(["systemctl", "start", "vault"])
+    run_cmd(["systemctl", "start", "vault-server"])
     logging.info("Full restore complete. You must now unseal Vault.")
 
 # ==========================================

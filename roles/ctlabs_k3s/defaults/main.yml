@@ -17,6 +17,7 @@ ctlabs_k3s:
       debian:
         - name: python3-yaml
         - name: python3-kubernetes
+        - url : https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb
       k3s:
         uri  : "https://github.com/k3s-io/k3s/releases/download/v{{ versions.k3s }}+k3s1/k3s"
         path : /usr/bin/k3s

@@ -1,0 +1,13 @@
+[Unit]
+  Description= Vault Proxy
+  Documentation= https://www.vaultproject.io/docs/proxy
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_vault.defaults.service.user }}
+  Group={{ ctlabs_vault.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_vault.defaults.config.server.bin }} proxy -config {{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.proxy.file }}
+
+[Install]
+  WantedBy=multi-user.target

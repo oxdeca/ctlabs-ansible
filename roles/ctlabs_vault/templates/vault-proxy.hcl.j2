@@ -1,0 +1,43 @@
+{# ------------------------------------------------------------------------------ #}
+{# File        : ctlabs-ansible/roles/ctlabs_vault/templates/vault-proxy.hcl.j2   #}
+{# Description : Vault Proxy configuration                                        #}
+{# ------------------------------------------------------------------------------ #}
+
+vault {
+  address     = "{{ ctlabs_vault_server_addr }}"
+  tls_ca_cert = "{{ ctlabs_vault.defaults.config.proxy.ca_cert }}"
+}
+
+auto_auth {
+  method "gcp" {
+    mount_path = "auth/gcp"
+    config = {
+      type = "gce"
+      role = "{{ ctlabs_vault_agent_gcp_role }}"
+    }
+  }
+}
+
+cache {
+  use_auto_auth_token = true
+}
+
+{% if ctlabs_vault_proxy_socktype == 'unix' %}
+listener "unix" {
+  address      = "{{ ctlabs_vault.defaults.config.proxy.unix }}"
+  tls_disable  = true
+  socket_user  = "vault"
+  socket_group = "vault-users"
+  socket_mode  = "0660"
+}
+{% endif %}
+
+{% if ctlabs_vault_proxy_socktype == 'mtls' %}
+listener "tcp" {
+  address            = "{{ ctlabs_vault.defaults.config.proxy.mtls.uri }}"
+  tls_cert_file      = "{{ ctlabs_vault.defaults.config.proxy.mtls.crt }}"
+  tls_key_file       = "{{ ctlabs_vault.defaults.config.proxy.mtls.key }}"
+  tls_client_ca_file = "{{ ctlabs_vault.defaults.config.proxy.mtls.ca  }}"
+  tls_require_and_verify_client_cert = true
+}
+{% endif %}

@@ -426,6 +426,27 @@
             "domain"   : "ctlabs.internal"
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.chrony.server.local_facts
+      when: ansible_hostname in ['h3']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_chrony.fact
+        content: |
+          {
+            "role"    : "server",
+            "sources" : [ "ntp1.torrix.ca", "ntp2.torrix.ca", "ntp3.torrix.ca" ],
+            "clients" : [ "192.168.0.0/16" ]
+          }
+
+    - name: ctlabs.playbooks.ctlabs.setup.chrony.client.local_facts
+      when: ansible_hostname in ['h4']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_chrony.fact
+        content: |
+          {
+            "role"    : "server",
+            "sources" : [ "h3.ctlabs.internal" ]
+          }
+
 
 # -----------------------------------------------------------------------------
 # ctlabs_ca
@@ -473,6 +494,15 @@
   tags  : rundeck
   roles :
     - roles/ctlabs_rundeck
+
+# -----------------------------------------------------------------------------
+# ctlabs_chrony
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.chrony
+  hosts : ansible
+  tags  : chrony
+  roles :
+    - roles/ctlabs_chrony
 
 # -----------------------------------------------------------------------------
 # ctlabs_kafka

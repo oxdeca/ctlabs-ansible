@@ -1,0 +1,33 @@
+{# ------------------------------------------------------------------------------ #}
+{# File        : ctlabs-ansible/roles/ctlabs_vault/templates/vault-agent.hcl.j2   #}
+{# Description : Vault Agent configuration                                        #}
+{# ------------------------------------------------------------------------------ #}
+
+vault {
+  address     = "{{ ctlabs_vault_server_addr }}"
+  tls_ca_cert = "{{ ctlabs_vault.defaults.config.proxy.ca_cert }}"
+}
+
+auto_auth {
+  method "gcp" {
+    mount_path = "auth/gcp"
+    config = {
+      type = "gce"
+      role = "{{ ctlabs_vault_agent_gcp_role }}"
+    }
+  }
+}
+
+{% if ctlabs_vault_agent_cache %}
+cache {
+  use_auto_auth_token = true
+}
+{% endif %}
+
+{% if ctlabs_vault_agent_sink %}
+sink "file" {
+  config = {
+    path = "/run/vault/token"
+  }
+}
+{% endif %}

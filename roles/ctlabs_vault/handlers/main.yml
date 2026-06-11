@@ -7,7 +7,7 @@
 
 - name: ctlabs_vault.handlers.service.vault.restart
   service:
-    name    : "{{ ctlabs_vault.defaults.service.name }}"
+    name    : "{{ ctlabs_vault.defaults.service.server.name }}"
     enabled : true
     state   : restarted
 
@@ -15,3 +15,14 @@
   systemd:
     daemon_reload: true
 
+- name: ctlabs_vault.handlers.service.agent.restart
+  service:
+    name    : "{{ ctlabs_vault.defaults.service.agent.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_vault.handlers.service.proxy.restart
+  service:
+    name    : "{{ ctlabs_vault.defaults.service.proxy.name }}"
+    enabled : true
+    state   : restarted

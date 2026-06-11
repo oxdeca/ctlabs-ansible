@@ -1,0 +1,50 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tests/test_vault.yml
+# Description : test playbook for ctlabs_vault (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.test.server
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    CTLABS_VAULT_ROLE: server
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"
+
+- name: ctlabs_vault.test.agent
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    CTLABS_VAULT_ROLE: agent
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"
+
+- name: ctlabs_vault.test.proxy
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    CTLABS_VAULT_ROLE: proxy
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"
+
+- name: ctlabs_vault.test.cli
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    CTLABS_VAULT_ROLE: cli
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

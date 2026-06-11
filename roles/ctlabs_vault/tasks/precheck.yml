@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_vault.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_vault.tasks.precheck.server_addr
+  set_fact:
+    ctlabs_vault_server_addr: "{{ ctg_facts.ctlabs_vault.address | default(ctlabs_vault_server_addr) }}"

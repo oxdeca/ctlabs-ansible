@@ -1,0 +1,13 @@
+[Unit]
+  Description= Vault Agent
+  Documentation= https://www.vaultproject.io/docs/agent
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_vault.defaults.service.user }}
+  Group={{ ctlabs_vault.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_vault.defaults.config.server.bin }} agent -config {{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.agent.file }}
+
+[Install]
+  WantedBy=multi-user.target

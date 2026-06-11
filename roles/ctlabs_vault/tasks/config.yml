@@ -16,7 +16,7 @@
 # Server
 #
 - name: ctlabs_vault.tasks.config.server
-  when: CTLABS_VAULT_SERVER == 'true'
+  when: CTLABS_VAULT_ROLE == 'server'
   block:
     - name: ctlabs_vault.tasks.config.server.vault.data.dir
       file:
@@ -29,4 +29,59 @@
       template:
         src  : "{{ ctlabs_vault.defaults.config.server.template }}"
         dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.server.file }}"
+      notify: ctlabs_vault.handlers.service.vault.reload
+
+#
+# Agent
+#
+- name: ctlabs_vault.tasks.config.agent
+  when: CTLABS_VAULT_ROLE == 'agent'
+  block:
+    - name: ctlabs_vault.tasks.config.agent.run.dir
+      file:
+        path : /run/vault
+        owner: "{{ ctlabs_vault.defaults.service.user  }}"
+        group: "{{ ctlabs_vault.defaults.service.group }}"
+        state: directory
+
+    - name: ctlabs_vault.tasks.config.agent.hcl
+      template:
+        src  : "{{ ctlabs_vault.defaults.config.agent.template }}"
+        dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.agent.file }}"
+      notify: ctlabs_vault.handlers.service.agent.restart
+
+    - name: ctlabs_vault.tasks.config.agent.service
+      template:
+        src  : vault-agent.service.j2
+        dest : "/etc/systemd/system/{{ ctlabs_vault.defaults.service.agent.name }}"
+      notify: ctlabs_vault.handlers.service.vault.reload
+
+#
+# Proxy
+#
+- name: ctlabs_vault.tasks.config.proxy
+  when: CTLABS_VAULT_ROLE == 'proxy'
+  block:
+    - name: ctlabs_vault.tasks.config.proxy.group
+      group:
+        name : vault-users
+        state: present
+
+    - name: ctlabs_vault.tasks.config.proxy.run.dir
+      file:
+        path : /run/vault
+        owner: "{{ ctlabs_vault.defaults.service.user  }}"
+        group: "{{ ctlabs_vault.defaults.service.group }}"
+        state: directory
+
+    - name: ctlabs_vault.tasks.config.proxy.hcl
+      template:
+        src  : "{{ ctlabs_vault.defaults.config.proxy.template }}"
+        dest : "{{ ctlabs_vault.defaults.config.dir }}/{{ ctlabs_vault.defaults.config.proxy.file }}"
+      notify: ctlabs_vault.handlers.service.proxy.restart
+
+    - name: ctlabs_vault.tasks.config.proxy.service
+      template:
+        src  : vault-proxy.service.j2
+        dest : "/etc/systemd/system/{{ ctlabs_vault.defaults.service.proxy.name }}"
       notify: ctlabs_vault.handlers.service.vault.reload

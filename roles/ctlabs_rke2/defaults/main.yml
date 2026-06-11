@@ -18,6 +18,7 @@ ctlabs_rke2:
       debian:
         - name: python3-yaml
         - name: python3-kubernetes
+        - url : https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb
       rke2:
         uri  : "https://github.com/rancher/rke2/releases/download/v{{ versions.rke2 }}+rke2r1/rke2.linux-amd64"
         path : /usr/bin/rke2
