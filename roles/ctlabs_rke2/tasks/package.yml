@@ -5,10 +5,28 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_rke2.tasks.package.debian.update.cache
+- name: ctlabs_rke2.tasks.package.debian
   when: ctg_os_family == 'debian'
-  apt:
-    update_cache: true
+  block:
+    - name: ctlabs_rke2.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+
+    - name: ctlabs_rke2.tasks.package.install.name
+      when: item.name is defined
+      apt:
+        name  : "{{ item.name }}"
+      loop    : "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+
+    - name: ctlabs_rke2.tasks.package.install.url
+      when: item.url is defined
+      apt:
+        deb   : "{{ item.url }}"
+      loop    : "{{ ctlabs_rke2.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
 
 - name: ctlabs_rke2.tasks.package.install
   package:
