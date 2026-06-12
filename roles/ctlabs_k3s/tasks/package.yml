@@ -12,9 +12,18 @@
       apt:
         update_cache: true
 
-    - name: ctlabs_k3s.tasks.package.install.url
+    - name: ctlabs_k3s.tasks.package.install.name
+      when: item.name is defined
       apt:
-        deb   : "{{ item.url if item.url is defined else item.name }}"
+        name  : "{{ item.name }}"
+      loop    : "{{ ctlabs_k3s.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+
+    - name: ctlabs_k3s.tasks.package.install.url
+      when: item.url is defined
+      apt:
+        deb   : "{{ item.url }}"
       loop    : "{{ ctlabs_k3s.defaults.pkgs[ctg_os_family] }}"
       register: result
       until   : result is success
