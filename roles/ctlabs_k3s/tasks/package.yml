@@ -5,18 +5,19 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_k3s.tasks.package.debian.update.cache
+- name: ctlabs_k3s.tasks.package.debian
   when: ctg_os_family == 'debian'
-  apt:
-    update_cache: true
+  block:
+    - name: ctlabs_k3s.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
 
-- name: ctlabs_k3s.tasks.package.install
-  package:
-    name  : "{{ item.name }}"
-    state : present
-  loop    : "{{ ctlabs_k3s.defaults.pkgs[ctg_os_family] }}"
-  register: result
-  until   : result is success
+    - name: ctlabs_k3s.tasks.package.install
+      apt:
+        name  : "{{ item.url if item.url is defined else item.name }}"
+      loop    : "{{ ctlabs_k3s.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
 
 - name: ctlabs_k3s.tasks.package.k3s.install
   get_url:
