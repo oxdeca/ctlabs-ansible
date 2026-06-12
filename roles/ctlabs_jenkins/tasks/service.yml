@@ -45,3 +45,7 @@
 #    state         :
 #    validate_certs: false
 #  register: dark_theme
+
+#
+# appearance:
+#   theme: "darkSystem"

@@ -52,8 +52,8 @@ ctlabs_vault:
         gui      : true
         bin      : /usr/bin/vault
         data     : /opt/vault/data
-        file     : vault-server.hcl
-        template : vault-server.hcl.j2
+        file     : vault.hcl
+        template : vault.hcl.j2
         port     : 8200
         cert     : /etc/ca-ctlabs/{{ ansible_nodename }}.crt
         key      : /etc/ca-ctlabs/{{ ansible_nodename }}.prv
@@ -77,7 +77,7 @@ ctlabs_vault:
       group : vault
       groups: [certs]
       server:
-        name: vault-server.service
+        name: vault.service
       agent:
         name: vault-agent.service
       proxy:
