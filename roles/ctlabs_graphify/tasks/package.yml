@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+
+- name: ctlabs_graphify.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_graphify.tasks.package.debian.update.cache
+      apt:
+        update_cache: yes
+
+- name: ctlabs_graphify.tasks.package.pkgs.installed
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop: "{{ ctlabs_graphify.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_graphify.tasks.package.pipx.installed
+  pip:
+    name       : pipx
+    state      : present
+    executable : "{{ ctlabs_graphify.defaults.pip_executable[ctg_os_family] }}"
+
+- name: ctlabs_graphify.tasks.package.graphifyy.installed
+  community.general.pipx:
+    name   : graphifyy
+    state  : install
+    python : "{{ ctlabs_graphify.defaults.python[ctg_os_family] }}"
+  environment:
+    PIPX_BIN_DIR: "{{ ctlabs_graphify.defaults.pipx.bin_dir }}"
+    PIPX_HOME   : "{{ ctlabs_graphify.defaults.pipx.home }}"

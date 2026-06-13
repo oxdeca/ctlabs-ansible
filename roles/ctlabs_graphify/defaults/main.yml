@@ -1,0 +1,47 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  graphifyy: 0.8.35
+
+ctlabs_graphify:
+  defaults:
+    pkgs:
+      debian:
+        - name: python3
+        - name: python3-pip
+        - name: python3-venv
+      redhat:
+        - name: python3.11
+        - name: python3.11-pip
+        - name: python3.11-devel
+    python:
+      debian: python3
+      redhat: python3.11
+    pip_executable:
+      debian: pip3
+      redhat: pip3.11
+    pipx:
+      bin_dir: /usr/local/bin
+      home   : /opt/pipx
+    config:
+      user  : graphify
+      group : graphify
+      dir   : /etc/graphify
+      env_file : /etc/graphify/graphify.env
+      opencode_user: opencode
+      mcp:
+        dir : /var/graphify
+        graph_file: /var/graphify/graph.json
+        host : 127.0.0.1
+        port : 8080
+    service:
+      name: graphify-mcp.service
+  os:
+    - debian12
+    - centos9
+    - redhat9

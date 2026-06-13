@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_graphify.tasks.service.unit
+  template:
+    src  : graphify-mcp.service.j2
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_graphify.defaults.service.name }}"
+  notify: ctlabs_graphify.handlers.service.restart
+
+- name: ctlabs_graphify.tasks.service.started
+  systemd:
+    name    : "{{ ctlabs_graphify.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

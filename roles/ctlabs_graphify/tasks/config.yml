@@ -1,0 +1,56 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_graphify.tasks.config.group
+  group:
+    name   : "{{ ctlabs_graphify.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_graphify.tasks.config.user
+  user:
+    name    : "{{ ctlabs_graphify.defaults.config.user }}"
+    group   : "{{ ctlabs_graphify.defaults.config.group }}"
+    system  : true
+    shell   : /usr/sbin/nologin
+    home    : "{{ ctlabs_graphify.defaults.config.mcp.dir }}"
+    create_home: false
+
+- name: ctlabs_graphify.tasks.config.mcp.dir
+  file:
+    path : "{{ ctlabs_graphify.defaults.config.mcp.dir }}"
+    state: directory
+    owner: "{{ ctlabs_graphify.defaults.config.user }}"
+    group: "{{ ctlabs_graphify.defaults.config.group }}"
+    mode : '0755'
+
+- name: ctlabs_graphify.tasks.config.wrapper
+  template:
+    src  : graphify-mcp.sh.j2
+    dest : /usr/local/bin/graphify-mcp-server
+    mode : '0755'
+
+- name: ctlabs_graphify.tasks.config.dir
+  file:
+    path : "{{ ctlabs_graphify.defaults.config.dir }}"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_graphify.tasks.config.env
+  template:
+    src  : graphify.env.j2
+    dest : "{{ ctlabs_graphify.defaults.config.env_file }}"
+    owner: "{{ ctlabs_graphify.defaults.config.user }}"
+    group: "{{ ctlabs_graphify.defaults.config.group }}"
+    mode : '0640'
+  notify: ctlabs_graphify.handlers.service.restart
+
+- name: ctlabs_graphify.tasks.config.opencode.integration
+  command:
+    cmd: /usr/local/bin/graphify opencode install
+    creates: "/home/{{ ctlabs_graphify.defaults.config.opencode_user }}/.config/opencode/skills/graphify/SKILL.md"
+  become: true
+  become_user: "{{ ctlabs_graphify.defaults.config.opencode_user }}"

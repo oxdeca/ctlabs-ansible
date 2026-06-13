@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_graphify.tasks.precheck
+  block:
+    - name: ctlabs_graphify.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_graphify.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_graphify.tasks.precheck.skip.unsupported
+      meta: end_host

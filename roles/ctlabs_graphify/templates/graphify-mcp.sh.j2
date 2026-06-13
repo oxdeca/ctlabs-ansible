@@ -1,0 +1,7 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/templates/graphify-mcp.sh.j2
+# Description : wrapper script for graphify-mcp HTTP server
+# ------------------------------------------------------------------------------
+
+exec {{ ctlabs_graphify.defaults.pipx.home }}/venvs/graphifyy/bin/python -m graphify.serve "$@"

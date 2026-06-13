@@ -1,0 +1,20 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/templates/graphify-mcp.service.j2
+# Description : graphify-mcp systemd unit
+# ------------------------------------------------------------------------------
+
+[Unit]
+Description=Graphify MCP HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User={{ ctlabs_graphify.defaults.config.user }}
+Group={{ ctlabs_graphify.defaults.config.group }}
+EnvironmentFile={{ ctlabs_graphify.defaults.config.env_file }}
+ExecStart=/usr/local/bin/graphify-mcp-server {{ ctlabs_graphify.defaults.config.mcp.graph_file }} --transport http --host ${GRAPHIFY_MCP_HOST} --port ${GRAPHIFY_MCP_PORT}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
