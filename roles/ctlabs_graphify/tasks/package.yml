@@ -21,12 +21,6 @@
   register: result
   until   : result is success
 
-- name: ctlabs_graphify.tasks.package.pipx.installed
-  pip:
-    name       : pipx
-    state      : present
-    executable : "{{ ctlabs_graphify.defaults.pip_executable[ctg_os_family] }}"
-
 - name: ctlabs_graphify.tasks.package.graphifyy.installed
   community.general.pipx:
     name   : graphifyy

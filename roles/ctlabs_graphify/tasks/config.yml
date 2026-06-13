@@ -47,10 +47,3 @@
     group: "{{ ctlabs_graphify.defaults.config.group }}"
     mode : '0640'
   notify: ctlabs_graphify.handlers.service.restart
-
-- name: ctlabs_graphify.tasks.config.opencode.integration
-  command:
-    cmd: /usr/local/bin/graphify opencode install
-    creates: "/home/{{ ctlabs_graphify.defaults.config.opencode_user }}/.config/opencode/skills/graphify/SKILL.md"
-  become: true
-  become_user: "{{ ctlabs_graphify.defaults.config.opencode_user }}"

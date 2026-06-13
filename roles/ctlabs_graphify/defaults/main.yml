@@ -15,10 +15,12 @@ ctlabs_graphify:
         - name: python3
         - name: python3-pip
         - name: python3-venv
+        - name: pipx
       redhat:
         - name: python3.11
         - name: python3.11-pip
         - name: python3.11-devel
+        - name: pipx
     python:
       debian: python3
       redhat: python3.11

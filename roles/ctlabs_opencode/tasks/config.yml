@@ -46,3 +46,10 @@
 #  template:
 #    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
 #    dest : "{{ ctlabs_opencode.defaults.config.settings.file     }}"
+
+#- name: ctlabs_opencode.tasks.config.graphify
+#  command:
+#    cmd: /usr/local/bin/graphify opencode install
+#    creates: "/home/{{ ctlabs_opencode.defaults.config.opencode_user }}/.config/opencode/skills/graphify/SKILL.md"
+#  become: true
+#  become_user: "{{ ctlabs_opencode.defaults.config.opencode_user }}"
