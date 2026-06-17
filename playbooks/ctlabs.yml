@@ -495,14 +495,14 @@
   roles :
     - roles/ctlabs_rundeck
 
-# -----------------------------------------------------------------------------
-# ctlabs_chrony
-# -----------------------------------------------------------------------------
-- name  : ctlabs.playbooks.ctlabs.chrony
-  hosts : ansible
-  tags  : chrony
-  roles :
-    - roles/ctlabs_chrony
+## -----------------------------------------------------------------------------
+## ctlabs_chrony
+## -----------------------------------------------------------------------------
+#- name  : ctlabs.playbooks.ctlabs.chrony
+#  hosts : ansible
+#  tags  : chrony
+#  roles :
+#    - roles/ctlabs_chrony
 
 # -----------------------------------------------------------------------------
 # ctlabs_kafka
@@ -1027,6 +1027,15 @@
     - roles/ctlabs_gemini_cli
 
 # -----------------------------------------------------------------------------
+# ctlabs_antigravity_cli
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.antigravity_cli
+  hosts : [ansible,h1,h2,h3]
+  tags  : [antigravity_cli]
+  roles :
+    - roles/ctlabs_antigravity_cli
+
+# -----------------------------------------------------------------------------
 # ctlabs_claude_code
 # -----------------------------------------------------------------------------
 - name  : ctlabs.playbooks.ctlabs.claude_code
@@ -1052,6 +1061,15 @@
   tags  : [picode]
   roles :
     - roles/ctlabs_picode
+
+# -----------------------------------------------------------------------------
+# ctlabs_hermes
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.hermes
+  hosts : [ansible,h1,h2,h3]
+  tags  : [hermes]
+  roles :
+    - roles/ctlabs_hermes
 
 # -----------------------------------------------------------------------------
 # ctlabs_wazuh

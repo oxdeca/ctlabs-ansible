@@ -1,0 +1,10 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_hermes/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_hermes.handlers.apt.update_cache
+  apt:
+    update_cache: yes

@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_hermes/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_hermes
+    - ctlabs_hermes.precheck
+    - ctlabs_hermes.package
+    - ctlabs_hermes.config
+    - ctlabs_hermes.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_hermes
+    - ctlabs_hermes.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_hermes
+    - ctlabs_hermes.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_hermes
+    - ctlabs_hermes.service

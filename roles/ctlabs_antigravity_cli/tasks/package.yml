@@ -1,0 +1,70 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_antigravity_cli.tasks.package.pkgs.installed
+  when: item.when is not defined or item.when
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_antigravity_cli.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+- name: ctlabs_antigravity_cli.tasks.package.binary.check
+  stat:
+    path: "{{ ctlabs_antigravity_cli.defaults.install.bin }}"
+  register: agy_bin
+
+- name: ctlabs_antigravity_cli.tasks.package.binary.install
+  when: not agy_bin.stat.exists
+  block:
+    - name: ctlabs_antigravity_cli.tasks.package.manifest.fetch
+      uri:
+        url : "{{ ctlabs_antigravity_cli.defaults.install.manifest_base }}/manifests/{{ agy_platform }}.json"
+        return_content: true
+      register: agy_manifest
+
+    - name: ctlabs_antigravity_cli.tasks.package.manifest.parse
+      set_fact:
+        agy_download_url: "{{ (agy_manifest.json).url }}"
+        agy_sha512: "{{ (agy_manifest.json).sha512 }}"
+
+    - name: ctlabs_antigravity_cli.tasks.package.download.dir
+      file:
+        path : "{{ ctlabs_antigravity_cli.defaults.install.dir }}"
+        state: directory
+        mode : '0755'
+
+    - name: ctlabs_antigravity_cli.tasks.package.binary.download
+      get_url:
+        url  : "{{ agy_download_url }}"
+        dest : "{{ ctlabs_antigravity_cli.defaults.install.dir }}/agy_download"
+        checksum: "sha512:{{ agy_sha512 }}"
+        mode : '0644'
+
+    - name: ctlabs_antigravity_cli.tasks.package.binary.extract_tar
+      when: "'tar.gz' in agy_download_url"
+      unarchive:
+        src: "{{ ctlabs_antigravity_cli.defaults.install.dir }}/agy_download"
+        dest: "{{ ctlabs_antigravity_cli.defaults.install.dir }}"
+        remote_src: true
+
+    - name: ctlabs_antigravity_cli.tasks.package.binary.install_tar
+      when: "'tar.gz' in agy_download_url"
+      copy:
+        src : "{{ ctlabs_antigravity_cli.defaults.install.dir }}/antigravity"
+        dest: "{{ ctlabs_antigravity_cli.defaults.install.bin }}"
+        mode: '0755'
+        remote_src: true
+
+    - name: ctlabs_antigravity_cli.tasks.package.binary.install_raw
+      when: "'tar.gz' not in agy_download_url"
+      copy:
+        src : "{{ ctlabs_antigravity_cli.defaults.install.dir }}/agy_download"
+        dest: "{{ ctlabs_antigravity_cli.defaults.install.bin }}"
+        mode: '0755'
+        remote_src: true

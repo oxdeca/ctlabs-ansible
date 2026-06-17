@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_hermes/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_hermes.tasks.config.group
+  group:
+    name   : "{{ ctlabs_hermes.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_hermes.tasks.config.user
+  user:
+    name   : "{{ ctlabs_hermes.defaults.config.user  }}"
+    group  : "{{ ctlabs_hermes.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_hermes.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_hermes.defaults.config.user   }}"
+    group : "{{ ctlabs_hermes.defaults.config.group  }}"
+    groups: "{{ ctlabs_hermes.defaults.config.groups }}"
+    shell : /bin/bash
+
+- name: ctlabs_hermes.tasks.config.hermes.dir
+  file:
+    path : "{{ ctlabs_hermes.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_hermes.defaults.config.user  }}"
+    group: "{{ ctlabs_hermes.defaults.config.group }}"
+    mode : '0750'
+
+- name: ctlabs_hermes.tasks.config.profile.d
+  template:
+    src  : "{{ ctlabs_hermes.defaults.config.profile.template }}"
+    dest : "{{ ctlabs_hermes.defaults.config.profile.file     }}"

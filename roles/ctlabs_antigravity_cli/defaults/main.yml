@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_antigravity_cli:
+  defaults:
+    pkgs:
+      debian:
+        - name: curl
+      redhat: []
+    install:
+      manifest_base: https://antigravity-cli-auto-updater-974169037036.us-central1.run.app
+      dir : /usr/local/lib/antigravity
+      bin : /usr/local/bin/agy
+    config:
+      dir     : /home/agy
+      user    : agy
+      group   : agy
+      groups  : [certs]
+      profile:
+        template: profile_agy.sh.j2
+        file    : /etc/profile.d/agy.sh
+    certs:
+      dir: /etc/ca-ctlabs
+      crt: "{{ ansible_nodename }}.crt"
+      key: "{{ ansible_nodename }}.prv"
+      ca:  ca-ctlabs.crt
+  os:
+    - debian12
+    - kali2025
+    - kali2026
+    - parrot6
+    - parrot7
+    - centos9
