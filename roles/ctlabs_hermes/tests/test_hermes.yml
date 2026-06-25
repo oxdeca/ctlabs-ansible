@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_hermes/tests/test_hermes.yml
+# Description : test playbook for ctlabs_hermes (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_hermes.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

@@ -42,15 +42,14 @@ ctlabs_opencode:
         template: profile_opencode.sh.j2
         file    : /etc/profile.d/opencode.sh
       settings:
-        dir     : ~/.opencode
+        dir     : /home/opencode/.config/opencode
         template: opencode.json.j2
-        file    : ~/.config/opencode/opencode.json
+        file    : /home/opencode/.config/opencode/opencode.json
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"
       key: "{{ ansible_nodename }}.prv"
       ca:  ca-ctlabs.crt
-    service:
   os:
     - debian12
     - kali2025
@@ -58,3 +57,4 @@ ctlabs_opencode:
     - parrot6
     - parrot7
     - centos9
+    

@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opencode/tests/test_opencode.yml
+# Description : test playbook for ctlabs_opencode (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opencode.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

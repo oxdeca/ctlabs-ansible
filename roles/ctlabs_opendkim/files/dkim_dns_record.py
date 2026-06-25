@@ -4,10 +4,10 @@
 import base64, hashlib, os, struct, sys
 
 private_key_path = sys.argv[1]
-txt_path = sys.argv[2]
-selector = sys.argv[3]
-domain = sys.argv[4]
-algorithm = sys.argv[5]
+txt_path         = sys.argv[2]
+selector         = sys.argv[3]
+domain           = sys.argv[4]
+algorithm        = sys.argv[5]
 
 with open(private_key_path, "rb") as f:
     pem_data = f.read()

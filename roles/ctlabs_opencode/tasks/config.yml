@@ -36,20 +36,15 @@
     src  : "{{ ctlabs_opencode.defaults.config.profile.template }}"
     dest : "{{ ctlabs_opencode.defaults.config.profile.file     }}"
 
-#- name: ctlabs_opencode.tasks.config.settings.dir
-#  file:
-#    path : "{{ ctlabs_opencode.defaults.config.settings.dir }}"
-#    state: directory
-#    mode: '0755'
-#
-#- name: ctlabs_opencode.tasks.config.settings.file
-#  template:
-#    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
-#    dest : "{{ ctlabs_opencode.defaults.config.settings.file     }}"
+- name: ctlabs_opencode.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_opencode.defaults.config.settings.dir }}"
+    state: directory
+    owner: "{{ ctlabs_opencode.defaults.config.user  }}"
+    group: "{{ ctlabs_opencode.defaults.config.group }}"
+    mode : '0755'
 
-#- name: ctlabs_opencode.tasks.config.graphify
-#  command:
-#    cmd: /usr/local/bin/graphify opencode install
-#    creates: "/home/{{ ctlabs_opencode.defaults.config.opencode_user }}/.config/opencode/skills/graphify/SKILL.md"
-#  become: true
-#  become_user: "{{ ctlabs_opencode.defaults.config.opencode_user }}"
+- name: ctlabs_opencode.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_opencode.defaults.config.settings.file }}"

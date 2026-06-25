@@ -5,8 +5,6 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_graphify.handlers.service.restart
-  systemd_service:
-    name          : "{{ ctlabs_graphify.defaults.service.name }}"
-    state         : restarted
-    daemon_reload : true
+- name: ctlabs_graphify.handlers.apt.update_cache
+  apt:
+    update_cache: yes

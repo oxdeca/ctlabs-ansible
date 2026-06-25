@@ -16,22 +16,8 @@
     group   : "{{ ctlabs_graphify.defaults.config.group }}"
     system  : true
     shell   : /usr/sbin/nologin
-    home    : "{{ ctlabs_graphify.defaults.config.mcp.dir }}"
+    home    : "{{ ctlabs_graphify.defaults.config.dir }}"
     create_home: false
-
-- name: ctlabs_graphify.tasks.config.mcp.dir
-  file:
-    path : "{{ ctlabs_graphify.defaults.config.mcp.dir }}"
-    state: directory
-    owner: "{{ ctlabs_graphify.defaults.config.user }}"
-    group: "{{ ctlabs_graphify.defaults.config.group }}"
-    mode : '0755'
-
-- name: ctlabs_graphify.tasks.config.wrapper
-  template:
-    src  : graphify-mcp.sh.j2
-    dest : /usr/local/bin/graphify-mcp-server
-    mode : '0755'
 
 - name: ctlabs_graphify.tasks.config.dir
   file:
@@ -39,11 +25,14 @@
     state: directory
     mode : '0755'
 
-- name: ctlabs_graphify.tasks.config.env
+- name: ctlabs_graphify.tasks.config.update.script
   template:
-    src  : graphify.env.j2
-    dest : "{{ ctlabs_graphify.defaults.config.env_file }}"
-    owner: "{{ ctlabs_graphify.defaults.config.user }}"
-    group: "{{ ctlabs_graphify.defaults.config.group }}"
-    mode : '0640'
-  notify: ctlabs_graphify.handlers.service.restart
+    src  : graphify-update-all.sh.j2
+    dest : /usr/local/bin/graphify-update-all
+    mode : '0755'
+
+- name: ctlabs_graphify.tasks.config.yaml_extract.copy
+  copy:
+    src  : ../tools/ansible_yaml_extract.py
+    dest : "{{ ctlabs_graphify.defaults.config.dir }}/ansible_yaml_extract.py"
+    mode : '0755'

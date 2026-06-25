@@ -1,0 +1,21 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_graphify/templates/graphify-update-all.sh.j2
+# Description : update knowledge graphs for all configured projects
+# ------------------------------------------------------------------------------
+set -euo pipefail
+
+GRAPHIFY={{ ctlabs_graphify.defaults.pipx.bin_dir }}/graphify
+YAML_EXTRACT={{ ctlabs_graphify.defaults.config.dir }}/ansible_yaml_extract.py
+
+{% for project in ctlabs_graphify.defaults.projects %}
+echo "[graphify] updating {{ project.dir }}"
+"$GRAPHIFY" update "{{ project.dir }}" --no-viz --update
+
+{% if project.yaml_extract %}
+echo "[graphify] extracting ansible yaml structure for {{ project.dir }}"
+python3.11 "$YAML_EXTRACT"
+{% endif %}
+{% endfor %}
+
+echo "[graphify] rebuild complete"

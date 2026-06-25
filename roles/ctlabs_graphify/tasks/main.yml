@@ -11,7 +11,6 @@
     - ctlabs_graphify.precheck
     - ctlabs_graphify.package
     - ctlabs_graphify.config
-    - ctlabs_graphify.service
 
 - import_tasks: package.yml
   tags:
@@ -22,8 +21,3 @@
   tags:
     - ctlabs_graphify
     - ctlabs_graphify.config
-
-- import_tasks: service.yml
-  tags:
-    - ctlabs_graphify
-    - ctlabs_graphify.service

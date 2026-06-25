@@ -6,7 +6,6 @@
 - `ctlabs_graphify.precheck`
 - `ctlabs_graphify.package`
 - `ctlabs_graphify.config`
-- `ctlabs_graphify.service`
 
 ## Prechecks
 
@@ -15,17 +14,32 @@
 
 ## Description
 
-Installs [Graphify](https://github.com/safishamsi/graphify) (knowledge graph tool for codebases) via pipx. Installs the `graphify` CLI system-wide and sets up a `graphify-mcp` systemd service for the MCP HTTP server.
+Installs [Graphify](https://github.com/safishamsi/graphify) (knowledge graph tool for codebases) and provides `graphify-update-all` to rebuild graphs for all configured projects.
+
+**Configured projects** (`ctlabs_graphify.defaults.projects`):
+
+| Project | Directory | YAML Extraction |
+|---|---|---|
+| ctlabs-ansible | `/root/ctlabs-ansible` | Yes (via `ansible_yaml_extract.py`) |
+| ctlabs-terraform | `/root/ctlabs-terraform` | No |
+| ctlabs-tools | `/root/ctlabs-tools` | No |
+
+On each run, `graphify-update-all`:
+1. Runs `graphify update --no-viz --update` on each project (skips heavy HTML viz, only processes changed files)
+2. Runs `ansible_yaml_extract.py` for the ansible repo (adds YAML structure without an API key)
+3. Each project's `graph.json` stays in its own `graphify-out/` directory
 
 ## Configuration
 
-| Variable                                         | Default                    | Description                   |
-|--------------------------------------------------|----------------------------|-------------------------------|
-| `ctlabs_graphify.defaults.pipx.bin_dir`          | `/usr/local/bin`           | pipx binary symlink directory |
-| `ctlabs_graphify.defaults.pipx.home`             | `/opt/pipx`                | pipx home (venv storage)      |
-| `ctlabs_graphify.defaults.config.mcp.host`       | `127.0.0.1`                | MCP HTTP server bind address  |
-| `ctlabs_graphify.defaults.config.mcp.port`       | `8080`                     | MCP HTTP server port          |
-| `ctlabs_graphify.defaults.config.mcp.graph_file` | `/var/graphify/graph.json` | Graph file path served by MCP |
+| Variable | Default | Description |
+|---|---|---|
+| `ctlabs_graphify.defaults.projects` | `[{dir: /root/ctlabs-ansible, yaml_extract: true}, ...]` | Project directories to index |
+
+## Usage
+
+```sh
+/usr/local/bin/graphify-update-all
+```
 
 ## Tests
 
@@ -39,10 +53,10 @@ Validates template file existence and `--syntax-check` of the role via a localho
 
 ### `tools/ansible_yaml_extract.py`
 
-Extracts Ansible YAML structure (roles, tasks, playbooks, tags, vars, handlers) into graphify's `graph.json`. Run it against the repo root after `graphify update .` to get YAML content in the graph (graphify skips `.yml`/`.yaml` as "docs" without an API key).
+Extracts Ansible YAML structure (roles, tasks, playbooks, tags, vars, handlers) into graphify's `graph.json`. Run against the repo root after `graphify update . --no-viz --update` to get YAML content in the graph (graphify skips `.yml`/`.yaml` as "docs" without an API key).
 
 ```sh
 python3 roles/ctlabs_graphify/tools/ansible_yaml_extract.py
 ```
 
-No API key needed — uses static parsing, not LLM.
+No API key needed — uses static parsing, not LLM. Automatically invoked by `graphify-update-all` for projects with `yaml_extract: true`.
