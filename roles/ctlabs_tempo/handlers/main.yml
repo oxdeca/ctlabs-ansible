@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tempo.handlers.service.restart
+  service:
+    name    : "{{ ctlabs_tempo.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_tempo.handlers.service.reload
+  service:
+    name  : "{{ ctlabs_tempo.defaults.service.name }}"
+    state : reloaded

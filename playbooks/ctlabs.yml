@@ -43,6 +43,7 @@
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
         content: |
           {
+            "role"   : "server",
             "type"   : "master",
             "zones"  : [
               { "name" : "{{ CTLABS_DOMAIN }}" }, 
@@ -59,6 +60,7 @@
         dest: /etc/ansible/facts.d/ctlabs_bind.fact
         content: |
           {
+            "role"    : "server",
             "type"    : "slave",
             "zones"  : [
               { "name" : "{{ CTLABS_DOMAIN }}" }, 
@@ -1106,3 +1108,12 @@
   tags  : [ghidra]
   roles :
     - roles/ctlabs_ghidra
+
+# -----------------------------------------------------------------------------
+# ctlabs_tempo
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.tempo
+  hosts : [hosts]
+  tags  : [tempo]
+  roles :
+    - roles/ctlabs_tempo

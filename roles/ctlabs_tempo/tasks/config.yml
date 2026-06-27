@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tempo.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_tempo.defaults.config.dir }}"
+    state : directory
+    mode  : '0755'
+
+- name: ctlabs_tempo.tasks.config.file
+  template:
+    src  : tempo.yml.j2
+    dest : "{{ ctlabs_tempo.defaults.config.dir }}/{{ ctlabs_tempo.defaults.config.file }}"
+  notify: ctlabs_tempo.handlers.service.restart

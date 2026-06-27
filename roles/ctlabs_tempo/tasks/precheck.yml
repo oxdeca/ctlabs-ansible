@@ -1,0 +1,24 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tempo.tasks.precheck
+  block:
+    - name: ctlabs_tempo.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_tempo.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_tempo.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_tempo.tasks.precheck.metrics_generator.var
+  set_fact:
+    ctlabs_tempo_metrics_generator: "{{ ctlabs_tempo_metrics_generator | default(ctlabs_tempo.defaults.metrics_generator.enabled) }}"
+
+- name: ctlabs_tempo.tasks.precheck.metrics_generator.fact
+  set_fact:
+    ctlabs_tempo_metrics_generator: "{{ ctg_facts.ctlabs_tempo.metrics_generator | default(ctlabs_tempo_metrics_generator) }}"

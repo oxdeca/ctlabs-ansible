@@ -1,0 +1,48 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_tempo/templates/tempo.yml.j2    #}
+{# Description : Grafana Tempo configuration file                            #}
+{# ------------------------------------------------------------------------- #}
+
+target: all
+multitenancy_enabled: false
+
+server:
+  http_listen_port: {{ ctlabs_tempo.defaults.server.http_listen_port }}
+  grpc_listen_port: {{ ctlabs_tempo.defaults.server.grpc_listen_port }}
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: {{ ctlabs_tempo.defaults.distributor.receivers.otlp.protocols.grpc.endpoint }}
+        http:
+          endpoint: {{ ctlabs_tempo.defaults.distributor.receivers.otlp.protocols.http.endpoint }}
+
+storage:
+  trace:
+    backend: {{ ctlabs_tempo.defaults.storage.backend }}
+    local:
+      path: {{ ctlabs_tempo.defaults.storage.local.path }}
+    wal:
+      path: {{ ctlabs_tempo.defaults.storage.wal.path }}
+
+{% if ctlabs_tempo_metrics_generator == true %}
+metrics_generator:
+  processor:
+    service_graphs:
+      enabled: true
+    span_metrics:
+      enabled: true
+  registry:
+    collection_interval: 15s
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: {{ ctlabs_tempo.defaults.metrics_generator.remote_write.url }}
+{% endif %}
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]

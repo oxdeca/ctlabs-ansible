@@ -1,0 +1,71 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tempo.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_tempo.defaults.download.bin | dirname }}"
+    state : directory
+
+- name: ctlabs_tempo.tasks.package.tmpdir
+  file:
+    path  : /tmp/tempo
+    state : directory
+
+- name: ctlabs_tempo.tasks.package.download
+  get_url:
+    url  : "{{ ctlabs_tempo.defaults.download.url }}"
+    dest : "{{ ctlabs_tempo.defaults.download.tmptar }}"
+
+- name: ctlabs_tempo.tasks.package.untar
+  unarchive:
+    src        : "{{ ctlabs_tempo.defaults.download.tmptar }}"
+    dest       : /tmp/tempo
+    remote_src : true
+
+- name: ctlabs_tempo.tasks.package.install
+  copy:
+    src  : /tmp/tempo/tempo
+    dest : "{{ ctlabs_tempo.defaults.download.bin }}"
+    mode : '0755'
+    remote_src: true
+
+- name: ctlabs_tempo.tasks.package.cleanup
+  file:
+    path  : "{{ item }}"
+    state : absent
+  loop:
+    - "{{ ctlabs_tempo.defaults.download.tmptar }}"
+    - /tmp/tempo
+
+- name: ctlabs_tempo.tasks.package.group
+  group:
+    name   : "{{ ctlabs_tempo.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_tempo.tasks.package.user
+  user:
+    name       : "{{ ctlabs_tempo.defaults.service.user }}"
+    group      : "{{ ctlabs_tempo.defaults.service.group }}"
+    system     : true
+    shell      : /usr/sbin/nologin
+    create_home: false
+
+- name: ctlabs_tempo.tasks.package.datadir
+  file:
+    path  : "{{ ctlabs_tempo.defaults.storage.local.path }}"
+    state : directory
+    owner : "{{ ctlabs_tempo.defaults.service.user }}"
+    group : "{{ ctlabs_tempo.defaults.service.group }}"
+    mode  : '0755'
+
+- name: ctlabs_tempo.tasks.package.waldir
+  file:
+    path  : "{{ ctlabs_tempo.defaults.storage.wal.path }}"
+    state : directory
+    owner : "{{ ctlabs_tempo.defaults.service.user }}"
+    group : "{{ ctlabs_tempo.defaults.service.group }}"
+    mode  : '0755'

@@ -1,0 +1,22 @@
+{# ---------------------------------------------------------------------------#}
+{# File        : ctlabs-ansible/roles/ctlabs_tempo/templates/                #}
+{#               tempo.service.j2                                            #}
+{# Description : systemd unit for Grafana Tempo                              #}
+{# ------------------------------------------------------------------------- #}
+
+[Unit]
+Description=Grafana Tempo
+Documentation=https://grafana.com/docs/tempo/
+After=network.target
+
+[Service]
+Type=simple
+User={{ ctlabs_tempo.defaults.service.user }}
+Group={{ ctlabs_tempo.defaults.service.group }}
+ExecStart={{ ctlabs_tempo.defaults.download.bin }} -config.file={{ ctlabs_tempo.defaults.config.dir }}/{{ ctlabs_tempo.defaults.config.file }}
+Restart=on-failure
+RestartSec=5
+WorkingDirectory=/var/tempo
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_tempo.tasks.service.unit
+  template:
+    src  : tempo.service.j2
+    dest : "{{ ctg_systemd_dir + '/' + ctlabs_tempo.defaults.service.name }}"
+  notify: ctlabs_tempo.handlers.service.restart
+
+- name: ctlabs_tempo.tasks.service.started
+  systemd:
+    name    : "{{ ctlabs_tempo.defaults.service.name }}"
+    enabled : true
+    masked  : false
+    state   : started

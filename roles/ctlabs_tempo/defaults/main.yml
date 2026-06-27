@@ -1,0 +1,48 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_tempo/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  tempo: 3.0.2
+
+ctlabs_tempo:
+  defaults:
+    download:
+      url    : "https://github.com/grafana/tempo/releases/download/v{{ versions.tempo }}/tempo_{{ versions.tempo }}_linux_amd64.tar.gz"
+      bin    : /usr/local/bin/tempo
+      tmptar : /tmp/tempo.tar.gz
+    config:
+      dir  : /etc/tempo
+      file : tempo.yml
+    storage:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+    server:
+      http_listen_port: 3200
+      grpc_listen_port: 9095
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+    metrics_generator:
+      enabled    : false
+      remote_write:
+        url: http://localhost:9090/api/v1/write
+    service:
+      name  : tempo.service
+      user  : tempo
+      group : tempo
+  os:
+    - redhat9
+    - centos9
+    - debian12
