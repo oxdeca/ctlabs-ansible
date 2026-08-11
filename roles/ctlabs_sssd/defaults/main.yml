@@ -13,16 +13,18 @@ ctlabs_sssd:
   defaults:
     pkgs:
       redhat:
-        - name : sssd
-        - name : bind-utils
-        - name : realmd
-        - name : krb5-workstation
-        - name : oddjob
-        - name : oddjob-mkhomedir
-        - name : adcli
-        - name : samba-common-tools
-        - name : openldap-clients
-        - name : authselect
+        - name: sssd
+        - name: bind-utils
+        - name: realmd
+        - name: krb5-workstation
+        - name: oddjob
+        - name: oddjob-mkhomedir
+        - name: adcli
+        - name: samba-common-tools
+        - name: openldap-clients
+        - name: authselect
+        - name: python3-pip
+        - name: python3-pexpect
       debian:
         - name: sssd-ad
         - name: sssd-ldap
@@ -80,10 +82,8 @@ ctlabs_sssd:
       oddjobd:
         name : oddjobd.service
   os:
-    - redhat7
     - redhat8
     - redhat9
-    - centos7
     - centos8
     - centos9
     - kali2024

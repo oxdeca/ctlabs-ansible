@@ -245,54 +245,30 @@
     - name: ctlabs_smbadc.tasks.iam.state.memberships.build
       set_fact:
         required_memberships: >-
-          {{
-            required_memberships | default([]) + 
-            ([{
-              'role': role_item.key,
-              'group': group_name,
-              'username': (
-                identity._type == 'user' 
-                and identity.firstname is defined 
-                and identity.lastname is defined
-                ? ((identity.lastname | lower)[:5] + (identity.firstname | lower)[:2])
-                : (identity.name | lower)
-              ),
-              'identity_type': identity._type
-            }] if (
-              identity.roles is defined and 
-              role_item.key in identity.roles and
-              group_name | lower in groups_after_create | default([])
-            ) else [])
-          }}
-      loop: "{{ domain_roles | dict2items }}"
-      loop_control:
-        loop_var: role_item
-      vars:
-        # Combine regular users + service accounts into unified list with type marker
-        all_identities: >-
-          {{
-            (domain_users | default([]) | map('combine', {'_type': 'user'}) | list)
-            + (domain_services | default([]) | map('combine', {'_type': 'service'}) | list)
-          }}
-        # Filter identities that have THIS role
-        identities_with_role: >-
-          {{
-            all_identities 
-            | selectattr('roles', 'defined') 
-            | selectattr('roles', 'contains', role_item.key) 
-            | list
-          }}
-      when: role_item.value.groups is defined
-      loop_control:
-        extended: true
-      vars:
-        group_name: "{{ item }}"
-        identity: "{{ outer_item }}"
-      loop: "{{ role_item.value.groups }}"
-      loop_control:
-        loop_var: item
-        extended: true
-      loop: "{{ identities_with_role }}"
+          {%- set results = [] -%}
+          {%- set all_identities = (domain_users | default([]) | map('combine', {'_type': 'user'}) | list) + (domain_services | default([]) | map('combine', {'_type': 'service'}) | list) -%}
+          
+          {%- for role_key, role_val in (domain_roles | default({})).items() if role_val.groups is defined -%}
+            {%- for identity in all_identities if identity.roles is defined and role_key in identity.roles -%}
+              {%- for group_name in role_val.groups if (group_name | lower) in (groups_after_create | default([])) -%}
+                
+                {%- if identity._type == 'user' and identity.firstname is defined and identity.lastname is defined -%}
+                  {%- set username = ((identity.lastname | lower)[:5] + (identity.firstname | lower)[:2]) -%}
+                {%- else -%}
+                  {%- set username = (identity.name | lower) -%}
+                {%- endif -%}
+                
+                {%- set _ = results.append({
+                  'role': role_key,
+                  'group': group_name,
+                  'username': username,
+                  'identity_type': identity._type
+                }) -%}
+                
+              {%- endfor -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ results }}
 
     - name: ctlabs_smbadc.tasks.iam.membership.dynamic.add
       command: /usr/bin/samba-tool group addmembers "{{ item.group }}" "{{ item.username }}"
