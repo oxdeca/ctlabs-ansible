@@ -19,8 +19,8 @@
   register: result
   until   : result is success
 
-- name: ctlabs_sssd.tasks.package.python.pips.install
-  when: not ctg_os.startswith('kali')
-  pip:
-    name: "{{ item }}"
-  loop: "{{ ctlabs_sssd.defaults.python.pips }}"
+# - name: ctlabs_sssd.tasks.package.python.pips.install
+#   when: not ctg_os.startswith('kali')
+#   pip:
+#     name: "{{ item }}"
+#   loop: "{{ ctlabs_sssd.defaults.python.pips }}"
