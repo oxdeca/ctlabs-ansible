@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_aide.tasks.precheck
+  block:
+    - name: ctlabs_aide.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_aide.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_aide.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_aide.tasks.precheck.config_file
+  set_fact:
+    ctlabs_aide_config_file: "{{ ctlabs_aide.defaults.config.paths[ctg_os_family]['dir'] }}/{{ ctlabs_aide.defaults.config.paths[ctg_os_family]['file'] }}"
+
+- name: ctlabs_aide.tasks.precheck.extra.var
+  set_fact:
+    ctlabs_aide_extra: "{{ ctlabs_aide_extra | default([]) }}"
+
+- name: ctlabs_aide.tasks.precheck.extra.local_fact
+  set_fact:
+    ctlabs_aide_extra: "{{ ctg_facts.ctlabs_aide.config.extra | default(ctlabs_aide_extra) }}"

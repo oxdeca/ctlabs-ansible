@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/templates/aide-check.sh.j2
+# Description : wrapper for periodic AIDE integrity check with journald logging
+# ------------------------------------------------------------------------------
+set -u
+
+AIDE="{{ ctlabs_aide.defaults.bin[ctg_os_family] }}"
+CONFIG="{{ ctlabs_aide_config_file }}"
+ID="aide-check"
+
+"${AIDE}" --config="${CONFIG}" --check
+RC=$?
+
+# aide exit codes:
+#   0  = no differences
+#   5  = differences found (expected integrity signal -> warn, unit stays clean)
+#   1,6,7,14... = real errors (db/corrupt/etc -> fail the unit)
+case "${RC}" in
+    0)
+        logger -t "${ID}" "AIDE integrity check: OK (no differences)"
+        ;;
+    5)
+        logger -t "${ID}" --priority user.warning \
+            "AIDE integrity check: differences found (aide rc=5) - see /var/log/aide/aide.log"
+        RC=0
+        ;;
+    *)
+        logger -t "${ID}" --priority user.err \
+            "AIDE integrity check FAILED (aide rc=${RC}) - see /var/log/aide/aide.log"
+        ;;
+esac
+
+exit "${RC}"

@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+# Re-baselines the database when the config changes and a baseline already
+# exists. Guarded so a fresh install (no DB yet) doesn't double-scan.
+- name: ctlabs_aide.handlers.db.rebaseline
+  command: "{{ ctlabs_aide.defaults.bin[ctg_os_family] }} --config={{ ctlabs_aide_config_file }} --init"
+  when: ctlabs_aide_db_stat.stat.exists
+  notify: ctlabs_aide.handlers.db.promote
+
+- name: ctlabs_aide.handlers.db.promote
+  command: "mv -f {{ ctlabs_aide.defaults.config.dbdir }}/{{ ctlabs_aide.defaults.config.db_new }} {{ ctlabs_aide.defaults.config.dbdir }}/{{ ctlabs_aide.defaults.config.db }}"

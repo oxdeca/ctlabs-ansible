@@ -1,0 +1,44 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_aide.tasks.config.dir.log
+  file:
+    path : "{{ ctlabs_aide.defaults.config.logdir }}"
+    owner: root
+    group: root
+    mode : '0750'
+    state: directory
+
+- name: ctlabs_aide.tasks.config.dir.db
+  file:
+    path : "{{ ctlabs_aide.defaults.config.dbdir }}"
+    owner: root
+    group: root
+    mode : '0750'
+    state: directory
+
+- name: ctlabs_aide.tasks.config.script
+  template:
+    src  : aide-check.sh.j2
+    dest : "{{ ctlabs_aide.defaults.script }}"
+    owner: root
+    group: root
+    mode : '0755'
+
+- name: ctlabs_aide.tasks.config.script.update
+  template:
+    src  : aide-update.sh.j2
+    dest : "{{ ctlabs_aide.defaults.update.script }}"
+    owner: root
+    group: root
+    mode : '0755'
+
+- name: ctlabs_aide.tasks.config.deploy
+  template:
+    src  : aide.conf.j2
+    dest : "{{ ctlabs_aide_config_file }}"
+  notify: ctlabs_aide.handlers.db.rebaseline

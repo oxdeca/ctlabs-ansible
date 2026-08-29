@@ -22,6 +22,10 @@ path "sys/seal-status" {
   capabilities = ["read"]
 }
 
+path "sys/rekey" {
+  capabilities = ["create", "read", "update", "delete", "sudo"]
+}
+
 path "sys/auth" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }

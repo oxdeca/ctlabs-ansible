@@ -1,0 +1,49 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/tasks/service.yml
+# Description : systemd timer + service
+# ------------------------------------------------------------------------------
+
+#
+# Make sure we have a Baseline
+#
+- name: ctlabs_aide.tasks.service.db.stat
+  stat:
+    path: "{{ ctlabs_aide.defaults.config.dbdir }}/{{ ctlabs_aide.defaults.config.db }}"
+  register: ctlabs_aide_db_stat
+
+- name: ctlabs_aide.tasks.service.db.init
+  command: "{{ ctlabs_aide.defaults.bin[ctg_os_family] }} --config={{ ctlabs_aide_config_file }} --init"
+  when: not ctlabs_aide_db_stat.stat.exists
+
+- name: ctlabs_aide.tasks.service.db.promote
+  command: "mv -f {{ ctlabs_aide.defaults.config.dbdir }}/{{ ctlabs_aide.defaults.config.db_new }} {{ ctlabs_aide.defaults.config.dbdir }}/{{ ctlabs_aide.defaults.config.db }}"
+  when: not ctlabs_aide_db_stat.stat.exists
+
+# -----------
+
+- name: ctlabs_aide.tasks.service.unit
+  template:
+    src  : "{{ ctlabs_aide.defaults.service.name }}.service.j2"
+    dest : "{{ ctlabs_aide.defaults.timer.dir }}/{{ ctlabs_aide.defaults.service.name }}.service"
+    mode : '0644'
+
+- name: ctlabs_aide.tasks.service.timer
+  template:
+    src  : "{{ ctlabs_aide.defaults.service.name }}.timer.j2"
+    dest : "{{ ctlabs_aide.defaults.timer.dir }}/{{ ctlabs_aide.defaults.service.name }}.timer"
+    mode : '0644'
+
+- name: ctlabs_aide.tasks.service.unit.update
+  template:
+    src  : "{{ ctlabs_aide.defaults.update.service }}.service.j2"
+    dest : "{{ ctlabs_aide.defaults.timer.dir }}/{{ ctlabs_aide.defaults.update.service }}.service"
+    mode : '0644'
+
+- name: ctlabs_aide.tasks.service.enable
+  systemd:
+    name    : "{{ ctlabs_aide.defaults.service.name }}.timer"
+    enabled : true
+    state   : started
+    daemon_reload: true

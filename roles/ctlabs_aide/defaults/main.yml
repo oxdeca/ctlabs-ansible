@@ -1,0 +1,50 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+# role defaults
+ctlabs_aide:
+  defaults:
+    pkgs:
+      redhat:
+        - name: aide
+      debian:
+        - name: aide
+    bin:
+      redhat : /usr/sbin/aide
+      debian : /usr/bin/aide
+    config:
+      paths:
+        redhat:
+          dir : /etc
+          file: aide.conf
+        debian:
+          dir : /etc/aide
+          file: aide.conf
+      dbdir    : /var/lib/aide
+      db       : aide.db
+      db_new   : aide.db.new
+      logdir   : /var/log/aide
+      logfile  : aide.log
+    service:
+      name: aide-check
+    script: /usr/local/sbin/aide-check.sh
+    update:
+      service: aide-update
+      script : /usr/local/sbin/aide-update.sh
+    timer:
+      dir             : "{{ ctg_systemd_dir }}"
+      oncalendar      : "*-*-* 03:15:00"
+      persistent      : true
+      randomized_delay: 15m
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12
+    - kali2025
+    - kali2026
+    - parrot7

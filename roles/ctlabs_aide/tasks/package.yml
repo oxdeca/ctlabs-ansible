@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/tasks/package.yml
+# Description : install packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_aide.tasks.package.install
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_aide.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success

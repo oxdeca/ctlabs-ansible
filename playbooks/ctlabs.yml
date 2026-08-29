@@ -1117,3 +1117,12 @@
   tags  : [tempo]
   roles :
     - roles/ctlabs_tempo
+
+# -----------------------------------------------------------------------------
+# ctlabs_aide
+# -----------------------------------------------------------------------------
+- name  : ctlabs.playbooks.ctlabs.aide
+  hosts : [hosts]
+  tags  : [aide]
+  roles :
+    - roles/ctlabs_aide

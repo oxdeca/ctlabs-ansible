@@ -1,0 +1,15 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/templates/aide-check.timer.j2
+# Description : systemd timer for periodic AIDE integrity check
+# ------------------------------------------------------------------------------
+
+[Unit]
+Description=Run AIDE integrity check daily
+
+[Timer]
+OnCalendar={{ ctlabs_aide.defaults.timer.oncalendar }}
+Persistent={{ ctlabs_aide.defaults.timer.persistent | lower }}
+RandomizedDelaySec={{ ctlabs_aide.defaults.timer.randomized_delay }}
+
+[Install]
+WantedBy=timers.target

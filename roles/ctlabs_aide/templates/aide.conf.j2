@@ -1,0 +1,121 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/templates/aide.conf.j2
+# Description : AIDE configuration template
+# ------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Database settings
+# -----------------------------------------------------------------------------
+database_in = file:/var/lib/aide/aide.db
+database_out = file:/var/lib/aide/aide.db.new
+database_new = file:/var/lib/aide/aide.db.new
+
+gzip_dbout = yes
+
+report_url = file:/var/log/aide/aide.log
+report_quiet = yes
+report_detailed_init = yes
+
+# -----------------------------------------------------------------------------
+# Attribute expressions (includes acl, selinux, xattrs where compiled in)
+# -----------------------------------------------------------------------------
+# p: permissions, ftype: file type, i: inode, n: links, l: link name,
+# u: user, g: group, s: size, b: block count, m: mtime, a: atime, c: ctime
+# S: growing size, md5/sha1/sha256/sha512: checksums
+# I: ignore changed filename
+
+CONTENT = p+i+n+u+g+acl+selinux+xattrs
+DATAONLY = p+n+u+g+s+acl+selinux+xattrs
+NORMAL = p+i+n+u+g+s+b+m+c+acl+selinux+xattrs+sha512
+DIR = p+i+n+u+g+acl+selinux+xattrs
+LOG = p+u+g+n+S+acl+selinux+xattrs
+PERMS = p+u+g+acl+selinux+xattrs
+
+# -----------------------------------------------------------------------------
+# Owner-only rules
+# -----------------------------------------------------------------------------
+/etc p+i+n+u+g+acl+selinux+xattrs+sha512
+
+# -----------------------------------------------------------------------------
+# Watch critical system paths
+# -----------------------------------------------------------------------------
+/etc/group NORMAL
+/etc/passwd NORMAL
+/etc/shadow NORMAL
+/etc/gshadow NORMAL
+/etc/sudoers NORMAL
+/etc/sudoers.d PERMS
+/etc/ssh NORMAL
+/etc/ssl NORMAL
+/etc/ca-certificates NORMAL
+/etc/ca-ctlabs NORMAL
+/etc/hosts NORMAL
+/etc/hostname NORMAL
+/etc/resolv.conf NORMAL
+/etc/nsswitch.conf NORMAL
+/etc/pam.d NORMAL
+/etc/security NORMAL
+/etc/systemd NORMAL
+/etc/fstab NORMAL
+/etc/hosts.allow NORMAL
+/etc/hosts.deny NORMAL
+
+/boot NORMAL
+/root NORMAL
+
+# -----------------------------------------------------------------------------
+# Binaries, libraries and kernel
+# -----------------------------------------------------------------------------
+/bin NORMAL
+/sbin NORMAL
+/usr/bin NORMAL
+/usr/sbin NORMAL
+/usr/lib NORMAL
+/usr/lib64 NORMAL
+/usr/local/bin NORMAL
+/usr/local/sbin NORMAL
+/lib NORMAL
+/lib64 NORMAL
+/boot NORMAL
+
+!/usr/lib/pm-utils
+!/usr/lib/X11
+!/usr/lib/locale
+!/usr/lib/gconv
+!/usr/lib/gcc
+!/usr/lib/python*
+!/usr/lib/systemd
+# -----------------------------------------------------------------------------
+# Exclusions — files that change frequently or are managed dynamically
+# -----------------------------------------------------------------------------
+!/var/log
+!/var/spool
+!/var/tmp
+!/var/cache
+!/var/lib/aide
+!/var/lib/systemd
+!/var/lib/docker
+!/var/lib/containers
+!/run
+!/tmp
+!/proc
+!/sys
+!/dev
+!/sysadm
+!/selinux
+!/mnt
+!/media
+!/lost+found
+!/srv
+
+!/var/lib/mysql
+!/var/lib/postgresql
+
+# -----------------------------------------------------------------------------
+# User-defined additions via ctg_facts/aide.extra
+# -----------------------------------------------------------------------------
+{% if ctlabs_aide_extra is defined %}
+{% for line in ctlabs_aide_extra %}
+{{ line }}
+{% endfor %}
+{% endif %}
