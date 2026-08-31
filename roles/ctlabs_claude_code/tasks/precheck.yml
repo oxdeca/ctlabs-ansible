@@ -15,6 +15,43 @@
     - name: ctlabs_claude_code.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_claude_code.tasks.precheck.fact.openrouter_api_key
+- name: ctlabs_claude_code.tasks.precheck.provider.active
   set_fact:
-    ctlabs_claude_code_openrouter_api_key: "{{ ctg_facts.ctlabs_claude_code.openrouter.api_key|default() }}"
+    ctlabs_claude_code_provider_active: "{{ ctg_facts.ctlabs_claude_code.provider.active | default(ctlabs_claude_code.defaults.config.provider.active) }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.assert
+  assert:
+    that: ctlabs_claude_code_provider_active in ['anthropic', 'openrouter', 'vertexai']
+    fail_msg: "Unknown provider: {{ ctlabs_claude_code_provider_active }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.anthropic.api_key
+  set_fact:
+    ctlabs_claude_code_provider_anthropic_api_key: "{{ ctg_facts.ctlabs_claude_code.provider.anthropic.api_key | default('') }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.openrouter.api_key
+  set_fact:
+    ctlabs_claude_code_provider_openrouter_api_key: "{{ ctg_facts.ctlabs_claude_code.provider.openrouter.api_key | default('') }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.openrouter.base_url
+  set_fact:
+    ctlabs_claude_code_provider_openrouter_base_url: "{{ ctg_facts.ctlabs_claude_code.provider.openrouter.base_url | default(ctlabs_claude_code.defaults.config.provider.openrouter.base_url) }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.vertexai.project_id
+  set_fact:
+    ctlabs_claude_code_provider_vertexai_project_id: "{{ ctg_facts.ctlabs_claude_code.provider.vertexai.project_id | default('') }}"
+
+- name: ctlabs_claude_code.tasks.precheck.provider.vertexai.region
+  set_fact:
+    ctlabs_claude_code_provider_vertexai_region: "{{ ctg_facts.ctlabs_claude_code.provider.vertexai.region | default('') }}"
+
+- name: ctlabs_claude_code.tasks.precheck.otlp.enabled
+  set_fact:
+    ctlabs_claude_code_otlp_enabled: "{{ ctg_facts.ctlabs_claude_code.otlp.enabled | default(ctlabs_claude_code.defaults.config.otlp.enabled) }}"
+
+- name: ctlabs_claude_code.tasks.precheck.otlp.endpoint
+  set_fact:
+    ctlabs_claude_code_otlp_endpoint: "{{ ctg_facts.ctlabs_claude_code.otlp.endpoint | default(ctlabs_claude_code.defaults.config.otlp.endpoint) }}"
+
+- name: ctlabs_claude_code.tasks.precheck.otlp.resource_attrs
+  set_fact:
+    ctlabs_claude_code_otlp_resource_attrs: "{{ ctg_facts.ctlabs_claude_code.otlp.resource_attrs | default(ctlabs_claude_code.defaults.config.otlp.resource_attrs) }}"

@@ -449,6 +449,30 @@
             "sources" : [ "h3.ctlabs.internal" ]
           }
 
+    - name: ctlabs.playbooks.ctlabs.setup.claude_code.local_facts
+      when: ansible_hostname in ['ansible', 'h1', 'h2', 'h3']
+      copy:
+        dest: /etc/ansible/facts.d/ctlabs_claude_code.fact
+        content: |
+          {
+            "provider" : {
+              "active"     : "openrouter",
+              "openrouter" : {
+                "api_key" : "{{ lookup('env', 'OPENROUTER_API_KEY') }}",
+                "base_url": "https://openrouter.ai/api"
+              }
+            },
+            "otlp" : {
+              "enabled" : true,
+              "endpoint": "http://prometheus.ctlabs.internal:9090/v1/metrics",
+              "resource_attrs" : {
+                "developer"   : "{{ ansible_user }}",
+                "team"        : "platform",
+                "environment" : "{{ ctg_env | default('dev') }}"
+              }
+            }
+          }
+
 
 # -----------------------------------------------------------------------------
 # ctlabs_ca

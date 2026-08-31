@@ -44,10 +44,27 @@ ctlabs_claude_code:
       user   : claude
       group  : claude
       groups : [certs]
-      settings: 
+      settings:
         dir     : ~/.claude
         template: settings.json.j2
         file    : ~/.claude/settings.json
+      provider:
+        active     : anthropic
+        anthropic:
+          api_key: ""
+        openrouter:
+          api_key : ""
+          base_url: "https://openrouter.ai/api"
+        vertexai:
+          project_id: ""
+          region    : ""
+      otlp:
+        enabled        : false
+        endpoint       : "http://prometheus.ctlabs.internal:9090/v1/metrics"
+        resource_attrs:
+          developer    : "{{ ansible_user_id | default(ansible_user) }}"
+          team         : "default"
+          environment  : "{{ ctg_env | default('dev') }}"
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"

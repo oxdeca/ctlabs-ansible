@@ -1,10 +1,31 @@
-{ 
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_claude_code/templates/settings.json.j2
+ # Description : ~/.claude/settings.json template
+ #}
+{
   "env": {
-    "ANTHROPIC_BASE_URL"                   : "https://openrouter.ai/api",
-    "ANTHROPIC_AUTH_TOKEN"                 : "{{ ctlabs_claude_code_openrouter_api_key }}",
-    "ANTHROPIC_API_KEY"                    : "",
-    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK" : "1"
+{% if ctlabs_claude_code_provider_active == 'anthropic' %}
+    "ANTHROPIC_API_KEY"                    : "{{ ctlabs_claude_code_provider_anthropic_api_key }}"{% if ctlabs_claude_code_otlp_enabled %},
+    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
+    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
+{% elif ctlabs_claude_code_provider_active == 'openrouter' %}
+    "ANTHROPIC_BASE_URL"                   : "{{ ctlabs_claude_code_provider_openrouter_base_url }}",
+    "ANTHROPIC_AUTH_TOKEN"                 : "{{ ctlabs_claude_code_provider_openrouter_api_key }}",
+    "ANTHROPIC_API_KEY"                   : "",
+    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK" : "1"{% if ctlabs_claude_code_otlp_enabled %},
+    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
+    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
+{% elif ctlabs_claude_code_provider_active == 'vertexai' %}
+    "ANTHROPIC_VERTEX_PROJECT_ID"          : "{{ ctlabs_claude_code_provider_vertexai_project_id }}",
+    "CLOUD_ML_REGION"                     : "{{ ctlabs_claude_code_provider_vertexai_region }}",
+    "CLAUDE_CODE_USE_VERTEX"              : "1"{% if ctlabs_claude_code_otlp_enabled %},
+    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
+    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
+{% endif %}
   },
-  "model"      : "openrouter/free",
+  "model": "openrouter/free",
   "theme": "dark"
 }
