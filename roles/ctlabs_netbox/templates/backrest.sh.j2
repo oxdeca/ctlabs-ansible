@@ -87,13 +87,14 @@ restore_files() {
   local tarfile=${1:-''}
 
   if [ ! -e "${tarfile}" ]; then
-    printf "Dumpfile '${tarfile}' not found!\n"
+    printf "Tarfile '${tarfile}' not found!\n"
     printf "Aborting ...\n"
     exit 1
   fi
 
-  #cd /opt/netbox/netbox/ && tar xvf ${tarfile}
-
+  cd /opt/netbox/netbox/ 
+  tar xvf ${tarfile}
+  cd -
 }
 
 
@@ -109,6 +110,8 @@ case $1 in
   'restore')
     if [ "${2}" == "db" ]; then
       restore ${3}
+    elif [ "${2}" == "files" ]; then
+      restore_files ${3}
     fi
     ;;
 esac

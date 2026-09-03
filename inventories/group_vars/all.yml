@@ -14,6 +14,8 @@ ctg_facts       : >-
                       'ctlabs_ad': (ansible_ctlabs_ad | from_json) if ansible_ctlabs_ad is defined else {}
                     }
                   }}
+ctg_facts_dir   : "/etc/ansible/facts.d"
+ctg_domain      : "{{ CTLABS_DOMAIN            | default('ctlabs.internal') }}"
 ctg_project     : "{{ ctg_facts.ctlabs.project | default() }}"
 ctg_env         : "{{ ctg_facts.ctlabs.env     | default() }}"
 
@@ -33,12 +35,7 @@ ctg_todaysdate  : "{{ '%Y%m%d' | strftime }}"
 ctg_uxtime      : "{{ '%s' | strftime }}"
 ctg_vendor      : "{{ ansible_system_vendor | lower }}"
 
-ctg_host        : >-
-                  {{
-                    (ansible_nodename | default(inventory_hostname))
-                    if ctg_os_family in ['redhat', 'debian']
-                    else (inventory_hostname)
-                  }}
+ctg_host        : "{{ ansible_nodename | default(inventory_hostname) }}"
 ctg_ipv4        : >-
                   {{
                     ansible_default_ipv4.address if ctg_os_family in ['redhat', 'debian'] else ansible_interfaces[0].ipv4.address

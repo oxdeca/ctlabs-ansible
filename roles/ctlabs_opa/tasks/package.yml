@@ -24,7 +24,6 @@
   when: ctg_os_family == 'debian'
   apt:
     deb  : "{{ item.url if item.url is defined else item.name }}"
-    state: present
   loop    : "{{ ctlabs_opa.defaults.pkgs[ctg_os_family] }}"
   register: result
   until   : result is success
