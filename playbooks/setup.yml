@@ -20,8 +20,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_ca
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.ca
+- name : ctlabs.playbooks.setup.ca
   hosts: all:!rhosts
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.ctlabs.setup.ca.local_facts
       copy:
@@ -36,6 +37,7 @@
 # -----------------------------------------------------------------------------
 - name: ctlabs.playbooks.setup.bind
   hosts: ns1,ns2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.bind.master.local_facts
       when: ctg_host == 'ns1'
@@ -74,8 +76,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_smbadc
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.smbadc
+- name : ctlabs.playbooks.setup.smbadc
   hosts: dc1,dc2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.smbadc.master.local_facts
       when: ctg_host == 'dc1'
@@ -101,8 +104,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_slapd
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.slapd
+- name : ctlabs.playbooks.setup.slapd
   hosts: slapd1,slapd2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.slapd.local_facts
       when: ctg_host in [ 'slapd1', 'slapd2']
@@ -123,8 +127,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_alloy
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.alloy
+- name : ctlabs.playbooks.setup.alloy
   hosts: mail1,mail2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.alloy.local_facts
       when: ctg_host in ['mail1', 'mail2']
@@ -140,8 +145,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_promtail
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.promtail
+- name : ctlabs.playbooks.setup.promtail
   hosts: mail1,mail2,prometheus
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.promtail.local_facts
       when: ctg_host in ['mail1', 'mail2']
@@ -168,8 +174,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_prometheus
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.prometheus
+- name : ctlabs.playbooks.setup.prometheus
   hosts: prometheus
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.prometheus.local_facts
       when: ctg_host == 'prometheus'
@@ -191,8 +198,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_openvpn
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.openvpn
-  hosts: prometheus
+- name : ctlabs.playbooks.setup.openvpn
+  hosts: ro1,ro2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.openvpn.server.local_facts
       when: ctg_host == 'ro1'
@@ -205,7 +213,7 @@
             "client_ip" : "10.8.15.2"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.openvpn.client.local_facts
+    - name: ctlabs.playbooks.setup.openvpn.client.local_facts
       when: ctg_host == 'ro2'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_openvpn.fact"
@@ -220,8 +228,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_frr
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.frr
+- name : ctlabs.playbooks.setup.frr
   hosts: ro1,ro2,ro3,ro4,isp1
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'ro1'
@@ -304,7 +313,7 @@
           }
 
 
-    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+    - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'isp1'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_frr.fact"
@@ -319,8 +328,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_rundeck
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.rundeck
+- name : ctlabs.playbooks.setup.rundeck
   hosts: ansible
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.rundeck.local_facts
       when: ctg_host == 'ansible'
@@ -337,8 +347,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_kafka
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.kafka
+- name : ctlabs.playbooks.setup.kafka
   hosts: kafka1,kafka2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.kafka.local_facts
       when: ctg_host in ['kafka1', 'kafka2']
@@ -355,8 +366,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_k3s
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.k3s
+- name : ctlabs.playbooks.setup.k3s
   hosts: k3s1,k3s2,k3s3,k3s4
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.k3s.server.local_facts
       when: ctg_host in ['k3s1']
@@ -399,8 +411,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_rke2
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.rke2
+- name : ctlabs.playbooks.setup.rke2
   hosts: rke21,rke22,rke23,rke24
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.rke2.server.local_facts
       when: ctg_host in ['rke21']
@@ -447,8 +460,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_kind
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.kind
+- name : ctlabs.playbooks.setup.kind
   hosts: kind1,kind2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.kind.single.local_facts
       when: ctg_host in ['kind1']
@@ -466,8 +480,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_foreman
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.foreman
+- name : ctlabs.playbooks.setup.foreman
   hosts: fm1,fm2,fm3,fm4
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.foreman.server.local_facts
       when: ctg_host in ['fm1']
@@ -490,8 +505,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_wazuh
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.wazuh
+- name : ctlabs.playbooks.setup.wazuh
   hosts: wazuh1,wazuh2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.wazuh.agent.local_facts
       when: "ctg_host in groups['hosts'] and ctg_host != 'wazuh1.ctlabs.internal'"
@@ -506,8 +522,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_opendkim
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.opendkim
+- name : ctlabs.playbooks.setup.opendkim
   hosts: mail1,mail2
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.opendkim.local_facts
       when: ctg_host in ['mail1']
@@ -521,8 +538,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_chrony
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.chrony
+- name : ctlabs.playbooks.setup.chrony
   hosts: h3,h4
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.chrony.server.local_facts
       when: ctg_host in ['h3']
@@ -548,8 +566,9 @@
 # -----------------------------------------------------------------------------
 # ctlabs_claude_code
 # -----------------------------------------------------------------------------
-- name: ctlabs.playbooks.setup.claude_code
+- name : ctlabs.playbooks.setup.claude_code
   hosts: ansible,h1,h2,h3
+  tags : setup
   tasks:
     - name: ctlabs.playbooks.setup.claude_code.local_facts
       when: ctg_host in ['ansible', 'h1', 'h2', 'h3']
