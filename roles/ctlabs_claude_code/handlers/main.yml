@@ -13,4 +13,4 @@
 
 - name: ctlabs_claude_code.handlers.apt.update_cache
   apt:
-    update_cache: yes
+    update_cache: true

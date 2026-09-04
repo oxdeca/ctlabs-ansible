@@ -37,7 +37,7 @@
     - name: ctlabs_claude_code.tasks.package.debian.repos.file
       apt_repository:
         repo: "deb [signed-by={{ ctlabs_claude_code.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
-        update_cache: yes
+        update_cache: true
       loop: "{{ ctlabs_claude_code.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_claude_code.tasks.package.debian.nodejs.pin

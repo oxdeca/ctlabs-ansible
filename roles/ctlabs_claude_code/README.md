@@ -6,6 +6,7 @@
 - `ctlabs_claude_code.precheck`
 - `ctlabs_claude_code.package`
 - `ctlabs_claude_code.config`
+- `ctlabs_claude_code.service`
 
 ## Prechecks
 
@@ -29,7 +30,7 @@ Claude Code supports multiple API providers. Select exactly one via `provider.ac
 |---|---|---|
 | `anthropic` (default) | `ANTHROPIC_API_KEY` | `ctg_facts.ctlabs_claude_code.provider.anthropic.api_key` |
 | `openrouter` | `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1` | `ctg_facts.ctlabs_claude_code.provider.openrouter.{api_key,base_url}` |
-| `vertexai` | `ANTHROPIC_VERTEX_PROJECT_ID`, `CLOUD_ML_REGION`, `CLAUDE_CODE_USE_VERTEX=1` | `ctg_facts.ctlabs_claude_code.provider.vertexai.{project_id,region}` |
+| `vertexai` | `ANTHROPIC_API_KEY=""`, `CLAUDE_CODE_USE_VERTEX=1`, `ANTHROPIC_VERTEX_PROJECT_ID`, `CLOUD_ML_REGION`, `GCE_METADATA_HOST` | `ctg_facts.ctlabs_claude_code.provider.vertexai.{project_id,region}` |
 
 The `vertexai` provider assumes Application Default Credentials (ADC) are already configured on the host (e.g. via `ctlabs_gcloud`).
 
@@ -37,43 +38,59 @@ The `vertexai` provider assumes Application Default Credentials (ADC) are alread
 
 Claude Code can emit OpenTelemetry metrics to a Prometheus OTLP receiver. **Opt-in** — disabled by default.
 
-| Variable | Default | Source |
+Configured via `ctg_facts.ctlabs_claude_code.otlp` (merged over `ctlabs_claude_code.defaults.config.otlp`):
+
+| Key | Default | Description |
 |---|---|---|
-| `ctlabs_claude_code_otlp_enabled` | `false` | `ctg_facts.ctlabs_claude_code.otlp.enabled` |
-| `ctlabs_claude_code_otlp_endpoint` | `http://prometheus.ctlabs.internal:9090/v1/metrics` | `ctg_facts.ctlabs_claude_code.otlp.endpoint` |
-| `ctlabs_claude_code_otlp_resource_attrs` | `developer`, `team`, `environment` | `ctg_facts.ctlabs_claude_code.otlp.resource_attrs` |
+| `enabled` | `false` | Enable OTLP metric export |
+| `endpoint` | `http://prometheus.ctlabs.internal:9090/v1/metrics` | OTLP receiver URL |
+| `resource_attrs` | `user.email=<ansible_user>` | `OTEL_RESOURCE_ATTRIBUTES` value |
 
-Prometheus promotes `developer`, `team`, `environment` as labels (`prometheus.conf.j2` → `otlp.promote_resource_attributes`).
+## Preferences
 
-## Enabling
+Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude_code.preferences` (merged over `ctlabs_claude_code.defaults.config.preferences`):
 
-Set local facts on the target host via `playbooks/ctlabs.yml` → `setup` play. Example for OpenRouter + OTLP on h1/h2/h3:
+| Key | Default | Description |
+|---|---|---|
+| `model` | `claude-sonnet-4-6` | Default model |
+| `theme` | `dark` | UI theme |
+| `always_thinking` | `false` | Enable extended thinking |
+| `fast_mode` | `true` | Enable fast mode |
+| `fallback_model` | `["haiku"]` | Fallback model list |
+| `gce_metadata_host` | `""` | `GCE_METADATA_HOST` override (vertexai only) |
+
+## Local Facts Example
+
+`/etc/ansible/facts.d/ctlabs_claude_code.fact`:
 
 ```json
 {
   "provider": {
-    "active": "openrouter",
-    "openrouter": {
-      "api_key": "<key from OPENROUTER_API_KEY env var>",
-      "base_url": "https://openrouter.ai/api"
+    "active": "vertexai",
+    "vertexai": {
+      "project_id": "my-gcp-project",
+      "region": "us-east5"
     }
   },
   "otlp": {
     "enabled": true,
-    "endpoint": "http://prometheus.ctlabs.internal:9090/v1/metrics",
-    "resource_attrs": {
-      "developer": "jonesmi",
-      "team": "platform",
-      "environment": "dev"
-    }
+    "endpoint": "https://prometheus.example.com/api/v1/otlp",
+    "resource_attrs": "user.email=user@example.com"
+  },
+  "preferences": {
+    "model": "claude-sonnet-4-6",
+    "theme": "dark",
+    "always_thinking": false,
+    "fast_mode": true,
+    "fallback_model": ["haiku"],
+    "gce_metadata_host": "127.0.0.1:1"
   }
 }
 ```
-
-For a host using Vertex AI, override `provider.active` and set `vertexai.*` in inventory vars.
 
 ## Tests
 
 ```sh
 pytest -sv roles/ctlabs_claude_code/tests
 ```
+

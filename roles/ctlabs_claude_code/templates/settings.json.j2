@@ -4,29 +4,54 @@
 #}
 {
   "env": {
-{% if ctlabs_claude_code_provider_active == 'anthropic' %}
-    "ANTHROPIC_API_KEY"                    : "{{ ctlabs_claude_code_provider_anthropic_api_key }}"{% if ctlabs_claude_code_otlp_enabled %},
-    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
-    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
-    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
-{% elif ctlabs_claude_code_provider_active == 'openrouter' %}
-    "ANTHROPIC_BASE_URL"                   : "{{ ctlabs_claude_code_provider_openrouter_base_url }}",
-    "ANTHROPIC_AUTH_TOKEN"                 : "{{ ctlabs_claude_code_provider_openrouter_api_key }}",
-    "ANTHROPIC_API_KEY"                    : "",
-    "ANTHROPIC_MODEL"                      : "openrouter/free",
-    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK" : "1"{% if ctlabs_claude_code_otlp_enabled %},
-    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
-    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
-    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
-{% elif ctlabs_claude_code_provider_active == 'vertexai' %}
-    "ANTHROPIC_VERTEX_PROJECT_ID"          : "{{ ctlabs_claude_code_provider_vertexai_project_id }}",
-    "CLOUD_ML_REGION"                      : "{{ ctlabs_claude_code_provider_vertexai_region }}",
-    "CLAUDE_CODE_USE_VERTEX"               : "1"{% if ctlabs_claude_code_otlp_enabled %},
-    "OTEL_METRICS_EXPORTER_OTLP_ENDPOINT"  : "{{ ctlabs_claude_code_otlp_endpoint }}",
-    "OTEL_EXPORTER_OTLP_PROTOCOL"          : "http/protobuf",
-    "OTEL_RESOURCE_ATTRIBUTES"             : "developer={{ ctlabs_claude_code_otlp_resource_attrs['developer'] }},team={{ ctlabs_claude_code_otlp_resource_attrs['team'] }},environment={{ ctlabs_claude_code_otlp_resource_attrs['environment'] }}"{% endif %}
+{% if ctlabs_claude_code_provider.active == 'anthropic' %}
+    "ANTHROPIC_API_KEY"                                  : "{{ ctlabs_claude_code_provider.anthropic.api_key }}"
+{%-  if ctlabs_claude_code_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_code_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_code_otlp.resource_attrs }}"
+{%   endif %}
+{% elif ctlabs_claude_code_provider.active == 'openrouter' %}
+    "ANTHROPIC_BASE_URL"                                 : "{{ ctlabs_claude_code_provider.openrouter.base_url }}",
+    "ANTHROPIC_AUTH_TOKEN"                               : "{{ ctlabs_claude_code_provider.openrouter.api_key }}",
+    "ANTHROPIC_API_KEY"                                  : "",
+    "ANTHROPIC_MODEL"                                    : "openrouter/free",
+    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK"               : "1"
+{%-  if ctlabs_claude_code_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_code_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_code_otlp.resource_attrs }}"
+{%   endif %}
+{% elif ctlabs_claude_code_provider.active == 'vertexai' %}
+    "ANTHROPIC_API_KEY"                                  : "",
+    "CLAUDE_CODE_USE_VERTEX"                             : "1",
+    "ANTHROPIC_VERTEX_PROJECT_ID"                        : "{{ ctlabs_claude_code_provider.vertexai.project_id }}",
+    "CLOUD_ML_REGION"                                    : "{{ ctlabs_claude_code_provider.vertexai.region }}"
+{%-  if ctlabs_claude_code_settings.gce_metadata_host | default('') %},
+    "GCE_METADATA_HOST"                                  : "{{ ctlabs_claude_code_settings.gce_metadata_host }}"
+{%-  endif %}
+{%-  if ctlabs_claude_code_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_code_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_code_otlp.resource_attrs }}"
+{%   endif %}
 {% endif %}
   },
-  "model": "openrouter/free",
-  "theme": "dark"
+  "model"                 : "{{ ctlabs_claude_code_settings.model }}",
+  "theme"                 : "{{ ctlabs_claude_code_settings.theme }}",
+  "alwaysThinkingEnabled" : {{ ctlabs_claude_code_settings.always_thinking | lower }},
+  "fastMode"              : {{ ctlabs_claude_code_settings.fast_mode | lower }},
+  "fallbackModel"         : {{ ctlabs_claude_code_settings.fallback_model | to_json }}
 }
