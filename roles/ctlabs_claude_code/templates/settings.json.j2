@@ -50,8 +50,9 @@
 {% endif %}
   },
   "model"                 : "{{ ctlabs_claude_code_settings.model }}",
-  "theme"                 : "{{ ctlabs_claude_code_settings.theme }}",
   "alwaysThinkingEnabled" : {{ ctlabs_claude_code_settings.always_thinking | lower }},
-  "fastMode"              : {{ ctlabs_claude_code_settings.fast_mode | lower }},
-  "fallbackModel"         : {{ ctlabs_claude_code_settings.fallback_model | to_json }}
+  "fastMode"              : {{ ctlabs_claude_code_settings.fast_mode       | lower }},
+  "fallbackModel"         : {{ ctlabs_claude_code_settings.fallback_model  | to_json }},
+  "theme"                 : "{{ ctlabs_claude_code_settings.theme }}",
+  "tui"                   : "fullscreen"
 }
