@@ -17,6 +17,12 @@
         path : "{{ ctg_facts_dir }}"
         state: directory
 
+# -----------------------------------------------------------------------------
+# ctlabs_ca
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.ca
+  hosts: all:!rhosts
+  tasks:
     - name: ctlabs.playbooks.ctlabs.setup.ca.local_facts
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_ca.fact"
@@ -25,7 +31,13 @@
             "domain" : "{{ CTLABS_DOMAIN }}"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.bind.master.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_bind
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.bind
+  hosts: ns1,ns2
+  tasks:
+    - name: ctlabs.playbooks.setup.bind.master.local_facts
       when: ctg_host == 'ns1'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_bind.fact"
@@ -42,7 +54,7 @@
             "slaves" : [ "192.168.20.11" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.bind.slave.local_facts
+    - name: ctlabs.playbooks.setup.bind.slave.local_facts
       when: ctg_host == 'ns2'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_bind.fact"
@@ -59,7 +71,13 @@
             "masters" : [ "192.168.10.11" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.smbadc.master.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_smbadc
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.smbadc
+  hosts: dc1,dc2
+  tasks:
+    - name: ctlabs.playbooks.setup.smbadc.master.local_facts
       when: ctg_host == 'dc1'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_smbadc.fact"
@@ -69,7 +87,7 @@
             "domain" : "ad.{{ CTLABS_DOMAIN }}"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.smbadc.slave.local_facts
+    - name: ctlabs.playbooks.setup.smbadc.slave.local_facts
       when: ctg_host == 'dc2'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_smbadc.fact"
@@ -80,7 +98,13 @@
             "master" : "dc1.ad.{{ CTLABS_DOMAIN }}"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.slapd.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_slapd
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.slapd
+  hosts: slapd1,slapd2
+  tasks:
+    - name: ctlabs.playbooks.setup.slapd.local_facts
       when: ctg_host in [ 'slapd1', 'slapd2']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_slapd.fact"
@@ -96,7 +120,13 @@
             }]
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.alloy.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_alloy
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.alloy
+  hosts: mail1,mail2
+  tasks:
+    - name: ctlabs.playbooks.setup.alloy.local_facts
       when: ctg_host in ['mail1', 'mail2']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_alloy.fact"
@@ -107,7 +137,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.promtail.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_promtail
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.promtail
+  hosts: mail1,mail2,prometheus
+  tasks:
+    - name: ctlabs.playbooks.setup.promtail.local_facts
       when: ctg_host in ['mail1', 'mail2']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_promtail.fact"
@@ -118,7 +154,24 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.prometheus.local_facts
+    - name: ctlabs.playbooks.setup.promtail.local_facts
+      when: ctg_host == 'prometheus'
+      copy:
+        dest: "{{ ctg_facts_dir }}/ctlabs_promtail.fact"
+        content: |
+          {
+            "config" : {
+              "goflow2" : true
+            }
+          }
+
+# -----------------------------------------------------------------------------
+# ctlabs_prometheus
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.prometheus
+  hosts: prometheus
+  tasks:
+    - name: ctlabs.playbooks.setup.prometheus.local_facts
       when: ctg_host == 'prometheus'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_prometheus.fact"
@@ -135,18 +188,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.promtail.local_facts
-      when: ctg_host == 'prometheus'
-      copy:
-        dest: "{{ ctg_facts_dir }}/ctlabs_promtail.fact"
-        content: |
-          {
-            "config" : {
-              "goflow2" : true
-            }
-          }
-
-    - name: ctlabs.playbooks.ctlabs.setup.openvpn.server.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_openvpn
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.openvpn
+  hosts: prometheus
+  tasks:
+    - name: ctlabs.playbooks.setup.openvpn.server.local_facts
       when: ctg_host == 'ro1'
       copy:
         dest: "{{ ctg_facts_dir }/ctlabs_openvpn.fact"
@@ -169,7 +217,13 @@
             "remote"    : "192.168.16.2"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_frr
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.frr
+  hosts: ro1,ro2,ro3,ro4,isp1
+  tasks:
+    - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'ro1'
       copy:
         dest: "{{ ctg_facts_dir }/ctlabs_frr.fact"
@@ -193,7 +247,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+    - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'ro2'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_frr.fact"
@@ -217,7 +271,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+    - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'ro3'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_frr.fact"
@@ -233,7 +287,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.frr.local_facts
+    - name: ctlabs.playbooks.setup.frr.local_facts
       when: ctg_host == 'ro4'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_frr.fact"
@@ -262,7 +316,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.rundeck.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_rundeck
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.rundeck
+  hosts: ansible
+  tasks:
+    - name: ctlabs.playbooks.setup.rundeck.local_facts
       when: ctg_host == 'ansible'
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_rundeck.fact"
@@ -274,7 +334,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.kafka.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_kafka
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.kafka
+  hosts: kafka1,kafka2
+  tasks:
+    - name: ctlabs.playbooks.setup.kafka.local_facts
       when: ctg_host in ['kafka1', 'kafka2']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_kafka.fact"
@@ -286,7 +352,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.k3s.server.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_k3s
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.k3s
+  hosts: k3s1,k3s2,k3s3,k3s4
+  tasks:
+    - name: ctlabs.playbooks.setup.k3s.server.local_facts
       when: ctg_host in ['k3s1']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_k3s.fact"
@@ -300,7 +372,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.control.local_facts
+    - name: ctlabs.playbooks.setup.k3s.agent.control.local_facts
       when: ctg_host in ['k3s2', 'k3s3']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_k3s.fact"
@@ -312,7 +384,7 @@
             "server_url"  : "https://k3s1.ctlabs.internal:6443"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.k3s.agent.data.local_facts
+    - name: ctlabs.playbooks.setup.k3s.agent.data.local_facts
       when: ctg_host in ['k3s4']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_k3s.fact"
@@ -324,7 +396,13 @@
             "server_url"  : "https://k3s1.ctlabs.internal:6443"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.rke2.server.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_rke2
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.rke2
+  hosts: rke21,rke22,rke23,rke24
+  tasks:
+    - name: ctlabs.playbooks.setup.rke2.server.local_facts
       when: ctg_host in ['rke21']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_rke2.fact"
@@ -342,7 +420,7 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
+    - name: ctlabs.playbooks.setup.rke2.agent.local_facts
       when: ctg_host in ['rke22', 'rke23']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_rke2.fact"
@@ -354,7 +432,7 @@
             "server_url"  : "https://rke21.ctlabs.internal:9345"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.rke2.agent.local_facts
+    - name: ctlabs.playbooks.setup.rke2.agent.local_facts
       when: ctg_host in ['rke24']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_rke2.fact"
@@ -366,7 +444,13 @@
             "server_url"  : "https://rke21.ctlabs.internal:9345"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.kind.single.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_kind
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.kind
+  hosts: kind1,kind2
+  tasks:
+    - name: ctlabs.playbooks.setup.kind.single.local_facts
       when: ctg_host in ['kind1']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_kind.fact"
@@ -379,7 +463,13 @@
             }
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.foreman.server.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_foreman
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.foreman
+  hosts: fm1,fm2,fm3,fm4
+  tasks:
+    - name: ctlabs.playbooks.setup.foreman.server.local_facts
       when: ctg_host in ['fm1']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_foreman.fact"
@@ -388,7 +478,7 @@
             "role" : "server"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.foreman.proxy.local_facts
+    - name: ctlabs.playbooks.setup.foreman.proxy.local_facts
       when: ctg_host in ['fm2', 'fm3', 'fm4']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_foreman.fact"
@@ -397,7 +487,13 @@
             "role" : "proxy"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.wazuh.agent.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_wazuh
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.wazuh
+  hosts: wazuh1,wazuh2
+  tasks:
+    - name: ctlabs.playbooks.setup.wazuh.agent.local_facts
       when: "ctg_host in groups['hosts'] and ctg_host != 'wazuh1.ctlabs.internal'"
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_wazuh.fact"
@@ -407,7 +503,13 @@
             "server_addr" : "wazuh1.ctlabs.internal"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.opendkim.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_opendkim
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.opendkim
+  hosts: mail1,mail2
+  tasks:
+    - name: ctlabs.playbooks.setup.opendkim.local_facts
       when: ctg_host in ['mail1']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_opendkim.fact"
@@ -416,7 +518,13 @@
             "domain"   : "ctlabs.internal"
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.chrony.server.local_facts
+# -----------------------------------------------------------------------------
+# ctlabs_chrony
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.chrony
+  hosts: h3,h4
+  tasks:
+    - name: ctlabs.playbooks.setup.chrony.server.local_facts
       when: ctg_host in ['h3']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_chrony.fact"
@@ -427,7 +535,7 @@
             "clients" : [ "192.168.0.0/16" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.chrony.client.local_facts
+    - name: ctlabs.playbooks.setup.chrony.client.local_facts
       when: ctg_host in ['h4']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_chrony.fact"
@@ -437,9 +545,14 @@
             "sources" : [ "h3.ctlabs.internal" ]
           }
 
-    - name: ctlabs.playbooks.ctlabs.setup.claude_code.local_facts
-      hosts: ansible
-      #when: ctg_host in ['ansible', 'h1', 'h2', 'h3']
+# -----------------------------------------------------------------------------
+# ctlabs_claude_code
+# -----------------------------------------------------------------------------
+- name: ctlabs.playbooks.setup.claude_code
+  hosts: ansible,h1,h2,h3
+  tasks:
+    - name: ctlabs.playbooks.setup.claude_code.local_facts
+      when: ctg_host in ['ansible', 'h1', 'h2', 'h3']
       copy:
         dest: "{{ ctg_facts_dir }}/ctlabs_claude_code.fact"
         content: |
