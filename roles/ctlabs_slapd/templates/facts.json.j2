@@ -1,0 +1,8 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_slapd/templates/facts.json.j2
+ # Description : ctlabs_slapd local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "dbs" : {{ _facts.dbs | default(ctlabs_slapd.defaults.config.dbs) | to_nice_json(indent=2) | indent(2) }}
+}

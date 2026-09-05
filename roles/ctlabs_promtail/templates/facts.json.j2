@@ -1,0 +1,10 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_promtail/templates/facts.json.j2
+ # Description : ctlabs_promtail local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "loki" : {
+    "url" : "{{ _facts.loki.url | default(ctlabs_promtail.defaults.config.loki.url) }}"
+  }
+}

@@ -1,0 +1,24 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_kind/templates/facts.json.j2
+ # Description : ctlabs_kind local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "plane" : "{{ _facts.plane | default('control') }}",
+  "name"  : "{{ _facts.name  | default(CTLABS_HOST) }}",
+  "image" : "{{ _facts.image | default('kindest/node:v1.31.0') }}",
+  "nodes" : {{ _facts.nodes  | default(1) }}
+{% if _facts.ingress is defined %},
+  "ingress" : {
+    "type" : "{{ _facts.ingress.type | default('nginx') }}"
+{% if _facts.ingress.provider is defined %},
+    "provider" : "{{ _facts.ingress.provider }}"
+{% endif %}
+  }
+{% endif %}
+{% if _facts.argocd is defined %},
+  "argocd" : {
+    "host" : "{{ _facts.argocd.host | default('argocd.' + CTLABS_DOMAIN) }}"
+  }
+{% endif %}
+}

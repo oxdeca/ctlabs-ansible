@@ -1,0 +1,13 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_smbadc/templates/facts.json.j2
+ # Description : ctlabs_smbadc local facts template
+#}
+{% set _facts  = ctlabs_role_facts | default({}) %}
+{% set _domain = _facts.domain | default('ad.' + CTLABS_DOMAIN) %}
+{
+  "role"   : "{{ _facts.role | default('master') }}",
+  "domain" : "{{ _domain }}"
+{%  if _facts.role | default('master') == 'slave' %},
+  "master" : "{{ _facts.master | default('dc1.' + _domain) }}"
+{%  endif %}
+}

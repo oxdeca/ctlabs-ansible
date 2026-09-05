@@ -1,0 +1,13 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_openvpn/templates/facts.json.j2
+ # Description : ctlabs_openvpn local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "type"      : "{{ _facts.type | default('server') }}",
+  "server_ip" : "{{ _facts.server_ip | default('') }}",
+  "client_ip" : "{{ _facts.client_ip | default('') }}"
+{%  if _facts.type | default('server') == 'client' %},
+  "remote"    : "{{ _facts.remote | default('') }}"
+{%  endif %}
+}

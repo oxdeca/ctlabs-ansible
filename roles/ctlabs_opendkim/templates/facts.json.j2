@@ -1,0 +1,13 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_opendkim/templates/facts.json.j2
+ # Description : ctlabs_opendkim local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "domain"   : "{{ _facts.domain   | default(CTLABS_DOMAIN) }}",
+  "selector" : "{{ _facts.selector | default('mail') }}",
+  "key" : {
+    "type"   : "{{ _facts.key.type   | default('rsa') }}",
+    "length" : {{ _facts.key.length  | default(2048) }}
+  }
+}

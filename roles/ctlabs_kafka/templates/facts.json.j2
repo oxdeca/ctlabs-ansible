@@ -1,0 +1,11 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_kafka/templates/facts.json.j2
+ # Description : ctlabs_kafka local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "kafka" : {
+    "server_address" : "{{ _facts.server_address | default(CTLABS_HOST + ':9092') }}",
+    "auth_method"    : "{{ _facts.auth_method    | default('SASL_PLAINTEXT') }}"
+  }
+}

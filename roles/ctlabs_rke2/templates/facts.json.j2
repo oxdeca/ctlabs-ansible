@@ -1,0 +1,31 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rke2/templates/facts.json.j2
+ # Description : ctlabs_rke2 local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "role"       : "{{ _facts.role       | default('server') }}",
+  "server_url" : "{{ _facts.server_url | default('https://' + CTLABS_HOST + ':9345') }}"
+{% if _facts.server_node is defined %},
+  "server_node" : "{{ _facts.server_node }}"
+{% endif %}
+{% if _facts.ingress is defined %},
+  "ingress" : {
+    "type" : "{{ _facts.ingress.type | default('traefik') }}"
+{% if _facts.ingress.provider is defined %},
+    "provider" : "{{ _facts.ingress.provider }}"
+{% endif %}
+{% if _facts.ingress.traefik is defined %},
+    "traefik" : {
+      "service_type"  : "{{ _facts.ingress.traefik.service_type  | default('LoadBalancer') }}",
+      "host_network"  : {{ _facts.ingress.traefik.host_network   | default(false) | to_json }}
+    }
+{% endif %}
+  }
+{% endif %}
+{% if _facts.argocd is defined %},
+  "argocd" : {
+    "host" : "{{ _facts.argocd.host | default('argocd.' + CTLABS_DOMAIN) }}"
+  }
+{% endif %}
+}

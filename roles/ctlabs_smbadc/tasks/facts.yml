@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_smbadc/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_smbadc.tasks.facts.write
+  tags:
+    - setup
+    - ctlabs_smbadc.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_smbadc.fact"

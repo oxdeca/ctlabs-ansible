@@ -1,0 +1,29 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_wazuh/templates/facts.json.j2
+ # Description : ctlabs_wazuh local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "role"        : "{{ _facts.role        | default('manager') }}",
+  "apt_release" : "{{ _facts.apt_release | default('4.x') }}"
+{% if _facts.server_addr is defined %},
+  "server_addr" : "{{ _facts.server_addr }}"
+{% endif %}
+{% if _facts.indexer is defined %},
+  "indexer" : {
+    "network" : {
+      "host" : "{{ _facts.indexer.network.host | default('0.0.0.0') }}"
+    }
+  }
+{% endif %}
+{% if _facts.manager is defined %},
+  "manager" : {
+    "addr" : "{{ _facts.manager.addr | default(CTLABS_HOST) }}"
+  }
+{% endif %}
+{% if _facts.dashboard is defined %},
+  "dashboard" : {
+    "host" : "{{ _facts.dashboard.host | default(CTLABS_HOST) }}"
+  }
+{% endif %}
+}

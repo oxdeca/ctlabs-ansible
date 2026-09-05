@@ -1,0 +1,12 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_prometheus/templates/facts.json.j2
+ # Description : ctlabs_prometheus local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "mode" : "{{ _facts.mode | default(ctlabs_prometheus.defaults.config.mode) }}",
+  "mtls" : {{ _facts.mtls | default(ctlabs_prometheus.defaults.config.server.tls.mtls) | lower }}
+{%  if _facts.config is defined %},
+  "config" : {{ _facts.config | to_nice_json(indent=2) | indent(2) }}
+{%  endif %}
+}

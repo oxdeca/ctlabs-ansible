@@ -1,0 +1,7 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_ca/templates/facts.json.j2
+ # Description : ctlabs_ca local facts template
+#}
+{
+  "domain" : "{{ ctlabs_role_facts.domain | default(CTLABS_DOMAIN) }}"
+}

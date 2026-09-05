@@ -1,0 +1,11 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rundeck/templates/facts.json.j2
+ # Description : ctlabs_rundeck local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "rundeck" : {
+    "server_url"    : "{{ _facts.server_url    | default('https://' + CTLABS_HOST + ':8192') }}",
+    "auth_provider" : "{{ _facts.auth_provider | default('ad') }}"
+  }
+}

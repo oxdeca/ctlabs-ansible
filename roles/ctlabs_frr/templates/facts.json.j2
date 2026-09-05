@@ -1,0 +1,16 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_frr/templates/facts.json.j2
+ # Description : ctlabs_frr local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "daemons" : {
+    "enabled" : {{ _facts.daemons.enabled | default([]) | to_json }}
+{%  if _facts.daemons.profile is defined %},
+    "profile" : "{{ _facts.daemons.profile }}"
+{%  endif %}
+  }
+{%  if _facts.router is defined %},
+  "router" : {{ _facts.router | to_nice_json(indent=2) | indent(2) }}
+{%  endif %}
+}

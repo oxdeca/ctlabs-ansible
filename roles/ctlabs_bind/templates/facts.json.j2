@@ -1,0 +1,19 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_bind/templates/facts.json.j2
+ # Description : ctlabs_bind local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{% set _type  = _facts.type | default('master') %}
+{
+  "role" : "server",
+  "type" : "{{ _type }}"
+{%  if _facts.zones is defined %},
+  "zones": {{ _facts.zones | to_nice_json(indent=2) | indent(2) }}
+{%  endif %}
+{%  if _type == 'master' and _facts.slaves is defined %},
+  "slaves": {{ _facts.slaves | to_json }}
+{%  endif %}
+{%  if _type == 'slave' and _facts.masters is defined %},
+  "masters": {{ _facts.masters | to_json }}
+{%  endif %}
+}

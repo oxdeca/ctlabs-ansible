@@ -1,0 +1,11 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_alloy/templates/facts.json.j2
+ # Description : ctlabs_alloy local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "loki" : {
+    "url" : "{{ _facts.loki.url | default(ctlabs_alloy.defaults.config.loki.url) }}"
+  },
+  "mtls" : {{ _facts.mtls | default(ctlabs_alloy.defaults.config.tls.mtls) | lower }}
+}

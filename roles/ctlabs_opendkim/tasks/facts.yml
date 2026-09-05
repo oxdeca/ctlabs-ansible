@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opendkim/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opendkim.tasks.facts.write
+  tags:
+    - setup
+    - ctlabs_opendkim.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_opendkim.fact"
