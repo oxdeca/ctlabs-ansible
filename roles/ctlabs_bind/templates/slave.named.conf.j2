@@ -13,9 +13,9 @@ options {
   secroots-file           "{{ ctlabs_bind.defaults.config[ctg_os_family].secroots_file  }}";
   recursing-file          "{{ ctlabs_bind.defaults.config[ctg_os_family].recursing_file }}";
 
-  allow-query             { {{ ctlabs_bind.defaults.config.allow_query|join('; ') }}; };
+  allow-query             { {{ ctlabs_bind.defaults.config.allow_query | join('; ') }}; };
   allow-transfer          { none; };
-  allow-notify            { {{ ctg_facts.ctlabs_bind.masters|join('; ') }}; };
+  allow-notify            { {{ ctg_facts.ctlabs_bind.masters | default([]) | join('; ') }}; };
 
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
@@ -62,7 +62,7 @@ include  "/etc/named.root.key";
 zone "{{ zone.name }}" IN {
   type       {{ zone.type }};
 {%   if zone.type == "slave" %}  
-  masters  { {{ ctg_facts.ctlabs_bind.masters|join('; ') }}; };
+  masters  { {{ ctg_facts.ctlabs_bind.masters default([]) | join('; ') }}; };
   file       "{{ ctlabs_bind.defaults.config[ctg_os_family].zones_dir }}/{{ zone.name }}.db";
 {%   endif %}
 {%   if zone.type == "forward" %}
