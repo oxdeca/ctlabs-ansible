@@ -79,7 +79,10 @@ ctlabs_xrdp:
           file    : xsettings.xml
           dir     : /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
     service:
-      name : xrdp.service
+      name   : xrdp.service
+      user   : xrdp
+      group  : xrdp
+      groups : [certs,ssl-cert]
     login:
       user   : ctlabs
       pass   : "$6$XkUy88ozFYT1Ezr8$.ZPa/PWOOswMcvZmIZITGO6VtcKepkqegKJJitSSyFdycve0UbHPJHPBGDN/HCUd.DBGzzd2xwlUjzsm0dQO./"

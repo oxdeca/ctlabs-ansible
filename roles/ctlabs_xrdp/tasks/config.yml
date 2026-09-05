@@ -45,19 +45,26 @@
     src  : "{{ ctlabs_xrdp.defaults.config.tmux.template }}"
     dest : "{{ ctlabs_xrdp.defaults.config.tmux.file     }}"
 
-- name: ctlabs_xrdp.taske.service.group
+- name: ctlabs_xrdp.tasks.config.login.group
   group:
     name   : "{{ ctlabs_xrdp.defaults.login.group }}"
 
-- name: ctlabs_xrdp.tasks.service.user
+- name: ctlabs_xrdp.tasks.config.login.user
   user:
     name     : "{{ ctlabs_xrdp.defaults.login.user  }}"
     group    : "{{ ctlabs_xrdp.defaults.login.group }}"
     password : "{{ ctlabs_xrdp.defaults.login.pass  }}"
     shell    : /bin/bash
 
-- name: ctlabs_xrdp.tasks.service.groups.member
+- name: ctlabs_xrdp.tasks.config.login.groups.member
   user:
     name   : "{{ ctlabs_xrdp.defaults.login.user   }}"
     group  : "{{ ctlabs_xrdp.defaults.login.group  }}"
     groups : "{{ ctlabs_xrdp.defaults.login.groups }}"
+
+- name: ctlabs_xrdp.tasks.config.service.groups.member
+  user:
+    name   : "{{ ctlabs_xrdp.defaults.service.user   }}"
+    group  : "{{ ctlabs_xrdp.defaults.service.group  }}"
+    groups : "{{ ctlabs_xrdp.defaults.service.groups }}"
+
