@@ -1,0 +1,15 @@
+---
+
+# -----------------------------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/playbooks/up.yml
+# Description : wait for all nodes to be reachable
+# -----------------------------------------------------------------------------------------------------------
+
+- name        : ctlabs.playbook.up.nodes
+  hosts       : all:!rhosts
+  tags        : up
+  gather_facts: false
+  tasks       :
+    - name: ctlabs.playbooks.up.nodes.wait
+      wait_for_connection:
+        delay: 5
