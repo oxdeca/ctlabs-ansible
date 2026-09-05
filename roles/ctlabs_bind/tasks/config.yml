@@ -22,7 +22,7 @@
         src  : master.named.conf.j2
         dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].file }}"
 
-    - name: ctlabs_bind.tasks.config.zones
+    - name: ctlabs_bind.tasks.master.config.zones
       when: zone.type|default('master') == 'master'
       template:
         src  : zone.db.j2
@@ -37,7 +37,7 @@
 - name: ctlabs_bind.tasks.config.slave
   when: ctg_facts.ctlabs_bind.type == 'slave'
   block:
-    - name: ctlabs.tasks.config.named
+    - name: ctlabs_bind.tasks.slave.config.named
       template:
         src  : slave.named.conf.j2
         dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].file }}"
