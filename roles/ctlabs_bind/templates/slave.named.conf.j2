@@ -15,7 +15,11 @@ options {
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query | join('; ') }}; };
   allow-transfer          { none; };
-  allow-notify            { {{ ctg_facts.ctlabs_bind.masters | default([]) | join('; ') }}; };
+{% if ctg_facts.ctlabs_bind.mastsers | default([]) %}
+  allow-notify            { {{ ctg_facts.ctlabs_bind.masters | join('; ') }}; };
+{% else %}
+  allow-notify            { none; };
+{% endif %}
 
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
