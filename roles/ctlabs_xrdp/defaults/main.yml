@@ -82,7 +82,7 @@ ctlabs_xrdp:
       name   : xrdp.service
       user   : xrdp
       group  : xrdp
-      groups : [certs,ssl-cert]
+      groups : [ssl-cert]
     login:
       user   : ctlabs
       pass   : "$6$XkUy88ozFYT1Ezr8$.ZPa/PWOOswMcvZmIZITGO6VtcKepkqegKJJitSSyFdycve0UbHPJHPBGDN/HCUd.DBGzzd2xwlUjzsm0dQO./"

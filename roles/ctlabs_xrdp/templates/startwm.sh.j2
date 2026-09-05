@@ -5,6 +5,7 @@
 # /etc/environment and /etc/default/locale to initialise the
 # locale and the user environment properly.
 
+# 1. Load user/system profiles
 if test -r /etc/profile; then
         . /etc/profile
 fi
@@ -13,5 +14,6 @@ if test -r ~/.profile; then
         . ~/.profile
 fi
 
+# 2. Start XFCE
 test -x /etc/X11/Xsession && exec /etc/X11/Xsession
 exec startxfce4

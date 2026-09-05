@@ -67,4 +67,4 @@
     name   : "{{ ctlabs_xrdp.defaults.service.user   }}"
     group  : "{{ ctlabs_xrdp.defaults.service.group  }}"
     groups : "{{ ctlabs_xrdp.defaults.service.groups }}"
-
+  notify: ctlabs_xrdp.handlers.service.restart

@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/handlers/main.yml
+# Description : main handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_xrdp.handlers.service.restart
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  loop:
+    - xrdp
+    - xrdp-sesman
