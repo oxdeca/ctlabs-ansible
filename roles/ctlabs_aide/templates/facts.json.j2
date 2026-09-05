@@ -1,0 +1,10 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_aide/templates/facts.json.j2
+ # Description : ctlabs_aide local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "config" : {
+    "extra" : {{ _facts.config.extra | default([]) | to_json }}
+  }
+}

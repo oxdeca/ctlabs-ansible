@@ -1,0 +1,14 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_syslog/templates/facts.json.j2
+ # Description : ctlabs_syslog local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "kind" : "{{ _facts.kind | default('syslog-ng') }}"
+{% if _facts.server is defined %},
+  "server" : {{ _facts.server | to_json }}
+{% endif %}
+{% if _facts.client is defined %},
+  "client" : {{ _facts.client | to_json }}
+{% endif %}
+}

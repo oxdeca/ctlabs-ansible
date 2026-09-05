@@ -1,0 +1,10 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_sssd/templates/facts.json.j2
+ # Description : ctlabs_sssd local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "uri"     : "{{ _facts.uri     | default('ldap://ldap.' + CTLABS_DOMAIN) }}",
+  "base"    : "{{ _facts.base    | default('dc=' + CTLABS_DOMAIN.split('.') | join(',dc=')) }}",
+  "backend" : "{{ _facts.backend | default('ldap') }}"
+}

@@ -1,0 +1,8 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_tempo/templates/facts.json.j2
+ # Description : ctlabs_tempo local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "metrics_generator" : {{ _facts.metrics_generator | default(false) | to_json }}
+}

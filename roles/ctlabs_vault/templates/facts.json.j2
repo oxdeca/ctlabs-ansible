@@ -1,0 +1,8 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_vault/templates/facts.json.j2
+ # Description : ctlabs_vault local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "address" : "{{ _facts.address | default('https://' + CTLABS_HOST + ':8200') }}"
+}

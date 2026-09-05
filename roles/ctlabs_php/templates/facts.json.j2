@@ -1,0 +1,9 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_php/templates/facts.json.j2
+ # Description : ctlabs_php local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "fpm_user"  : "{{ _facts.fpm_user  | default('www-data') }}",
+  "fpm_group" : "{{ _facts.fpm_group | default('www-data') }}"
+}

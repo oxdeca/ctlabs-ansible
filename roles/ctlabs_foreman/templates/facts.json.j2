@@ -1,0 +1,9 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_foreman/templates/facts.json.j2
+ # Description : ctlabs_foreman local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "role"     : "{{ _facts.role     | default('server') }}",
+  "scenario" : "{{ _facts.scenario | default('katello') }}"
+}

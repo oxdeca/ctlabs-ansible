@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_node_exporter/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_node_exporter.tasks.facts.write
+  tags:
+    - setup
+    - ctlabs_node_exporter.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_node_exporter.fact"

@@ -1,0 +1,8 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_mimir/templates/facts.json.j2
+ # Description : ctlabs_mimir local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "mtls" : {{ _facts.mtls | default(false) | to_json }}
+}

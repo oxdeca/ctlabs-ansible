@@ -1,0 +1,17 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_postfix/templates/facts.json.j2
+ # Description : ctlabs_postfix local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "relayhost" : "{{ _facts.relayhost | default('') }}",
+  "networks"  : {{ _facts.networks   | default(['localhost']) | to_json }},
+  "smtp" : {
+    "wrappermode" : {{ _facts.smtp.wrappermode | default(false) | to_json }}
+  }
+{% if _facts.transport is defined %},
+  "transport" : {
+    "google" : {{ _facts.transport.google | default(false) | to_json }}
+  }
+{% endif %}
+}

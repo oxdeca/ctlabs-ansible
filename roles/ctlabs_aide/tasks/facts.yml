@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_aide/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_aide.tasks.facts.write
+  tags:
+    - setup
+    - ctlabs_aide.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_aide.fact"
+''
