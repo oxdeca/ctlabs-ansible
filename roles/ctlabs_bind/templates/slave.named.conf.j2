@@ -15,11 +15,7 @@ options {
 
   allow-query             { {{ ctlabs_bind.defaults.config.allow_query | join('; ') }}; };
   allow-transfer          { none; };
-{% if ctg_facts.ctlabs_bind.masters | default([]) %}
-  allow-notify            { {{ ctg_facts.ctlabs_bind.masters | join('; ') }}; };
-{% else %}
-  allow-notify            { none; };
-{% endif %}
+  allow-notify            { {{ ctg_facts.ctlabs_bind.masters | default(['none']) | join('; ') }}; };
 
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
@@ -66,7 +62,7 @@ include  "/etc/named.root.key";
 zone "{{ zone.name }}" IN {
   type       {{ zone.type }};
 {%   if zone.type == "slave" %}  
-  masters  { {{ ctg_facts.ctlabs_bind.masters default([]) | join('; ') }}; };
+  masters  { {{ ctg_facts.ctlabs_bind.masters | default(['none']) | join('; ') }}; };
   file       "{{ ctlabs_bind.defaults.config[ctg_os_family].zones_dir }}/{{ zone.name }}.db";
 {%   endif %}
 {%   if zone.type == "forward" %}
