@@ -10,6 +10,7 @@
     src  : "{{ ctlabs_smbadc.defaults.config.ca_ctlabs.certdir }}/{{ item.name }}"
     dest : "{{ ctlabs_smbadc.defaults.config.tls.dir }}/{{ item.name }}"
     mode : "{{ item.mode }}"
+    remote_src: true
   loop:
     - { name: "{{ ctlabs_smbadc.defaults.config.tls.crt }}", mode: '0640' }
     - { name: "{{ ctlabs_smbadc.defaults.config.tls.key }}", mode: '0600' }
