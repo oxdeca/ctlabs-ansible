@@ -3,7 +3,7 @@
  # Description : ctlabs_ca local facts template
 #}
 {% set _host_facts = ctlabs_fole_facts | default({}) %}
-{% set _role_facts = play_setup(['ca'] | default({}) %}
+{% set _role_facts = play_setup['ca']  | default({}) %}
 {
   "domain" : "{{ _host_facts.domain | default(_role_facts.domain | default(CTLABS_DOMAIN)) }}"
 }
