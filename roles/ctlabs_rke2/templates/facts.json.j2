@@ -4,16 +4,16 @@
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
-  "plane"      : "{{ _facts.plane      | default('control') }}"
+  "plane"      : "{{ _facts.plane      | default('control') }}",
   "role"       : "{{ _facts.role       | default('server') }}",
   "server_url" : "{{ _facts.server_url | default('https://' + CTLABS_HOST + ':9345') }}"
-{% if _facts.server_node is defined %},
+{%- if _facts.server_node is defined %},
   "server_node" : "{{ _facts.server_node }}"
 {% endif %}
 {% if _facts.ingress is defined %},
   "ingress" : {
     "type" : "{{ _facts.ingress.type | default('traefik') }}"
-{% if _facts.ingress.provider is defined %},
+{%- if _facts.ingress.provider is defined %},
     "provider" : "{{ _facts.ingress.provider }}"
 {% endif %}
 {% if _facts.ingress.traefik is defined %},
