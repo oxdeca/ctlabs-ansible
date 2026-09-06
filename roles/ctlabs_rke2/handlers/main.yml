@@ -16,13 +16,14 @@
     name  : "{{ ctlabs_rke2.defaults.service.server.name }}"
     state : started
 
-- name: ctlabs_rke2.handlers.agent.systemd.reload
+- name: ctlabs_rke2.handlers.control.systemd.reload
   systemd:
-    name          : "{{ ctlabs_rke2.defaults.service.agent.name }}" 
+    name          : "{{ ctlabs_rke2.defaults.service.control.name }}"
     enabled       : true
     daemon_reload : true
 
-- name: ctlabs_rke2.handlers.service.agent.started
-  service:
-    name  : "{{ ctlabs_rke2.defaults.service.agent.name }}"
-    state : started
+- name: ctlabs_rke2.handlers.worker.systemd.reload
+  systemd:
+    name          : "{{ ctlabs_rke2.defaults.service.worker.name }}"
+    enabled       : true
+    daemon_reload : true

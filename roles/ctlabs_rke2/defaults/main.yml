@@ -66,14 +66,20 @@ ctlabs_rke2:
       server:
         name     : rke2-server.service
         template : rke2-server.service.j2
-      agent:
+      control:
+        name     : rke2-control.service
+        template : rke2-control.service.j2
+      worker:
         name     : rke2-agent.service
         template : rke2-agent.service.j2
     sysconfig:
-      dir  : /etc/sysconfig
-      agent:
-        name     : /etc/sysconfig/rke2
-        template : rke2-agent.sysconfig.j2
+      dir    : /etc/sysconfig
+      control:
+        name    : /etc/sysconfig/rke2
+        template: rke2-agent.sysconfig.j2
+      worker:
+        name    : /etc/sysconfig/rke2
+        template: rke2-agent.sysconfig.j2
     bin:
       path: /usr/bin/rke2
       mode: '0750'

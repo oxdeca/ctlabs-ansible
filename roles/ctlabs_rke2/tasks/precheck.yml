@@ -51,8 +51,8 @@
   set_fact:
     ctlabs_rke2_argocd_host: "{{ ctg_facts.ctlabs_rke2['argocd']['host'] | default(ctlabs_rke2['defaults']['argocd']['host']) }}"
 
-- name: ctlabs_rke2.tasks.precheck.agent.vars
-  when: ctlabs_rke2_role is in ["agent"]
+- name: ctlabs_rke2.tasks.precheck.join.vars
+  when: ctlabs_rke2_role in ["control", "worker"]
   block:
     - name: ctlabs_rke2.tasks.precheck.rke2_url.fact
       set_fact:

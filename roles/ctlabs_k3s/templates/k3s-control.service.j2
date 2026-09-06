@@ -1,0 +1,21 @@
+[Unit]
+Description=k3s control plane
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+
+User=root
+EnvironmentFile=/etc/sysconfig/k3s
+{% if ctlabs_k3s_ingress_provider == "traefik" %}
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server
+{% else %}
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --disable=traefik
+{% endif %}
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

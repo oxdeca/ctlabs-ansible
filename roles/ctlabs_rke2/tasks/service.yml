@@ -19,23 +19,42 @@
         name  : "{{ ctlabs_rke2.defaults.service.server.name }}"
         state : started
     
-- name: ctlabs_rke2.tasks.service.agent
-  when: ctlabs_rke2_role == "agent"
+- name: ctlabs_rke2.tasks.service.control
+  when: ctlabs_rke2_role == "control"
   block:
-    - name: ctlabs_rke2.tasks.service.agent.present
+    - name: ctlabs_rke2.tasks.service.control.sysconfig.present
       template:
-        src  : "{{ ctlabs_rke2.defaults.service.agent.template }}"
-        dest : "{{ ctg_systemd_dir + '/' + ctlabs_rke2.defaults.service.agent.name }}"
-      notify: ctlabs_rke2.handlers.agent.systemd.reload
+        src  : "{{ ctlabs_rke2.defaults.sysconfig.control.template }}"
+        dest : "{{ ctlabs_rke2.defaults.sysconfig.control.name     }}"
 
-    - name: ctlabs_rke2.tasks.service.agent.sysconfig.present
+    - name: ctlabs_rke2.tasks.service.control.present
       template:
-        src  : "{{ ctlabs_rke2.defaults.sysconfig.agent.template }}"
-        dest : "{{ ctlabs_rke2.defaults.sysconfig.agent.name     }}"
+        src  : "{{ ctlabs_rke2.defaults.service.control.template }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_rke2.defaults.service.control.name }}"
+      notify: ctlabs_rke2.handlers.control.systemd.reload
 
-    - name: ctlabs_rke2.tasks.service.agent.started
+    - name: ctlabs_rke2.tasks.service.control.started
       service:
-        name  : "{{ ctlabs_rke2.defaults.service.agent.name }}"
+        name  : "{{ ctlabs_rke2.defaults.service.control.name }}"
+        state : started
+
+- name: ctlabs_rke2.tasks.service.worker
+  when: ctlabs_rke2_role == "worker"
+  block:
+    - name: ctlabs_rke2.tasks.service.worker.sysconfig.present
+      template:
+        src  : "{{ ctlabs_rke2.defaults.sysconfig.worker.template }}"
+        dest : "{{ ctlabs_rke2.defaults.sysconfig.worker.name     }}"
+
+    - name: ctlabs_rke2.tasks.service.worker.present
+      template:
+        src  : "{{ ctlabs_rke2.defaults.service.worker.template }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_rke2.defaults.service.worker.name }}"
+      notify: ctlabs_rke2.handlers.worker.systemd.reload
+
+    - name: ctlabs_rke2.tasks.service.worker.started
+      service:
+        name  : "{{ ctlabs_rke2.defaults.service.worker.name }}"
         state : started
     
 - name: ctlabs_rke2.tasks.service.cluster

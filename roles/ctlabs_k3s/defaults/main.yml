@@ -58,12 +58,18 @@ ctlabs_k3s:
       server:
         name     : k3s-server.service
         template : k3s-server.service.j2
-      agent:
+      control:
+        name     : k3s-control.service
+        template : k3s-control.service.j2
+      worker:
         name     : k3s-agent.service
         template : k3s-agent.service.j2
     sysconfig:
-      dir  : /etc/sysconfig
-      agent:
+      dir: /etc/sysconfig
+      control:
+        name     : /etc/sysconfig/k3s
+        template : k3s-agent.sysconfig.j2
+      worker:
         name     : /etc/sysconfig/k3s
         template : k3s-agent.sysconfig.j2
     bin:

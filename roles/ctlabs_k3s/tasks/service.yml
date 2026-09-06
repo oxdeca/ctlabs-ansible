@@ -13,29 +13,48 @@
         src  : "{{ ctlabs_k3s.defaults.service.server.template }}"
         dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.server.name }}"
       notify: ctlabs_k3s.handlers.server.systemd.reload
-    
+
     - name: ctlabs_k3s.tasks.service.server.started
       service:
         name  : "{{ ctlabs_k3s.defaults.service.server.name }}"
         state : started
-    
-- name: ctlabs_k3s.tasks.service.agent
-  when: ctlabs_k3s_role == "agent"
-  block:
-    - name: ctlabs_k3s.tasks.service.agent.present
-      template:
-        src  : "{{ ctlabs_k3s.defaults.service.agent.template }}"
-        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.agent.name }}"
-      notify: ctlabs_k3s.handlers.agent.systemd.reload
 
-    - name: ctlabs_k3s.tasks.service.agent.sysconfig.present
+- name: ctlabs_k3s.tasks.service.control
+  when: ctlabs_k3s_role == "control"
+  block:
+    - name: ctlabs_k3s.tasks.service.control.sysconfig.present
       template:
-        src  : "{{ ctlabs_k3s.defaults.sysconfig.agent.template }}"
-        dest : "{{ ctlabs_k3s.defaults.sysconfig.agent.name     }}"
-    
-    - name: ctlabs_k3s.tasks.service.agent.started
+        src  : "{{ ctlabs_k3s.defaults.sysconfig.control.template }}"
+        dest : "{{ ctlabs_k3s.defaults.sysconfig.control.name     }}"
+
+    - name: ctlabs_k3s.tasks.service.control.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.service.control.template }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.control.name }}"
+      notify: ctlabs_k3s.handlers.control.systemd.reload
+
+    - name: ctlabs_k3s.tasks.service.control.started
       service:
-        name  : "{{ ctlabs_k3s.defaults.service.agent.name }}"
+        name  : "{{ ctlabs_k3s.defaults.service.control.name }}"
+        state : started
+
+- name: ctlabs_k3s.tasks.service.worker
+  when: ctlabs_k3s_role == "worker"
+  block:
+    - name: ctlabs_k3s.tasks.service.worker.sysconfig.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.sysconfig.worker.template }}"
+        dest : "{{ ctlabs_k3s.defaults.sysconfig.worker.name     }}"
+
+    - name: ctlabs_k3s.tasks.service.worker.present
+      template:
+        src  : "{{ ctlabs_k3s.defaults.service.worker.template }}"
+        dest : "{{ ctg_systemd_dir + '/' + ctlabs_k3s.defaults.service.worker.name }}"
+      notify: ctlabs_k3s.handlers.worker.systemd.reload
+
+    - name: ctlabs_k3s.tasks.service.worker.started
+      service:
+        name  : "{{ ctlabs_k3s.defaults.service.worker.name }}"
         state : started
     
 - name: ctlabs_k3s.tasks.service.cluster

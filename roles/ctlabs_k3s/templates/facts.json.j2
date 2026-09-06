@@ -4,7 +4,6 @@
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
-  "plane"      : "{{ _facts.plane      | default('control') }}",
   "role"       : "{{ _facts.role       | default('server') }}",
   "server_url" : "{{ _facts.server_url | default('https://' + CTLABS_HOST + ':6443') }}"
 {%- if _facts.server_node is defined %},
