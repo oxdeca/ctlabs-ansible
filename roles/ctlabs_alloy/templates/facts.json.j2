@@ -5,7 +5,7 @@
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
   "loki" : {
-    "url" : "{{ _facts.loki.url | default(ctlabs_alloy.defaults.config.loki.url) }}"
+    "url" : "{{ (_facts.loki.url | default({})).url | default(ctlabs_alloy.defaults.config.loki_url) }}"
   },
   "mtls" : {{ _facts.mtls | default(ctlabs_alloy.defaults.config.tls.mtls) | lower }}
 }
