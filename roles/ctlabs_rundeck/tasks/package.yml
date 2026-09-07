@@ -10,7 +10,7 @@
   block:
     - name: ctlabs_rundeck.tasks.package.redhat.repo.key
       rpm_key:
-        key: "{{ item.gpg }}"
+        key: "{{ item.key }}"
       loop: "{{ ctlabs_rundeck.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_rundeck.tasks.package.redhat.repo.file
