@@ -25,7 +25,7 @@ activedirectory {
   reportStatistics="true";
 
   // Fallback to File Authentication
-  org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+  org.rundeck.jaas.PropertyFileLoginModule required
   debug="true"
   file="/etc/rundeck/realm.properties";
 };
