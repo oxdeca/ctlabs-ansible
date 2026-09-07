@@ -12,7 +12,7 @@
   notify: ctlabs_rundeck.handlers.service.restart
   loop:
     - "{{ ctlabs_rundeck.defaults.config.rundeck   }}"
-    - "{{ ctlabs_rundeck.defaults.config.sysconfig }}"
+    - "{{ ctlabs_rundeck.defaults.config.sysconfig[ctg_os_family] }}"
     - "{{ ctlabs_rundeck.defaults.config.realm     }}"
     - "{{ ctlabs_rundeck.defaults.config.framework }}"
     - "{{ ctlabs_rundeck.defaults.config.ssl       }}"
