@@ -77,4 +77,6 @@ ctlabs_rundeck:
       group: rundeck
   os:
     - centos9
+    - centos10
     - debian11
+    - debian12
