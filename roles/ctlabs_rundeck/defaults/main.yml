@@ -48,8 +48,12 @@ ctlabs_rundeck:
         admin_pass    : "secret123!"
         auth_provider : login
       sysconfig:
-        file     : /etc/sysconfig/rundeckd
-        template : rundeckd.sysconfig.j2
+        redhat:
+          file     : /etc/sysconfig/rundeckd
+          template : rundeckd.sysconfig.j2
+        debian:
+          file     : /etc/default/rundeckd
+          template : rundeckd.sysconfig.j2
       auth_provider:
         ad:
           template  : jaas-activedirectory.conf.j2
