@@ -89,7 +89,6 @@ ctlabs_sssd:
     - debian11
     - debian12
     - kali2025
-    - kali2026
     - parrot6
     - parrot7
   env:
