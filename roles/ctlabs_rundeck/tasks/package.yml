@@ -26,13 +26,33 @@
 - name: ctlabs_rundeck.tasks.package
   when: ctg_os_family == 'debian'
   block:
-#    - name: ctlabs_rundeck.tasks.package.install.redhat
-#      when: ctg_os_family == 'redhat'
-#      yum:
-#        name              : "{{ item.url if item.url is defined else item.name }}"
-#        disable_gpg_check : true
-#        state             : present
-#      loop: "{{ ctlabs_rundeck.defaults.pkgs[ctg_os_family] }}"
+    - name: ctlabs_rundeck.tasks.package.debian.keydir
+      file:
+        path : "{{ ctlabs_rundeck.defaults.config.keydir }}"
+        state: directory
+        mode : '0755'
+    
+    # Create Repo:
+    # gpg_key_url="https://packagecloud.io/pagerduty/rundeck/gpgkey"
+    # gpg_keyring_path="$apt_keyrings_dir/pagerduty_rundeck-archive-keyring.gpg"
+    # gpg_key_path_old="/etc/apt/trusted.gpg.d/pagerduty_rundeck.gpg"
+    #
+    - name: ctlabs_rundeck.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_rundeck.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_rundeck.defaults.repos[ctg_os_family] }}"
+    
+    # /etc/apt/sources.list.d/pagerduty_rundeck_any.list
+    # deb [signed-by=/etc/apt/keyrings/pagerduty_rundeck-archive-keyring.gpg] https://packagecloud.io/pagerduty/rundeck/any/ any main
+    # deb-src [signed-by=/etc/apt/keyrings/pagerduty_rundeck-archive-keyring.gpg] https://packagecloud.io/pagerduty/rundeck/any/ any main
+    - name: ctlabs_rundeck.tasks.package.debian.repos.file
+      apt_repository:
+        repo: "deb [signed-by={{ ctlabs_rundeck.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
+        #repo: "deb [signed-by=/etc/apt/keyrings/pagerduty_rundeck-archive-keyring.gpg] https://packagecloud.io/pagerduty/rundeck/any/ any main"
+        update_cache: yes
+      loop: "{{ ctlabs_rundeck.defaults.repos[ctg_os_family] }}"
 
     - name: ctlabs_rundeck.tasks.package.url.install.debian
       when: item.url is defined
