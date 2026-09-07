@@ -4,7 +4,7 @@
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
-  "uri"     : "{{ _facts.uri     | default(ctlabs_sssd.defaults.config.ldap.uri) }}",
-  "base"    : "{{ _facts.base    | default('dc=' + CTLABS_DOMAIN.split('.') | join(',dc=')) }}",
-  "backend" : "{{ _facts.backend | default('ldap') }}"
+  "uri"     : "{{ _facts.uri      | default(ctlabs_sssd.defaults.config.ldap.uri) }}",
+  "base"    : "{{ _facts.base     | default('dc=' + CTLABS_DOMAIN.split('.') | join(',dc=')) }}",
+  "backend" : "{{ (_facts.backend | default('ldap')) | upper }}"
 }
