@@ -17,9 +17,9 @@ ctlabs_rundeck:
         template : rundeck.repo.j2
         gpg      : https://docs.rundeck.com/keys/BUILD-GPG-KEY-20260105.key
       debian:
-        file     : rundeck
-        url      : https://packagecloud.io/pagerduty/rundeck/any/
-        key      : https://packagecloud.io/pagerduty/rundeck/gpgkey
+        - name: rundeck
+          url : https://packagecloud.io/pagerduty/rundeck/any/
+          key : https://packagecloud.io/pagerduty/rundeck/gpgkey
     pkgs:
       redhat:
         - name: "java-{{ versions.java }}-openjdk-headless"
