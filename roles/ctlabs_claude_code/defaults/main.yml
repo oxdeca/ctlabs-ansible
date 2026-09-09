@@ -63,10 +63,10 @@ ctlabs_claude_code:
         endpoint       : "http://prometheus.ctlabs.internal:9090/v1/metrics"
         resource_attrs : "user.email={{ ansible_user_id | default(ansible_user) }}"
       preferences:
-        model          : "claude-sonnet-4-6"
+        model          : "claude-sonnet-5"
         theme          : "dark"
-        always_thinking: false
-        fast_mode      : true
+        always_thinking: true
+        fast_mode      : false
         fallback_model : ["haiku"]
         gce_metadata_host: ""
     certs:
