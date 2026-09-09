@@ -3,23 +3,23 @@
  # Description : ctlabs_claude_code local facts template
 #}
 {% set _defaults = ctlabs_claude_code.defaults.config %}
-{% set _facts    = ctlabs_role_facts | default({}) %}
-{% set _provider = (_defaults.provider | combine(_facts.provider | default({}), recursive=true)) %}
-{% set _otlp     = (_defaults.otlp     | combine(_facts.otlp     | default({}), recursive=true)) %}
+{% set _facts    = ctlabs_role_facts      | default({}) %}
+{% set _provider = (_defaults.provider    | combine(_facts.provider    | default({}), recursive=true)) %}
+{% set _otlp     = (_defaults.otlp        | combine(_facts.otlp        | default({}), recursive=true)) %}
 {% set _prefs    = (_defaults.preferences | combine(_facts.preferences | default({}), recursive=true)) %}
 {
   "provider" : {
-    "active" : "{{ _provider.active }}"
-{%  if _provider.active == 'anthropic' %},
+    "active" : "{{ _provider.active }}",
+{%  if _provider.active == 'anthropic' %}
     "anthropic" : {
       "api_key" : "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
     }
-{%  elif _provider.active == 'openrouter' %},
+{%  elif _provider.active == 'openrouter' %}
     "openrouter" : {
       "api_key"  : "{{ lookup('env', 'OPENROUTER_API_KEY') }}",
       "base_url" : "{{ _provider.openrouter.base_url | default('https://openrouter.ai/api') }}"
     }
-{%  elif _provider.active == 'vertexai' %},
+{%  elif _provider.active == 'vertexai' %}
     "vertexai" : {
       "project_id" : "{{ _provider.vertexai.project_id | default('') }}",
       "region"     : "{{ _provider.vertexai.region     | default('global') }}"
