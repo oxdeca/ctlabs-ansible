@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_gotify/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_gotify.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_gotify.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_gotify.fact"

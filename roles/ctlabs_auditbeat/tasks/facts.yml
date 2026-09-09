@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_auditbeat/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_auditbeat.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_auditbeat.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_auditbeat.fact"

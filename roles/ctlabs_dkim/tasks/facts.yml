@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_dkim/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_dkim.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_dkim.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_dkim.fact"

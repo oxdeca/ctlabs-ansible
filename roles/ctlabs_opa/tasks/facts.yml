@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_opa/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_opa.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_opa.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_opa.fact"

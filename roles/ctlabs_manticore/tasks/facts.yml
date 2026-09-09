@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_manticore/tasks/facts.yml
+# Description : write local facts
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_manticore.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_manticore.facts
+  template:
+    src : facts.json.j2
+    dest: "{{ ctg_facts_dir }}/ctlabs_manticore.fact"

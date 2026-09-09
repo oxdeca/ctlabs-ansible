@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_claude_code.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
   tags:
     - setup
     - ctlabs_claude_code.facts
