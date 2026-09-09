@@ -16,7 +16,7 @@
 # Server
 #
 - name: ctlabs_vault.tasks.config.server
-  when: CTLABS_VAULT_ROLE == 'server'
+  when: ctlabs_vault_install_type == 'server'
   block:
     - name: ctlabs_vault.tasks.config.server.vault.data.dir
       file:
@@ -35,7 +35,7 @@
 # Agent
 #
 - name: ctlabs_vault.tasks.config.agent
-  when: CTLABS_VAULT_ROLE == 'agent'
+  when: ctlabs_vault_install_type == 'agent'
   block:
     - name: ctlabs_vault.tasks.config.agent.run.dir
       file:
@@ -60,7 +60,7 @@
 # Proxy
 #
 - name: ctlabs_vault.tasks.config.proxy
-  when: CTLABS_VAULT_ROLE == 'proxy'
+  when: ctlabs_vault_install_type == 'proxy'
   block:
     - name: ctlabs_vault.tasks.config.proxy.group
       group:

@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_vault.tasks.init.init_status
-  when: CTLABS_VAULT_ROLE == 'server'
+  when: ctlabs_vault_install_type == 'server'
   vars:
     ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   uri:
@@ -17,13 +17,13 @@
   delay   : 5
 
 - name: ctlabs_vault.tasks.init.init_status.fact
-  when: CTLABS_VAULT_ROLE == 'server'
+  when: ctlabs_vault_install_type == 'server'
   set_fact:
     ctlabs_vault_initialized: "{{ vault_init_status.json.initialized }}"
 
 - name: ctlabs_vault.tasks.init
   when:
-    - CTLABS_VAULT_ROLE == 'server'
+    - ctlabs_vault_install_type == 'server'
     - not ctlabs_vault_initialized
   block:
     - name: ctlabs_vault.tasks.init.initialize

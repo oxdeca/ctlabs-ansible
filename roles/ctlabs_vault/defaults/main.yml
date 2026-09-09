@@ -5,8 +5,6 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
-# role mode: server, agent, or proxy, cli
-CTLABS_VAULT_ROLE : cli
 CMD_IP_PATH       : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
 
 # agent / proxy variables

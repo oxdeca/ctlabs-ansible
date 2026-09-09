@@ -2,7 +2,7 @@
 
 ## Modes
 
-The role supports four modes via `CTLABS_VAULT_ROLE`:
+The role supports four install modes via `ctlabs_vault_install_type`:
 
 | Mode     | Description                                         |
 |----------|-----------------------------------------------------|
@@ -10,6 +10,12 @@ The role supports four modes via `CTLABS_VAULT_ROLE`:
 | `server` | Full vault server with file storage, TLS, init      |
 | `agent`  | Vault Agent with GCP auto-auth, optional cache/sink |
 | `proxy`  | Vault Proxy with GCP auto-auth, cache, unix/mtls    |
+
+The install type is resolved per host in `tasks/precheck.yml`:
+
+1. Local fact `ctg_facts.ctlabs_vault.install_type` (authoritative — per-host)
+2. `ctlabs_vault_install_type` variable (fallback only)
+3. `cli` (default when neither is set)
 
 ## Ansible Tags
 
@@ -24,6 +30,7 @@ The role supports four modes via `CTLABS_VAULT_ROLE`:
 
 | Variable                          | Default       | Description                                    |
 |-----------------------------------|---------------|------------------------------------------------|
+| `ctlabs_vault_install_type`       | `cli`         | Install mode: `cli`, `server`, `agent`, `proxy` |
 | `ctlabs_vault_server_addr`        | see below     | Vault server address for agent/proxy connect |
 | `ctlabs_vault_agent_gcp_role`     | `gce-role`    | GCP auth role for auto_auth                    |
 | `ctlabs_vault_agent_cache`        | `false`       | Enable agent token caching                     |
@@ -47,17 +54,31 @@ On agent/proxy hosts, provide the vault server address via a local fact — e.g.
 
 ## Local Facts
 
+Fact file: `/etc/ansible/facts.d/ctlabs_vault.fact` (written by `tasks/facts.yml`).
+
+```json
+{
+  "address"      : "https://<vault-server-ip>:8200",
+  "install_type" : "server"
+}
+```
+
+- `address` — vault server address for agent/proxy connect
+- `install_type` — `cli`, `server`, `agent`, or `proxy`; resolved via `ctg_facts.ctlabs_vault.install_type` in precheck
+
 ### Agent
 ```json
 {
-  "address": "https://<vault-server-ip>:8200"
+  "address"      : "https://<vault-server-ip>:8200",
+  "install_type" : "agent"
 }
 ```
 
 ### Proxy
 ```json
 {
-  "address": "https://<vault-server-ip>:8200"
+  "address"      : "https://<vault-server-ip>:8200",
+  "install_type" : "proxy"
 }
 ```
 

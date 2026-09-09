@@ -4,5 +4,6 @@
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
-  "address" : "{{ _facts.address | default('https://' + CTLABS_HOST + ':8200') }}"
+  "address"      : "{{ _facts.address       | default('https://' + CTLABS_HOST + ':8200') }}",
+  "install_type" : "{{ _facts.install_type  | default('cli') }}"
 }

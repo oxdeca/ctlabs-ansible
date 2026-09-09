@@ -12,7 +12,7 @@
   vars:
     ctg_os: debian12
     ctg_os_family: debian
-    CTLABS_VAULT_ROLE: server
+    ctlabs_vault_install_type: server
   roles:
     - role: "{{ playbook_dir | dirname | dirname }}"
 
@@ -23,7 +23,7 @@
   vars:
     ctg_os: debian12
     ctg_os_family: debian
-    CTLABS_VAULT_ROLE: agent
+    ctlabs_vault_install_type: agent
   roles:
     - role: "{{ playbook_dir | dirname | dirname }}"
 
@@ -34,7 +34,7 @@
   vars:
     ctg_os: debian12
     ctg_os_family: debian
-    CTLABS_VAULT_ROLE: proxy
+    ctlabs_vault_install_type: proxy
   roles:
     - role: "{{ playbook_dir | dirname | dirname }}"
 
@@ -45,6 +45,6 @@
   vars:
     ctg_os: debian12
     ctg_os_family: debian
-    CTLABS_VAULT_ROLE: cli
+    ctlabs_vault_install_type: cli
   roles:
     - role: "{{ playbook_dir | dirname | dirname }}"

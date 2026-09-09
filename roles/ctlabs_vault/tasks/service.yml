@@ -6,21 +6,21 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_vault.tasks.service.server.start
-  when: CTLABS_VAULT_ROLE == 'server'
+  when: ctlabs_vault_install_type == 'server'
   service:
     name    : "{{ ctlabs_vault.defaults.service.server.name }}"
     enabled : true
     state   : started
 
 - name: ctlabs_vault.tasks.service.agent.start
-  when: CTLABS_VAULT_ROLE == 'agent'
+  when: ctlabs_vault_install_type == 'agent'
   service:
     name    : "{{ ctlabs_vault.defaults.service.agent.name }}"
     enabled : true
     state   : started
 
 - name: ctlabs_vault.tasks.service.proxy.start
-  when: CTLABS_VAULT_ROLE == 'proxy'
+  when: ctlabs_vault_install_type == 'proxy'
   service:
     name    : "{{ ctlabs_vault.defaults.service.proxy.name }}"
     enabled : true
