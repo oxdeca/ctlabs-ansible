@@ -18,7 +18,7 @@
     - name: ctlabs_sssd.tasks.join.ad.dc.realm
       when: not ctlabs_sssd_domain_joined
       expect:
-        command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} --membership-software adcli --computer-name {{ ctlabs_sssd_computer_name }} {{ ctlabs_sssd_ad_server[0] }}.{{ ctlabs_sssd.defaults.config.dc.domain }}"
+        command: "ip vrf exec default realm join -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd_realm }} --membership-software adcli --computer-name {{ ctlabs_sssd_computer_name }} {{ ctlabs_sssd_ad_server[0] }}.{{ ctlabs_sssd_domain }}"
         responses:
           (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
     
@@ -30,4 +30,3 @@
         src  : "{{ ctlabs_sssd.defaults.config.sssd.template.ad }}"
         dest : "{{ ctlabs_sssd.defaults.config.sssd.file        }}"
       notify: ctlabs_sssd.handlers.service.sssd.restart
-

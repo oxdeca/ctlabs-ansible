@@ -8,7 +8,7 @@
   auth_provider            = ldap
 
   ldap_uri                 = {{ ctg_facts.ctlabs_sssd.uri  | default(ctlabs_sssd.defaults.config.ldap.uri)  }}
-  ldap_search_base         = {{ ctg_facts.ctlabs_sssd.base | default(ctlabs_sssd.defaults.config.ldap.base) }}
+  ldap_search_base         = {{ ctlabs_sssd_domain_path }}
   ldap_id_use_start_tls    = true
   ldap_pwd_policy          =
 

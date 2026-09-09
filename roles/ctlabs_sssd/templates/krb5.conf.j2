@@ -13,7 +13,7 @@ includedir /etc/krb5.conf.d/
   admin_server         = FILE:/var/log/kadmind.log
 
 [libdefaults]
-  default_realm        = {{ ctlabs_sssd.defaults.config.dc.realm }}
+  default_realm        = {{ ctlabs_sssd_realm }}
   dns_lookup_realm     = false
   dns_lookup_kdc       = true
   ticket_lifetime      = 24h
@@ -34,14 +34,13 @@ includedir /etc/krb5.conf.d/
 
 
 [realms]
-  {{ ctlabs_sssd.defaults.config.dc.realm }} = {
-    default_domain = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  {{ ctlabs_sssd_realm }} = {
+    default_domain = {{ ctlabs_sssd_domain }}
 {% for host in ctlabs_sssd.defaults.config.dc.hosts %}
-    kdc            = {{ host }}.{{ ctlabs_sssd.defaults.config.dc.domain }}
+    kdc            = {{ host }}.{{ ctlabs_sssd_domain }}
 {% endfor %}
   }
 
 [domain_realm]
-  .{{ ctlabs_sssd.defaults.config.dc.domain }} = {{ ctlabs_sssd.defaults.config.dc.realm }}
-   {{ ctlabs_sssd.defaults.config.dc.domain }} = {{ ctlabs_sssd.defaults.config.dc.realm }}
-
+  .{{ ctlabs_sssd_domain }} = {{ ctlabs_sssd_realm }}
+   {{ ctlabs_sssd_domain }} = {{ ctlabs_sssd_realm }}

@@ -19,15 +19,14 @@
       when: ctlabs_sssd_domain_joined
       no_log: true
       expect:
-        command: "ip vrf exec default realm leave -rU  {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} {{ ctlabs_sssd.defaults.config.dc.domain }}"
+        command: "ip vrf exec default realm leave -rU  {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd_realm }} {{ ctlabs_sssd_domain }}"
         responses:
           (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
-      notify: ctlabs_sssd.handlers.ad.service.stop
+      notify: ctlabs_sssd.handlers.service.sssd.stop
     
     - name: ctlabs_sssd.tasks.leave.ad.dc.host_delete
       when: ctlabs_sssd_domain_joined
       expect:
-        command: "ip vrf exed default adcli delete-computer -D {{ ctlabs_sssd.defaults.config.dc.domain }} -R {{ ctlabs_sssd.defaults.config.dc.realm }} -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd.defaults.config.dc.realm }} -vW {{ ctlabs_sssd_computer_name }}"
+        command: "ip vrf exec default adcli delete-computer -D {{ ctlabs_sssd_domain }} -R {{ ctlabs_sssd_realm }} -U {{ ctlabs_sssd.defaults.config.dc.join.user }}@{{ ctlabs_sssd_realm }} -vW {{ ctlabs_sssd_computer_name }}"
         responses:
           (?i)password: "{{ ctlabs_sssd_dc_join_pass | default(ctlabs_sssd.defaults.config.dc.join.pass) }}"
-    

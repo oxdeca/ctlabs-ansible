@@ -19,6 +19,29 @@
     - name: ctlabs_sssd.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_sssd.tasks.precheck.backend
+# backend
+- name: ctlabs_sssd.tasks.precheck.backend.var
   set_fact:
-    ctlabs_sssd_backend: "{{ ctg_facts.ctlabs_sssd.backend | default(CTLABS_SSSD_BACKEND) }}"
+    ctlabs_sssd_backend: "{{ ctlabs_sssd_backend | default('ldap') | upper }}"
+
+- name: ctlabs_sssd.tasks.precheck.backend.local_fact
+  set_fact:
+    ctlabs_sssd_backend: "{{ ctg_facts.ctlabs_sssd.backend | default(ctlabs_sssd_backend) }}"
+
+# domain
+- name: ctlabs_sssd.tasks.precheck.domain.var
+  set_fact:
+    ctlabs_sssd_domain: "{{ ctlabs_sssd_domain | default('ad.ctlabs.internal') }}"
+
+- name: ctlabs_sssd.tasks.precheck.domain.local_fact
+  set_fact:
+    ctlabs_sssd_domain: "{{ ctg_facts.ctlabs_sssd.domain | default(ctlabs_sssd_domain) }}"
+
+# derived
+- name: ctlabs_sssd.tasks.precheck.domain_path
+  set_fact:
+    ctlabs_sssd_domain_path: "dc={{ ctlabs_sssd_domain.split('.') | join(',dc=') }}"
+
+- name: ctlabs_sssd.tasks.precheck.realm
+  set_fact:
+    ctlabs_sssd_realm: "{{ ctlabs_sssd_domain | upper }}"

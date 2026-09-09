@@ -33,7 +33,7 @@
     
     - name: ctlabs_sssd.tasks.config.ad.computer.joined.fact
       set_fact:
-        ctlabs_sssd_domain_joined: "{{ True if joined.stdout == ctlabs_sssd.defaults.config.dc.domain else False }}"
+        ctlabs_sssd_domain_joined: "{{ True if joined.stdout == ctlabs_sssd_domain else False }}"
     
     - name: ctlabs_sssd.tasks.config.ad.dc.ad_server
       set_fact:

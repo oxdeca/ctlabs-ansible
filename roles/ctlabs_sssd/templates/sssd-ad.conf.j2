@@ -4,24 +4,24 @@
 # ------------------------------------------------------------------------------
 {%- set tmp = [] -%}
 {%- for host in ctlabs_sssd_ad_server -%}
-{%-   set _ = tmp.append(host + '.' + ctlabs_sssd.defaults.config.dc.domain) -%}
+{%-   set _ = tmp.append(host + '.' + ctlabs_sssd_domain) -%}
 {%- endfor -%}
 {%- set ad_server = (tmp|join(', ')) %}
 
 
-[domain/{{ ctlabs_sssd.defaults.config.dc.domain }}]
+[domain/{{ ctlabs_sssd_domain }}]
   access_provider                = ad
   auth_provider                  = ad
   id_provider                    = ad
 
-  ldap_sasl_authid               = {{ ctlabs_sssd_computer_name }}@{{ ctlabs_sssd.defaults.config.dc.realm }}
+  ldap_sasl_authid               = {{ ctlabs_sssd_computer_name }}@{{ ctlabs_sssd_realm }}
 
   ad_server                      = {{ ad_server }}
-  ad_domain                      = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  ad_domain                      = {{ ctlabs_sssd_domain }}
   ad_hostname                    = {{ ansible_nodename }}
   dyndns_update                  = false
 
-  krb5_realm                     = {{ ctlabs_sssd.defaults.config.dc.domain | upper }}
+  krb5_realm                     = {{ ctlabs_sssd_realm }}
   krb5_store_password_if_offline = true
 
   realmd_tags                    = manages-system joined-with-adcli
@@ -41,7 +41,7 @@
   enumerate                      = true
 
 [sssd]
-  domains                        = {{ ctlabs_sssd.defaults.config.dc.domain }}
+  domains                        = {{ ctlabs_sssd_domain }}
   config_file_version            = 2
   services                       = nss, pam, ssh
   # default_domain_suffix        =
