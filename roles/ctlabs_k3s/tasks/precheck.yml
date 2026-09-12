@@ -28,17 +28,25 @@
   set_fact:
     ctlabs_k3s_role: "{{ ctg_facts.ctlabs_k3s.role | default(ctlabs_k3s_role) }}"
 
+- name: ctlabs_k3s.tasks.precheck.k3s.ingress_enabled
+  set_fact:
+    ctlabs_k3s_ingress_enabled: "{{ ctg_facts.ctlabs_k3s.ingress.enabled | default(ctlabs_k3s.defaults.config.ingress.enabled) }}"
+
 - name: ctlabs_k3s.tasks.precheck.k3s.ingress_type
   set_fact:
     ctlabs_k3s_ingress_type: "{{ ctg_facts.ctlabs_k3s.ingress.type | default(ctlabs_k3s.defaults.config.ingress.type) }}"
 
-- name: ctlabs_k3s.tasks.precheck.k3s_ingress.provider
+- name: ctlabs_k3s.tasks.precheck.k3s.gateway_api_enabled
   set_fact:
-    ctlabs_k3s_ingress_provider: "{{ ctg_facts.ctlabs_k3s.ingress.provider | default(ctlabs_k3s.defaults.config.ingress.provider) }}"
+    ctlabs_k3s_gateway_api_enabled: "{{ ctg_facts.ctlabs_k3s.gateway_api.enabled | default(ctlabs_k3s.defaults.config.gateway_api.enabled) }}"
+
+- name: ctlabs_k3s.tasks.precheck.k3s.gateway_api_provider
+  set_fact:
+    ctlabs_k3s_gateway_api_provider: "{{ ctg_facts.ctlabs_k3s.gateway_api.provider | default(ctlabs_k3s.defaults.config.gateway_api.provider) }}"
 
 - name: ctlabs_k3s.tasks.precheck.debug.ingress
   debug:
-    msg: "ingress_type={{ ctlabs_k3s_ingress_type }}, ingress_provider={{ ctlabs_k3s_ingress_provider }}"
+    msg: "ingress_enabled={{ ctlabs_k3s_ingress_enabled }}, ingress_type={{ ctlabs_k3s_ingress_type }}, gateway_api_enabled={{ ctlabs_k3s_gateway_api_enabled }}, gateway_api_provider={{ ctlabs_k3s_gateway_api_provider }}"
 
 #- debug: "msg={{ ctlabs_k3s_role }}"
 

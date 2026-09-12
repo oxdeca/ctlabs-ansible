@@ -83,10 +83,10 @@
     # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE
     # ------------------------------------------------------------------------------
     - name: ctlabs_k3s.tasks.service.gateway_api
-      when: ctlabs_k3s_ingress_type == "gateway_api"
+      when: ctlabs_k3s_gateway_api_enabled
       block:
         - name: ctlabs_k3s.tasks.service.gateway_api.crds.available
-          when: ctlabs_k3s_ingress_provider == "traefik"
+          when: ctlabs_k3s_gateway_api_provider == "traefik"
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           shell: /usr/bin/k3s kubectl get crd referencegrants.gateway.networking.k8s.io
@@ -96,7 +96,7 @@
           delay   : 5
 
         - name: ctlabs_k3s.tasks.service.gateway_api.traefik
-          when: ctlabs_k3s_ingress_provider == "traefik"
+          when: ctlabs_k3s_gateway_api_provider == "traefik"
           block:
             - name: ctlabs_k3s.tasks.service.gateway_api.traefik.manifests_dir
               ansible.builtin.file:
@@ -140,7 +140,7 @@
               kubernetes.core.k8s:
                 state: present
                 definition:
-                  apiVersion: gateway.networking.k8s.io/v1
+                  apiVersion: gateway.networking.k8s.io/v1beta1
                   kind: ReferenceGrant
                   metadata:
                     name: argocd-grant
@@ -162,7 +162,7 @@
               kubernetes.core.k8s:
                 state: present
                 definition:
-                  apiVersion: gateway.networking.k8s.io/v1
+                  apiVersion: gateway.networking.k8s.io/v1beta1
                   kind: ReferenceGrant
                   metadata:
                     name: allow-argo-routes
@@ -177,7 +177,7 @@
                         kind: Gateway
 
             - name: ctlabs_k3s.tasks.service.argocd.gateway
-              when: ctlabs_k3s_ingress_provider == "traefik"
+              when: ctlabs_k3s_gateway_api_provider == "traefik"
               kubernetes.core.k8s:
                 state: present
                 definition:
@@ -236,8 +236,8 @@
 
     - name: ctlabs_k3s.tasks.service.gateway_envoy
       when:
-        - ctlabs_k3s_ingress_type == "gateway_api"
-        - ctlabs_k3s_ingress_provider == "envoy-gateway"
+        - ctlabs_k3s_gateway_api_enabled
+        - ctlabs_k3s_gateway_api_provider == "envoy-gateway"
       block:
         - name: ctlabs_k3s.tasks.service.gateway_envoy.install
           get_url:
@@ -255,8 +255,8 @@
 
     - name: ctlabs_k3s.tasks.service.ingress
       when:
-        - ctlabs_k3s_ingress_type == "ingress"
-        - ctlabs_k3s_ingress_provider == "nginx"
+        - ctlabs_k3s_ingress_enabled
+        - ctlabs_k3s_ingress_type == "nginx"
       block:
         - name: ctlabs_k3s.tasks.service.ingress.download
           get_url:

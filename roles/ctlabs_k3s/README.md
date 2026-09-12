@@ -30,10 +30,14 @@ Sets up a single- or multi-node k3s cluster.
 
 ```json
 {
-  "role"      : "server",
-  "server_url": "https://k3s1.ctlabs.internal:6443",
-  "ingress"   : {
-    "type"    : "gateway_api",
+  "role"       : "server",
+  "server_url" : "https://k3s1.ctlabs.internal:6443",
+  "ingress"    : {
+    "enabled": false,
+    "type"   : "nginx"
+  },
+  "gateway_api": {
+    "enabled" : true,
     "provider": "traefik"
   }
 }
@@ -59,21 +63,29 @@ Sets up a single- or multi-node k3s cluster.
 }
 ```
 
-## Ingress Options
+## Controller Options
 
-| Type          | Provider        | Notes                                      |
-|---------------|-----------------|--------------------------------------------|
-| `gateway_api` | `traefik`       | Default — GatewayClass via Helm            |
-| `gateway_api` | `envoy-gateway` | Envoy Gateway CRDs + controller            |
-| `ingress`     | `nginx`         | nginx-ingress via manifest                 |
+Ingress and Gateway API are independent, co-installable sections.
 
-Full ingress facts example (server with Traefik):
+| Section       | Key        | Options       | Notes                                  |
+|---------------|------------|---------------|----------------------------------------|
+| `ingress`     | `enabled`  | `true/false`  | Run an ingress controller              |
+| `ingress`     | `type`     | `nginx`       | nginx-ingress via manifest             |
+| `gateway_api` | `enabled`  | `true/false`  | Program the Gateway API               |
+| `gateway_api` | `provider` | `traefik`     | Default — uses k3s bundled Traefik     |
+| `gateway_api` | `provider` | `envoy-gateway` | Envoy Gateway CRDs + controller     |
+
+Full facts example (Traefik as Gateway API provider, no ingress):
 
 ```json
 {
-  "role"   : "server",
-  "ingress": {
-    "type"    : "gateway_api",
+  "role"       : "server",
+  "ingress"    : {
+    "enabled": false,
+    "type"   : "nginx"
+  },
+  "gateway_api": {
+    "enabled" : true,
     "provider": "traefik"
   }
 }
@@ -84,20 +96,34 @@ Full ingress facts example (server with Traefik):
 ```yaml
 k3s:
   k3s1:
-    role   : server
+    role: server
     ingress:
-      type    : gateway_api
+      enabled: false
+    gateway_api:
+      enabled : true
       provider: traefik
   k3s2:
     role       : control
     server_node: k3s1
     server_url : "https://k3s1.ctlabs.internal:6443"
+    ingress   :
+      enabled: false
+    gateway_api:
+      enabled: false
   k3s3:
     role       : control
     server_node: k3s1
     server_url : "https://k3s1.ctlabs.internal:6443"
+    ingress   :
+      enabled: false
+    gateway_api:
+      enabled: false
   k3s4:
     role       : worker
     server_node: k3s1
     server_url : "https://k3s1.ctlabs.internal:6443"
+    ingress   :
+      enabled: false
+    gateway_api:
+      enabled: false
 ```

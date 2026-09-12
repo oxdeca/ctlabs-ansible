@@ -6,15 +6,19 @@
 {
   "role"       : "{{ _facts.role       | default('server') }}",
   "server_url" : "{{ _facts.server_url | default('https://' + CTLABS_HOST + ':6443') }}"
-{%- if _facts.server_node is defined %},
+{% if _facts.server_node is defined %},
   "server_node" : "{{ _facts.server_node }}"
 {% endif %}
 {% if _facts.ingress is defined %},
   "ingress" : {
-    "type"     : "{{ _facts.ingress.type     | default('traefik') }}"
-{%- if _facts.ingress.provider is defined %},
-    "provider" : "{{ _facts.ingress.provider }}"
+    "enabled" : {{ _facts.ingress.enabled | default(true) | lower }},
+    "type"    : "{{ _facts.ingress.type | default('nginx') }}"
+  }
 {% endif %}
+{% if _facts.gateway_api is defined %},
+  "gateway_api" : {
+    "enabled"  : {{ _facts.gateway_api.enabled | default(true) | lower }},
+    "provider" : "{{ _facts.gateway_api.provider | default('traefik') }}"
   }
 {% endif %}
 }

@@ -30,8 +30,11 @@ ctlabs_k3s:
     config:
       role   : server
       ingress:
-        type    : "gateway_api"  # Options: 'ingress', 'gateway_api'
-        provider: "traefik"      # Options: 'traefik', 'nginx', 'envoy-gateway'
+        enabled: false
+        type   : "nginx"     # Options: 'traefik', 'nginx'
+      gateway_api:
+        enabled : true
+        provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
       server:
         url: "https://{{ ansible_nodename }}:6443"
         token: /var/lib/rancher/k3s/server/token
