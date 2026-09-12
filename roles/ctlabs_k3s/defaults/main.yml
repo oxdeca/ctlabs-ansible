@@ -9,6 +9,7 @@ versions:
   k3s   : 1.34.3
   nginx : 1.14.1
   envoy : 1.0.1
+  gateway_api : 1.5.0
 
 ctlabs_k3s:
   defaults:
@@ -22,6 +23,9 @@ ctlabs_k3s:
         path : /usr/bin/k3s
         mode : '0750'
     ingress:
+      gateway_api:
+        crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
+        file: /tmp/gateway-api-crds.yaml
       nginx:
         url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.nginx }}/deploy/static/provider/baremetal/deploy.yaml"
         lb :
