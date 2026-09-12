@@ -104,7 +104,6 @@
     _route_name    : "{{ _gw_item['route_name']    | default(ctlabs_helm.defaults.gateway.route_name) }}"
     _route_backend : "{{ _gw_item['route_backend'] | default(ctlabs_helm.defaults.gateway.route_backend) }}"
     _route_port    : "{{ _gw_item['route_port']    | default(ctlabs_helm.defaults.gateway.route_port) | int }}"
-    _backend_refs  : "{{ [{'name': _route_backend, 'port': _route_port}] }}"
   environment:
     KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
   when: "'gateway' in chart"
@@ -129,7 +128,9 @@
               - path:
                   type: PathPrefix
                   value: /
-            backendRefs: "{{ _backend_refs }}"
+            backendRefs:
+              - name: "{{ _route_backend }}"
+                port: "{{ _route_port | int }}"
   register: res_route
   until   : res_route is success
   retries : 30
