@@ -85,6 +85,24 @@
     - name: ctlabs_k3s.tasks.service.gateway_api
       when: ctlabs_k3s_ingress_type == "gateway_api"
       block:
+        - name: ctlabs_k3s.tasks.service.gateway_api.crds.download
+          ansible.builtin.get_url:
+            url  : "{{ ctlabs_k3s.defaults.ingress.gateway_api.crds }}"
+            dest : "{{ ctlabs_k3s.defaults.ingress.gateway_api.file }}"
+          register: res_crds_dl
+          until   : res_crds_dl is success
+
+        - name: ctlabs_k3s.tasks.service.gateway_api.crds.apply
+          environment:
+            KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          shell: >
+            /usr/bin/k3s kubectl apply
+            --server-side -f {{ ctlabs_k3s.defaults.ingress.gateway_api.file }}
+          register: res_gw_crds
+          until   : res_gw_crds is success
+          retries : 3
+          delay   : 5
+
         - name: ctlabs_k3s.tasks.service.gateway_api.traefik
           when: ctlabs_k3s_ingress_provider == "traefik"
           block:
@@ -130,7 +148,7 @@
               kubernetes.core.k8s:
                 state: present
                 definition:
-                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  apiVersion: gateway.networking.k8s.io/v1
                   kind: ReferenceGrant
                   metadata:
                     name: argocd-grant
@@ -148,7 +166,7 @@
               kubernetes.core.k8s:
                 state: present
                 definition:
-                  apiVersion: gateway.networking.k8s.io/v1beta1
+                  apiVersion: gateway.networking.k8s.io/v1
                   kind: ReferenceGrant
                   metadata:
                     name: allow-argo-routes
