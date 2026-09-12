@@ -1,6 +1,6 @@
 # Ansible Role `ctlabs_rke2`
 
-Sets up a single- or multi-node RKE2 cluster with ArgoCD.
+Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc.) are deployed via the separate `ctlabs_helm` role.
 
 ## Node Roles
 
@@ -29,15 +29,12 @@ Sets up a single- or multi-node RKE2 cluster with ArgoCD.
 | Variable                                            | Default                  | Description                                         |
 |-----------------------------------------------------|--------------------------|-----------------------------------------------------|
 | `versions.rke2`                                     | `1.33.3`                 | RKE2 version                                        |
-| `versions.helm`                                     | `3.16.1`                 | Helm version                                        |
-| `versions.traefik`                                  | `40.0.0`                 | Traefik Helm chart version                          |
 | `versions.gateway_api`                              | `1.5.0`                  | Gateway API CRDs version                            |
 | `versions.envoy`                                    | `1.0.1`                  | Envoy Gateway version                               |
-| `ctlabs_rke2.defaults.ingress.traefik.host_network` | `false`                  | Bind Traefik directly to node IP                    |
-| `ctlabs_rke2.defaults.ingress.traefik.service_type` | `ClusterIP`              | Traefik service type                                |
-| `ctlabs_rke2.defaults.argocd.host`                  | `argocd.ctlabs.internal` | ArgoCD hostname                                     |
 | `ctlabs_rke2.defaults.config.ingress.type`          | `gateway_api`            | Ingress type (`ingress`, `gateway_api`)             |
 | `ctlabs_rke2.defaults.config.ingress.provider`      | `traefik`                | Provider (`traefik`, `nginx`, `envoy-gateway`)      |
+
+> Note: Helm itself, the ArgoCD chart, and the Traefik chart are no longer deployed by this role. They are handled by the separate `ctlabs_helm` role — see its `setup_profiles.yml` `helm:` profile for chart configuration (kubeconfig, values, etc.).
 
 ## Local Facts
 
@@ -49,11 +46,7 @@ Sets up a single- or multi-node RKE2 cluster with ArgoCD.
   "server_url": "https://rke21.ctlabs.internal:9345",
   "ingress"   : {
     "type"    : "gateway_api",
-    "provider": "traefik",
-    "traefik" : {
-      "host_network": true,
-      "service_type": "ClusterIP"
-    }
+    "provider": "traefik"
   }
 }
 ```
@@ -82,11 +75,11 @@ Sets up a single- or multi-node RKE2 cluster with ArgoCD.
 
 | Type          | Provider        | Notes                                              |
 |---------------|-----------------|----------------------------------------------------|
-| `gateway_api` | `traefik`       | Default — Traefik via Helm, hostNetwork or LB mode |
+| `gateway_api` | `traefik`       | Default — Traefik chart via `ctlabs_helm` role     |
 | `gateway_api` | `envoy-gateway` | Envoy Gateway CRDs + controller                    |
 | `ingress`     | `nginx`         | rke2-ingress-nginx (bundled)                       |
 
-`host_network: true` binds Traefik directly to the node IP on ports 8000/8443. Set `host_network: false` and `service_type: LoadBalancer` when using MetalLB.
+**Traefik (gateway_api mode)** is installed by the `ctlabs_helm` role. Traefik values (hostNetwork, service type, ports, `providers.kubernetesGateway.enabled`) are configured per-host in `setup_profiles.yml` under the `helm:` profile. This role only provisions the supporting resources (Gateway API CRDs, Traefik `GatewayClass`/`Gateway`, ArgoCD `HTTPRoute`).
 
 ## setup_profiles.yml Example
 
@@ -97,9 +90,6 @@ rke2:
     ingress:
       type    : gateway_api
       provider: traefik
-      traefik :
-        host_network: true
-        service_type: ClusterIP
   rke22:
     role       : control
     server_node: rke21

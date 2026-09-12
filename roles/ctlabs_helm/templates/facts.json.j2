@@ -1,0 +1,9 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_helm/templates/facts.json.j2
+ # Description : ctlabs_helm local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "repos"  : {{ (_facts.repos  | default([])) | to_json }},
+  "charts" : {{ (_facts.charts | default([])) | to_json }}
+}

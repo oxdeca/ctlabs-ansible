@@ -15,17 +15,6 @@
 {%- if _facts.ingress.provider is defined %},
     "provider" : "{{ _facts.ingress.provider }}"
 {% endif %}
-{% if _facts.ingress.traefik is defined %},
-    "traefik" : {
-      "service_type"  : "{{ _facts.ingress.traefik.service_type  | default('LoadBalancer') }}",
-      "host_network"  : {{ _facts.ingress.traefik.host_network   | default(false) | to_json }}
-    }
-{% endif %}
-  }
-{% endif %}
-{% if _facts.argocd is defined %},
-  "argocd" : {
-    "host" : "{{ _facts.argocd.host | default('argocd.' + CTLABS_DOMAIN) }}"
   }
 {% endif %}
 }

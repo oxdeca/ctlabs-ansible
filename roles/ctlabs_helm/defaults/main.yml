@@ -1,0 +1,28 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  helm: 4.1.4
+
+ctlabs_helm:
+  defaults:
+    bin:
+      url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
+      tmptar : /tmp/helm.tar.gz
+      tmpdir : /tmp
+      tardir : /tmp/linux-amd64
+      path   : /usr/bin/helm
+      mode   : '0750'
+    repos : []
+    charts: []
+  os:
+    - centos8
+    - centos9
+    - redhat8
+    - redhat9
+    - debian11
+    - debian12

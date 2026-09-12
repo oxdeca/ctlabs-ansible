@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tasks/main.yml
+# Description : main ctlabs_helm tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_helm
+    - ctlabs_helm.precheck
+    - ctlabs_helm.package
+    - ctlabs_helm.charts
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_helm
+    - ctlabs_helm.package
+
+- import_tasks: charts.yml
+  tags:
+    - ctlabs_helm
+    - ctlabs_helm.charts

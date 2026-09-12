@@ -9,7 +9,6 @@ versions:
   kind        : 0.31.0
   k8s         : 1.35.0
   kubectl     : 1.35.0
-  helm        : 4.1.4
   nginx       : 1.15.0
   traefik     : 40.0.0
   gateway_api : 1.5.0
@@ -32,14 +31,6 @@ ctlabs_kind:
         version:
         url    : "https://dl.k8s.io/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
         path   : /usr/bin/kubectl
-        mode   : '0750'
-      helm:
-        version:
-        url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
-        tmptar : /tmp/helm.tar.gz
-        tmpdir : /tmp
-        tardir : /tmp/linux-amd64
-        path   : /usr/bin/helm
         mode   : '0750'
     config:
       plane   : "single"           # "single" or "multi"
@@ -74,11 +65,6 @@ ctlabs_kind:
         chart   : oci://docker.io/envoyproxy/gateway-helm
         version : "v{{ versions.envoy }}"
         ns      : envoy-gateway-system
-    helm:
-      - ns   : argo
-        name : argo
-        chart: argo/argo-cd
-        repo : https://argoproj.github.io/argo-helm
     argocd:
       repo    : https://argoproj.github.io/argo-helm
       chart   : argo/argo-cd

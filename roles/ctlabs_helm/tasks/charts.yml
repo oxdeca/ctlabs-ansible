@@ -1,0 +1,44 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tasks/charts.yml
+# Description : helm repositories and chart deployments
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_helm.tasks.charts.repo
+  kubernetes.core.helm_repository:
+    name    : "{{ item.name }}"
+    repo_url: "{{ item.repo_url }}"
+  loop      : "{{ ctlabs_helm_repos }}"
+  register  : result
+  until     : result is success
+
+- name: ctlabs_helm.tasks.charts.values.render
+  copy:
+    dest   : "/tmp/ctlabs-helm-values-{{ item['name'] | lower | regex_replace('[^a-z0-9]', '_') }}.yml"
+    content: "{{ item['values'] | default({}) | to_nice_yaml(indent = 2) }}"
+    mode   : '0644'
+  when: "'values' in item"
+  loop: "{{ ctlabs_helm_charts }}"
+
+- name: ctlabs_helm.tasks.charts.install
+  vars:
+    ansible_python_interpreter: "{{ chart['interpreter'] | default(omit) }}"
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
+  kubernetes.core.helm:
+    name             : "{{ chart['name'] }}"
+    chart_ref        : "{{ chart['chart'] }}"
+    chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+    release_namespace: "{{ chart['namespace'] | default('default') }}"
+    create_namespace : "{{ chart['create_namespace'] | default(true) }}"
+    update_repo_cache: "{{ chart['update_repo_cache'] | default(false) }}"
+    wait             : "{{ chart['wait'] | default(false) }}"
+    atomic           : "{{ chart['atomic'] | default(false) }}"
+    skip_crds        : "{{ chart['skip_crds'] | default(false) }}"
+    values_files     : "{{ chart['values_files'] | default([]) + (['/tmp/ctlabs-helm-values-' + chart['name'] | lower | regex_replace('[^a-z0-9]', '_') + '.yml'] if 'values' in chart else []) }}"
+  loop: "{{ ctlabs_helm_charts }}"
+  loop_control:
+    loop_var: chart
+  register: result
+  until   : result is success

@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tests/test_helm.yml
+# Description : test playbook for ctlabs_helm (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_helm.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

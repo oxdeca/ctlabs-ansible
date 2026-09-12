@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_rke2/tests/test_ctlabs_rke2.py
-# Description : pytest tests for ctlabs_rke2 role
+# File        : ctlabs-ansible/roles/ctlabs_helm/tests/test_ctlabs_helm.py
+# Description : pytest tests for ctlabs_helm role
 # ------------------------------------------------------------------------------
 
 import os
@@ -12,14 +12,10 @@ def test_template_exists(role_dir):
         "tasks/main.yml",
         "tasks/precheck.yml",
         "tasks/package.yml",
-        "tasks/config.yml",
-        "tasks/service.yml",
+        "tasks/charts.yml",
+        "tasks/facts.yml",
         "defaults/main.yml",
-        "handlers/main.yml",
-        "templates/rke2-server.service.j2",
-        "templates/rke2-agent.service.j2",
-        "templates/rke2-agent.sysconfig.j2",
-        "templates/rke2.profile.j2",
+        "templates/facts.json.j2",
     ]
     for f in files:
         path = os.path.join(role_dir, f)
@@ -27,7 +23,7 @@ def test_template_exists(role_dir):
 
 
 def test_playbook_syntax_check(role_dir):
-    playbook = os.path.join(role_dir, "tests", "test_rke2.yml")
+    playbook = os.path.join(role_dir, "tests", "test_helm.yml")
     result = subprocess.run(
         ["ansible-playbook", "--syntax-check", playbook],
         capture_output=True,

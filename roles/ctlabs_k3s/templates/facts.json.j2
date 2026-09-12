@@ -17,9 +17,4 @@
 {% endif %}
   }
 {% endif %}
-{% if _facts.argocd is defined %},
-  "argocd" : {
-    "host" : "{{ _facts.argocd.host | default('argocd.' + CTLABS_DOMAIN) }}"
-  }
-{% endif %}
 }

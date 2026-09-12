@@ -80,35 +80,6 @@
         namespace : kube-system
         wait      : true
 
-    - name: ctlabs_rke2.tasks.service.argocd
-      vars:
-        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-      environment:
-        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
-      kubernetes.core.helm:
-        name              : argocd
-        chart_ref         : argo/argo-cd
-        release_namespace : argo
-        create_namespace  : true
-        update_repo_cache : true
-        wait              : true
-        atomic            : true
-        values:
-          global:
-            domain: "{{ ctlabs_rke2_argocd_host }}"
-          configs:
-            secret:
-              argocdServerAdminPassword: $2a$10$su0tAsqr1mOHxP4EoT7ExOZLSGw4C9GiG30GHaLVCA1ceW6CXl4r2
-            params:
-              server.insecure: true
-          server:
-            ingress:
-              enabled         : "{{ false if ctlabs_rke2_ingress_type == 'gateway_api' else true }}"
-              ingressClassName: "{{ ctlabs_rke2_ingress_provider }}"
-              hostname        : "{{ ctlabs_rke2_argocd_host }}"
-      register: res_argo
-      until   : res_argo is success
-
     # ------------------------------------------------------------------------------
     # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE
     # ------------------------------------------------------------------------------
@@ -132,48 +103,6 @@
           until  : gw_crds is success
           retries: 3
           delay  : 5
-
-        - name: ctlabs_rke2.tasks.service.gateway_api.traefik
-          when: ctlabs_rke2_ingress_provider == "traefik"
-          block:
-            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.helm_repo
-              kubernetes.core.helm_repository:
-                name    : traefik
-                repo_url: https://traefik.github.io/charts
-
-            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.values
-              template:
-                src  : traefik-values.yml.j2
-                dest : /tmp/ctlabs-rke2-traefik-values.yml
-
-            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.install
-              vars:
-                ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-              environment:
-                KUBECONFIG: /etc/rancher/rke2/rke2.yaml
-              kubernetes.core.helm:
-                name             : traefik
-                chart_ref        : traefik/traefik
-                chart_version    : "{{ versions['traefik'] }}"
-                release_namespace: traefik
-                create_namespace : true
-                skip_crds        : true
-                values_files:
-                  - /tmp/ctlabs-rke2-traefik-values.yml
-
-            - name: ctlabs_rke2.tasks.service.gateway_api.traefik.ready
-              vars:
-                ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-              environment:
-                KUBECONFIG: /etc/rancher/rke2/rke2.yaml
-              kubernetes.core.k8s_info:
-                kind      : Pod
-                namespace : traefik
-                label_selectors:
-                  - app.kubernetes.io/name=traefik
-                wait      : true
-                wait_sleep: 10
-                wait_timeout: 600
 
         - name: ctlabs_rke2.tasks.service.gateway_api.envoy
           when: ctlabs_rke2_ingress_provider == "envoy-gateway"

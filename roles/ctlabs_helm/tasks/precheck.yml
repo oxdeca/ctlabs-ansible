@@ -1,0 +1,24 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tasks/precheck.yml
+# Description : tasks prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_helm.tasks.precheck
+  block:
+    - name: ctlabs_helm.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_helm.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_helm.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_helm.tasks.precheck.repos
+  set_fact:
+    ctlabs_helm_repos: "{{ ctg_facts.ctlabs_helm.repos | default(ctlabs_helm.defaults.repos, true) }}"
+
+- name: ctlabs_helm.tasks.precheck.charts
+  set_fact:
+    ctlabs_helm_charts: "{{ ctg_facts.ctlabs_helm.charts | default(ctlabs_helm.defaults.charts, true) }}"

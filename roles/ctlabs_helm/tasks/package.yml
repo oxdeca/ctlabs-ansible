@@ -1,0 +1,43 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_helm.tasks.package.bin.stat
+  stat:
+    path: "{{ ctlabs_helm.defaults.bin.path }}"
+  register: ctlabs_helm_bin
+
+- name: ctlabs_helm.tasks.package.bin.version
+  shell: "{{ ctlabs_helm.defaults.bin.path }} version --client --short"
+  register: ctlabs_helm_bin_version
+  changed_when: false
+  failed_when: false
+  when: ctlabs_helm_bin.stat.exists
+
+- name: ctlabs_helm.tasks.package.bin.install
+  when: >
+    not ctlabs_helm_bin.stat.exists or
+    versions.helm not in (ctlabs_helm_bin_version.stdout | default(''))
+  block:
+    - name: ctlabs_helm.tasks.package.bin.install.download
+      get_url:
+        url  : "{{ ctlabs_helm.defaults.bin.url }}"
+        dest : "{{ ctlabs_helm.defaults.bin.tmptar }}"
+      register: result
+      until   : result is success
+
+    - name: ctlabs_helm.tasks.package.bin.install.untar
+      unarchive:
+        src        : "{{ ctlabs_helm.defaults.bin.tmptar }}"
+        dest       : "{{ ctlabs_helm.defaults.bin.tmpdir }}/"
+        remote_src : true
+
+    - name: ctlabs_helm.tasks.package.bin.install.copy
+      copy:
+        src        : "{{ ctlabs_helm.defaults.bin.tardir }}/helm"
+        dest       : "{{ ctlabs_helm.defaults.bin.path }}"
+        mode       : "{{ ctlabs_helm.defaults.bin.mode }}"
+        remote_src : true
