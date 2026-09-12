@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ _route_name }}
+  namespace: {{ chart['namespace'] }}
+spec:
+  parentRefs:
+    - name: {{ _gw_item['name'] }}
+      namespace: {{ _gw_item['namespace'] }}
+      sectionName: web
+    - name: {{ _gw_item['name'] }}
+      namespace: {{ _gw_item['namespace'] }}
+      sectionName: websecure
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ _route_backend }}
+          port: {{ _route_port | int }}

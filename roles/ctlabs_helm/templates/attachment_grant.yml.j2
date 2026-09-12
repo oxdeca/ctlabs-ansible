@@ -1,0 +1,13 @@
+apiVersion: gateway.networking.k8s.io/{{ chart['gateway']['refgrant_api'] | default(ctlabs_helm.defaults.gateway.refgrant_api) }}
+kind: ReferenceGrant
+metadata:
+  name: {{ chart['gateway']['attach_grant'] | default(ctlabs_helm.defaults.gateway.attach_grant) }}
+  namespace: {{ chart['gateway']['namespace'] }}
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ chart['namespace'] }}
+  to:
+    - group: gateway.networking.k8s.io
+      kind: Gateway

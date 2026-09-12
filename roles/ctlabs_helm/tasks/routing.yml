@@ -19,16 +19,7 @@
   when: "'gateway' in chart"
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: "{{ chart['gateway']['tls_secret'] | default(ctlabs_helm.defaults.gateway.tls_secret) }}"
-        namespace: "{{ chart['namespace'] }}"
-      type: kubernetes.io/tls
-      data:
-        tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
-        tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
+    definition: "{{ lookup('template', 'tls_secret.yml.j2') | from_yaml }}"
   register: res_route_tls
   until   : res_route_tls is success
   retries : 30
@@ -45,20 +36,7 @@
   when: "'gateway' in chart"
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: gateway.networking.k8s.io/{{ chart['gateway']['refgrant_api'] | default(ctlabs_helm.defaults.gateway.refgrant_api) }}
-      kind: ReferenceGrant
-      metadata:
-        name: "{{ chart['gateway']['grant_name'] | default(ctlabs_helm.defaults.gateway.grant_name) }}"
-        namespace: "{{ chart['namespace'] }}"
-      spec:
-        from:
-          - group: gateway.networking.k8s.io
-            kind: Gateway
-            namespace: "{{ chart['gateway']['namespace'] }}"
-        to:
-          - group: ""
-            kind: Secret
+    definition: "{{ lookup('template', 'reference_grant.yml.j2') | from_yaml }}"
   register: res_route_grant
   until   : res_route_grant is success
   retries : 30
@@ -75,20 +53,7 @@
   when: "'gateway' in chart"
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: gateway.networking.k8s.io/{{ chart['gateway']['refgrant_api'] | default(ctlabs_helm.defaults.gateway.refgrant_api) }}
-      kind: ReferenceGrant
-      metadata:
-        name: "{{ chart['gateway']['attach_grant'] | default(ctlabs_helm.defaults.gateway.attach_grant) }}"
-        namespace: "{{ chart['gateway']['namespace'] }}"
-      spec:
-        from:
-          - group: gateway.networking.k8s.io
-            kind: HTTPRoute
-            namespace: "{{ chart['namespace'] }}"
-        to:
-          - group: gateway.networking.k8s.io
-            kind: Gateway
+    definition: "{{ lookup('template', 'attachment_grant.yml.j2') | from_yaml }}"
   register: res_route_attach
   until   : res_route_attach is success
   retries : 30
@@ -109,28 +74,7 @@
   when: "'gateway' in chart"
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: gateway.networking.k8s.io/v1
-      kind: HTTPRoute
-      metadata:
-        name: "{{ _route_name }}"
-        namespace: "{{ chart['namespace'] }}"
-      spec:
-        parentRefs:
-          - name: "{{ _gw_item['name'] }}"
-            namespace: "{{ _gw_item['namespace'] }}"
-            sectionName: web
-          - name: "{{ _gw_item['name'] }}"
-            namespace: "{{ _gw_item['namespace'] }}"
-            sectionName: websecure
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /
-            backendRefs:
-              - name: "{{ _route_backend }}"
-                port: "{{ _route_port | int }}"
+    definition: "{{ lookup('template', 'httproute.yml.j2') | from_yaml }}"
   register: res_route
   until   : res_route is success
   retries : 30
