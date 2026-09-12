@@ -88,6 +88,12 @@
         - name: ctlabs_k3s.tasks.service.gateway_api.traefik
           when: ctlabs_k3s_ingress_provider == "traefik"
           block:
+            - name: ctlabs_k3s.tasks.service.gateway_api.traefik.manifests_dir
+              ansible.builtin.file:
+                path : /var/lib/rancher/k3s/server/manifests
+                state: directory
+                mode : '0755'
+
             - name: ctlabs_k3s.tasks.service.gateway_api.traefik.manifest
               template:
                 src: k3s-traefik-config.yml.j2
