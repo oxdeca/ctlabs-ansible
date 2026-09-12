@@ -97,6 +97,15 @@
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           block:
+            - name: ctlabs_k3s.tasks.service.argocd.namespace
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: v1
+                  kind: Namespace
+                  metadata:
+                    name: argo
+
             - name: ctlabs_k3s.tasks.service.argocd.tls_secret
               kubernetes.core.k8s:
                 state: present

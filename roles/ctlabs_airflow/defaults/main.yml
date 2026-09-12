@@ -24,6 +24,7 @@ ctlabs_airflow:
     service:
   os:
     - centos9
+    - debian12
   virtype:
     - kvm
     - container

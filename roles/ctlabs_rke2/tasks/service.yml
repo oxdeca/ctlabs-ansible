@@ -124,6 +124,18 @@
           environment:
             KUBECONFIG: /etc/rancher/rke2/rke2.yaml
           block:
+            - name: ctlabs_rke2.tasks.service.argocd.namespaces
+              kubernetes.core.k8s:
+                state: present
+                definition:
+                  apiVersion: v1
+                  kind: Namespace
+                  metadata:
+                    name: "{{ item }}"
+              loop:
+                - argo
+                - "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+
             - name: ctlabs_rke2.tasks.service.argocd.tls_secret
               kubernetes.core.k8s:
                 state: present
