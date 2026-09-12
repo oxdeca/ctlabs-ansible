@@ -135,7 +135,7 @@
                   data:
                     tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
                     tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
-    
+
             - name: ctlabs_k3s.tasks.service.argocd.reference_grant
               kubernetes.core.k8s:
                 state: present
@@ -153,6 +153,10 @@
                     to:
                       - group: ""
                         kind: Secret
+              register: res_ref_grant
+              until   : res_ref_grant is success
+              retries : 30
+              delay   : 5
 
             - name: ctlabs_k3s.tasks.service.gateway.attachment_grant
               kubernetes.core.k8s:
