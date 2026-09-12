@@ -127,7 +127,7 @@
                   value: /
             backendRefs:
               - name: "{{ _gw_item['route_backend'] | default(ctlabs_helm.defaults.gateway.route_backend) }}"
-                port  : "{{ _gw_item['route_port']    | default(ctlabs_helm.defaults.gateway.route_port) }}"
+                port  : "{{ _gw_item['route_port'] | default(ctlabs_helm.defaults.gateway.route_port) | int }}"
   register: res_route
   until   : res_route is success
   retries : 30
