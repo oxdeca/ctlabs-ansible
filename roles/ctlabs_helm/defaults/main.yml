@@ -19,6 +19,14 @@ ctlabs_helm:
       mode   : '0750'
     repos : []
     charts: []
+    gateway:
+      refgrant_api  : "v1"            # Options: 'v1', 'v1beta1' (v1beta1 for k3s bundled Gateway API v1.0.0 CRDs)
+      tls_secret    : "argocd-tls"
+      grant_name    : "argocd-grant"
+      attach_grant  : "allow-argo-routes"
+      route_name    : "argocd-server"
+      route_backend : "argocd-server"
+      route_port    : 80
   os:
     - centos8
     - centos9

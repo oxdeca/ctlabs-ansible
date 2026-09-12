@@ -89,7 +89,7 @@
           when: ctlabs_k3s_gateway_api_provider == "traefik"
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          shell: /usr/bin/k3s kubectl get crd referencegrants.gateway.networking.k8s.io
+          shell: /usr/bin/k3s kubectl get crd gateways.gateway.networking.k8s.io
           register: res_gw_crds
           until   : res_gw_crds is success
           retries : 30
@@ -109,130 +109,42 @@
                 src: k3s-traefik-config.yml.j2
                 dest: /var/lib/rancher/k3s/server/manifests/k3s-traefik-config.yaml
 
-        - name: ctlabs_k3s.tasks.service.argocd.gateway_objects
+        - name: ctlabs_k3s.tasks.service.gateway.gateway
+          when: ctlabs_k3s_gateway_api_provider == "traefik"
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          block:
-            - name: ctlabs_k3s.tasks.service.argocd.namespace
-              kubernetes.core.k8s:
-                state: present
-                definition:
-                  apiVersion: v1
-                  kind: Namespace
-                  metadata:
-                    name: argo
-
-            - name: ctlabs_k3s.tasks.service.argocd.tls_secret
-              kubernetes.core.k8s:
-                state: present
-                definition:
-                  apiVersion: v1
-                  kind: Secret
-                  metadata:
-                    name: argocd-tls
-                    namespace: argo
-                  type: kubernetes.io/tls
-                  data:
-                    tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
-                    tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
-
-            - name: ctlabs_k3s.tasks.service.argocd.reference_grant
-              kubernetes.core.k8s:
-                state: present
-                definition:
-                  apiVersion: gateway.networking.k8s.io/v1beta1
-                  kind: ReferenceGrant
-                  metadata:
-                    name: argocd-grant
-                    namespace: argo
-                  spec:
-                    from:
-                      - group: gateway.networking.k8s.io
-                        kind: Gateway
-                        namespace: kube-system
-                    to:
-                      - group: ""
-                        kind: Secret
-              register: res_ref_grant
-              until   : res_ref_grant is success
-              retries : 30
-              delay   : 5
-
-            - name: ctlabs_k3s.tasks.service.gateway.attachment_grant
-              kubernetes.core.k8s:
-                state: present
-                definition:
-                  apiVersion: gateway.networking.k8s.io/v1beta1
-                  kind: ReferenceGrant
-                  metadata:
-                    name: allow-argo-routes
-                    namespace: kube-system # Target namespace is where the Gateway lives
-                  spec:
-                    from:
-                      - group: gateway.networking.k8s.io
-                        kind: HTTPRoute
-                        namespace: argo # Source namespace is where the Route lives
-                    to:
-                      - group: gateway.networking.k8s.io
-                        kind: Gateway
-
-            - name: ctlabs_k3s.tasks.service.argocd.gateway
-              when: ctlabs_k3s_gateway_api_provider == "traefik"
-              kubernetes.core.k8s:
-                state: present
-                definition:
-                  apiVersion: gateway.networking.k8s.io/v1
-                  kind: Gateway
-                  metadata:
-                    name: traefik-gateway
-                    namespace: kube-system
-                  spec:
-                    gatewayClassName: traefik
-                    listeners:
-                      - name: web
-                        port: 8000
-                        protocol: HTTP
-                        allowedRoutes:
-                          namespaces:
-                            from: All
-                      - name: websecure
-                        port: 8443
-                        protocol: HTTPS
-                        tls:
-                          mode: Terminate
-                          certificateRefs:
-                            - name: argocd-tls
-                              namespace: argo
-                        allowedRoutes:
-                          namespaces:
-                            from: All
-
-            - name: ctlabs_k3s.tasks.service.argocd.httproute
-              kubernetes.core.k8s:
-                state: present
-                definition: 
-                  apiVersion: gateway.networking.k8s.io/v1
-                  kind: HTTPRoute
-                  metadata:
-                    name: argocd-server
-                    namespace: argo
-                  spec:
-                    parentRefs:
-                      - name: traefik-gateway
-                        namespace: kube-system
-                        sectionName: web
-                      - name: traefik-gateway
-                        namespace: kube-system
-                        sectionName: websecure
-                    rules:
-                      - matches:
-                          - path:
-                              type: PathPrefix
-                              value: /
-                        backendRefs:
-                          - name: argocd-server
-                            port: 80
-
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: gateway.networking.k8s.io/v1
+              kind: Gateway
+              metadata:
+                name: traefik-gateway
+                namespace: kube-system
+              spec:
+                gatewayClassName: traefik
+                listeners:
+                  - name: web
+                    port: 8000
+                    protocol: HTTP
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+                  - name: websecure
+                    port: 8443
+                    protocol: HTTPS
+                    tls:
+                      mode: Terminate
+                      certificateRefs:
+                        - name: argocd-tls
+                          namespace: argo
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+          register: res_gateway
+          until   : res_gateway is success
+          retries : 30
+          delay   : 5
 
     - name: ctlabs_k3s.tasks.service.gateway_envoy
       when:

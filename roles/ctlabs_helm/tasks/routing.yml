@@ -1,0 +1,137 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_helm/tasks/routing.yml
+# Description : Gateway API routing objects for charts that expose a `gateway`
+#               key. The cluster roles own the Gateway (infrastructure); the
+#               app-specific wiring (App namespace TLS secret, ReferenceGrants,
+#               HTTPRoute) rides with the app's chart installation.
+#
+#               The Gateway's listeners (web/websecure) are the infra contract
+#               every route targets, so the HTTPRoute parentRefs are literal.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_helm.tasks.routing.tls_secret
+  vars:
+    ansible_python_interpreter: "{{ chart['interpreter'] | default(omit) }}"
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
+  when: "'gateway' in chart"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ chart['gateway']['tls_secret'] | default(ctlabs_helm.defaults.gateway.tls_secret) }}"
+        namespace: "{{ chart['namespace'] }}"
+      type: kubernetes.io/tls
+      data:
+        tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
+        tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.key') | b64encode }}"
+  register: res_route_tls
+  until   : res_route_tls is success
+  retries : 30
+  delay   : 5
+  loop: "{{ ctlabs_helm_charts }}"
+  loop_control:
+    loop_var: chart
+
+- name: ctlabs_helm.tasks.routing.reference_grant
+  vars:
+    ansible_python_interpreter: "{{ chart['interpreter'] | default(omit) }}"
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
+  when: "'gateway' in chart"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: gateway.networking.k8s.io/{{ chart['gateway']['refgrant_api'] | default(ctlabs_helm.defaults.gateway.refgrant_api) }}
+      kind: ReferenceGrant
+      metadata:
+        name: "{{ chart['gateway']['grant_name'] | default(ctlabs_helm.defaults.gateway.grant_name) }}"
+        namespace: "{{ chart['namespace'] }}"
+      spec:
+        from:
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+            namespace: "{{ chart['gateway']['namespace'] }}"
+        to:
+          - group: ""
+            kind: Secret
+  register: res_route_grant
+  until   : res_route_grant is success
+  retries : 30
+  delay   : 5
+  loop: "{{ ctlabs_helm_charts }}"
+  loop_control:
+    loop_var: chart
+
+- name: ctlabs_helm.tasks.routing.attachment_grant
+  vars:
+    ansible_python_interpreter: "{{ chart['interpreter'] | default(omit) }}"
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
+  when: "'gateway' in chart"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: gateway.networking.k8s.io/{{ chart['gateway']['refgrant_api'] | default(ctlabs_helm.defaults.gateway.refgrant_api) }}
+      kind: ReferenceGrant
+      metadata:
+        name: "{{ chart['gateway']['attach_grant'] | default(ctlabs_helm.defaults.gateway.attach_grant) }}"
+        namespace: "{{ chart['gateway']['namespace'] }}"
+      spec:
+        from:
+          - group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            namespace: "{{ chart['namespace'] }}"
+        to:
+          - group: gateway.networking.k8s.io
+            kind: Gateway
+  register: res_route_attach
+  until   : res_route_attach is success
+  retries : 30
+  delay   : 5
+  loop: "{{ ctlabs_helm_charts }}"
+  loop_control:
+    loop_var: chart
+
+- name: ctlabs_helm.tasks.routing.httproute
+  vars:
+    ansible_python_interpreter: "{{ chart['interpreter'] | default(omit) }}"
+    _gw_item: "{{ chart['gateway'] }}"
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default(omit) }}"
+  when: "'gateway' in chart"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      metadata:
+        name: "{{ _gw_item['route_name'] | default(ctlabs_helm.defaults.gateway.route_name) }}"
+        namespace: "{{ chart['namespace'] }}"
+      spec:
+        parentRefs:
+          - name: "{{ _gw_item['name'] }}"
+            namespace: "{{ _gw_item['namespace'] }}"
+            sectionName: web
+          - name: "{{ _gw_item['name'] }}"
+            namespace: "{{ _gw_item['namespace'] }}"
+            sectionName: websecure
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - name: "{{ _gw_item['route_backend'] | default(ctlabs_helm.defaults.gateway.route_backend) }}"
+                port  : "{{ _gw_item['route_port']    | default(ctlabs_helm.defaults.gateway.route_port) }}"
+  register: res_route
+  until   : res_route is success
+  retries : 30
+  delay   : 5
+  loop: "{{ ctlabs_helm_charts }}"
+  loop_control:
+    loop_var: chart

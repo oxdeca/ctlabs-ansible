@@ -21,3 +21,8 @@
   tags:
     - ctlabs_helm
     - ctlabs_helm.charts
+
+- import_tasks: routing.yml
+  tags:
+    - ctlabs_helm
+    - ctlabs_helm.charts

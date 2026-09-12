@@ -42,6 +42,40 @@ Installs the Helm binary, adds Helm repositories, and deploys Helm charts.
 | `update_repo_cache` | no    | `helm repo update` before install (default `false`)     |
 | `values`         | no       | Inline values dict — rendered to YAML preserving types  |
 | `values_files`   | no       | Additional pre-rendered values files to merge           |
+| `gateway`        | no       | Dict — enables Gateway API routing for this chart (see below) |
+
+### Gateway API routing
+
+Cluster roles own the infrastructure Gateway (e.g. `traefik-gateway`). When an
+app chart needs Gateway API routing, add a `gateway` key to its chart entry;
+`ctlabs_helm.tasks.routing` then creates the app-side wiring after the install:
+TLS secret, both ReferenceGrants, and the HTTPRoute. Names/versions resolve
+against `ctlabs_helm.defaults.gateway` when omitted.
+
+| `gateway` field      | Required | Description                                        |
+|----------------------|----------|----------------------------------------------------|
+| `name`               | yes      | Gateway object name the route/grants target        |
+| `namespace`          | yes      | Namespace the Gateway lives in                     |
+| `refgrant_api`       | no       | ReferenceGrant apiVersion (`v1` default; `v1beta1` for k3s bundled Gateway API v1.0.0 CRDs) |
+| `tls_secret`         | no       | TLS secret name in the chart namespace             |
+| `grant_name`         | no       | Secret-ReferenceGrant name (app namespace)         |
+| `attach_grant`       | no       | Attachment-ReferenceGrant name (gateway namespace) |
+| `route_name`         | no       | HTTPRoute name                                     |
+| `route_backend`      | no       | Backend service name (port 80)                     |
+| `route_port`         | no       | Backend service port                               |
+
+Example (k3s, bundled traefik Gateway API v1.0.0 CRDs → `v1beta1` grants):
+
+```yaml
+- name        : argocd
+  chart       : argo/argo-cd
+  namespace   : argo
+  kubeconfig  : /etc/rancher/k3s/k3s.yaml
+  gateway     :
+    name        : traefik-gateway
+    namespace   : kube-system
+    refgrant_api: v1beta1
+```
 
 ## Local Facts
 
