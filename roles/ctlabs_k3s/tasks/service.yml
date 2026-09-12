@@ -85,22 +85,14 @@
     - name: ctlabs_k3s.tasks.service.gateway_api
       when: ctlabs_k3s_ingress_type == "gateway_api"
       block:
-        - name: ctlabs_k3s.tasks.service.gateway_api.crds.download
-          ansible.builtin.get_url:
-            url  : "{{ ctlabs_k3s.defaults.ingress.gateway_api.crds }}"
-            dest : "{{ ctlabs_k3s.defaults.ingress.gateway_api.file }}"
-          register: res_crds_dl
-          until   : res_crds_dl is success
-
-        - name: ctlabs_k3s.tasks.service.gateway_api.crds.apply
+        - name: ctlabs_k3s.tasks.service.gateway_api.crds.available
+          when: ctlabs_k3s_ingress_provider == "traefik"
           environment:
             KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          shell: >
-            /usr/bin/k3s kubectl apply
-            --server-side -f {{ ctlabs_k3s.defaults.ingress.gateway_api.file }}
+          shell: /usr/bin/k3s kubectl get crd referencegrants.gateway.networking.k8s.io
           register: res_gw_crds
           until   : res_gw_crds is success
-          retries : 3
+          retries : 30
           delay   : 5
 
         - name: ctlabs_k3s.tasks.service.gateway_api.traefik
