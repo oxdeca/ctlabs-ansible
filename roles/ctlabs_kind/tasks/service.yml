@@ -254,6 +254,8 @@
         wait             : true
         skip_crds        : true
         values           :
+          gateway:
+            enabled: false
           providers:
             kubernetesGateway:
               enabled: true
