@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tests/test_kind.yml
+# Description : test playbook for ctlabs_kind (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

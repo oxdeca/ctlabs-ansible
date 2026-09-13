@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/tests/test_k8s.yml
+# Description : test playbook for ctlabs_k8s (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_k8s.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

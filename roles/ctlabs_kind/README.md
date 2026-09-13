@@ -86,3 +86,9 @@
 > Note: for the Gateway API (traefik) case, the role provisions the provider
 > (Traefik chart + Gateway API CRDs) and the ArgoCD app wiring (TLS secret,
 > `ReferenceGrant`s, `HTTPRoute`) directly, since it deploys ArgoCD itself.
+
+## Tests
+
+```sh
+pytest -sv roles/ctlabs_kind/tests
+```
