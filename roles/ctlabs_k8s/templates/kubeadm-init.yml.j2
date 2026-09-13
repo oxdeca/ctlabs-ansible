@@ -17,7 +17,8 @@ bootstrapTokens:
       - authentication
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: {{ ctlabs_k8s_master_ip }}
+    - name: "node-ip"
+      value: "{{ ctlabs_k8s_master_ip }}"
   taints: []
 localAPIEndpoint:
   advertiseAddress: {{ ctlabs_k8s_master_ip }}
@@ -31,7 +32,8 @@ kubernetesVersion   : {{ ctlabs_k8s.defaults.cluster.k8s.version }}
 controlPlaneEndpoint: "{{ ctlabs_k8s_master_ip }}:6443"
 apiServer           :
   extraArgs:
-    service-node-port-range: 80-32767
+    - name: "service-node-port-range"
+      value: "80-32767"
 networking          :
   podSubnet: "{{ ctlabs_k8s_pod_cidr }}"
 
