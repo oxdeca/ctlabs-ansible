@@ -16,12 +16,10 @@
 #    name  : "{{ ctlabs_k8s.defaults.service.name }}"
 #    state : started
 
-- name: ctlabs_k8s.tasks.service.ingress.controller.ready
-  vars:
-    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+- name: ctlabs_k8s.tasks.service.apiserver.ready
   ansible.builtin.wait_for:
-    host   : "{{ ansible_nodename }}"
-    port   : 443
+    host   : "{{ ctlabs_k8s_master_ip }}"
+    port   : 6443
     state  : started
     timeout: 300 
     delay  : 10

@@ -42,6 +42,7 @@ Installs the Helm binary, adds Helm repositories, and deploys Helm charts.
 | `update_repo_cache` | no    | `helm repo update` before install (default `false`)     |
 | `values`         | no       | Inline values dict — rendered to YAML preserving types  |
 | `values_files`   | no       | Additional pre-rendered values files to merge           |
+| `resources`      | no       | List of manifest objects applied via `kubernetes.core.k8s` after the chart installs (e.g. MetalLB `IPAddressPool`/`L2Advertisement`) |
 | `gateway`        | no       | Dict — enables Gateway API routing for this chart (see below) |
 
 ### Gateway API routing
@@ -75,6 +76,31 @@ Example (k3s, bundled traefik Gateway API v1.0.0 CRDs → `v1beta1` grants):
     name        : traefik-gateway
     namespace   : kube-system
     refgrant_api: v1beta1
+```
+
+### Post-install resources
+
+Charts that need custom CRs after the release is up (e.g. MetalLB pools) use `resources` — a list of objects applied with `kubernetes.core.k8s` (same `kubeconfig`/`interpreter` as the chart):
+
+```yaml
+- name        : metallb
+  chart       : metallb/metallb
+  namespace   : metallb-system
+  kubeconfig  : /etc/kubernetes/admin.conf
+  resources   :
+    - apiVersion: metallb.io/v1beta1
+      kind      : IPAddressPool
+      metadata  :
+        name      : default
+        namespace: metallb-system
+      spec      :
+        addresses:
+          - 192.168.30.240-192.168.30.250
+    - apiVersion: metallb.io/v1beta1
+      kind      : L2Advertisement
+      metadata  :
+        name      : default
+        namespace: metallb-system
 ```
 
 ## Local Facts

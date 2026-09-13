@@ -42,3 +42,17 @@
     loop_var: chart
   register: result
   until   : result is success
+
+- name: ctlabs_helm.tasks.charts.resources
+  vars:
+    ansible_python_interpreter: "{{ item[0]['interpreter'] | default(omit) }}"
+  environment:
+    KUBECONFIG: "{{ item[0]['kubeconfig'] | default(omit) }}"
+  kubernetes.core.k8s:
+    state     : present
+    definition: "{{ item[1] }}"
+  loop: "{{ ctlabs_helm_charts | subelements('resources', skip_missing=True) }}"
+  register: result
+  until   : result is success
+  retries : 30
+  delay   : 5

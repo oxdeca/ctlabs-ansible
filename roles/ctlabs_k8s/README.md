@@ -1,6 +1,8 @@
 # Ansible Role `ctlabs_k8s`
 
-Sets up a single- or multi-node Kubernetes cluster with `kubeadm`, including CNI (calico/flannel/weave), optional ingress-nginx, metrics-server, kube-vip, and longhorn.
+Sets up a single- or multi-node Kubernetes cluster with `kubeadm`, including CNI (calico/flannel/weave), metrics-server, and kube-vip. The Kubernetes version is pinned in `versions.k8s` (default `1.36.4`).
+
+> Components that used to be deployed via raw manifests (longhorn, ingress/traefik) now come from Helm charts owned by [`ctlabs_helm`](../ctlabs_helm/README.md) — see the cluster's `helm` profile in `setup_profiles.yml`.
 
 ## Ansible Tags
 

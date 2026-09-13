@@ -23,7 +23,7 @@ def _render_kubeadm_init(**overrides):
         "ctlabs_k8s": {
             "defaults": {
                 "cluster": {
-                    "k8s": {"version": "1.28.0"},
+                    "k8s": {"version": "1.36.4"},
                 }
             }
         },
@@ -48,7 +48,6 @@ def test_template_exists(role_dir):
         "templates/crictl.yaml.j2",
         "templates/ctlabs_k8s.sh.j2",
         "templates/flannel.yml.j2",
-        "templates/ingress-patch.yml.j2",
         "templates/k8sall.sh.j2",
         "templates/kubeadm-init.yml.j2",
         "templates/kubeadm-join.yml.j2",
@@ -84,6 +83,6 @@ def test_kubeadm_init_values():
     init, cluster, _ = docs
     assert init["bootstrapTokens"][0]["token"] == "abcdef.0123456789abcdef"
     assert init["localAPIEndpoint"]["advertiseAddress"] == "192.168.99.10"
-    assert cluster["kubernetesVersion"] == "1.28.0"
+    assert cluster["kubernetesVersion"] == "1.36.4"
     assert cluster["controlPlaneEndpoint"] == "192.168.99.10:6443"
     assert cluster["networking"]["podSubnet"] == "10.8.15.0/24"

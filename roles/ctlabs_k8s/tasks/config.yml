@@ -80,34 +80,3 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl certificate approve {{ item }}"
   loop: "{{ certs.stdout_lines }}"
-
-#
-# Longhorn
-#
-- name: ctlabs_k8s.tasks.config.longhorn.download
-  get_url:
-    url  : "{{ ctlabs_k8s.defaults.cluster.longhorn.url }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/longhorn.yml"
-
-- name: ctlabs_k8s.tasks.config.longhorn.install
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/longhorn.yml"
-
-#
-# Ingress
-#
-- name: ctlabs_k8s.tasks.config.ingress.download
-  get_url:
-    url  : "{{ ctlabs_k8s.defaults.cluster.ingress.url }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/ingress.yml"
-
-- name: ctlabs_k8s.tasks.config.ingress.install
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/ingress.yml"
-
-- name: ctlabs_k8s.tasks.config.ingress.patch.lb.nodeport
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl patch -n ingress-nginx service/ingress-nginx-controller --patch-file {{ ctlabs_k8s.defaults.config.dirs.components }}/ingress-patch.yml"

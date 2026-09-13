@@ -6,10 +6,8 @@
 # ------------------------------------------------------------------------------
 
 versions :
-  k8s            : 1.28.0
-  calico         : 3.27.2
-  longhorn       : 1.6.0
-  ingress        : 1.10.0
+  k8s            : 1.36.4
+  calico         : 3.32.2
   prometheus     : 0.10
   metrics_server : 0.7.0
 
@@ -26,12 +24,8 @@ ctlabs_k8s:
         version: "{{ versions.k8s }}"
       calico:
         url    : "https://raw.githubusercontent.com/projectcalico/calico/v{{ versions.calico }}/manifests/tigera-operator.yaml"
-      longhorn:
-        url    : "https://raw.githubusercontent.com/longhorn/longhorn/v{{ versions.longhorn }}/deploy/longhorn.yaml"
       metrics_server:
         url    : "https://github.com/kubernetes-sigs/metrics-server/releases/download/v{{ versions.metrics_server }}/components.yaml"
-      ingress:
-        url    : "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.ingress }}/deploy/static/provider/cloud/deploy.yaml" 
       prometheus:
         url    : "https://github.com/prometheus-operator/kube-prometheus/archive/refs/heads/release-{{ versions.prometheus }}.zip"
     repos:
@@ -105,9 +99,6 @@ ctlabs_k8s:
         - name    : weave
           file    : weave.yml
           template: weave.yml.j2
-        - name    : ingress
-          file    : ingress-patch.yml
-          template: ingress-patch.yml.j2
 
       pid_cidr        : 172.31.0.0/16
       kube_vip        : false
