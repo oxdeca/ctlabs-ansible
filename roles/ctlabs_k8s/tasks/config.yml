@@ -55,15 +55,24 @@
 # Calico
 # -----------------------------------------------------------------------------
 
-- name: ctlabs_k8s.tasks.config.calico.download
+- name: ctlabs_k8s.tasks.config.calico.download-operator
   get_url:
     url  : "{{ ctlabs_k8s.defaults.cluster.calico.url }}"
     dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
 
-- name: ctlabs_k8s.tasks.config.calico.install
+- name: ctlabs_k8s.tasks.config.calico.install-operator
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
+
+- name: ctlabs_k8s.tasks.config.calico.wait-for-crd
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  command: "/usr/bin/kubectl wait --for=condition=established --timeout=60s crd/installations.operator.tigera.io"
+  register: crd_wait
+  until: crd_wait is success
+  retries: 5
+  delay: 3
 
 - name: ctlabs_k8s.tasks.config.calico.custom-resources
   environment:
