@@ -36,13 +36,25 @@
   set_fact:
     ctlabs_kind_nodes: "{{ ctg_facts.ctlabs_kind.nodes | default(ctlabs_kind.defaults.config.node.count) }}"
 
+- name: ctlabs_kind.tasks.precheck.ingress_enabled
+  set_fact:
+    ctlabs_kind_ingress_enabled: "{{ ctg_facts.ctlabs_kind.ingress.enabled | default(ctlabs_kind.defaults.config.ingress.enabled) }}"
+
 - name: ctlabs_kind.tasks.precheck.ingress_type
   set_fact:
     ctlabs_kind_ingress_type: "{{ ctg_facts.ctlabs_kind.ingress.type | default(ctlabs_kind.defaults.config.ingress.type) }}"
 
-- name: ctlabs_kind.tasks.precheck.ingress_provider
+- name: ctlabs_kind.tasks.precheck.gateway_api_enabled
   set_fact:
-    ctlabs_kind_ingress_provider: "{{ ctg_facts.ctlabs_kind.ingress.provider | default(ctlabs_kind.defaults.config.ingress.provider) }}"
+    ctlabs_kind_gateway_api_enabled: "{{ ctg_facts.ctlabs_kind.gateway_api.enabled | default(ctlabs_kind.defaults.config.gateway_api.enabled) }}"
+
+- name: ctlabs_kind.tasks.precheck.gateway_api_provider
+  set_fact:
+    ctlabs_kind_gateway_api_provider: "{{ ctg_facts.ctlabs_kind.gateway_api.provider | default(ctlabs_kind.defaults.config.gateway_api.provider) }}"
+
+- name: ctlabs_kind.tasks.precheck.ingress_class
+  set_fact:
+    ctlabs_kind_ingress_class: "{{ ctlabs_kind_ingress_type if ctlabs_kind_ingress_enabled else ctlabs_kind_gateway_api_provider }}"
 
 - name: ctlabs_kind.tasks.precheck.argocd_hostname
   set_fact:
@@ -50,4 +62,4 @@
 
 - name: ctlabs_kind.tasks.precheck.vars
   debug:
-    msg: "plane={{ ctlabs_kind_plane }}, name={{ ctlabs_kind_name }}, image={{ ctlabs_kind_image }}, nodes={{ ctlabs_kind_nodes }}, ingress_type={{ ctlabs_kind_ingress_type }}, ingress_provider={{ ctlabs_kind_ingress_provider }}"
+    msg: "plane={{ ctlabs_kind_plane }}, name={{ ctlabs_kind_name }}, image={{ ctlabs_kind_image }}, nodes={{ ctlabs_kind_nodes }}, ingress_enabled={{ ctlabs_kind_ingress_enabled }}, ingress_type={{ ctlabs_kind_ingress_type }}, gateway_api_enabled={{ ctlabs_kind_gateway_api_enabled }}, gateway_api_provider={{ ctlabs_kind_gateway_api_provider }}"

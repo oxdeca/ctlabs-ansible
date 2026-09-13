@@ -60,8 +60,8 @@
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.ingress
   when:
-    - ctlabs_kind_ingress_type == "ingress"
-    - ctlabs_kind_ingress_provider == "nginx"
+    - ctlabs_kind_ingress_enabled
+    - ctlabs_kind_ingress_type == "nginx"
   block:
     - name: ctlabs_kind.tasks.service.ingress.download
       get_url:
@@ -94,8 +94,8 @@
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.ingress.traefik
   when:
-    - ctlabs_kind_ingress_type == "ingress"
-    - ctlabs_kind_ingress_provider == "traefik"
+    - ctlabs_kind_ingress_enabled
+    - ctlabs_kind_ingress_type == "traefik"
   block:
     - name: ctlabs_kind.tasks.service.ingress.traefik.helm_repo
       kubernetes.core.helm_repository:
@@ -149,8 +149,8 @@
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.gateway_api
   when:
-    - ctlabs_kind_ingress_type == "gateway_api"
-    - ctlabs_kind_ingress_provider == "envoy-gateway"
+    - ctlabs_kind_gateway_api_enabled
+    - ctlabs_kind_gateway_api_provider == "envoy-gateway"
   block:
     - name: ctlabs_kind.tasks.service.gateway_api.crds.download
       get_url:
@@ -189,8 +189,8 @@
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.gateway_api.traefik
   when:
-    - ctlabs_kind_ingress_type == "gateway_api"
-    - ctlabs_kind_ingress_provider == "traefik"
+    - ctlabs_kind_gateway_api_enabled
+    - ctlabs_kind_gateway_api_provider == "traefik"
   block:
     - name: ctlabs_kind.tasks.service.gateway_api.traefik.crds.download
       get_url:
@@ -325,8 +325,8 @@
       server:
         ingress:
           enabled: true
-          ingressClassName: "{{ ctlabs_kind_ingress_provider }}"
-          hostname: "{{ ctlabs_kind_argocd_host }}"
+            ingressClassName: "{{ ctlabs_kind_ingress_class }}"
+            hostname: "{{ ctlabs_kind_argocd_host }}"
 
 - name: ctlabs_kind.tasks.service.argocd.deploy
   environment:
@@ -341,8 +341,8 @@
 
 - name: ctlabs_kind.tasks.service.argocd.gateway_api
   when:
-    - ctlabs_kind_ingress_type == "gateway_api"
-    - ctlabs_kind_ingress_provider == "traefik"
+    - ctlabs_kind_gateway_api_enabled
+    - ctlabs_kind_gateway_api_provider == "traefik"
   environment:
     KUBECONFIG: /root/.kube/config
   block:
@@ -466,8 +466,8 @@
 
     - name: ctlabs_kind.tasks.service.proxy.svc_name
       set_fact:
-        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_provider == 'traefik' else 'ingress-nginx-controller' }}"
-        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_provider == 'traefik' else 'ingress-nginx' }}"
+        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx-controller' }}"
+        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx' }}"
 
     - name: ctlabs_kind.tasks.service.proxy.nodeport.http
       environment:

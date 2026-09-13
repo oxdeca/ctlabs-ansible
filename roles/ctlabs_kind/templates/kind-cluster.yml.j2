@@ -4,16 +4,17 @@ name: {{ ctlabs_kind_name }}
 nodes:
 {% if ctlabs_kind_plane == "single" %}
   - role: control-plane
-{% if ctlabs_kind_ingress_type in ["ingress", "gateway_api"] %}
+{% if ctlabs_kind_ingress_enabled or ctlabs_kind_gateway_api_enabled %}
     extraPortMappings:
       - containerPort: 80
         hostPort: 80
       - containerPort: 443
         hostPort: 443
 {% endif %}
+
 {% elif ctlabs_kind_plane == "multi" %}
   - role: control-plane
-{% if ctlabs_kind_ingress_type in ["ingress", "gateway_api"] %}
+{% if ctlabs_kind_ingress_enabled or ctlabs_kind_gateway_api_enabled %}
     extraPortMappings:
       - containerPort: 80
         hostPort: 80

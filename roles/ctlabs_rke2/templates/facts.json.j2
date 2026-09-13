@@ -11,10 +11,14 @@
 {% endif %}
 {% if _facts.ingress is defined %},
   "ingress" : {
-    "type" : "{{ _facts.ingress.type | default('traefik') }}"
-{%- if _facts.ingress.provider is defined %},
-    "provider" : "{{ _facts.ingress.provider }}"
+    "enabled" : {{ _facts.ingress.enabled | default(false) | lower }},
+    "type"    : "{{ _facts.ingress.type | default('nginx') }}"
+  }
 {% endif %}
+{% if _facts.gateway_api is defined %},
+  "gateway_api" : {
+    "enabled"  : {{ _facts.gateway_api.enabled | default(true) | lower }},
+    "provider" : "{{ _facts.gateway_api.provider | default('traefik') }}"
   }
 {% endif %}
 }

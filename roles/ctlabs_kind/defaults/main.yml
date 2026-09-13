@@ -45,8 +45,11 @@ ctlabs_kind:
       node    :
         count   : 1
       ingress:
-        type    : "ingress"         # "ingress" or "gateway_api"
-        provider: "nginx"           # "nginx", "traefik" or "envoy-gateway"
+        enabled: false
+        type   : "nginx"     # Options: 'traefik', 'nginx'
+      gateway_api:
+        enabled : true
+        provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
     ingress:
       nginx:
         url: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ versions.nginx }}/deploy/static/provider/kind/deploy.yaml"
@@ -87,3 +90,4 @@ ctlabs_kind:
     - debian12
   virtype:
     - kvm
+  

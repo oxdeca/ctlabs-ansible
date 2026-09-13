@@ -31,13 +31,21 @@
 
 #- debug: "msg={{ ctlabs_rke2_role }}"
 
+- name: ctlabs_rke2.tasks.precheck.ingress_enabled
+  set_fact:
+    ctlabs_rke2_ingress_enabled: "{{ ctg_facts.ctlabs_rke2.ingress.enabled | default(ctlabs_rke2.defaults.config.ingress.enabled) }}"
+
 - name: ctlabs_rke2.tasks.precheck.ingress_type
   set_fact:
-    ctlabs_rke2_ingress_type: "{{ ctg_facts.ctlabs_rke2['ingress']['type'] | default(ctlabs_rke2['defaults']['config']['ingress']['type']) }}"
+    ctlabs_rke2_ingress_type: "{{ ctg_facts.ctlabs_rke2.ingress.type | default(ctlabs_rke2.defaults.config.ingress.type) }}"
 
-- name: ctlabs_rke2.tasks.precheck.ingress_provider
+- name: ctlabs_rke2.tasks.precheck.gateway_api_enabled
   set_fact:
-    ctlabs_rke2_ingress_provider: "{{ ctg_facts.ctlabs_rke2['ingress']['provider'] | default(ctlabs_rke2['defaults']['config']['ingress']['provider']) }}"
+    ctlabs_rke2_gateway_api_enabled: "{{ ctg_facts.ctlabs_rke2.gateway_api.enabled | default(ctlabs_rke2.defaults.config.gateway_api.enabled) }}"
+
+- name: ctlabs_rke2.tasks.precheck.gateway_api_provider
+  set_fact:
+    ctlabs_rke2_gateway_api_provider: "{{ ctg_facts.ctlabs_rke2.gateway_api.provider | default(ctlabs_rke2.defaults.config.gateway_api.provider) }}"
 
 - name: ctlabs_rke2.tasks.precheck.join.vars
   when: ctlabs_rke2_role in ["control", "worker"]
