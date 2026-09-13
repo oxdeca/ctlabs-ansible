@@ -44,9 +44,13 @@
   set_fact:
     ctlabs_k3s_gateway_api_provider: "{{ ctg_facts.ctlabs_k3s.gateway_api.provider | default(ctlabs_k3s.defaults.config.gateway_api.provider) }}"
 
+- name: ctlabs_k3s.tasks.precheck.k3s.servicelb_enabled
+  set_fact:
+    ctlabs_k3s_servicelb_enabled: "{{ ctg_facts.ctlabs_k3s.servicelb.enabled | default(ctlabs_k3s.defaults.config.servicelb.enabled) }}"
+
 - name: ctlabs_k3s.tasks.precheck.debug.ingress
   debug:
-    msg: "ingress_enabled={{ ctlabs_k3s_ingress_enabled }}, ingress_type={{ ctlabs_k3s_ingress_type }}, gateway_api_enabled={{ ctlabs_k3s_gateway_api_enabled }}, gateway_api_provider={{ ctlabs_k3s_gateway_api_provider }}"
+    msg: "ingress_enabled={{ ctlabs_k3s_ingress_enabled }}, ingress_type={{ ctlabs_k3s_ingress_type }}, gateway_api_enabled={{ ctlabs_k3s_gateway_api_enabled }}, gateway_api_provider={{ ctlabs_k3s_gateway_api_provider }}, servicelb_enabled={{ ctlabs_k3s_servicelb_enabled }}"
 
 #- debug: "msg={{ ctlabs_k3s_role }}"
 

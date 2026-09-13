@@ -8,10 +8,16 @@ Type=simple
 
 User=root
 {% if (ctlabs_k3s_ingress_enabled and ctlabs_k3s_ingress_type == "traefik") or (ctlabs_k3s_gateway_api_enabled and ctlabs_k3s_gateway_api_provider == "traefik") %}
-ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init
+{% set _ingress_flags = [] %}
 {% else %}
-ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init --disable=traefik
+{% set _ingress_flags = ['--disable=traefik'] %}
 {% endif %}
+
+{% set _flags = _ingress_flags %}
+{% if not (ctlabs_k3s_servicelb_enabled | default(true)) %}
+{% set _ = _flags.append('--disable=servicelb') %}
+{% endif %}
+ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init{{ ' ' ~ _flags | join(' ') if _flags }}
 
 Restart=always
 RestartSec=5

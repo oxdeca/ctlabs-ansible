@@ -21,4 +21,9 @@
     "provider" : "{{ _facts.gateway_api.provider | default('traefik') }}"
   }
 {% endif %}
+{% if _facts.servicelb is defined %},
+  "servicelb" : {
+    "enabled" : {{ _facts.servicelb.enabled | default(true) | lower }}
+  }
+{% endif %}
 }

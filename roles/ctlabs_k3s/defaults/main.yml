@@ -35,6 +35,8 @@ ctlabs_k3s:
       gateway_api:
         enabled : true
         provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
+      servicelb:
+        enabled: true  # k3s bundles klipper-lb; disabled via --disable=servicelb
       server:
         url: "https://{{ ansible_nodename }}:6443"
         token: /var/lib/rancher/k3s/server/token
