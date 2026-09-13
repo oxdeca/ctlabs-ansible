@@ -82,6 +82,39 @@
         namespace : kube-system
         wait      : true
 
+    - name: ctlabs_rke2.tasks.service.cluster.ingress.traefik.ready
+      when:
+        - ctlabs_rke2_ingress_enabled
+        - ctlabs_rke2_ingress_type == "traefik"
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+      block:
+        - name: ctlabs_rke2.tasks.service.cluster.ingress.traefik.info
+          kubernetes.core.k8s_info:
+            kind      : Deployment
+            name      : traefik
+            namespace : "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
+          register: res_traefik_info
+          failed_when: false
+
+        - name: ctlabs_rke2.tasks.service.cluster.ingress.traefik.wait
+          when: res_traefik_info.resources | length > 0
+          kubernetes.core.k8s_info:
+            kind      : Deployment
+            name      : traefik
+            namespace : "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
+            wait      : true
+            wait_timeout: 300
+            wait_condition:
+              type  : Available
+              status: True
+          register: res_traefik
+          until   : res_traefik is success
+          retries : 30
+          delay   : 5
+
     # ------------------------------------------------------------------------------
     # GATEWAY-API PROVIDER INFRA (CRDs + controller). The Gateway object itself is
     # cluster-owned infra; the app wiring (App namespace TLS secret, ReferenceGrants,
@@ -92,8 +125,8 @@
       block:
         - name: ctlabs_rke2.tasks.service.gateway_api.crds.download
           get_url:
-            url  : "{{ ctlabs_rke2.defaults.ingress.gateway_api.crds }}"
-            dest : "{{ ctlabs_rke2.defaults.ingress.gateway_api.file }}"
+            url  : "{{ ctlabs_rke2.defaults.gateway_api.crds }}"
+            dest : "{{ ctlabs_rke2.defaults.gateway_api.file }}"
           register: res_crds_dl
           until   : res_crds_dl is success
 
@@ -102,7 +135,7 @@
             KUBECONFIG: /etc/rancher/rke2/rke2.yaml
           shell: >
             {{ ctlabs_rke2.defaults.pkgs.kubectl.path }} apply
-            --server-side -f {{ ctlabs_rke2.defaults.ingress.gateway_api.file }}
+            --server-side -f {{ ctlabs_rke2.defaults.gateway_api.file }}
           register: gw_crds
           until  : gw_crds is success
           retries: 3
@@ -136,7 +169,7 @@
                   apiVersion: v1
                   kind: Namespace
                   metadata:
-                    name: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                    name: "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
 
             - name: ctlabs_rke2.tasks.service.gateway_api.traefik.gateway
               environment:
@@ -148,7 +181,7 @@
                   kind: Gateway
                   metadata:
                     name: traefik-gateway
-                    namespace: "{{ ctlabs_rke2.defaults.ingress.traefik.ns }}"
+                    namespace: "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
                   spec:
                     gatewayClassName: traefik
                     listeners:

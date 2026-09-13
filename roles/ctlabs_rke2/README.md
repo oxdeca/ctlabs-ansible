@@ -84,6 +84,9 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 | `gateway_api`  | `traefik`       | Default — Traefik chart via `ctlabs_helm` role     |
 | `gateway_api`  | `envoy-gateway` | Envoy Gateway CRDs + controller                    |
 | `ingress`      | `nginx`         | rke2-ingress-nginx (bundled)                       |
+| `ingress`      | `traefik`       | Traefik chart (via `ctlabs_helm`) serving `Ingress` too — this role disables the bundled nginx and only waits |
+
+**Traefik (`ingress.type: traefik`)** uses the same Traefik chart installed by the `ctlabs_helm` role — its `kubernetesIngress` provider is enabled by default, so it serves `Ingress` resources in addition to `Gateway`/`HTTPRoute`. When configured, this role disables the bundled nginx controller (`--disable=rke2-ingress-nginx`) and waits for the Traefik deployment (if already present).
 
 **Traefik (gateway_api mode)** is installed by the `ctlabs_helm` role. Traefik values (hostNetwork, service type, ports, `providers.kubernetesGateway.enabled`) are configured per-host in `setup_profiles.yml` under the `helm:` profile. This role only provisions the supporting resources: Gateway API CRDs and the Traefik `Gateway`. The app wiring (App namespace, TLS secret, `ReferenceGrant`s, `HTTPRoute`) rides with the ArgoCD chart via the `ctlabs_helm` role's `routing.yml` (see the `gateway:` key on the `argocd` chart entry).
 

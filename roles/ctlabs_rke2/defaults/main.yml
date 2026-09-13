@@ -24,9 +24,10 @@ ctlabs_rke2:
       kubectl:
         path: /var/lib/rancher/rke2/bin/kubectl
     ingress:
-      gateway_api:
-        crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
-        file: /tmp/gateway-api-crds.yaml
+      # rke2 bundles ingress-nginx; no provider defaults needed here
+    gateway_api:
+      crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
+      file: /tmp/gateway-api-crds.yaml
       traefik:
         ns: traefik
     config:
