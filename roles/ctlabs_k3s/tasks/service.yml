@@ -80,7 +80,7 @@
       delay: 10 
 
     # ------------------------------------------------------------------------------
-    # GATEWAY-API / TRAEFIK GATEWAYCLASS / ARGOCD HTTPROUTE
+    # GATEWAY-API / TRAEFIK GATEWAYCLASS 
     # ------------------------------------------------------------------------------
     - name: ctlabs_k3s.tasks.service.gateway_api
       when: ctlabs_k3s_gateway_api_enabled
