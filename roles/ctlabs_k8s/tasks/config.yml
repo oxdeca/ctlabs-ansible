@@ -1,5 +1,4 @@
 ---
-
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_k8s/tasks/config.yml
 # Description : main configurations
@@ -24,22 +23,28 @@
     mode : '0600'
   loop: "{{ ctlabs_k8s.defaults.config.kubeadm }}"
 
-- name: ctlabs_k8s.tasks.config.manifests
-  template:
-    src  : "{{ item.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.manifests }}/{{item.file }}"
-    mode : '0644'
-  loop: "{{ ctlabs_k8s.defaults.config.manifests }}"
-
 - name: ctlabs_k8s.tasks.config.components
   template:
     src  : "{{ item.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/{{item.file }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/{{ item.file }}"
     mode : '0644'
   loop: "{{ ctlabs_k8s.defaults.config.components }}"
+  register: k8s_config_components
+  until   : k8s_config_components is success
+  retries : 10
+  delay   : 5
 
 - name: ctlabs_k8s.tasks.config.kubeadm-init
   command: "/usr/bin/kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: ctlabs_k8s.tasks.config.manifests
+  template:
+    src  : "{{ item.template }}"
+    dest : "{{ ctlabs_k8s.defaults.config.dirs.manifests }}/{{ item.file }}"
+    mode : '0644'
+  loop: "{{ ctlabs_k8s.defaults.config.manifests }}"
 
 - name: ctlabs_k8s.tasks.config.profile.d
   template:
@@ -47,10 +52,9 @@
     dest : "{{ ctlabs_k8s.defaults.config.profile.file     }}"
 
 # -----------------------------------------------------------------------------
-
-#
 # Calico
-#
+# -----------------------------------------------------------------------------
+
 - name: ctlabs_k8s.tasks.config.calico.download
   get_url:
     url  : "{{ ctlabs_k8s.defaults.cluster.calico.url }}"
@@ -59,24 +63,27 @@
 - name: ctlabs_k8s.tasks.config.calico.install
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl create -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
+  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
 
 - name: ctlabs_k8s.tasks.config.calico.custom-resources
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
 
-#
+# -----------------------------------------------------------------------------
 # Approve Certs
-#
+# -----------------------------------------------------------------------------
+
 - name: ctlabs_k8s.tasks.config.certs.list
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name"
   register: certs
+  changed_when: false
 
 - name: ctlabs_k8s.tasks.config.certs.approve
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   command: "/usr/bin/kubectl certificate approve {{ item }}"
   loop: "{{ certs.stdout_lines }}"
+  when: certs.stdout_lines | length > 0
