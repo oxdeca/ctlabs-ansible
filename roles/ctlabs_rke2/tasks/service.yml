@@ -165,43 +165,14 @@
                 KUBECONFIG: /etc/rancher/rke2/rke2.yaml
               kubernetes.core.k8s:
                 state: present
-                definition:
-                  apiVersion: v1
-                  kind: Namespace
-                  metadata:
-                    name: "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
+                definition: "{{ lookup('template', 'traefik-namespace.yml.j2') | from_yaml }}"
 
             - name: ctlabs_rke2.tasks.service.gateway_api.traefik.gateway
               environment:
                 KUBECONFIG: /etc/rancher/rke2/rke2.yaml
               kubernetes.core.k8s:
                 state: present
-                definition:
-                  apiVersion: gateway.networking.k8s.io/v1
-                  kind: Gateway
-                  metadata:
-                    name: traefik-gateway
-                    namespace: "{{ ctlabs_rke2.defaults.gateway_api.traefik.ns }}"
-                  spec:
-                    gatewayClassName: traefik
-                    listeners:
-                      - name: web
-                        port: 8000
-                        protocol: HTTP
-                        allowedRoutes:
-                          namespaces:
-                            from: All
-                      - name: websecure
-                        port: 8443
-                        protocol: HTTPS
-                        tls:
-                          mode: Terminate
-                          certificateRefs:
-                            - name: argocd-tls
-                              namespace: argo
-                        allowedRoutes:
-                          namespaces:
-                            from: All
+                definition: "{{ lookup('template', 'gateway-traefik.yml.j2') | from_yaml }}"
               register: res_gateway
               until   : res_gateway is success
               retries : 30

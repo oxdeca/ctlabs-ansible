@@ -31,7 +31,9 @@ ctlabs_rke2:
       traefik:
         ns: traefik
     config:
-      role   : server
+      role     : server
+      servicelb:
+        enabled: false
       ingress:
         enabled: false
         type   : "nginx"     # Options: 'traefik', 'nginx'

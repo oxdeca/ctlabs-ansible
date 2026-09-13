@@ -8,11 +8,14 @@ Type=simple
 
 User=root
 
-{% if ctlabs_rke2_ingress_enabled and ctlabs_rke2_ingress_type == "nginx" %}
-ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
-{% else %}
-ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server --disable=rke2-ingress-nginx
+{% set _flags = [] %}
+{% if not (ctlabs_rke2_ingress_enabled and ctlabs_rke2_ingress_type == "nginx") %}
+{% set _ = _flags.append('--disable=rke2-ingress-nginx') %}
 {% endif %}
+{% if ctlabs_rke2_servicelb_enabled | default(false) %}
+{% set _ = _flags.append('--enable-servicelb') %}
+{% endif %}
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server{{ ' ' ~ _flags | join(' ') if _flags }}
 
 Restart=always
 RestartSec=5

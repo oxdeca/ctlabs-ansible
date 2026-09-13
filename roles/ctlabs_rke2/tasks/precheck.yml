@@ -47,6 +47,10 @@
   set_fact:
     ctlabs_rke2_gateway_api_provider: "{{ ctg_facts.ctlabs_rke2.gateway_api.provider | default(ctlabs_rke2.defaults.config.gateway_api.provider) }}"
 
+- name: ctlabs_rke2.tasks.precheck.servicelb_enabled
+  set_fact:
+    ctlabs_rke2_servicelb_enabled: "{{ ctg_facts.ctlabs_rke2.servicelb.enabled | default(ctlabs_rke2.defaults.config.servicelb.enabled) }}"
+
 - name: ctlabs_rke2.tasks.precheck.join.vars
   when: ctlabs_rke2_role in ["control", "worker"]
   block:
