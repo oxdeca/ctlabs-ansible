@@ -7,9 +7,26 @@ import json
 import os
 import subprocess
 
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 ROLE_TEMPLATES = "/root/ctlabs-ansible/roles/ctlabs_minikube/templates"
+
+
+def _iter_tasks(data):
+    for entry in data:
+        if isinstance(entry, dict) and "block" in entry:
+            yield from _iter_tasks(entry["block"])
+        elif isinstance(entry, dict):
+            yield entry
+
+
+def _uses_kubectl(task):
+    for key in ("shell", "command"):
+        val = task.get(key)
+        if isinstance(val, str) and "kubectl" in val:
+            return True
+    return False
 
 
 class _Joiner:
@@ -97,3 +114,18 @@ def test_facts_repos_only_valid_json():
     facts = {"repos": [{"name": "argo", "repo_url": "https://argoproj.github.io/argo-helm"}]}
     parsed = json.loads(_facts_env().get_template("facts.json.j2").render(ctlabs_role_facts=facts))
     assert len(parsed["repos"]) == 1
+
+
+def test_raw_kubectl_tasks_set_kubeconfig(role_dir):
+    offenders = []
+    for tf in ("charts.yml", "proxy.yml"):
+        path = os.path.join(role_dir, "tasks", tf)
+        with open(path) as fh:
+            data = yaml.safe_load(fh)
+        for task in _iter_tasks(data):
+            if not _uses_kubectl(task):
+                continue
+            env = task.get("environment")
+            if not env or "KUBECONFIG" not in str(env):
+                offenders.append((tf, task.get("name")))
+    assert not offenders, "Raw kubectl tasks missing KUBECONFIG: " + repr(offenders)
