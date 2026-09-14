@@ -1,0 +1,14 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_k8s/templates/facts.json.j2
+ # Description : ctlabs_k8s local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "role"       : "{{ _facts.role       | default('master') }}"
+{%- if _facts.master_node is defined %},
+  "master_node": "{{ _facts.master_node }}"
+{% endif %}
+{%- if _facts.master_ip is defined %},
+  "master_ip"  : "{{ _facts.master_ip }}"
+{% endif %}
+}

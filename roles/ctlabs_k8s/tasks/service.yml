@@ -17,6 +17,7 @@
 #    state : started
 
 - name: ctlabs_k8s.tasks.service.apiserver.ready
+  when: ctlabs_k8s_role == 'master'
   ansible.builtin.wait_for:
     host   : "{{ ctlabs_k8s_master_ip }}"
     port   : 6443

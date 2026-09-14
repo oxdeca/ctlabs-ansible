@@ -50,3 +50,57 @@
     path  : /etc/hosts
     block: |
       {{ ansible_default_ipv4.address }}  {{ ansible_nodename }}.local {{ ansible_nodename }} {{ ansible_nodename.split('.')[0] }} kubernetes
+
+#
+# node role
+#
+- name: ctlabs_k8s.tasks.precheck.role.var
+  set_fact:
+    ctlabs_k8s_role: "{{ ctlabs_k8s_role | default(ctlabs_k8s.defaults.config.role) }}"
+
+- name: ctlabs_k8s.tasks.precheck.role.local_fact
+  set_fact:
+    ctlabs_k8s_role: "{{ ctg_facts.ctlabs_k8s.role | default(ctlabs_k8s_role) }}"
+
+- name: ctlabs_k8s.tasks.precheck.role.supported
+  assert:
+    that    : ctlabs_k8s_role in ['master', 'control', 'worker']
+    fail_msg: "Role [{{ ctlabs_k8s_role }}] not supported! Valid: master, control, worker"
+
+#
+# join (control / worker)
+#
+- name: ctlabs_k8s.tasks.precheck.join
+  when: ctlabs_k8s_role in ['control', 'worker']
+  block:
+    - name: ctlabs_k8s.tasks.precheck.join.master_node
+      set_fact:
+        ctlabs_k8s_master_node: "{{ ctg_facts.ctlabs_k8s.master_node }}"
+
+    - name: ctlabs_k8s.tasks.precheck.join.master_ip
+      set_fact:
+        ctlabs_k8s_master_ip: "{{ ctg_facts.ctlabs_k8s.master_ip | default(ctlabs_k8s_master_ip) }}"
+
+    - name: ctlabs_k8s.tasks.precheck.join.master.ready
+      wait_for:
+        host   : "{{ ctlabs_k8s_master_ip }}"
+        port   : 6443
+        state  : started
+        timeout: 600
+        delay  : 10
+
+    - name: ctlabs_k8s.tasks.precheck.join.data.get
+      slurp:
+        src: "{{ ctlabs_k8s.defaults.config.dirs.main }}/{{ ctlabs_k8s.defaults.config.join_data.file.split('/')[-1] }}"
+      delegate_to: "{{ ctlabs_k8s_master_node }}"
+      register   : k8s_join_data
+      until      : k8s_join_data is success
+      retries    : 60
+      delay      : 5
+
+    - name: ctlabs_k8s.tasks.precheck.join.data.facts
+      set_fact:
+        ctlabs_k8s_join_apiserver: "{{ (k8s_join_data.content | b64decode | from_yaml).api_server }}"
+        ctlabs_k8s_join_token    : "{{ (k8s_join_data.content | b64decode | from_yaml).token }}"
+        ctlabs_k8s_join_ca_hash  : "{{ (k8s_join_data.content | b64decode | from_yaml).ca_cert_hash }}"
+        ctlabs_k8s_join_cert_key : "{{ (k8s_join_data.content | b64decode | from_yaml).certificate_key }}"

@@ -1,7 +1,15 @@
 ---
+
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_k8s/tasks/config.yml
 # Description : main configurations
+#
+# Node roles (resolved in precheck -> ctlabs_k8s_role):
+#   master  : initial control plane — runs `kubeadm init --upload-certs`, writes
+#             the join payload, installs CNI (calico), approves kubelet CSRs.
+#   control : additional control plane — `kubeadm join --control-plane` using the
+#             certificate-key from the master.
+#   worker  : `kubeadm join`.
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_k8s.tasks.config.crictl.config
@@ -16,13 +24,6 @@
     mode : '0755'
   loop: "{{ ctlabs_k8s.defaults.config.dirs | dict2items }}"
 
-- name: ctlabs_k8s.tasks.config.kubeadm
-  template:
-    src  : "{{ item.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}/{{ item.file }}"
-    mode : '0600'
-  loop: "{{ ctlabs_k8s.defaults.config.kubeadm }}"
-
 - name: ctlabs_k8s.tasks.config.components
   template:
     src  : "{{ item.template }}"
@@ -34,65 +35,145 @@
   retries : 10
   delay   : 5
 
-- name: ctlabs_k8s.tasks.config.kubeadm-init
-  command: "/usr/bin/kubeadm init --config /etc/kubernetes/kubeadm-init.yml --upload-certs"
-  args:
-    creates: /etc/kubernetes/admin.conf
-
-- name: ctlabs_k8s.tasks.config.manifests
-  template:
-    src  : "{{ item.template }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.manifests }}/{{ item.file }}"
-    mode : '0644'
-  loop: "{{ ctlabs_k8s.defaults.config.manifests }}"
-
 - name: ctlabs_k8s.tasks.config.profile.d
   template:
     src  : "{{ ctlabs_k8s.defaults.config.profile.template }}"
     dest : "{{ ctlabs_k8s.defaults.config.profile.file     }}"
 
 # -----------------------------------------------------------------------------
-# Calico
+# join nodes (control / worker)
 # -----------------------------------------------------------------------------
 
-- name: ctlabs_k8s.tasks.config.calico.download-operator
-  get_url:
-    url  : "{{ ctlabs_k8s.defaults.cluster.calico.url }}"
-    dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
+- name: ctlabs_k8s.tasks.config.join
+  when: ctlabs_k8s_role in ['control', 'worker']
+  block:
+    - name: ctlabs_k8s.tasks.config.join.render
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.join.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}/{{ ctlabs_k8s.defaults.config.join.file }}"
+        mode : '0600'
 
-- name: ctlabs_k8s.tasks.config.calico.install-operator
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
-
-- name: ctlabs_k8s.tasks.config.calico.wait-for-crd
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl wait --for=condition=established --timeout=60s crd/installations.operator.tigera.io"
-  register: crd_wait
-  until: crd_wait is success
-  retries: 5
-  delay: 3
-
-- name: ctlabs_k8s.tasks.config.calico.custom-resources
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
+    - name: ctlabs_k8s.tasks.config.join.run
+      command: "/usr/bin/kubeadm join --config {{ ctlabs_k8s.defaults.config.dirs.main }}/{{ ctlabs_k8s.defaults.config.join.file }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf
 
 # -----------------------------------------------------------------------------
-# Approve Certs
+# master (initial control plane)
 # -----------------------------------------------------------------------------
 
-- name: ctlabs_k8s.tasks.config.certs.list
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name"
-  register: certs
-  changed_when: false
+- name: ctlabs_k8s.tasks.config.master
+  when: ctlabs_k8s_role == 'master'
+  block:
+    - name: ctlabs_k8s.tasks.config.secrets.stat
+      stat:
+        path: "{{ ctlabs_k8s.defaults.config.secrets.file }}"
+      register: k8s_secrets_stat
 
-- name: ctlabs_k8s.tasks.config.certs.approve
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  command: "/usr/bin/kubectl certificate approve {{ item }}"
-  loop: "{{ certs.stdout_lines }}"
-  when: certs.stdout_lines | length > 0
+    - name: ctlabs_k8s.tasks.config.secrets.create
+      when: not k8s_secrets_stat.stat.exists
+      copy:
+        dest   : "{{ ctlabs_k8s.defaults.config.secrets.file }}"
+        content: |
+          token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6)[0] }}.{{ query('community.general.random_string', override_all='0123456789abcdef', length=16)[0] }}"
+          certificate_key: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=64)[0] }}"
+        mode   : '0640'
+
+    - name: ctlabs_k8s.tasks.config.secrets.get
+      slurp:
+        src: "{{ ctlabs_k8s.defaults.config.secrets.file }}"
+      register: k8s_secrets
+
+    - name: ctlabs_k8s.tasks.config.secrets.facts
+      set_fact:
+        ctlabs_k8s_join_token: "{{ (k8s_secrets.content | b64decode | from_yaml).token }}"
+        ctlabs_k8s_cert_key  : "{{ (k8s_secrets.content | b64decode | from_yaml).certificate_key }}"
+
+    - name: ctlabs_k8s.tasks.config.kubeadm-init
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.init.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.dirs.main }}/{{ ctlabs_k8s.defaults.config.init.file }}"
+        mode : '0600'
+
+    - name: ctlabs_k8s.tasks.config.kubeadm-init.run
+      command: "/usr/bin/kubeadm init --config {{ ctlabs_k8s.defaults.config.dirs.main }}/{{ ctlabs_k8s.defaults.config.init.file }} --upload-certs"
+      args:
+        creates: /etc/kubernetes/admin.conf
+
+    - name: ctlabs_k8s.tasks.config.ca.hash
+      shell: >
+        openssl x509 -pubkey
+        -in {{ ctlabs_k8s.defaults.config.dirs.main }}/pki/ca.crt
+        | openssl rsa -pubin -outform der 2>/dev/null
+        | openssl dgst -sha256 -hex
+        | sed 's/^.* //'
+      register: k8s_ca_hash
+
+    - name: ctlabs_k8s.tasks.config.ca.hash.fact
+      set_fact:
+        ctlabs_k8s_join_ca_hash: "{{ k8s_ca_hash.stdout | trim }}"
+
+    - name: ctlabs_k8s.tasks.config.join_data
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.join_data.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.join_data.file }}"
+        mode : '0640'
+
+    - name: ctlabs_k8s.tasks.config.manifests
+      template:
+        src  : "{{ item.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.dirs.manifests }}/{{ item.file }}"
+        mode : '0644'
+      loop: "{{ ctlabs_k8s.defaults.config.manifests }}"
+
+# -----------------------------------------------------------------------------
+# Calico (master only)
+# -----------------------------------------------------------------------------
+
+- name: ctlabs_k8s.tasks.config.calico
+  when: ctlabs_k8s_role == 'master'
+  block:
+    - name: ctlabs_k8s.tasks.config.calico.download-operator
+      get_url:
+        url  : "{{ ctlabs_k8s.defaults.cluster.calico.url }}"
+        dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
+
+    - name: ctlabs_k8s.tasks.config.calico.install-operator
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/calico.yml"
+
+    - name: ctlabs_k8s.tasks.config.calico.wait-for-crd
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl wait --for=condition=established --timeout=60s crd/installations.operator.tigera.io"
+      register: crd_wait
+      until: crd_wait is success
+      retries: 5
+      delay: 3
+
+    - name: ctlabs_k8s.tasks.config.calico.custom-resources
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
+
+# -----------------------------------------------------------------------------
+# Approve Certs (master only)
+# -----------------------------------------------------------------------------
+
+- name: ctlabs_k8s.tasks.config.certs
+  when: ctlabs_k8s_role == 'master'
+  block:
+    - name: ctlabs_k8s.tasks.config.certs.list
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving -o name"
+      register: certs
+      changed_when: false
+
+    - name: ctlabs_k8s.tasks.config.certs.approve
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl certificate approve {{ item }}"
+      loop: "{{ certs.stdout_lines }}"
+      when: certs.stdout_lines | length > 0

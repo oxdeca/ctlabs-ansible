@@ -14,4 +14,4 @@
     ctg_os_family: debian
     ctg_virtype: kvm
   roles:
-    - role: "{{ playbook_dir | dirname | dirname }}"
+    - ctlabs_k8s

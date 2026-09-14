@@ -1,0 +1,14 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : /etc/kubernetes/ctlabs_k8s_join.yml
+# Template    : ctlabs_k8s/templates/join-data.yml.j2
+# Description : join payload rendered on the master node after `kubeadm init`.
+#               control/worker nodes slurp this (delegate_to master) and build
+#               their kubeadm-join.yml from it.
+# ------------------------------------------------------------------------------
+
+api_server     : "{{ ctlabs_k8s_master_ip }}:6443"
+token          : "{{ ctlabs_k8s_join_token }}"
+certificate_key: "{{ ctlabs_k8s_cert_key }}"
+ca_cert_hash   : "{{ ctlabs_k8s_join_ca_hash }}"

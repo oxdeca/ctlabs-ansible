@@ -3,4 +3,27 @@
 # ------------------------------------------------------------------------------
 # File        : /etc/kubernetes/kubeadm-join.yml
 # Template    : ctlabs_k8s/templates/kubeadm-join.yml.j2
+# Description : join configuration for control-plane (control) and worker nodes.
+#               token / certificate-key / CA hash come from the master node
+#               (ctlabs_k8s_join_* vars resolved in precheck from the master's
+#               /etc/kubernetes/ctlabs_k8s_join.yml).
 # ------------------------------------------------------------------------------
+
+apiVersion     : kubeadm.k8s.io/v1beta4
+kind           : JoinConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    - name : "node-ip"
+      value: "{{ ansible_default_ipv4.address }}"
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: "{{ ctlabs_k8s_join_apiserver }}"
+    token            : "{{ ctlabs_k8s_join_token }}"
+    caCertHashes:
+      - "sha256:{{ ctlabs_k8s_join_ca_hash }}"
+{% if ctlabs_k8s_role == 'control' %}
+localAPIEndpoint:
+  advertiseAddress: {{ ansible_default_ipv4.address }}
+controlPlane:
+  certificateKey: "{{ ctlabs_k8s_join_cert_key }}"
+{% endif %}

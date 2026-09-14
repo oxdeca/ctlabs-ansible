@@ -59,9 +59,15 @@ ctlabs_k8s:
         template: k8sall.sh.j2
         file    : /usr/local/bin/k8s-all
     config:
+      role       : master                  # one of: master (initial control plane), control (additional control plane), worker
       profile:
         template: ctlabs_k8s.sh.j2
         file    : /etc/profile.d/ctlabs_k8s.sh
+      secrets:
+        file    : /etc/kubernetes/ctlabs_k8s_secrets.yml
+      join_data:
+        file    : /etc/kubernetes/ctlabs_k8s_join.yml
+        template: join-data.yml.j2
       kernel:
         params:
           file    : /etc/sysctl.d/99-k8s.conf
@@ -78,13 +84,12 @@ ctlabs_k8s:
       crictl:
         file    : /etc/crictl.yaml
         template: crictl.yaml.j2
-      kubeadm:
-        - name    : init
-          file    : kubeadm-init.yml
-          template: kubeadm-init.yml.j2
-        - name    : join
-          file    : kubeadm-join.yml
-          template: kubeadm-join.yml.j2
+      init:
+        file    : kubeadm-init.yml
+        template: kubeadm-init.yml.j2
+      join:
+        file    : kubeadm-join.yml
+        template: kubeadm-join.yml.j2
       manifests:
         - name    : kube-vip
           file    : kube-vip.yml
