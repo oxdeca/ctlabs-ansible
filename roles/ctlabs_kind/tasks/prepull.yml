@@ -14,7 +14,7 @@
     chart_ref        : "{{ chart['chart'] }}"
     chart_version    : "{{ chart['chart_version'] | default(omit) }}"
     release_namespace: "{{ chart['namespace'] | default('default') }}"
-    release_values   : "{{ chart['values'] | default({}) }}"
+    values_files     : "{{ (['/tmp/ctlabs-kind-values-' + chart['name'] | lower | regex_replace('[^a-z0-9]', '_') + '.yml'] if 'values' in chart else []) + (chart['values_files'] | default([])) }}"
   register: ctlabs_kind_chart_template
 
 - name: ctlabs_kind.tasks.prepull.images

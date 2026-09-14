@@ -56,9 +56,13 @@
   set_fact:
     ctlabs_kind_ingress_class: "{{ ctlabs_kind_ingress_type if ctlabs_kind_ingress_enabled else ctlabs_kind_gateway_api_provider }}"
 
-- name: ctlabs_kind.tasks.precheck.argocd_hostname
+- name: ctlabs_kind.tasks.precheck.repos
   set_fact:
-    ctlabs_kind_argocd_host: "{{ ctg_facts.ctlabs_kind.argocd.host | default(ctlabs_kind.defaults.argocd.host) }}"
+    ctlabs_kind_repos: "{{ ctg_facts.ctlabs_kind.repos | default(ctlabs_kind.defaults.repos, true) }}"
+
+- name: ctlabs_kind.tasks.precheck.charts
+  set_fact:
+    ctlabs_kind_charts: "{{ ctg_facts.ctlabs_kind.charts | default(ctlabs_kind.defaults.charts, true) }}"
 
 - name: ctlabs_kind.tasks.precheck.vars
   debug:
