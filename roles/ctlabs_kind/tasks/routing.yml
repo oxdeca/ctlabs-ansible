@@ -1,0 +1,92 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/routing.yml
+# Description : Gateway API routing objects for the argocd chart when the
+#               gateway_api provider is traefik (the app-side TLS secret,
+#               ReferenceGrants and HTTPRoute). The Gateway object itself is
+#               infra owned by the role (tasks/service.yml).
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.routing
+  when:
+    - ctlabs_kind_gateway_api_enabled
+    - ctlabs_kind_gateway_api_provider == "traefik"
+  environment:
+    KUBECONFIG: /root/.kube/config
+  block:
+    - name: ctlabs_kind.tasks.routing.tls_secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind      : Secret
+          metadata  :
+            name     : argocd-tls
+            namespace: argo
+          type: kubernetes.io/tls
+          data:
+            tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
+            tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.prv') | b64encode }}"
+
+    - name: ctlabs_kind.tasks.routing.reference_grant
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind      : ReferenceGrant
+          metadata  :
+            name     : argocd-grant
+            namespace: argo
+          spec:
+            from:
+              - group     : gateway.networking.k8s.io
+                kind      : Gateway
+                namespace : traefik
+            to:
+              - group: ""
+                kind : Secret
+
+    - name: ctlabs_kind.tasks.routing.attachment_grant
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind      : ReferenceGrant
+          metadata  :
+            name     : allow-argo-routes
+            namespace: traefik
+          spec:
+            from:
+              - group     : gateway.networking.k8s.io
+                kind      : HTTPRoute
+                namespace : argo
+            to:
+              - group     : gateway.networking.k8s.io
+                kind      : Gateway
+
+    - name: ctlabs_kind.tasks.routing.httproute
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind      : HTTPRoute
+          metadata  :
+            name     : argocd-server
+            namespace: argo
+          spec:
+            parentRefs:
+              - name       : traefik-gateway
+                namespace  : traefik
+                sectionName: web
+              - name       : traefik-gateway
+                namespace  : traefik
+                sectionName: websecure
+            rules:
+              - matches:
+                  - path:
+                      type : PathPrefix
+                      value: /
+                backendRefs:
+                  - name: argocd-server
+                    port: 80

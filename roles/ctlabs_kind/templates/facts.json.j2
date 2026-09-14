@@ -20,9 +20,10 @@
     "provider" : "{{ _facts.gateway_api.provider | default('traefik') }}"
   }
 {% endif %}
-{% if _facts.argocd is defined %},
-  "argocd" : {
-    "host" : "{{ _facts.argocd.host | default('argocd.' + CTLABS_DOMAIN) }}"
-  }
+{% if _facts.repos is defined %},
+  "repos" : {{ _facts.repos | to_json }}
+{% endif %}
+{% if _facts.charts is defined %},
+  "charts" : {{ _facts.charts | to_json }}
 {% endif %}
 }

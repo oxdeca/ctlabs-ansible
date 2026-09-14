@@ -12,6 +12,9 @@
     - ctlabs_kind.package
     - ctlabs_kind.config
     - ctlabs_kind.service
+    - ctlabs_kind.charts
+    - ctlabs_kind.routing
+    - ctlabs_kind.proxy
 
 - import_tasks: package.yml
   tags:
@@ -27,3 +30,18 @@
   tags:
     - ctlabs_kind
     - ctlabs_kind.service
+
+- import_tasks: charts.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.charts
+
+- import_tasks: routing.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.routing
+
+- import_tasks: proxy.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.proxy

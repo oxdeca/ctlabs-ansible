@@ -1,0 +1,97 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/proxy.yml
+# Description : host iptables DNAT forwarding :80/:443 to the kind cluster
+#               service nodeports (runs after charts.yml so the ingress svc
+#               exists). The kind container is the "node"; the svc nodeports are
+#               the entry point from the VM host.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.proxy
+  block:
+    - name: ctlabs_kind.tasks.proxy.container_ip
+      shell: >
+        podman inspect {{ ctlabs_kind_name }}-control-plane
+        | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['NetworkSettings']['Networks'].popitem()[1]['IPAddress'])"
+      register: container_ip
+      changed_when: false
+
+    - name: ctlabs_kind.tasks.proxy.svc_name
+      set_fact:
+        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx-controller' }}"
+        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx' }}"
+
+    - name: ctlabs_kind.tasks.proxy.nodeport.http
+      environment:
+        KUBECONFIG: /root/.kube/config
+      shell: >
+        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} get svc
+        -n {{ ingress_ns }}
+        {{ ingress_svc }}
+        -o jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
+      register: http_nodeport
+      changed_when: false
+
+    - name: ctlabs_kind.tasks.proxy.nodeport.https
+      environment:
+        KUBECONFIG: /root/.kube/config
+      shell: >
+        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} get svc
+        -n {{ ingress_ns }}
+        {{ ingress_svc }}
+        -o jsonpath='{.spec.ports[?(@.port==443)].nodePort}'
+      register: https_nodeport
+      changed_when: false
+
+    - name: ctlabs_kind.tasks.proxy.forward
+      shell: >
+        iptables -C FORWARD -p tcp -d {{ container_ip.stdout }}
+        --dport {{ item }} -j ACCEPT 2>/dev/null
+        || iptables -A FORWARD -p tcp -d {{ container_ip.stdout }}
+        --dport {{ item }} -j ACCEPT
+      loop:
+        - "{{ http_nodeport.stdout }}"
+        - "{{ https_nodeport.stdout }}"
+
+    - name: ctlabs_kind.tasks.proxy.iptables.http
+      shell: >
+        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        2>/dev/null
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+
+    - name: ctlabs_kind.tasks.proxy.iptables.https
+      shell: >
+        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        2>/dev/null
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+
+    - name: ctlabs_kind.tasks.proxy.host_ip
+      set_fact:
+        ctlabs_kind_host_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: ctlabs_kind.tasks.proxy.output.http
+      shell: >
+        iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
+        -p tcp --dport 80
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        2>/dev/null
+        || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
+        -p tcp --dport 80
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+
+    - name: ctlabs_kind.tasks.proxy.output.https
+      shell: >
+        iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
+        -p tcp --dport 443
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        2>/dev/null
+        || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
+        -p tcp --dport 443
+        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+  tags:
+    - ctlabs_kind.tasks.proxy

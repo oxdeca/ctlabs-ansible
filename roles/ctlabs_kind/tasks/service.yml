@@ -2,7 +2,10 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_kind/tasks/service.yml
-# Description : service
+# Description : cluster infrastructure (kind cluster, kubeconfig, ingress-nginx,
+#               Gateway API CRDs, Gateway object). Chart deployments live in
+#               tasks/charts.yml (data-driven); app gateway-API routing in
+#               tasks/routing.yml; host iptables DNAT in tasks/proxy.yml.
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_kind.tasks.service.cluster.check
@@ -56,7 +59,7 @@
   changed_when: false
 
 # ------------------------------------------------------------------------------
-# ingress: nginx
+# ingress: nginx (raw manifest, kind provider)
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.ingress
   when:
@@ -90,67 +93,10 @@
       delay: 5
 
 # ------------------------------------------------------------------------------
-# ingress: traefik
-# ------------------------------------------------------------------------------
-- name: ctlabs_kind.tasks.service.ingress.traefik
-  when:
-    - ctlabs_kind_ingress_enabled
-    - ctlabs_kind_ingress_type == "traefik"
-  block:
-    - name: ctlabs_kind.tasks.service.ingress.traefik.helm_repo
-      kubernetes.core.helm_repository:
-        name    : traefik
-        repo_url: "{{ ctlabs_kind.defaults.ingress.traefik.repo }}"
-
-    - name: ctlabs_kind.tasks.service.ingress.traefik.images.extract
-      kubernetes.core.helm_template:
-        name             : traefik
-        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
-        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
-        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
-      register: traefik_ingress_template
-
-    - name: ctlabs_kind.tasks.service.ingress.traefik.images.parse
-      set_fact:
-        traefik_ingress_images: "{{ traefik_ingress_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
-
-    - name: ctlabs_kind.tasks.service.ingress.traefik.images.pull
-      containers.podman.podman_image:
-        name: "{{ item }}"
-      loop: "{{ traefik_ingress_images }}"
-
-    - name: ctlabs_kind.tasks.service.ingress.traefik.images.load
-      shell: >
-        rm -f {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }} &&
-        podman save {{ item }} -o {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }}
-        && kind load image-archive {{ ctlabs_kind.defaults.proxy.traefik_tmp_archive }}
-        --name {{ ctlabs_kind_name }}
-      loop: "{{ traefik_ingress_images }}"
-
-    - name: ctlabs_kind.tasks.service.ingress.traefik.install
-      environment:
-        KUBECONFIG: /root/.kube/config
-      kubernetes.core.helm:
-        name             : traefik
-        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
-        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
-        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
-        create_namespace : true
-        wait             : true
-        values           :
-          ports:
-            web:
-              hostPort: 80
-            websecure:
-              hostPort: 443
-
-# ------------------------------------------------------------------------------
-# gateway-api: envoy-gateway
+# gateway-api: CRDs (server-side apply)
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.gateway_api
-  when:
-    - ctlabs_kind_gateway_api_enabled
-    - ctlabs_kind_gateway_api_provider == "envoy-gateway"
+  when: ctlabs_kind_gateway_api_enabled
   block:
     - name: ctlabs_kind.tasks.service.gateway_api.crds.download
       get_url:
@@ -168,377 +114,42 @@
       retries: 3
       delay: 5
 
-    - name: ctlabs_kind.tasks.service.gateway_api.envoy.helm_repo
-      kubernetes.core.helm_repository:
-        name    : "{{ ctlabs_kind.defaults.ingress.envoy.name }}"
-        repo_url: "{{ ctlabs_kind.defaults.ingress.envoy.repo }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.envoy.install
-      environment:
-        KUBECONFIG: /root/.kube/config
-      kubernetes.core.helm:
-        name             : eg
-        chart_ref        : "{{ ctlabs_kind.defaults.ingress.envoy.chart }}"
-        chart_version    : "{{ ctlabs_kind.defaults.ingress.envoy.version }}"
-        release_namespace: "{{ ctlabs_kind.defaults.ingress.envoy.ns }}"
-        create_namespace : true
-        wait             : true
-
 # ------------------------------------------------------------------------------
-# gateway-api: traefik
+# gateway-api: Gateway object (infra ownership — cluster role owns the Gateway;
+# app TLS secret / ReferenceGrants / HTTPRoute ride with the argocd chart in
+# tasks/routing.yml)
 # ------------------------------------------------------------------------------
-- name: ctlabs_kind.tasks.service.gateway_api.traefik
+- name: ctlabs_kind.tasks.service.gateway
   when:
     - ctlabs_kind_gateway_api_enabled
     - ctlabs_kind_gateway_api_provider == "traefik"
-  block:
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.crds.download
-      get_url:
-        url  : "{{ ctlabs_kind.defaults.ingress.gateway_api.crds }}"
-        dest : "{{ ctlabs_kind.defaults.ingress.gateway_api.file }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.crds.apply
-      environment:
-        KUBECONFIG: /root/.kube/config
-      shell: >
-        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} apply
-        --server-side -f {{ ctlabs_kind.defaults.ingress.gateway_api.file }}
-      register: gw_crds
-      until: gw_crds is success
-      retries: 3
-      delay: 5
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.helm_repo
-      kubernetes.core.helm_repository:
-        name    : traefik
-        repo_url: "{{ ctlabs_kind.defaults.ingress.traefik.repo }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.extract
-      kubernetes.core.helm_template:
-        name             : traefik
-        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
-        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
-        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
-        release_values   :
-          providers:
-            kubernetesGateway:
-              enabled: true
-      register: traefik_template
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.parse
-      set_fact:
-        traefik_images: "{{ traefik_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.pull
-      containers.podman.podman_image:
-        name: "{{ item }}"
-      loop: "{{ traefik_images }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.images.load
-      shell: >
-        rm -f {{ ctlabs_kind.defaults.proxy.tmp_archive }} &&
-        podman save {{ item }} -o {{ ctlabs_kind.defaults.proxy.tmp_archive }}
-        && kind load image-archive {{ ctlabs_kind.defaults.proxy.tmp_archive }}
-        --name {{ ctlabs_kind_name }}
-      loop: "{{ traefik_images }}"
-
-    - name: ctlabs_kind.tasks.service.gateway_api.traefik.install
-      environment:
-        KUBECONFIG: /root/.kube/config
-      kubernetes.core.helm:
-        name             : traefik
-        chart_ref        : "{{ ctlabs_kind.defaults.ingress.traefik.chart }}"
-        chart_version    : "{{ ctlabs_kind.defaults.ingress.traefik.version }}"
-        release_namespace: "{{ ctlabs_kind.defaults.ingress.traefik.ns }}"
-        create_namespace : true
-        wait             : true
-        skip_crds        : true
-        values           :
-          gateway:
-            enabled: false
-          providers:
-            kubernetesGateway:
-              enabled: true
-          ports:
-            web:
-              hostPort: 80
-            websecure:
-              hostPort: 443
-
-# ------------------------------------------------------------------------------
-# argocd
-# ------------------------------------------------------------------------------
-- name: ctlabs_kind.tasks.service.argocd.images
-  block:
-    - name: ctlabs_kind.tasks.service.argocd.repo.add
-      kubernetes.core.helm_repository:
-        name    : argo
-        repo_url: "{{ ctlabs_kind.defaults.argocd.repo }}"
-
-    - name: ctlabs_kind.tasks.service.argocd.images.extract
-      kubernetes.core.helm_template:
-        release_name     : "{{ ctlabs_kind.defaults.argocd.name }}"
-        chart_ref        : "{{ ctlabs_kind.defaults.argocd.chart }}"
-        release_namespace: "{{ ctlabs_kind.defaults.argocd.ns }}"
-        release_values   :
-          server:
-            insecure: true
-      register: argocd_template
-
-    - name: ctlabs_kind.tasks.service.argocd.images.parse
-      set_fact:
-        argocd_images: "{{ argocd_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
-
-    - name: ctlabs_kind.tasks.service.argocd.images.pull
-      containers.podman.podman_image:
-        name: "{{ item }}"
-      loop: "{{ argocd_images }}"
-
-    - name: ctlabs_kind.tasks.service.argocd.images.load
-      shell: >
-        rm -f {{ ctlabs_kind.defaults.proxy.tmp_archive }} &&
-        podman save {{ item }} -o {{ ctlabs_kind.defaults.proxy.tmp_archive }}
-        && kind load image-archive {{ ctlabs_kind.defaults.proxy.tmp_archive }}
-        --name {{ ctlabs_kind_name }}
-      loop: "{{ argocd_images }}"
-
-- name: ctlabs_kind.tasks.service.argocd.ingress.remove
   environment:
     KUBECONFIG: /root/.kube/config
   kubernetes.core.k8s:
-    state: absent
-    api_version: networking.k8s.io/v1
-    kind: Ingress
-    name: argocd-server
-    namespace: argo
-
-- name: ctlabs_kind.tasks.service.argocd.values
-  copy:
-    dest: /tmp/argocd-values.yml
-    content: |
-      configs:
-        secret:
-          argocdServerAdminPassword: "{{ ctlabs_kind.defaults.argocd.admin_password_hash }}"
-        params:
-          server.insecure: true
-          server.baseUrl: "https://{{ ctlabs_kind_argocd_host }}"
-      global:
-        domain: "{{ ctlabs_kind_argocd_host }}"
-      server:
-        ingress:
-          enabled: true
-            ingressClassName: "{{ ctlabs_kind_ingress_class }}"
-            hostname: "{{ ctlabs_kind_argocd_host }}"
-
-- name: ctlabs_kind.tasks.service.argocd.deploy
-  environment:
-    KUBECONFIG: /root/.kube/config
-  command: >
-    helm upgrade --install
-    --namespace {{ ctlabs_kind.defaults.argocd.ns }}
-    --values /tmp/argocd-values.yml
-    --create-namespace --reset-values --wait
-    {{ ctlabs_kind.defaults.argocd.name }}
-    {{ ctlabs_kind.defaults.argocd.chart }}
-
-- name: ctlabs_kind.tasks.service.argocd.gateway_api
-  when:
-    - ctlabs_kind_gateway_api_enabled
-    - ctlabs_kind_gateway_api_provider == "traefik"
-  environment:
-    KUBECONFIG: /root/.kube/config
-  block:
-    - name: ctlabs_kind.tasks.service.argocd.tls_secret
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: argocd-tls
-            namespace: argo
-          type: kubernetes.io/tls
-          data:
-            tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
-            tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.prv') | b64encode }}"
-
-    - name: ctlabs_kind.tasks.service.argocd.gateway
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind: Gateway
-          metadata:
-            name: traefik-gateway
-            namespace: traefik
-          spec:
-            gatewayClassName: traefik
-            listeners:
-              - name: web
-                port: 8000
-                protocol: HTTP
-                allowedRoutes:
-                  namespaces:
-                    from: All
-              - name: websecure
-                port: 8443
-                protocol: HTTPS
-                tls:
-                  mode: Terminate
-                  certificateRefs:
-                    - name: argocd-tls
-                      namespace: argo
-                allowedRoutes:
-                  namespaces:
-                    from: All
-
-    - name: ctlabs_kind.tasks.service.argocd.reference_grant
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind: ReferenceGrant
-          metadata:
-            name: argocd-grant
-            namespace: argo
-          spec:
-            from:
-              - group: gateway.networking.k8s.io
-                kind: Gateway
-                namespace: traefik
-            to:
-              - group: ""
-                kind: Secret
-
-    - name: ctlabs_kind.tasks.service.argocd.route_attachment_grant
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind: ReferenceGrant
-          metadata:
-            name: allow-argo-routes
-            namespace: traefik
-          spec:
-            from:
-              - group: gateway.networking.k8s.io
-                kind: HTTPRoute
-                namespace: argo
-            to:
-              - group: gateway.networking.k8s.io
-                kind: Gateway
-
-    - name: ctlabs_kind.tasks.service.argocd.httproute
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind: HTTPRoute
-          metadata:
-            name: argocd-server
-            namespace: argo
-          spec:
-            parentRefs:
-              - name: traefik-gateway
-                namespace: traefik
-                sectionName: web
-              - name: traefik-gateway
-                namespace: traefik
-                sectionName: websecure
-            rules:
-              - matches:
-                  - path:
-                      type: PathPrefix
-                      value: /
-                backendRefs:
-                  - name: argocd-server
-                    port: 80
-
-# ------------------------------------------------------------------------------
-# host proxy (iptables DNAT for kind container nodeports)
-# ------------------------------------------------------------------------------
-- name: ctlabs_kind.tasks.service.proxy
-  block:
-    - name: ctlabs_kind.tasks.service.proxy.container_ip
-      shell: >
-        podman inspect {{ ctlabs_kind_name }}-control-plane
-        | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['NetworkSettings']['Networks'].popitem()[1]['IPAddress'])"
-      register: container_ip
-      changed_when: false
-
-    - name: ctlabs_kind.tasks.service.proxy.svc_name
-      set_fact:
-        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx-controller' }}"
-        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx' }}"
-
-    - name: ctlabs_kind.tasks.service.proxy.nodeport.http
-      environment:
-        KUBECONFIG: /root/.kube/config
-      shell: >
-        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} get svc
-        -n {{ ingress_ns }}
-        {{ ingress_svc }}
-        -o jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
-      register: http_nodeport
-      changed_when: false
-
-    - name: ctlabs_kind.tasks.service.proxy.nodeport.https
-      environment:
-        KUBECONFIG: /root/.kube/config
-      shell: >
-        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} get svc
-        -n {{ ingress_ns }}
-        {{ ingress_svc }}
-        -o jsonpath='{.spec.ports[?(@.port==443)].nodePort}'
-      register: https_nodeport
-      changed_when: false
-
-    - name: ctlabs_kind.tasks.service.proxy.forward
-      shell: >
-        iptables -C FORWARD -p tcp -d {{ container_ip.stdout }}
-        --dport {{ item }} -j ACCEPT 2>/dev/null
-        || iptables -A FORWARD -p tcp -d {{ container_ip.stdout }}
-        --dport {{ item }} -j ACCEPT
-      loop:
-        - "{{ http_nodeport.stdout }}"
-        - "{{ https_nodeport.stdout }}"
-
-    - name: ctlabs_kind.tasks.service.proxy.iptables.http
-      shell: >
-        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
-        2>/dev/null
-        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
-
-    - name: ctlabs_kind.tasks.service.proxy.iptables.https
-      shell: >
-        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
-        2>/dev/null
-        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
-
-    - name: ctlabs_kind.tasks.service.proxy.host_ip
-      set_fact:
-        ctlabs_kind_host_ip: "{{ ansible_default_ipv4.address }}"
-
-    - name: ctlabs_kind.tasks.service.proxy.output.http
-      shell: >
-        iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
-        -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
-        2>/dev/null
-        || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
-        -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
-
-    - name: ctlabs_kind.tasks.service.proxy.output.https
-      shell: >
-        iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
-        -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
-        2>/dev/null
-        || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
-        -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+    state: present
+    definition:
+      apiVersion: gateway.networking.k8s.io/v1
+      kind      : Gateway
+      metadata  :
+        name     : traefik-gateway
+        namespace: traefik
+      spec:
+        gatewayClassName: traefik
+        listeners:
+          - name: web
+            port: 8000
+            protocol: HTTP
+            allowedRoutes:
+              namespaces:
+                from: All
+          - name: websecure
+            port: 8443
+            protocol: HTTPS
+            tls:
+              mode: Terminate
+              certificateRefs:
+                - name     : argocd-tls
+                  namespace: argo
+            allowedRoutes:
+              namespaces:
+                from: All

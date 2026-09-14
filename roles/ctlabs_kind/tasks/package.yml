@@ -24,3 +24,31 @@
     url  : "{{ ctlabs_kind.defaults.pkgs.kubectl.url  }}"
     dest : "{{ ctlabs_kind.defaults.pkgs.kubectl.path }}"
     mode : "{{ ctlabs_kind.defaults.pkgs.kubectl.mode }}"
+
+- name: ctlabs_kind.tasks.package.helm.stat
+  stat:
+    path: "{{ ctlabs_kind.defaults.pkgs.helm.path }}"
+  register: var_kind_helm
+
+- name: ctlabs_kind.tasks.package.helm.install
+  when: not var_kind_helm.stat.exists
+  block:
+    - name: ctlabs_kind.tasks.package.helm.install.download
+      get_url:
+        url  : "{{ ctlabs_kind.defaults.pkgs.helm.url }}"
+        dest : "{{ ctlabs_kind.defaults.pkgs.helm.tmptar }}"
+      register: result
+      until   : result is success
+
+    - name: ctlabs_kind.tasks.package.helm.install.untar
+      unarchive:
+        src        : "{{ ctlabs_kind.defaults.pkgs.helm.tmptar }}"
+        dest       : "{{ ctlabs_kind.defaults.pkgs.helm.tmpdir }}/"
+        remote_src : true
+
+    - name: ctlabs_kind.tasks.package.helm.install.copy
+      copy:
+        src        : "{{ ctlabs_kind.defaults.pkgs.helm.tardir }}/helm"
+        dest       : "{{ ctlabs_kind.defaults.pkgs.helm.path }}"
+        mode       : "{{ ctlabs_kind.defaults.pkgs.helm.mode }}"
+        remote_src : true

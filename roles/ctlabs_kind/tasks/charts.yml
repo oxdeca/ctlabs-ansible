@@ -1,0 +1,96 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/charts.yml
+# Description : data-driven helm chart deployments. Chart definitions come from
+#               `ctlabs_kind_charts` (resolved in precheck from
+#               `ctg_facts.ctlabs_kind.charts`, falling back to
+#               `ctlabs_kind.defaults.charts`).
+#
+# Chart structure (mirrors ctlabs_helm):
+#   name, chart, chart_version, namespace, kubeconfig, create_namespace,
+#   update_repo_cache, wait, atomic, skip_crds, values, values_files,
+#   resources (post-install CRs via kubernetes.core.k8s),
+#   prepull (default true — kind nodes often can't reach quay.io, so images are
+#           pull->save->`kind load image-archive`-ed before `helm install`).
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.charts.repo
+  kubernetes.core.helm_repository:
+    name    : "{{ item.name }}"
+    repo_url: "{{ item.repo_url }}"
+  loop      : "{{ ctlabs_kind_repos }}"
+  register  : result
+  until     : result is success
+
+- name: ctlabs_kind.tasks.charts.values
+  copy:
+    dest   : "/tmp/ctlabs-kind-values-{{ item['name'] | lower | regex_replace('[^a-z0-9]', '_') }}.yml"
+    content: "{{ item['values'] | default({}) | to_nice_yaml(indent = 2) }}"
+    mode   : '0644'
+  when: "'values' in item"
+  loop: "{{ ctlabs_kind_charts }}"
+
+- name: ctlabs_kind.tasks.charts.prepull
+  when: chart['prepull'] | default(true)
+  block:
+    - name: ctlabs_kind.tasks.charts.prepull.template
+      kubernetes.core.helm_template:
+        name             : "{{ chart['name'] }}"
+        chart_ref        : "{{ chart['chart'] }}"
+        chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+        release_namespace: "{{ chart['namespace'] | default('default') }}"
+        release_values   : "{{ chart['values'] | default({}) }}"
+      register: ctlabs_kind_chart_template
+
+    - name: ctlabs_kind.tasks.charts.prepull.images
+      set_fact:
+        ctlabs_kind_chart_images: "{{ ctlabs_kind_chart_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+    - name: ctlabs_kind.tasks.charts.prepull.pull
+      containers.podman.podman_image:
+        name: "{{ item }}"
+      loop: "{{ ctlabs_kind_chart_images }}"
+
+    - name: ctlabs_kind.tasks.charts.prepull.load
+      shell: >
+        rm -f /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
+        podman save {{ item }} -o /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
+        kind load image-archive /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar
+        --name {{ ctlabs_kind_name }}
+      loop: "{{ ctlabs_kind_chart_images }}"
+  loop: "{{ ctlabs_kind_charts }}"
+  loop_control:
+    loop_var: chart
+
+- name: ctlabs_kind.tasks.charts.install
+  environment:
+    KUBECONFIG: "{{ chart['kubeconfig'] | default('/root/.kube/config') }}"
+  kubernetes.core.helm:
+    name             : "{{ chart['name'] }}"
+    chart_ref        : "{{ chart['chart'] }}"
+    chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+    release_namespace: "{{ chart['namespace'] | default('default') }}"
+    create_namespace : "{{ chart['create_namespace'] | default(true) }}"
+    update_repo_cache: "{{ chart['update_repo_cache'] | default(false) }}"
+    wait             : "{{ chart['wait'] | default(true) }}"
+    atomic           : "{{ chart['atomic'] | default(false) }}"
+    skip_crds        : "{{ chart['skip_crds'] | default(false) }}"
+    values_files     : "{{ (['/tmp/ctlabs-kind-values-' + chart['name'] | lower | regex_replace('[^a-z0-9]', '_') + '.yml'] if 'values' in chart else []) + (chart['values_files'] | default([])) }}"
+  loop: "{{ ctlabs_kind_charts }}"
+  loop_control:
+    loop_var: chart
+  register: result
+  until   : result is success
+
+- name: ctlabs_kind.tasks.charts.resources
+  environment:
+    KUBECONFIG: "{{ item[0]['kubeconfig'] | default('/root/.kube/config') }}"
+  kubernetes.core.k8s:
+    state     : present
+    definition: "{{ item[1] }}"
+  loop: "{{ ctlabs_kind_charts | subelements('resources', skip_missing=True) }}"
+  register: result
+  until   : result is success
+  retries : 30
+  delay   : 5
