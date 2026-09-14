@@ -37,6 +37,8 @@ ctlabs_minikube:
         mode   : '0755'
     repos  : []
     charts : []
+    proxy:
+      interface: "{{ ansible_default_ipv4.interface | default('') }}"
     config:
       profile:
         template : minikube.profile.j2

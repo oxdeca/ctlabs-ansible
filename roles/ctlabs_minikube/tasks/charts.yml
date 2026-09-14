@@ -76,3 +76,17 @@
   until   : result is success
   retries : 30
   delay   : 5
+
+- name: ctlabs_minikube.tasks.charts.lb_ip
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  shell: >
+    kubectl patch svc {{ item['loadBalancerSvc'] | default(item['name']) }}
+    -n {{ item['namespace'] | default('default') }}
+    --subresource=status --type=merge
+    -p '{{ {"status": {"loadBalancer": {"ingress": [{"ip": item["loadBalancerIP"]}]}}} | to_json }}'
+  when: "'loadBalancerIP' in item"
+  loop: "{{ ctlabs_minikube_charts }}"
+  register: result
+  until  : result is success
+  retries: 30
+  delay  : 2

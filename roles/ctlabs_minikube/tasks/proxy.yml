@@ -1,0 +1,100 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/proxy.yml
+# Description : host iptables DNAT forwarding :80/:443 to the traefik ingress
+#               entrypoint (runs after charts.yml so the ingress svc exists).
+#               Minikube has no routable LoadBalancer IP (MetalLB L2 cannot
+#               announce on the docker-in-node/podman bridge), so the traefik
+#               LoadBalancer advertises the HOST IP (charts.yml
+#               `loadBalancerIP` — same observable as the k3s/rke2 svclb) and
+#               this task binds the host :80/:443 to the svc NodePorts on the
+#               node IP, mirroring the ctlabs_kind proxy fallback.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.proxy
+  block:
+    - name: ctlabs_minikube.tasks.proxy.interface
+      set_fact:
+        ctlabs_minikube_proxy_interface: "{{ ctg_facts.ctlabs_minikube.proxy.interface | default(ctlabs_minikube.defaults.proxy.interface) }}"
+
+    - name: ctlabs_minikube.tasks.proxy.host_ip
+      set_fact:
+        ctlabs_minikube_host_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: ctlabs_minikube.tasks.proxy.node_ip
+      shell: >
+        podman inspect minikube
+        | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['NetworkSettings']['Networks'].popitem()[1]['IPAddress'])"
+      register: node_ip
+      changed_when: false
+
+    - name: ctlabs_minikube.tasks.proxy.nodeport.http
+      become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+      shell: >
+        kubectl get svc traefik -n traefik
+        -o jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
+      register: http_nodeport
+      changed_when: false
+
+    - name: ctlabs_minikube.tasks.proxy.nodeport.https
+      become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+      shell: >
+        kubectl get svc traefik -n traefik
+        -o jsonpath='{.spec.ports[?(@.port==443)].nodePort}'
+      register: https_nodeport
+      changed_when: false
+
+    - name: ctlabs_minikube.tasks.proxy.target
+      set_fact:
+        ingress_ip  : "{{ node_ip.stdout | trim }}"
+        ingress_port: "{{ http_nodeport.stdout | trim }}"
+        ingress_port_https: "{{ https_nodeport.stdout | trim }}"
+
+    - name: ctlabs_minikube.tasks.proxy.forward
+      shell: >
+        iptables -C FORWARD -p tcp -d {{ ingress_ip }}
+        --dport {{ item }} -j ACCEPT 2>/dev/null
+        || iptables -A FORWARD -p tcp -d {{ ingress_ip }}
+        --dport {{ item }} -j ACCEPT
+      loop:
+        - "{{ ingress_port }}"
+        - "{{ ingress_port_https }}"
+
+    - name: ctlabs_minikube.tasks.proxy.iptables.http
+      shell: >
+        iptables -t nat -C PREROUTING -i {{ ctlabs_minikube_proxy_interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
+        2>/dev/null
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_minikube_proxy_interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
+
+    - name: ctlabs_minikube.tasks.proxy.iptables.https
+      shell: >
+        iptables -t nat -C PREROUTING -i {{ ctlabs_minikube_proxy_interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
+        2>/dev/null
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_minikube_proxy_interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
+
+    - name: ctlabs_minikube.tasks.proxy.output.http
+      shell: >
+        iptables -t nat -C OUTPUT -d {{ ctlabs_minikube_host_ip }}
+        -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
+        2>/dev/null
+        || iptables -t nat -A OUTPUT -d {{ ctlabs_minikube_host_ip }}
+        -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
+
+    - name: ctlabs_minikube.tasks.proxy.output.https
+      shell: >
+        iptables -t nat -C OUTPUT -d {{ ctlabs_minikube_host_ip }}
+        -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
+        2>/dev/null
+        || iptables -t nat -A OUTPUT -d {{ ctlabs_minikube_host_ip }}
+        -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
+  tags:
+    - ctlabs_minikube.tasks.proxy

@@ -52,6 +52,35 @@ therefore run with `become_user: minikube`: helm resolves the minikube user's
 profile the unit started. Per-chart `kubeconfig` overrides this. The user needs
 podman access (as `minikube start` already requires).
 
+### Prepull on minikube
+
+Minikube nodes pull images **directly** — the kind-style registry TLS failures
+don't apply, so the k8s lab profile sets `prepull: false` per chart. The
+host-side prepull path (`podman pull` + `minikube image load` as the minikube
+user) additionally requires rootless-podman setup for that user (`/etc/subuid`
++ `/etc/subgid` + writable HOME), otherwise it fails with "cannot chdir to
+/root" / "potentially insufficient UIDs or GIDs". Keep `prepull: false` unless
+the node genuinely can't reach the registry.
+
+### LoadBalancer on minikube (host IP, like k3s/rke2)
+
+MetalLB *assigns* an ExternalIP on minikube but **L2 announcement never answers
+ARP from the host** on the docker-in-node/podman bridge (the speaker reconciles
+the service but never announces; the VIP is only reachable from inside the node
+via kube-proxy IPVS). So the minikube profile does NOT use MetalLB: the traefik
+chart stays `service.type: LoadBalancer` and, when a chart carries a
+`loadBalancerIP` key, this role patches the svc `status.loadBalancer.ingress`
+to that IP (`kubectl patch --subresource=status`) — so `EXTERNAL-IP`, the
+ingress ADDRESS and anything reading the svc status show the **host IP**
+(`192.168.30.61` here), exactly the observable of the k3s/rke2 svclb. Optional
+`loadBalancerSvc` overrides the svc name (default: chart name).
+
+`tasks/proxy.yml` then binds the host: iptables DNAT on the host IP binds
+`:80/:443` to the svc **NodePorts** on the node IP (`kubectl get svc`), the same
+fallback as `ctlabs_kind.tasks.proxy`. Nothing in the cluster needs to know the
+host IP's NIC; the proxy reads `ansible_default_ipv4` and
+`podman inspect minikube`.
+
 ## Tests
 
 ```sh

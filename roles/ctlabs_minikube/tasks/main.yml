@@ -33,3 +33,8 @@
   tags:
     - ctlabs_minikube
     - ctlabs_minikube.charts
+
+- import_tasks: proxy.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.proxy
