@@ -12,6 +12,7 @@
     - ctlabs_minikube.package
     - ctlabs_minikube.config
     - ctlabs_minikube.service
+    - ctlabs_minikube.charts
 
 - import_tasks: package.yml
   tags:
@@ -27,3 +28,8 @@
   tags:
     - ctlabs_minikube
     - ctlabs_minikube.service
+
+- import_tasks: charts.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.charts

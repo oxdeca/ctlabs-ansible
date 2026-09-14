@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/prepull.yml
+# Description : image pre-pull for a single chart (`chart` loop var, driven by
+#               tasks/charts.yml). Render the chart, extract images, pull with
+#               podman and `minikube image load` them into the node before
+#               `helm install`. Runs as the minikube system user (the same user
+#               that owns the minikube profile and podman access).
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.prepull.template
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  kubernetes.core.helm_template:
+    name             : "{{ chart['name'] }}"
+    chart_ref        : "{{ chart['chart'] }}"
+    chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+    release_namespace: "{{ chart['namespace'] | default('default') }}"
+    values_files     : "{{ (['/tmp/ctlabs-minikube-values-' + chart['name'] | lower | regex_replace('[^a-z0-9]', '_') + '.yml'] if 'values' in chart else []) + (chart['values_files'] | default([])) }}"
+  register: ctlabs_minikube_chart_template
+
+- name: ctlabs_minikube.tasks.prepull.images
+  set_fact:
+    ctlabs_minikube_chart_images: "{{ ctlabs_minikube_chart_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+- name: ctlabs_minikube.tasks.prepull.pull
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_minikube_chart_images }}"
+
+- name: ctlabs_minikube.tasks.prepull.load
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  command: "{{ ctlabs_minikube.defaults.pkgs.minikube.path }} image load {{ item }}"
+  loop: "{{ ctlabs_minikube_chart_images }}"

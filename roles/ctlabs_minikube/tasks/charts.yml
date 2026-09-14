@@ -1,0 +1,78 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_minikube/tasks/charts.yml
+# Description : data-driven helm chart deployments. Chart definitions come from
+#               `ctlabs_minikube_charts` (resolved in precheck from
+#               `ctg_facts.ctlabs_minikube.charts`, falling back to
+#               `ctlabs_minikube.defaults.charts`).
+#
+# Chart structure (mirrors ctlabs_helm / ctlabs_kind):
+#   name, chart, chart_version, namespace, kubeconfig, create_namespace,
+#   update_repo_cache, wait, atomic, skip_crds, values, values_files,
+#   resources (post-install CRs via kubernetes.core.k8s),
+#   prepull (default true — images are pull->`minikube image load`-ed into the
+#           node before `helm install`).
+#
+# The cluster (and helm/podman/minikube) run as the minikube system user, so
+# every task here runs with `become_user: ctlabs_minikube.defaults.service.main.user`
+# — helm resolves ~/.kube/config and ~/.config/helm there, and `minikube image
+# load` targets the profile the systemd unit started. The default kubeconfig is
+# therefore implicit (the minikube user's); override per chart when needed.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_minikube.tasks.charts.repo
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  kubernetes.core.helm_repository:
+    name    : "{{ item.name }}"
+    repo_url: "{{ item.repo_url }}"
+  loop      : "{{ ctlabs_minikube_repos }}"
+  register  : result
+  until     : result is success
+
+- name: ctlabs_minikube.tasks.charts.values
+  copy:
+    dest   : "/tmp/ctlabs-minikube-values-{{ item['name'] | lower | regex_replace('[^a-z0-9]', '_') }}.yml"
+    content: "{{ item['values'] | default({}) | to_nice_yaml(indent = 2) }}"
+    mode   : '0644'
+  when: "'values' in item"
+  loop: "{{ ctlabs_minikube_charts }}"
+
+- name: ctlabs_minikube.tasks.charts.prepull
+  include_tasks: prepull.yml
+  when: chart['prepull'] | default(true)
+  loop: "{{ ctlabs_minikube_charts }}"
+  loop_control:
+    loop_var: chart
+
+- name: ctlabs_minikube.tasks.charts.install
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  environment: "{{ {'KUBECONFIG': chart['kubeconfig']} if 'kubeconfig' in chart else {} }}"
+  kubernetes.core.helm:
+    name             : "{{ chart['name'] }}"
+    chart_ref        : "{{ chart['chart'] }}"
+    chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+    release_namespace: "{{ chart['namespace'] | default('default') }}"
+    create_namespace : "{{ chart['create_namespace'] | default(true) }}"
+    update_repo_cache: "{{ chart['update_repo_cache'] | default(false) }}"
+    wait             : "{{ chart['wait'] | default(true) }}"
+    atomic           : "{{ chart['atomic'] | default(false) }}"
+    skip_crds        : "{{ chart['skip_crds'] | default(false) }}"
+    values_files     : "{{ (['/tmp/ctlabs-minikube-values-' + chart['name'] | lower | regex_replace('[^a-z0-9]', '_') + '.yml'] if 'values' in chart else []) + (chart['values_files'] | default([])) }}"
+  loop: "{{ ctlabs_minikube_charts }}"
+  loop_control:
+    loop_var: chart
+  register: result
+  until   : result is success
+
+- name: ctlabs_minikube.tasks.charts.resources
+  become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  environment: "{{ {'KUBECONFIG': item[0]['kubeconfig']} if 'kubeconfig' in item[0] else {} }}"
+  kubernetes.core.k8s:
+    state     : present
+    definition: "{{ item[1] }}"
+  loop: "{{ ctlabs_minikube_charts | subelements('resources', skip_missing=True) }}"
+  register: result
+  until   : result is success
+  retries : 30
+  delay   : 5

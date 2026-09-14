@@ -9,13 +9,16 @@ versions:
   minikube : 1.37.0
   k8s      : 1.34.0
   kubectl  : 1.34.0
+  helm     : 4.1.4
 
 ctlabs_minikube:
   defaults:
     pkgs:
-      redhat: []
+      redhat:
+        - name: python3-kubernetes
       debian:
         - name: podman
+        - name: python3-kubernetes
       minikube:
         url  : "https://github.com/kubernetes/minikube/releases/download/v{{ versions.minikube }}/minikube-linux-amd64"
         path : /usr/bin/minikube
@@ -25,6 +28,15 @@ ctlabs_minikube:
         url  : "https://dl.k8s.io/release/v{{ versions.kubectl }}/bin/linux/amd64/kubectl"
         path : /usr/bin/kubectl
         mode : '0755'
+      helm:
+        url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
+        tmptar : /tmp/helm.tar.gz
+        tmpdir : /tmp
+        tardir : /tmp/linux-amd64
+        path   : /usr/bin/helm
+        mode   : '0755'
+    repos  : []
+    charts : []
     config:
       profile:
         template : minikube.profile.j2

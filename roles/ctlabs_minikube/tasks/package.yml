@@ -28,3 +28,31 @@
     mode  : "{{ ctlabs_minikube.defaults.pkgs.kubectl.mode }}"
   register: result
   until   : result is success
+
+- name: ctlabs_minikube.tasks.package.helm.stat
+  stat:
+    path: "{{ ctlabs_minikube.defaults.pkgs.helm.path }}"
+  register: var_minikube_helm
+
+- name: ctlabs_minikube.tasks.package.helm.install
+  when: not var_minikube_helm.stat.exists
+  block:
+    - name: ctlabs_minikube.tasks.package.helm.install.download
+      get_url:
+        url  : "{{ ctlabs_minikube.defaults.pkgs.helm.url }}"
+        dest : "{{ ctlabs_minikube.defaults.pkgs.helm.tmptar }}"
+      register: result
+      until   : result is success
+
+    - name: ctlabs_minikube.tasks.package.helm.install.untar
+      unarchive:
+        src        : "{{ ctlabs_minikube.defaults.pkgs.helm.tmptar }}"
+        dest       : "{{ ctlabs_minikube.defaults.pkgs.helm.tmpdir }}/"
+        remote_src : true
+
+    - name: ctlabs_minikube.tasks.package.helm.install.copy
+      copy:
+        src        : "{{ ctlabs_minikube.defaults.pkgs.helm.tardir }}/helm"
+        dest       : "{{ ctlabs_minikube.defaults.pkgs.helm.path }}"
+        mode       : "{{ ctlabs_minikube.defaults.pkgs.helm.mode }}"
+        remote_src : true

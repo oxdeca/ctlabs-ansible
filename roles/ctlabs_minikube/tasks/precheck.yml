@@ -19,3 +19,11 @@
   rescue:
     - name: ctlabs_minikube.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_minikube.tasks.precheck.repos
+  set_fact:
+    ctlabs_minikube_repos: "{{ ctg_facts.ctlabs_minikube.repos | default(ctlabs_minikube.defaults.repos, true) }}"
+
+- name: ctlabs_minikube.tasks.precheck.charts
+  set_fact:
+    ctlabs_minikube_charts: "{{ ctg_facts.ctlabs_minikube.charts | default(ctlabs_minikube.defaults.charts, true) }}"
