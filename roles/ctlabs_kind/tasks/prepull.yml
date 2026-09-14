@@ -1,0 +1,35 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/prepull.yml
+# Description : image pre-pull for a single chart (`chart` loop var, driven by
+#               tasks/charts.yml). kind nodes often can't reach registries like
+#               quay.io, so render the chart, extract images, pull with podman
+#               and `kind load image-archive` before `helm install`.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.prepull.template
+  kubernetes.core.helm_template:
+    name             : "{{ chart['name'] }}"
+    chart_ref        : "{{ chart['chart'] }}"
+    chart_version    : "{{ chart['chart_version'] | default(omit) }}"
+    release_namespace: "{{ chart['namespace'] | default('default') }}"
+    release_values   : "{{ chart['values'] | default({}) }}"
+  register: ctlabs_kind_chart_template
+
+- name: ctlabs_kind.tasks.prepull.images
+  set_fact:
+    ctlabs_kind_chart_images: "{{ ctlabs_kind_chart_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+- name: ctlabs_kind.tasks.prepull.pull
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_kind_chart_images }}"
+
+- name: ctlabs_kind.tasks.prepull.load
+  shell: >
+    rm -f /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
+    podman save {{ item }} -o /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
+    kind load image-archive /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar
+    --name {{ ctlabs_kind_name }}
+  loop: "{{ ctlabs_kind_chart_images }}"

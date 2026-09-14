@@ -35,6 +35,7 @@ def test_template_exists(role_dir):
         "tasks/facts.yml",
         "tasks/service.yml",
         "tasks/charts.yml",
+        "tasks/prepull.yml",
         "tasks/routing.yml",
         "tasks/proxy.yml",
         "defaults/main.yml",
@@ -50,10 +51,12 @@ def test_template_exists(role_dir):
 
 def test_playbook_syntax_check(role_dir):
     playbook = os.path.join(role_dir, "tests", "test_kind.yml")
+    env = dict(os.environ, ANSIBLE_ROLES_PATH=os.path.join(role_dir, os.pardir))
     result = subprocess.run(
         ["ansible-playbook", "--syntax-check", playbook],
         capture_output=True,
         text=True,
+        env=env,
     )
     assert result.returncode == 0, f"Syntax check failed:\n{result.stderr}"
 

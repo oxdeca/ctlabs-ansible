@@ -32,33 +32,8 @@
   loop: "{{ ctlabs_kind_charts }}"
 
 - name: ctlabs_kind.tasks.charts.prepull
+  include_tasks: prepull.yml
   when: chart['prepull'] | default(true)
-  block:
-    - name: ctlabs_kind.tasks.charts.prepull.template
-      kubernetes.core.helm_template:
-        name             : "{{ chart['name'] }}"
-        chart_ref        : "{{ chart['chart'] }}"
-        chart_version    : "{{ chart['chart_version'] | default(omit) }}"
-        release_namespace: "{{ chart['namespace'] | default('default') }}"
-        release_values   : "{{ chart['values'] | default({}) }}"
-      register: ctlabs_kind_chart_template
-
-    - name: ctlabs_kind.tasks.charts.prepull.images
-      set_fact:
-        ctlabs_kind_chart_images: "{{ ctlabs_kind_chart_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
-
-    - name: ctlabs_kind.tasks.charts.prepull.pull
-      containers.podman.podman_image:
-        name: "{{ item }}"
-      loop: "{{ ctlabs_kind_chart_images }}"
-
-    - name: ctlabs_kind.tasks.charts.prepull.load
-      shell: >
-        rm -f /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
-        podman save {{ item }} -o /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar &&
-        kind load image-archive /tmp/ctlabs-kind-{{ chart['name'] | lower | regex_replace('[^a-z0-9]', '_') }}-image.tar
-        --name {{ ctlabs_kind_name }}
-      loop: "{{ ctlabs_kind_chart_images }}"
   loop: "{{ ctlabs_kind_charts }}"
   loop_control:
     loop_var: chart
@@ -94,3 +69,4 @@
   until   : result is success
   retries : 30
   delay   : 5
+  
