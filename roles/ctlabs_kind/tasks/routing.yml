@@ -6,6 +6,7 @@
 #               gateway_api provider is traefik (the app-side TLS secret,
 #               ReferenceGrants and HTTPRoute). The Gateway object itself is
 #               infra owned by the role (tasks/service.yml).
+#               Manifests are rendered from templates/.
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_kind.tasks.routing
@@ -15,78 +16,43 @@
   environment:
     KUBECONFIG: /root/.kube/config
   block:
+    - name: ctlabs_kind.tasks.routing.tls_crt
+      slurp:
+        src: /etc/ca-ctlabs/{{ ansible_nodename }}.crt
+      register: tls_crt
+
+    - name: ctlabs_kind.tasks.routing.tls_key
+      slurp:
+        src: /etc/ca-ctlabs/{{ ansible_nodename }}.prv
+      register: tls_key
+
     - name: ctlabs_kind.tasks.routing.tls_secret
+      vars:
+        ctlabs_kind_tls_crt : "{{ tls_crt.content }}"
+        ctlabs_kind_tls_key : "{{ tls_key.content }}"
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: v1
-          kind      : Secret
-          metadata  :
-            name     : argocd-tls
-            namespace: argo
-          type: kubernetes.io/tls
-          data:
-            tls.crt: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.crt') | b64encode }}"
-            tls.key: "{{ lookup('file', '/etc/ca-ctlabs/' + ansible_nodename + '.prv') | b64encode }}"
+        definition: "{{ lookup('template', 'tls_secret.yml.j2') | from_yaml }}"
 
     - name: ctlabs_kind.tasks.routing.reference_grant
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind      : ReferenceGrant
-          metadata  :
-            name     : argocd-grant
-            namespace: argo
-          spec:
-            from:
-              - group     : gateway.networking.k8s.io
-                kind      : Gateway
-                namespace : traefik
-            to:
-              - group: ""
-                kind : Secret
+        definition: "{{ lookup('template', 'reference_grant.yml.j2') | from_yaml }}"
+      register: res_route_grant
+      until   : res_route_grant is success
+      retries : 30
+      delay   : 5
 
     - name: ctlabs_kind.tasks.routing.attachment_grant
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind      : ReferenceGrant
-          metadata  :
-            name     : allow-argo-routes
-            namespace: traefik
-          spec:
-            from:
-              - group     : gateway.networking.k8s.io
-                kind      : HTTPRoute
-                namespace : argo
-            to:
-              - group     : gateway.networking.k8s.io
-                kind      : Gateway
+        definition: "{{ lookup('template', 'attachment_grant.yml.j2') | from_yaml }}"
 
     - name: ctlabs_kind.tasks.routing.httproute
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind      : HTTPRoute
-          metadata  :
-            name     : argocd-server
-            namespace: argo
-          spec:
-            parentRefs:
-              - name       : traefik-gateway
-                namespace  : traefik
-                sectionName: web
-              - name       : traefik-gateway
-                namespace  : traefik
-                sectionName: websecure
-            rules:
-              - matches:
-                  - path:
-                      type : PathPrefix
-                      value: /
-                backendRefs:
-                  - name: argocd-server
-                    port: 80
+        definition: "{{ lookup('template', 'httproute.yml.j2') | from_yaml }}"
+      register: res_route_httproute
+      until   : res_route_httproute is success
+      retries : 30
+      delay   : 5

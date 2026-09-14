@@ -43,6 +43,12 @@ def test_template_exists(role_dir):
         "templates/facts.json.j2",
         "templates/kind-cluster.yml.j2",
         "templates/kind.profile.j2",
+        "templates/gateway.yml.j2",
+        "templates/gateway_ns.yml.j2",
+        "templates/tls_secret.yml.j2",
+        "templates/reference_grant.yml.j2",
+        "templates/attachment_grant.yml.j2",
+        "templates/httproute.yml.j2",
     ]
     for f in files:
         path = os.path.join(role_dir, f)

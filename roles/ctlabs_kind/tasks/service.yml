@@ -129,38 +129,9 @@
     - name: ctlabs_kind.tasks.service.gateway.namespace
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: v1
-          kind      : Namespace
-          metadata  :
-            name: traefik
+        definition: "{{ lookup('template', 'gateway_ns.yml.j2') | from_yaml }}"
 
     - name: ctlabs_kind.tasks.service.gateway.apply
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: gateway.networking.k8s.io/v1
-          kind      : Gateway
-          metadata  :
-            name     : traefik-gateway
-            namespace: traefik
-          spec:
-            gatewayClassName: traefik
-            listeners:
-              - name: web
-                port: 8000
-                protocol: HTTP
-                allowedRoutes:
-                  namespaces:
-                    from: All
-              - name: websecure
-                port: 8443
-                protocol: HTTPS
-                tls:
-                  mode: Terminate
-                  certificateRefs:
-                    - name     : argocd-tls
-                      namespace: argo
-                allowedRoutes:
-                  namespaces:
-                    from: All
+        definition: "{{ lookup('template', 'gateway.yml.j2') | from_yaml }}"

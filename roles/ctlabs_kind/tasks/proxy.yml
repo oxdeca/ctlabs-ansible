@@ -2,14 +2,36 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_kind/tasks/proxy.yml
-# Description : host iptables DNAT forwarding :80/:443 to the kind cluster
-#               service nodeports (runs after charts.yml so the ingress svc
-#               exists). The kind container is the "node"; the svc nodeports are
-#               the entry point from the VM host.
+# Description : host iptables DNAT forwarding :80/:443 to the ingress entrypoint
+#               (runs after charts.yml so the ingress svc exists). When a
+#               LoadBalancer service has an EXTERNAL-IP (MetalLB in the
+#               kind/podman bridge CIDR), the DNAT targets the LB IP directly;
+#               otherwise it falls back to the svc NodePorts on the kind node.
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_kind.tasks.proxy
   block:
+    - name: ctlabs_kind.tasks.proxy.interface
+      set_fact:
+        ctlabs_kind_proxy_interface: "{{ ctg_facts.ctlabs_kind.proxy.interface | default(ctlabs_kind.defaults.proxy.interface) }}"
+
+    - name: ctlabs_kind.tasks.proxy.svc_name
+      set_fact:
+        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx-controller' }}"
+        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx' }}"
+
+    - name: ctlabs_kind.tasks.proxy.lb_ip
+      environment:
+        KUBECONFIG: /root/.kube/config
+      shell: >
+        {{ ctlabs_kind.defaults.pkgs.kubectl.path }} get svc
+        -n {{ ingress_ns }}
+        {{ ingress_svc }}
+        -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+      register: lb_ip
+      changed_when: false
+      failed_when: false
+
     - name: ctlabs_kind.tasks.proxy.container_ip
       shell: >
         podman inspect {{ ctlabs_kind_name }}-control-plane
@@ -17,12 +39,8 @@
       register: container_ip
       changed_when: false
 
-    - name: ctlabs_kind.tasks.proxy.svc_name
-      set_fact:
-        ingress_svc: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx-controller' }}"
-        ingress_ns: "{{ 'traefik' if ctlabs_kind_ingress_class == 'traefik' else 'ingress-nginx' }}"
-
     - name: ctlabs_kind.tasks.proxy.nodeport.http
+      when: not lb_ip.stdout
       environment:
         KUBECONFIG: /root/.kube/config
       shell: >
@@ -34,6 +52,7 @@
       changed_when: false
 
     - name: ctlabs_kind.tasks.proxy.nodeport.https
+      when: not lb_ip.stdout
       environment:
         KUBECONFIG: /root/.kube/config
       shell: >
@@ -44,31 +63,37 @@
       register: https_nodeport
       changed_when: false
 
+    - name: ctlabs_kind.tasks.proxy.target
+      set_fact:
+        ingress_ip  : "{{ lb_ip.stdout | trim | default(container_ip.stdout | trim, true) }}"
+        ingress_port: "{{ ('80' if lb_ip.stdout else http_nodeport.stdout) | trim }}"
+        ingress_port_https: "{{ ('443' if lb_ip.stdout else https_nodeport.stdout) | trim }}"
+
     - name: ctlabs_kind.tasks.proxy.forward
       shell: >
-        iptables -C FORWARD -p tcp -d {{ container_ip.stdout }}
+        iptables -C FORWARD -p tcp -d {{ ingress_ip }}
         --dport {{ item }} -j ACCEPT 2>/dev/null
-        || iptables -A FORWARD -p tcp -d {{ container_ip.stdout }}
+        || iptables -A FORWARD -p tcp -d {{ ingress_ip }}
         --dport {{ item }} -j ACCEPT
       loop:
-        - "{{ http_nodeport.stdout }}"
-        - "{{ https_nodeport.stdout }}"
+        - "{{ ingress_port }}"
+        - "{{ ingress_port_https }}"
 
     - name: ctlabs_kind.tasks.proxy.iptables.http
       shell: >
-        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        iptables -t nat -C PREROUTING -i {{ ctlabs_kind_proxy_interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
         2>/dev/null
-        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind_proxy_interface }} -p tcp --dport 80
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
 
     - name: ctlabs_kind.tasks.proxy.iptables.https
       shell: >
-        iptables -t nat -C PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        iptables -t nat -C PREROUTING -i {{ ctlabs_kind_proxy_interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
         2>/dev/null
-        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind.defaults.proxy.interface }} -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        || iptables -t nat -A PREROUTING -i {{ ctlabs_kind_proxy_interface }} -p tcp --dport 443
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
 
     - name: ctlabs_kind.tasks.proxy.host_ip
       set_fact:
@@ -78,20 +103,20 @@
       shell: >
         iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
         -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
         2>/dev/null
         || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
         -p tcp --dport 80
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ http_nodeport.stdout }}
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port }}
 
     - name: ctlabs_kind.tasks.proxy.output.https
       shell: >
         iptables -t nat -C OUTPUT -d {{ ctlabs_kind_host_ip }}
         -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
         2>/dev/null
         || iptables -t nat -A OUTPUT -d {{ ctlabs_kind_host_ip }}
         -p tcp --dport 443
-        -j DNAT --to-destination {{ container_ip.stdout }}:{{ https_nodeport.stdout }}
+        -j DNAT --to-destination {{ ingress_ip }}:{{ ingress_port_https }}
   tags:
     - ctlabs_kind.tasks.proxy
