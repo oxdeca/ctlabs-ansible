@@ -79,6 +79,7 @@
 
 - name: ctlabs_minikube.tasks.charts.lb_ip
   become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+  environment: "{{ {'KUBECONFIG': item['kubeconfig']} if 'kubeconfig' in item else {} }}"
   shell: >
     kubectl patch svc {{ item['loadBalancerSvc'] | default(item['name']) }}
     -n {{ item['namespace'] | default('default') }}
