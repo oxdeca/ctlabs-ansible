@@ -125,31 +125,42 @@
     - ctlabs_kind_gateway_api_provider == "traefik"
   environment:
     KUBECONFIG: /root/.kube/config
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: gateway.networking.k8s.io/v1
-      kind      : Gateway
-      metadata  :
-        name     : traefik-gateway
-        namespace: traefik
-      spec:
-        gatewayClassName: traefik
-        listeners:
-          - name: web
-            port: 8000
-            protocol: HTTP
-            allowedRoutes:
-              namespaces:
-                from: All
-          - name: websecure
-            port: 8443
-            protocol: HTTPS
-            tls:
-              mode: Terminate
-              certificateRefs:
-                - name     : argocd-tls
-                  namespace: argo
-            allowedRoutes:
-              namespaces:
-                from: All
+  block:
+    - name: ctlabs_kind.tasks.service.gateway.namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind      : Namespace
+          metadata  :
+            name: traefik
+
+    - name: ctlabs_kind.tasks.service.gateway.apply
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind      : Gateway
+          metadata  :
+            name     : traefik-gateway
+            namespace: traefik
+          spec:
+            gatewayClassName: traefik
+            listeners:
+              - name: web
+                port: 8000
+                protocol: HTTP
+                allowedRoutes:
+                  namespaces:
+                    from: All
+              - name: websecure
+                port: 8443
+                protocol: HTTPS
+                tls:
+                  mode: Terminate
+                  certificateRefs:
+                    - name     : argocd-tls
+                      namespace: argo
+                allowedRoutes:
+                  namespaces:
+                    from: All
