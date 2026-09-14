@@ -18,6 +18,10 @@
       set_fact:
         ctlabs_minikube_proxy_interface: "{{ ctg_facts.ctlabs_minikube.proxy.interface | default(ctlabs_minikube.defaults.proxy.interface) }}"
 
+    - name: ctlabs_minikube.tasks.proxy.kubeconfig
+      set_fact:
+        ctlabs_minikube_proxy_kubeconfig: "{{ ctg_facts.ctlabs_minikube.proxy.kubeconfig | default(ctlabs_minikube.defaults.proxy.kubeconfig) }}"
+
     - name: ctlabs_minikube.tasks.proxy.host_ip
       set_fact:
         ctlabs_minikube_host_ip: "{{ ansible_default_ipv4.address }}"
@@ -31,6 +35,8 @@
 
     - name: ctlabs_minikube.tasks.proxy.nodeport.http
       become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+      environment:
+        KUBECONFIG: "{{ ctlabs_minikube_proxy_kubeconfig }}"
       shell: >
         kubectl get svc traefik -n traefik
         -o jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
@@ -39,6 +45,8 @@
 
     - name: ctlabs_minikube.tasks.proxy.nodeport.https
       become_user: "{{ ctlabs_minikube.defaults.service.main.user }}"
+      environment:
+        KUBECONFIG: "{{ ctlabs_minikube_proxy_kubeconfig }}"
       shell: >
         kubectl get svc traefik -n traefik
         -o jsonpath='{.spec.ports[?(@.port==443)].nodePort}'

@@ -38,7 +38,8 @@ ctlabs_minikube:
     repos  : []
     charts : []
     proxy:
-      interface: "{{ ansible_default_ipv4.interface | default('') }}"
+      interface : "{{ ansible_default_ipv4.interface | default('') }}"
+      kubeconfig: /home/minikube/.kube/config
     config:
       profile:
         template : minikube.profile.j2
