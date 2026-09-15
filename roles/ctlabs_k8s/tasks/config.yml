@@ -164,6 +164,9 @@
 - name: ctlabs_k8s.tasks.config.certs
   when: ctlabs_k8s_role == 'master'
   block:
+    # Worker kubelet-serving CSRs arrive LATE (after a node joins). Poll a few
+    # minutes so late CSRs are caught; otherwise kubectl logs/exec fails with
+    # "remote error: tls: internal error" (Pending csr for that node).
     - name: ctlabs_k8s.tasks.config.certs.list
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
@@ -177,6 +180,26 @@
       command: "/usr/bin/kubectl certificate approve {{ item }}"
       loop: "{{ certs.stdout_lines }}"
       when: certs.stdout_lines | length > 0
+
+    # Kubelet-serving CSRs arrive LATE (after each node joins). Re-poll for a
+    # couple of minutes and approve late/rotated CSRs; otherwise kubectl
+    # logs/exec fails with "tls: internal error" while the CSR sits Pending.
+    - name: ctlabs_k8s.tasks.config.certs.late
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      shell: |
+        pending=$(/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving --no-headers | awk '$NF != "Approved,Issued" {print $1}')
+        if [ -n "$pending" ]; then
+          /usr/bin/kubectl certificate approve $pending >/dev/null 2>&1
+        fi
+        /usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving --no-headers | awk '$NF != "Approved,Issued"' | wc -l
+      args:
+        executable: /bin/bash
+      register: certs_late
+      changed_when: false
+      until: (certs_late.stdout | trim | int) == 0
+      retries: 12
+      delay: 10
 
 # -----------------------------------------------------------------------------
 # Storage (master only)
