@@ -11,6 +11,7 @@ import json
 from jinja2 import Environment, FileSystemLoader
 
 ROLE_TEMPLATES = "/root/ctlabs-ansible/roles/ctlabs_k8s/templates"
+ROLE_TASKS = "/root/ctlabs-ansible/roles/ctlabs_k8s/tasks"
 
 
 class _Joiner:
@@ -175,7 +176,7 @@ def test_facts_role_valid_json():
 
 def test_facts_role_default_master():
     facts = json.loads(_facts_env().get_template("facts.json.j2").render(ctlabs_role_facts={}))
-    assert facts == {"role": "master", "storage": "local"}
+    assert facts == {"role": "master"}
 
 
 def test_facts_storage_explicit():
@@ -185,6 +186,13 @@ def test_facts_storage_explicit():
     assert facts["storage"] == "longhorn"
 
 
+def test_facts_storage_absent_when_undeclared():
+    facts = json.loads(
+        _facts_env().get_template("facts.json.j2").render(ctlabs_role_facts={"role": "worker"})
+    )
+    assert "storage" not in facts
+
+
 def _render_local_path(**overrides):
     env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
     ctx = {
@@ -192,7 +200,12 @@ def _render_local_path(**overrides):
             "defaults": {
                 "config": {
                     "storage": {
-                        "local": {"namespace": "kube-system", "version": "v0.0.31", "data_dir": "/media/vols"},
+                        "local": {
+                            "namespace": "kube-system",
+                            "version": "v0.0.31",
+                            "data_dir": "/media/vols",
+                            "helper_image": "busybox:latest",
+                        }
                     }
                 }
             }
@@ -225,3 +238,71 @@ def test_local_path_data_dir():
     sc = next(d for d in docs if d["kind"] == "StorageClass")
     assert sc["metadata"]["annotations"]["storageclass.kubernetes.io/is-default-class"] == "true"
     assert sc["provisioner"] == "rancher.io/local-path"
+
+
+def test_local_path_image_tag():
+    docs = [d for d in yaml.safe_load_all(_render_local_path()) if d]
+    deploy = next(d for d in docs if d["kind"] == "Deployment")
+    image = deploy["spec"]["template"]["spec"]["containers"][0]["image"]
+    assert image == "docker.io/rancher/local-path-provisioner:v0.0.31"
+
+
+def test_local_path_helper_pod_mounted():
+    docs = [d for d in yaml.safe_load_all(_render_local_path()) if d]
+    deploy = next(d for d in docs if d["kind"] == "Deployment")
+    cm = next(d for d in docs if d["kind"] == "ConfigMap")
+    vol = deploy["spec"]["template"]["spec"]["volumes"][0]["configMap"]
+    assert vol["name"] == "local-path-config"
+    assert "items" not in vol
+    assert "setup" in cm["data"] and "teardown" in cm["data"]
+    helper = yaml.safe_load(cm["data"]["helperPod.yaml"])
+    assert helper["spec"]["containers"][0]["name"] == "helper-pod"
+
+
+def test_local_path_provisioner_flags():
+    docs = [d for d in yaml.safe_load_all(_render_local_path()) if d]
+    deploy = next(d for d in docs if d["kind"] == "Deployment")
+    cont = deploy["spec"]["template"]["spec"]["containers"][0]
+    assert "--helper-image" in cont["command"]
+    assert "--configmap-name" in cont["command"]
+    assert "local-path-config" in cont["command"]
+    envs = {e["name"]: e.get("value") for e in cont["env"]}
+    assert envs["CONFIG_MOUNT_PATH"] == "/etc/config/"
+
+
+def test_precheck_storage_master_only():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    names = [t.get("name") for t in precheck]
+    assert "ctlabs_k8s.tasks.precheck.storage.fact" in names
+    assert "ctlabs_k8s.tasks.precheck.storage.master_only" in names
+    fact = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.fact")
+    assert "ctg_facts.ctlabs_k8s.storage" in fact["set_fact"]["ctlabs_k8s_storage"]
+    assert "'master'" in fact["set_fact"]["ctlabs_k8s_storage"]
+    asrt = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.master_only")
+    that = asrt["assert"]["that"]
+    cond = that if isinstance(that, str) else that[0]
+    assert "ctlabs_k8s_storage is none" in cond
+    assert "ctlabs_k8s_role == 'master'" in cond
+
+
+def test_precheck_storage_rule_order():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    names = [t.get("name") for t in precheck]
+    assert names.index("ctlabs_k8s.tasks.precheck.role.supported") < names.index(
+        "ctlabs_k8s.tasks.precheck.storage.fact"
+    )
+    assert names.index("ctlabs_k8s.tasks.precheck.storage.fact") < names.index(
+        "ctlabs_k8s.tasks.precheck.storage.master_only"
+    )
+
+
+def test_config_storage_exists_master_only():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        config = yaml.safe_load(f)
+    storage = next(t for t in config if t.get("name") == "ctlabs_k8s.tasks.config.storage")
+    assert storage["when"] == "ctlabs_k8s_role == 'master'"
+    blocknames = [t.get("name") for t in storage["block"]]
+    assert "ctlabs_k8s.tasks.config.storage.engine" not in blocknames
+    assert "ctlabs_k8s.tasks.config.storage.local.manifest" in blocknames

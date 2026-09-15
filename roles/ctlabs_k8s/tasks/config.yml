@@ -181,7 +181,8 @@
 # -----------------------------------------------------------------------------
 # Storage (master only)
 #
-# Engine facts (per node, from ctg_facts.ctlabs_k8s.storage, default 'local'):
+# Engine resolved in precheck (ctlabs_k8s_storage); validated to be a
+# master-only declaration there. Values:
 #   local   : minimal node-local dynamic PV (rancher/local-path-provisioner),
 #             a single Deployment + default StorageClass on every node.
 #   longhorn: provisioned out-of-band via the ctlabs_helm 'longhorn' chart
@@ -192,10 +193,6 @@
 - name: ctlabs_k8s.tasks.config.storage
   when: ctlabs_k8s_role == 'master'
   block:
-    - name: ctlabs_k8s.tasks.config.storage.engine
-      set_fact:
-        ctlabs_k8s_storage: "{{ ctg_facts.ctlabs_k8s.storage | default(ctlabs_k8s.defaults.config.storage.engine) }}"
-
     - name: ctlabs_k8s.tasks.config.storage.local.manifest
       when: ctlabs_k8s_storage == 'local'
       template:

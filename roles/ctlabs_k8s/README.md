@@ -27,13 +27,15 @@ How joining works:
 
 ## Storage
 
-The storage engine is facts-driven (`ctg_facts.ctlabs_k8s.storage`, default `local`), set per host in the lab's `k8s:` profile:
+The storage engine is **cluster-wide** and decided by the **master only**. Set it on the `master` host of the lab's `k8s:` profile via `ctg_facts.ctlabs_k8s.storage`:
 
 | Value      | Engine                                                             | Deployed by |
 |------------|--------------------------------------------------------------------|-------------|
 | `local`    | `rancher/local-path-provisioner` — one Deployment + a default StorageClass, node-local paths under `data_dir` (default `/media/vols`) | this role (master, raw manifest) |
 | `longhorn` | Longhorn (replicated storage) — requires the `longhorn/longhorn` chart added to the `helm` profile of an opt-in lab; this role is a no-op | `ctlabs_helm` |
 | `none`     | No storage engine                                                | —           |
+
+> Putting `storage` on any non-`master` host fails the role's precheck — both engines install cluster-wide, so a per-host value would be inconsistent. Switch engines by changing the value on the master (default `local` when unset).
 
 Use `local` for minimal footprint labs (a `2G` worker is fine — there is no per-node DaemonSet). Use `longhorn` only when a lab must exercise replication; to keep a node out of Longhorn scheduling set its fact to `none` and add a node `allowScheduling: false` resource in the lab's helm chart config.
 

@@ -111,9 +111,10 @@ ctlabs_k8s:
       storage:
         engine    : local          # storage engine: local (default) | longhorn | none
         local:
-          namespace : kube-system
-          version   : v0.0.31
-          data_dir  : /media/vols
+          namespace   : kube-system
+          version     : v0.0.31
+          data_dir    : /media/vols
+          helper_image: busybox:latest
         manifest:
           file    : local-path-provisioner.yml
           template: local-path-provisioner.yml.j2

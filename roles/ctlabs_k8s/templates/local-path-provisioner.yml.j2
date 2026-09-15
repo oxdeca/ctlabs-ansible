@@ -1,10 +1,15 @@
 {#
  # File        : ctlabs-ansible/roles/ctlabs_k8s/templates/local-path-provisioner.yml.j2
- # Description : minimal node-local dynamic PV provisioner (rancher/local-path-provisioner)
+ # Description : minimal node-local dynamic PV provisioner (rancher/local-path-provisioner v0.0.31)
+ #               Mirrors the official chart layout: the provisioner reads helperPod/setup/teardown
+ #               from the local-path-config ConfigMap at runtime.
 #}
 {% set _lp     = ctlabs_k8s.defaults.config.storage.local %}
 {% set _ns     = _lp.namespace %}
-# local-path-provisioner v{{ _lp.version }} — templated by ctlabs_k8s
+{% set _prov   = 'rancher.io/local-path' %}
+{% set _cm     = 'local-path-config' %}
+{% set _sa     = 'local-path-provisioner-service-account' %}
+# local-path-provisioner {{ _lp.version }} — templated by ctlabs_k8s
 # Provides a default StorageClass backed by {{ _lp.data_dir }} on each node.
 
 apiVersion: v1
@@ -15,7 +20,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: local-path-provisioner-service-account
+  name: {{ _sa }}
   namespace: {{ _ns }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -49,7 +54,7 @@ roleRef:
   name: local-path-provisioner-role
 subjects:
   - kind: ServiceAccount
-    name: local-path-provisioner-service-account
+    name: {{ _sa }}
     namespace: {{ _ns }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -76,13 +81,13 @@ roleRef:
   name: local-path-provisioner-role
 subjects:
   - kind: ServiceAccount
-    name: local-path-provisioner-service-account
+    name: {{ _sa }}
     namespace: {{ _ns }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: local-path-config
+  name: {{ _cm }}
   namespace: {{ _ns }}
 data:
   config.json: |-
@@ -94,20 +99,31 @@ data:
             }
             ]
     }
+  setup: |-
+    #!/bin/sh
+    set -eu
+    mkdir -m 0777 -p "$VOL_DIR"
+  teardown: |-
+    #!/bin/sh
+    set -eu
+    rm -rf "$VOL_DIR"
   helperPod.yaml: |-
     apiVersion: v1
     kind: Pod
     metadata:
       name: helper-pod
+      namespace: {{ _ns }}
     spec:
       priorityClassName: system-node-critical
       tolerations:
-      - key: "node.kubernetes.io/not-ready"
-        operator: "Exists"
-        effect: "NoExecute"
-      - key: "node.kubernetes.io/unreachable"
-        operator: "Exists"
-        effect: "NoExecute"
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: helper-pod
+          image: {{ _lp.helper_image }}
+          imagePullPolicy: IfNotPresent
+          resources: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -124,7 +140,7 @@ spec:
       labels:
         app: local-path-provisioner
     spec:
-      serviceAccountName: local-path-provisioner-service-account
+      serviceAccountName: {{ _sa }}
       priorityClassName: system-node-critical
       tolerations:
         - key: "node.kubernetes.io/not-ready"
@@ -135,7 +151,7 @@ spec:
           effect: "NoExecute"
       containers:
         - name: local-path-provisioner
-          image: docker.io/rancher/local-path-provisioner:v{{ _lp.version }}
+          image: docker.io/rancher/local-path-provisioner:{{ _lp.version }}
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -143,8 +159,14 @@ spec:
             - start
             - --config
             - /etc/config/config.json
+            - --service-account-name
+            - {{ _sa }}
             - --provisioner-name
-            - rancher.io/local-path
+            - {{ _prov }}
+            - --helper-image
+            - {{ _lp.helper_image }}
+            - --configmap-name
+            - {{ _cm }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config/
@@ -153,13 +175,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: CONFIG_MOUNT_PATH
+              value: /etc/config/
       volumes:
         - name: config-volume
           configMap:
-            name: local-path-config
-            items:
-              - key: config.json
-                path: config.json
+            name: {{ _cm }}
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -167,7 +188,7 @@ metadata:
   name: local-path
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-provisioner: rancher.io/local-path
+provisioner: {{ _prov }}
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 allowVolumeExpansion: true
