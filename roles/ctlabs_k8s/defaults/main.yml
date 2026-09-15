@@ -20,6 +20,12 @@ ctlabs_k8s_master_ip : "{{ ansible_default_ipv4.address }}"
 # nodes get no podCIDR → calico cross-node routes break ('dev lo' loops, pod-to-pod
 # dead). Single-node labs work with anything; multi-node needs at least a /16.
 ctlabs_k8s_pod_cidr  : 10.8.0.0/16
+# Calico tunnel: use IPIP (tunl0) rather than VXLANCrossSubnet. On HA labs kube-vip
+# puts its VIP (192.168.30.x/32) on every node's lo; under VXLANCrossSubnet calico
+# then programs peer podCIDR routes `via <peer-ip> dev lo onlink` → cross-node pod
+# traffic dies (metallb/webhook timeouts, argocd `helm install --wait` hangs on any
+# pod on another node). IPIP tunnels unconditionally through tunl0 and is immune.
+ctlabs_k8s_pod_cidr_encapsulation : "IPIP"
 ctlabs_k8s_prometheus: false
 
 ctlabs_k8s:
@@ -122,6 +128,16 @@ ctlabs_k8s:
 
       pid_cidr        : 172.31.0.0/16
       kube_vip        : false
+      # Services LoadBalancer provider — exactly ONE may be active at a time.
+      #   kube-vip : host-IP LB (k3s/klipper style). kube-vip already runs on the
+      #              master for the apiserver VIP (.31); LoadBalancer services are
+      #              served on that node IP, so the app host name
+      #              (k8s1.ctlabs.internal) works directly — no extra controller.
+      #   metallb  : pool-based LB, deployed by the ctlabs_helm profile (opt-in);
+      #              kube-vip then stays control-plane-VIP only.
+      #   none     : no services LB at all.
+      lb              : kube-vip
+      lb_supported    : ['kube-vip', 'metallb', 'none']
       schedule_master : false
       network         : calico
       prometheus      : false

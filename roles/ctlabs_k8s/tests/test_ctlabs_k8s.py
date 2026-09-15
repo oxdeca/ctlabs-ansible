@@ -335,11 +335,25 @@ def test_config_gateway_api_master_only():
     for expected in [
         "ctlabs_k8s.tasks.config.gateway_api.crds.download",
         "ctlabs_k8s.tasks.config.gateway_api.crds.apply",
-        "ctlabs_k8s.tasks.config.gateway_api.gateway_class.manifest",
-        "ctlabs_k8s.tasks.config.gateway_api.gateway_class.apply",
-        "ctlabs_k8s.tasks.config.gateway_api.gateway.apply",
+        "ctlabs_k8s.tasks.config.gateway_api.namespace",
+        "ctlabs_k8s.tasks.config.gateway_api.gateway_class",
+        "ctlabs_k8s.tasks.config.gateway_api.gateway",
     ]:
         assert expected in blocknames
+    declarative = ["kubernetes.core.k8s" in t for t in gw["block"]]
+    assert any(declarative)
+
+
+def test_config_gateway_api_no_command():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        config = yaml.safe_load(f)
+    gw = next(t for t in config if t.get("name") == "ctlabs_k8s.tasks.config.gateway_api")
+    allow_kubectl_server_side = {"ctlabs_k8s.tasks.config.gateway_api.crds.apply"}
+    for t in gw["block"]:
+        if t.get("name") in allow_kubectl_server_side:
+            continue
+        assert "command" not in t, f"gateway_api task '{t.get('name')}' must not use command"
+        assert "shell" not in t, f"gateway_api task '{t.get('name')}' must not use shell"
 
 
 def test_gateway_template_listeners():
@@ -369,3 +383,14 @@ def test_gateway_template_listeners():
     assert "kind: GatewayClass" in gwc
     assert "controllerName:" in gwc
     assert gwc.count("controllerName:") == 1
+
+
+def test_calico_encapsulation_default():
+    with open(os.path.join(ROLE_TEMPLATES, "calico-custom-resources.yml.j2")) as f:
+        tpl = f.read()
+    assert "ctlabs_k8s_pod_cidr_encapsulation" in tpl
+    assert "VXLANCrossSubnet" not in tpl
+
+    with open(os.path.join(ROLE_TASKS, "../defaults/main.yml")) as f:
+        defaults = yaml.safe_load(f)
+    assert defaults["ctlabs_k8s_pod_cidr_encapsulation"] == "IPIP"

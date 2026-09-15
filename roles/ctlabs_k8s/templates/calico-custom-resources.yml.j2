@@ -15,7 +15,7 @@ spec:
     ipPools:
       - blockSize    : 26
         cidr         : {{ ctlabs_k8s_pod_cidr }}
-        encapsulation: VXLANCrossSubnet
+        encapsulation: {{ ctlabs_k8s_pod_cidr_encapsulation }}
         natOutgoing  : Enabled
         nodeSelector : all()
     nodeAddressAutodetectionV4:

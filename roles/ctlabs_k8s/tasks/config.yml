@@ -257,44 +257,24 @@
       retries: 3
       delay: 5
 
-    - name: ctlabs_k8s.tasks.config.gateway_api.gateway_class.manifest
-      template:
-        src  : gatewayclass.yml.j2
-        dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/gatewayclass.yml"
-
-    - name: ctlabs_k8s.tasks.config.gateway_api.gateway_class.apply
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/gatewayclass.yml"
-      register: gw_class
-      until: gw_class is success
-      retries: 3
-      delay: 5
-
     - name: ctlabs_k8s.tasks.config.gateway_api.namespace
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
-      command: "/usr/bin/kubectl get namespace {{ ctlabs_k8s.defaults.config.gateway_api.gateway.namespace }}"
-      changed_when: false
-      failed_when: false
-      register: gw_ns
+      kubernetes.core.k8s:
+        kind : Namespace
+        name : "{{ ctlabs_k8s.defaults.config.gateway_api.gateway.namespace }}"
+        state: present
 
-    - name: ctlabs_k8s.tasks.config.gateway_api.namespace.create
+    - name: ctlabs_k8s.tasks.config.gateway_api.gateway_class
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
-      command: "/usr/bin/kubectl create namespace {{ ctlabs_k8s.defaults.config.gateway_api.gateway.namespace }}"
-      when: gw_ns.rc != 0
+      kubernetes.core.k8s:
+        state     : present
+        definition: "{{ lookup('template', 'gatewayclass.yml.j2') | from_yaml }}"
 
-    - name: ctlabs_k8s.tasks.config.gateway_api.gateway.manifest
-      template:
-        src  : gateway.yml.j2
-        dest : "{{ ctlabs_k8s.defaults.config.dirs.components }}/gateway.yml"
-
-    - name: ctlabs_k8s.tasks.config.gateway_api.gateway.apply
+    - name: ctlabs_k8s.tasks.config.gateway_api.gateway
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
-      command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/gateway.yml"
-      register: gw_apply
-      until: gw_apply is success
-      retries: 3
-      delay: 5
+      kubernetes.core.k8s:
+        state     : present
+        definition: "{{ lookup('template', 'gateway.yml.j2') | from_yaml }}"
