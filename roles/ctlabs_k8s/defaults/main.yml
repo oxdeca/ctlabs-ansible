@@ -14,7 +14,11 @@ versions :
 ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6)[0] }}.{{ query('community.general.random_string', override_all='01234567890abcdef', length=16)[0] }}"
 ctlabs_k8s_cert_key  : "{{ query('community.general.random_string', override_all='0123456789abcdef', length=64)[0] }}"
 ctlabs_k8s_master_ip : "{{ ansible_default_ipv4.address }}"
-ctlabs_k8s_pod_cidr  : 10.8.15.0/24
+# Pod network. MUST be large enough for kubeadm to hand each node its own /24
+# (kubeadm derives per-node podCIDRs from this). A /24 only fits ONE node → other
+# nodes get no podCIDR → calico cross-node routes break ('dev lo' loops, pod-to-pod
+# dead). Single-node labs work with anything; multi-node needs at least a /16.
+ctlabs_k8s_pod_cidr  : 10.8.0.0/16
 ctlabs_k8s_prometheus: false
 
 ctlabs_k8s:
@@ -104,6 +108,15 @@ ctlabs_k8s:
         - name    : weave
           file    : weave.yml
           template: weave.yml.j2
+      storage:
+        engine    : local          # storage engine: local (default) | longhorn | none
+        local:
+          namespace : kube-system
+          version   : v0.0.31
+          data_dir  : /media/vols
+        manifest:
+          file    : local-path-provisioner.yml
+          template: local-path-provisioner.yml.j2
 
       pid_cidr        : 172.31.0.0/16
       kube_vip        : false

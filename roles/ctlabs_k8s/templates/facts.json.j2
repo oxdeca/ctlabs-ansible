@@ -11,4 +11,9 @@
 {%- if _facts.master_ip is defined %},
   "master_ip"  : "{{ _facts.master_ip }}"
 {% endif %}
+{%- if _facts.storage is defined %},
+  "storage"    : "{{ _facts.storage }}"
+{% else %},
+  "storage"    : "local"
+{% endif %}
 }

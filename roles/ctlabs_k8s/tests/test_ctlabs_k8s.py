@@ -38,7 +38,7 @@ def _render_kubeadm_init(**overrides):
         "ctlabs_k8s_join_token": "abcdef.0123456789abcdef",
         "ctlabs_k8s_cert_key": "0" * 64,
         "ctlabs_k8s_master_ip": "192.168.99.10",
-        "ctlabs_k8s_pod_cidr": "10.8.15.0/24",
+        "ctlabs_k8s_pod_cidr": "10.8.0.0/16",
         "ctlabs_k8s": {
             "defaults": {
                 "cluster": {
@@ -90,6 +90,7 @@ def test_template_exists(role_dir):
         "templates/kube-vip.yml.j2",
         "templates/versions.sh.j2",
         "templates/weave.yml.j2",
+        "templates/local-path-provisioner.yml.j2",
     ]
     for f in files:
         path = os.path.join(role_dir, f)
@@ -123,7 +124,7 @@ def test_kubeadm_init_values():
     assert init["localAPIEndpoint"]["advertiseAddress"] == "192.168.99.10"
     assert cluster["kubernetesVersion"] == "1.36.4"
     assert cluster["controlPlaneEndpoint"] == "192.168.99.10:6443"
-    assert cluster["networking"]["podSubnet"] == "10.8.15.0/24"
+    assert cluster["networking"]["podSubnet"] == "10.8.0.0/16"
 
 
 def test_kubeadm_join_worker():
@@ -167,11 +168,60 @@ def test_facts_role_valid_json():
     facts = json.loads(
         _facts_env()
         .get_template("facts.json.j2")
-        .render(ctlabs_role_facts={"role": "control", "master_node": "k8s1", "master_ip": "192.168.99.10"})
+        .render(ctlabs_role_facts={"role": "control", "master_node": "k8s1", "master_ip": "192.168.99.10", "storage": "none"})
     )
-    assert facts == {"role": "control", "master_node": "k8s1", "master_ip": "192.168.99.10"}
+    assert facts == {"role": "control", "master_node": "k8s1", "master_ip": "192.168.99.10", "storage": "none"}
 
 
 def test_facts_role_default_master():
     facts = json.loads(_facts_env().get_template("facts.json.j2").render(ctlabs_role_facts={}))
-    assert facts == {"role": "master"}
+    assert facts == {"role": "master", "storage": "local"}
+
+
+def test_facts_storage_explicit():
+    facts = json.loads(
+        _facts_env().get_template("facts.json.j2").render(ctlabs_role_facts={"storage": "longhorn"})
+    )
+    assert facts["storage"] == "longhorn"
+
+
+def _render_local_path(**overrides):
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    ctx = {
+        "ctlabs_k8s": {
+            "defaults": {
+                "config": {
+                    "storage": {
+                        "local": {"namespace": "kube-system", "version": "v0.0.31", "data_dir": "/media/vols"},
+                    }
+                }
+            }
+        },
+    }
+    ctx.update(overrides)
+    return env.get_template("local-path-provisioner.yml.j2").render(ctx)
+
+
+def test_local_path_valid_yaml():
+    docs = [d for d in yaml.safe_load_all(_render_local_path()) if d]
+    kinds = [d["kind"] for d in docs]
+    assert kinds == [
+        "Namespace",
+        "ServiceAccount",
+        "ClusterRole",
+        "ClusterRoleBinding",
+        "Role",
+        "RoleBinding",
+        "ConfigMap",
+        "Deployment",
+        "StorageClass",
+    ]
+
+
+def test_local_path_data_dir():
+    docs = [d for d in yaml.safe_load_all(_render_local_path()) if d]
+    cm = next(d for d in docs if d["kind"] == "ConfigMap")
+    assert "/media/vols" in cm["data"]["config.json"]
+    sc = next(d for d in docs if d["kind"] == "StorageClass")
+    assert sc["metadata"]["annotations"]["storageclass.kubernetes.io/is-default-class"] == "true"
+    assert sc["provisioner"] == "rancher.io/local-path"

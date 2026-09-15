@@ -23,7 +23,19 @@ How joining works:
 
 `ctlabs_k8s_master_ip` must point at the first control-plane node (it is also the advertise/local API endpoint beaconing host). See the k8s groups in `role_profiles.yml` for an example 1-master/2-control multi-node layout.
 
-> Components that used to be deployed via raw manifests (longhorn, ingress/traefik) now come from Helm charts owned by [`ctlabs_helm`](../ctlabs_helm/README.md) — see the cluster's `helm` profile in `setup_profiles.yml`.
+> Components that used to be deployed via raw manifests (ingress/traefik) now come from Helm charts owned by [`ctlabs_helm`](../ctlabs_helm/README.md) — see the cluster's `helm` profile in `setup_profiles.yml`.
+
+## Storage
+
+The storage engine is facts-driven (`ctg_facts.ctlabs_k8s.storage`, default `local`), set per host in the lab's `k8s:` profile:
+
+| Value      | Engine                                                             | Deployed by |
+|------------|--------------------------------------------------------------------|-------------|
+| `local`    | `rancher/local-path-provisioner` — one Deployment + a default StorageClass, node-local paths under `data_dir` (default `/media/vols`) | this role (master, raw manifest) |
+| `longhorn` | Longhorn (replicated storage) — requires the `longhorn/longhorn` chart added to the `helm` profile of an opt-in lab; this role is a no-op | `ctlabs_helm` |
+| `none`     | No storage engine                                                | —           |
+
+Use `local` for minimal footprint labs (a `2G` worker is fine — there is no per-node DaemonSet). Use `longhorn` only when a lab must exercise replication; to keep a node out of Longhorn scheduling set its fact to `none` and add a node `allowScheduling: false` resource in the lab's helm chart config.
 
 ## Ansible Tags
 
@@ -44,9 +56,10 @@ How joining works:
 |-------------------------------------------|-------------|-------------------------------------------------|
 | `ctlabs_k8s_role`                         | `master`    | Node role: `master`, `control`, or `worker`     |
 | `ctlabs_k8s_master_ip`                    | node IP     | Control plane advertise address                 |
-| `ctlabs_k8s_pod_cidr`                     | `10.8.15.0/24` | Pod network subnet (must match CNI config)  |
+| `ctlabs_k8s_pod_cidr`                     | `10.8.0.0/16` | Pod network subnet (must fit one `/24` per node; `/16` for multi-node, `/24` is single-node only) |
 | `ctlabs_k8s.defaults.config.network`      | `calico`    | CNI (`calico`, `flannel`, `weave`)             |
 | `ctlabs_k8s.defaults.config.kube_vip`     | `false`     | Enable kube-vip for HA control plane           |
+| `ctlabs_k8s.defaults.config.storage.engine` | `local`   | Storage engine: `local` (default), `longhorn`, `none` |
 
 ## Tests
 
