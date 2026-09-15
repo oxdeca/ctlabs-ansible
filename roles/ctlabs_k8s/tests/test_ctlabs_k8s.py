@@ -278,6 +278,8 @@ def test_precheck_storage_master_only():
     assert "ctlabs_k8s.tasks.precheck.storage.master_only" in names
     fact = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.fact")
     assert "ctg_facts.ctlabs_k8s.storage" in fact["set_fact"]["ctlabs_k8s_storage"]
+    assert "default('')" in fact["set_fact"]["ctlabs_k8s_storage"]
+    assert "lower" in fact["set_fact"]["ctlabs_k8s_storage"]
     assert "'master'" in fact["set_fact"]["ctlabs_k8s_storage"]
     asrt = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.master_only")
     that = asrt["assert"]["that"]

@@ -72,7 +72,7 @@
 #
 - name: ctlabs_k8s.tasks.precheck.storage.fact
   set_fact:
-    ctlabs_k8s_storage: "{{ ctg_facts.ctlabs_k8s.storage | default(ctlabs_k8s.defaults.config.storage.engine if ctlabs_k8s_role == 'master' else none) }}"
+    ctlabs_k8s_storage: "{{ (ctg_facts.ctlabs_k8s.storage | default('') | trim | lower) or (ctlabs_k8s.defaults.config.storage.engine if ctlabs_k8s_role == 'master' else none) }}"
 
 - name: ctlabs_k8s.tasks.precheck.storage.master_only
   assert:
