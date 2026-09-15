@@ -1,0 +1,25 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.name }}
+  namespace: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.namespace }}
+spec:
+  gatewayClassName: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.class }}
+  listeners:
+    - name: web
+      port: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.listeners.web.port | int }}
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: websecure
+      port: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.listeners.websecure.port | int }}
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.tls_secret }}
+            namespace: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.tls_secret_ns }}
+      allowedRoutes:
+        namespaces:
+          from: All

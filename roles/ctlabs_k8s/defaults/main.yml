@@ -10,6 +10,7 @@ versions :
   calico         : 3.32.2
   prometheus     : 0.10
   metrics_server : 0.7.0
+  gateway_api    : 1.5.1
 
 ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6)[0] }}.{{ query('community.general.random_string', override_all='01234567890abcdef', length=16)[0] }}"
 ctlabs_k8s_cert_key  : "{{ query('community.general.random_string', override_all='0123456789abcdef', length=64)[0] }}"
@@ -126,6 +127,29 @@ ctlabs_k8s:
       prometheus      : false
       pgsql_op        : none
       pgsql_opns      : default
+
+      # Gateway API (cluster-wide, decided by the master only). The role owns the
+      # infrastructure (CRDs + GatewayClass + Gateway object, ctlabs_k8s/tasks/config.yml);
+      # app wiring (TLS secret, ReferenceGrants, HTTPRoute) rides with the app's chart
+      # in ctlabs_helm via the chart-level `gateway` key — same model as k3s/rke2.
+      gateway_api:
+        enabled : true            # actual default per host via ctg_facts.ctlabs_k8s.gateway_api
+        provider: "traefik"       # Options: 'traefik'
+        crds:
+          url : "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
+          file: "/etc/kubernetes/gateway-api-crds.yml"
+        gateway:
+          name       : traefik-gateway
+          namespace  : traefik
+          class      : traefik
+          class_controller: "traefik.io/gateway-controller"
+          tls_secret : argocd-tls
+          tls_secret_ns: argo
+          listeners:
+            web:
+              port: 8000
+            websecure:
+              port: 8443
     service:
       name: kubelet.service
     bin:

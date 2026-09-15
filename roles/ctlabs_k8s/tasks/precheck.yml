@@ -81,6 +81,18 @@
     fail_msg: "Storage engine is a cluster-wide choice, decided by the master only. Remove 'storage: {{ ctlabs_k8s_storage_raw }}' from host [{{ inventory_hostname }}] (role {{ ctlabs_k8s_role }}) and set it on the master instead."
 
 #
+# gateway-api (cluster-wide, infra owned by the master; apps wire their own
+# HTTPRoute via the ctlabs_helm chart-level `gateway` key, like k3s/rke2)
+#
+- name: ctlabs_k8s.tasks.precheck.gateway_api.enabled
+  set_fact:
+    ctlabs_k8s_gateway_api_enabled: "{{ ctg_facts.ctlabs_k8s.gateway_api.enabled | default(ctlabs_k8s.defaults.config.gateway_api.enabled) }}"
+
+- name: ctlabs_k8s.tasks.precheck.gateway_api.provider
+  set_fact:
+    ctlabs_k8s_gateway_api_provider: "{{ ctg_facts.ctlabs_k8s.gateway_api.provider | default(ctlabs_k8s.defaults.config.gateway_api.provider) }}"
+
+#
 # join (control / worker)
 #
 - name: ctlabs_k8s.tasks.precheck.join

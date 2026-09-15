@@ -14,4 +14,10 @@
 {%- if _facts.storage is defined %},
   "storage"    : "{{ _facts.storage }}"
 {% endif %}
+{%- if _facts.gateway_api is defined %},
+  "gateway_api": {
+    "enabled" : "{{ 'true' if (_facts.gateway_api.enabled | default(true)) else 'false' }}",
+    "provider": "{{ _facts.gateway_api.provider | default('traefik') }}"
+  }
+{% endif %}
 }

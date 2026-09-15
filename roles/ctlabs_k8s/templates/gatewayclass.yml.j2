@@ -1,0 +1,6 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.class }}
+spec:
+  controllerName: {{ ctlabs_k8s.defaults.config.gateway_api.gateway.class_controller }}

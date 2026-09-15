@@ -310,3 +310,62 @@ def test_config_storage_exists_master_only():
     blocknames = [t.get("name") for t in storage["block"]]
     assert "ctlabs_k8s.tasks.config.storage.engine" not in blocknames
     assert "ctlabs_k8s.tasks.config.storage.local.manifest" in blocknames
+
+
+def test_precheck_gateway_api_facts():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    names = [t.get("name") for t in precheck]
+    assert "ctlabs_k8s.tasks.precheck.gateway_api.enabled" in names
+    assert "ctlabs_k8s.tasks.precheck.gateway_api.provider" in names
+    enabled = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.gateway_api.enabled")
+    provider = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.gateway_api.provider")
+    assert "ctg_facts.ctlabs_k8s.gateway_api.enabled" in enabled["set_fact"]["ctlabs_k8s_gateway_api_enabled"]
+    assert "default" in enabled["set_fact"]["ctlabs_k8s_gateway_api_enabled"]
+    assert "ctg_facts.ctlabs_k8s.gateway_api.provider" in provider["set_fact"]["ctlabs_k8s_gateway_api_provider"]
+
+
+def test_config_gateway_api_master_only():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        config = yaml.safe_load(f)
+    gw = next(t for t in config if t.get("name") == "ctlabs_k8s.tasks.config.gateway_api")
+    assert "ctlabs_k8s_role == 'master'" in (gw["when"] if isinstance(gw["when"], str) else " ".join(gw["when"]))
+    assert "ctlabs_k8s_gateway_api_enabled" in " ".join(gw["when"])
+    blocknames = [t.get("name") for t in gw["block"]]
+    for expected in [
+        "ctlabs_k8s.tasks.config.gateway_api.crds.download",
+        "ctlabs_k8s.tasks.config.gateway_api.crds.apply",
+        "ctlabs_k8s.tasks.config.gateway_api.gateway_class.manifest",
+        "ctlabs_k8s.tasks.config.gateway_api.gateway_class.apply",
+        "ctlabs_k8s.tasks.config.gateway_api.gateway.apply",
+    ]:
+        assert expected in blocknames
+
+
+def test_gateway_template_listeners():
+    with open(os.path.join(ROLE_TEMPLATES, "gateway.yml.j2")) as f:
+        tpl = f.read()
+    assert "kind: Gateway" in tpl
+    assert "gatewayClassName:" in tpl
+    assert "protocol: HTTP" in tpl
+    assert "protocol: HTTPS" in tpl
+    assert "mode: Terminate" in tpl
+    assert "certificateRefs" in tpl
+    assert "allowedRoutes" in tpl
+
+    with open(os.path.join(ROLE_TASKS, "../defaults/main.yml")) as f:
+        defaults = yaml.safe_load(f)
+    gw = defaults["ctlabs_k8s"]["defaults"]["config"]["gateway_api"]
+    assert gw["provider"] == "traefik"
+    assert gw["gateway"]["name"] == "traefik-gateway"
+    assert gw["gateway"]["tls_secret"] == "argocd-tls"
+    assert gw["gateway"]["listeners"]["web"]["port"] == 8000
+    assert gw["gateway"]["listeners"]["websecure"]["port"] == 8443
+    assert "standard-install.yaml" in gw["crds"]["url"]
+    assert gw["gateway"]["class_controller"] == "traefik.io/gateway-controller"
+
+    with open(os.path.join(ROLE_TEMPLATES, "gatewayclass.yml.j2")) as f:
+        gwc = f.read()
+    assert "kind: GatewayClass" in gwc
+    assert "controllerName:" in gwc
+    assert gwc.count("controllerName:") == 1
