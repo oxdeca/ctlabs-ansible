@@ -277,6 +277,8 @@ def test_precheck_storage_master_only():
     assert "ctlabs_k8s.tasks.precheck.storage.fact" in names
     assert "ctlabs_k8s.tasks.precheck.storage.master_only" in names
     fact = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.fact")
+    assert "ctlabs_k8s_storage_raw" in fact["set_fact"]
+    assert "ctlabs_k8s_storage" in fact["set_fact"]
     assert "ctg_facts.ctlabs_k8s.storage" in fact["set_fact"]["ctlabs_k8s_storage"]
     assert "default('')" in fact["set_fact"]["ctlabs_k8s_storage"]
     assert "lower" in fact["set_fact"]["ctlabs_k8s_storage"]
@@ -284,7 +286,7 @@ def test_precheck_storage_master_only():
     asrt = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.storage.master_only")
     that = asrt["assert"]["that"]
     cond = that if isinstance(that, str) else that[0]
-    assert "ctlabs_k8s_storage is none" in cond
+    assert "ctlabs_k8s_storage_raw == ''" in cond
     assert "ctlabs_k8s_role == 'master'" in cond
 
 
