@@ -36,7 +36,7 @@ def test_playbook_syntax_check(role_dir):
     assert result.returncode == 0, f"Syntax check failed:\n{result.stderr}"
 
 
-def test_longhorn_guard_present():
+def test_longhorn_guard_skips_not_fails():
     with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
         precheck = yaml.safe_load(f)
     guard = next(t for t in precheck if t.get("name") == "ctlabs_helm.tasks.precheck.longhorn.guard")
@@ -44,26 +44,30 @@ def test_longhorn_guard_present():
     inner = [t.get("name") for t in guard["block"]]
     assert "ctlabs_helm.tasks.precheck.longhorn.engine.fact" in inner
     assert "ctlabs_helm.tasks.precheck.longhorn.chart.fact" in inner
-    assert "ctlabs_helm.tasks.precheck.longhorn.engine.required" in inner
-    asrt = next(
-        t for t in guard["block"]
-        if t.get("name") == "ctlabs_helm.tasks.precheck.longhorn.engine.required"
-    )
-    that = asrt["assert"]["that"]
-    cond = that if isinstance(that, str) else that[0]
-    assert "ctlabs_helm_has_longhorn_chart" in cond
-    assert "ctlabs_k8s_master_storage" in cond
-    assert "'longhorn'" in cond
+    assert "ctlabs_helm.tasks.precheck.longhorn.skip" in inner
+    assert "ctlabs_helm.tasks.precheck.longhorn.skip.notice" in inner
+    hard_fail = [t for t in guard["block"] if "assert" in t]
+    assert not hard_fail, "longhorn guard must skip the chart, not assert/fail"
 
 
-def test_longhorn_guard_chart_detection():
+def test_longhorn_guard_skip_expr():
     with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
         precheck = yaml.safe_load(f)
     guard = next(t for t in precheck if t.get("name") == "ctlabs_helm.tasks.precheck.longhorn.guard")
+    skip = next(
+        t for t in guard["block"]
+        if t.get("name") == "ctlabs_helm.tasks.precheck.longhorn.skip"
+    )
+    expr = skip["set_fact"]["ctlabs_helm_charts"]
+    assert "rejectattr('chart', 'search', 'longhorn')" in expr
+    assert "rejectattr('name', 'equalto', 'longhorn')" in expr
+    flagged = skip["set_fact"]["ctlabs_helm_longhorn_skipped"]
+    assert "ctlabs_k8s_master_storage" in flagged
+    assert "'longhorn'" in flagged
     fact = next(
         t for t in guard["block"]
         if t.get("name") == "ctlabs_helm.tasks.precheck.longhorn.chart.fact"
     )
-    expr = fact["set_fact"]["ctlabs_helm_has_longhorn_chart"]
-    assert "selectattr('chart', 'search', 'longhorn')" in expr
-    assert "selectattr('name', 'equalto', 'longhorn')" in exp
+    detection = fact["set_fact"]["ctlabs_helm_has_longhorn_chart"]
+    assert "selectattr('chart', 'search', 'longhorn')" in detection
+    assert "selectattr('name', 'equalto', 'longhorn')" in detection

@@ -47,8 +47,23 @@
           {{ (ctlabs_helm_charts | selectattr('chart', 'search', 'longhorn') | list | length) > 0
              or (ctlabs_helm_charts | selectattr('name', 'equalto', 'longhorn') | list | length) > 0 }}
 
-    - name: ctlabs_helm.tasks.precheck.longhorn.engine.required
-      assert:
-        that    : not (ctlabs_helm_has_longhorn_chart and (ctlabs_k8s_master_storage | default('')) != 'longhorn')
-        fail_msg: "The 'longhorn' chart is configured for host [{{ inventory_hostname }}] but the k8s storage engine is '{{ ctlabs_k8s_master_storage | default('') or 'local' }}', not 'longhorn'. Either set storage: longhorn on the k8s master (helm profile), or remove the longhorn chart entry from the helm profile. They must not coexist."
+    #
+    # The storage engine decides: when the k8s master's engine is NOT
+    # 'longhorn', drop the longhorn chart from the install list so it can
+    # never coexist with the default 'local' engine (they fight over the
+    # default StorageClass / PVC mutating webhook). Skipped, not fatal.
+    #
+    - name: ctlabs_helm.tasks.precheck.longhorn.skip
+      set_fact:
+        ctlabs_helm_longhorn_skipped: "{{ ctlabs_helm_has_longhorn_chart and (ctlabs_k8s_master_storage | default('')) != 'longhorn' }}"
+        ctlabs_helm_charts: >-
+          {%- if ctlabs_helm_has_longhorn_chart and (ctlabs_k8s_master_storage | default('')) != 'longhorn' -%}
+          {{ ctlabs_helm_charts | rejectattr('chart', 'search', 'longhorn') | rejectattr('name', 'equalto', 'longhorn') | list }}
+          {%- else -%}
+          {{ ctlabs_helm_charts }}
+          {%- endif -%}
 
+    - name: ctlabs_helm.tasks.precheck.longhorn.skip.notice
+      when: ctlabs_helm_longhorn_skipped
+      debug:
+        msg: "Skipping the 'longhorn' chart for host [{{ inventory_hostname }}]: the k8s storage engine is '{{ ctlabs_k8s_master_storage | default('') or 'local' }}', not 'longhorn'. Set storage: longhorn on the k8s master to activate it."
