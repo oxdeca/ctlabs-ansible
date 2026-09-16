@@ -424,3 +424,38 @@ def test_kube_vip_svc_enable_gated_by_lb():
     off = tpl.render(ctlabs_k8s_lb="metallb", **ctx)
     assert 'name: svc_enable\n      value: "true"' in on
     assert 'name: svc_enable\n      value: "false"' in off
+
+
+def test_config_csrs_approver_master_only():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        config = yaml.safe_load(f)
+    block = next(t for t in config if t.get("name") == "ctlabs_k8s.tasks.config.certs.approver")
+    assert block["when"] == "ctlabs_k8s_role == 'master'"
+    names = [t.get("name") for t in block["block"]]
+    for expected in [
+        "ctlabs_k8s.tasks.config.certs.approver.script",
+        "ctlabs_k8s.tasks.config.certs.approver.service",
+        "ctlabs_k8s.tasks.config.certs.approver.timer",
+        "ctlabs_k8s.tasks.config.certs.approver.enable",
+    ]:
+        assert expected in names
+    enable = next(t for t in block["block"] if t.get("name") == "ctlabs_k8s.tasks.config.certs.approver.enable")
+    assert enable["systemd"]["name"] == "k8s-csr-approver.timer"
+    assert enable["systemd"]["enabled"] is True
+    for t in block["block"]:
+        assert "command" not in t
+        assert "shell" not in t
+
+
+def test_csr_approver_templates():
+    with open(os.path.join(ROLE_TEMPLATES, "approve-serving-csrs.sh.j2")) as f:
+        script = f.read()
+    assert "kubelet-serving" in script
+    assert "certificate approve" in script
+    assert 'awk \'$NF == "Pending"' in script
+    with open(os.path.join(ROLE_TEMPLATES, "k8s-csr-approver.timer.j2")) as f:
+        timer = f.read()
+    assert "OnUnitActiveSec=60s" in timer
+    with open(os.path.join(ROLE_TEMPLATES, "k8s-csr-approver.service.j2")) as f:
+        service = f.read()
+    assert "Type=oneshot" in service

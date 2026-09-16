@@ -202,6 +202,43 @@
       delay: 10
 
 # -----------------------------------------------------------------------------
+# kubelet-serving CSR auto-approver (master only)
+#
+# The in-play polls above still miss kubelet-serving CSRs from nodes that join
+# long after this play finishes (kubectl logs/exec => "tls: internal error").
+# Install a systemd timer that approves any pending kubelet-serving CSR every
+# minute, forever — self-healing on every rebuild.
+# -----------------------------------------------------------------------------
+
+- name: ctlabs_k8s.tasks.config.certs.approver
+  when: ctlabs_k8s_role == 'master'
+  block:
+    - name: ctlabs_k8s.tasks.config.certs.approver.script
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.csr_approver.script.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.csr_approver.script.file }}"
+        mode : '0700'
+
+    - name: ctlabs_k8s.tasks.config.certs.approver.service
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.csr_approver.service.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.csr_approver.service.file }}"
+        mode : '0644'
+
+    - name: ctlabs_k8s.tasks.config.certs.approver.timer
+      template:
+        src  : "{{ ctlabs_k8s.defaults.config.csr_approver.timer.template }}"
+        dest : "{{ ctlabs_k8s.defaults.config.csr_approver.timer.file }}"
+        mode : '0644'
+
+    - name: ctlabs_k8s.tasks.config.certs.approver.enable
+      systemd:
+        name           : k8s-csr-approver.timer
+        state          : started
+        enabled        : true
+        daemon_reload  : true
+
+# -----------------------------------------------------------------------------
 # Storage (master only)
 #
 # Engine resolved in precheck (ctlabs_k8s_storage); validated to be a

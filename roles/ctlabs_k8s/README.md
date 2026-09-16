@@ -60,7 +60,7 @@ Use `local` for minimal footprint labs (a `2G` worker is fine — there is no pe
 | `ctlabs_k8s_master_ip`                    | node IP     | Control plane advertise address                 |
 | `ctlabs_k8s_pod_cidr`                     | `10.8.0.0/16` | Pod network subnet (must fit one `/24` per node; `/16` for multi-node, `/24` is single-node only) |
 | `ctlabs_k8s.defaults.config.network`      | `calico`    | CNI (`calico`, `flannel`, `weave`)             |
-| `ctlabs_k8s.defaults.config.kube_vip`     | `false`     | Enable kube-vip for HA control plane           |
+| `ctlabs_k8s.defaults.config.lb`           | `kube-vip`  | Services LoadBalancer (one at a time): `kube-vip` (host IP), `metallb`, `none` |
 | `ctlabs_k8s.defaults.config.storage.engine` | `local`   | Storage engine: `local` (default), `longhorn`, `none` |
 
 ## Tests

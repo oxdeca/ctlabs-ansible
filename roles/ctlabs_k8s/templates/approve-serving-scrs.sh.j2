@@ -1,0 +1,10 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/templates/approve-serving-csrs.sh.j2
+# Description : approve pending kubelet-serving CSRs (kubectl logs/exec fix)
+# ------------------------------------------------------------------------------
+set -euo pipefail
+export KUBECONFIG=/etc/kubernetes/admin.conf
+/usr/bin/kubectl get csr --field-selector spec.signerName=kubernetes.io/kubelet-serving --no-headers \
+  | awk '$NF == "Pending" {print $1}' \
+  | xargs -r /usr/bin/kubectl certificate approve >/dev/null 2>&1

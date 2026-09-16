@@ -126,6 +126,22 @@ ctlabs_k8s:
           file    : local-path-provisioner.yml
           template: local-path-provisioner.yml.j2
 
+      # kubelet-serving CSR auto-approver (master only). Kubernetes auto-approves
+      # node/client certs (kubeadm nodeclient/selfnodeclient bindings) but NOT the
+      # serving certs — k8s2/3/4 CSRs land Pending after the in-play approval poll
+      # finishes → kubectl logs/exec die with "tls: internal error". This timer
+      # approves any pending kubelet-serving CSR every minute, self-healing.
+      csr_approver:
+        script:
+          file    : /usr/local/bin/k8s-approve-serving-csrs.sh
+          template: approve-serving-csrs.sh.j2
+        service:
+          file    : /etc/systemd/system/k8s-csr-approver.service
+          template: k8s-csr-approver.service.j2
+        timer:
+          file    : /etc/systemd/system/k8s-csr-approver.timer
+          template: k8s-csr-approver.timer.j2
+
       pid_cidr        : 172.31.0.0/16
       # Services LoadBalancer provider — exactly ONE may be active at a time.
       #   kube-vip : host-IP LB (k3s/klipper style). kube-vip already runs on the

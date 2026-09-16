@@ -1,0 +1,13 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/templates/k8s-csr-approver.timer.j2
+# Description : every-minute timer for the kubelet-serving CSR approver
+# ------------------------------------------------------------------------------
+[Unit]
+Description=Trigger the kubelet-serving CSR approver every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=60s
+
+[Install]
+WantedBy=timers.target

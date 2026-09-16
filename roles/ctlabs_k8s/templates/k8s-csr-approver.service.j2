@@ -1,0 +1,10 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/templates/k8s-csr-approver.service.j2
+# Description : oneshot unit for the kubelet-serving CSR approver
+# ------------------------------------------------------------------------------
+[Unit]
+Description=Approve pending kubelet-serving CSRs
+
+[Service]
+Type=oneshot
+ExecStart={{ ctlabs_k8s.defaults.config.csr_approver.script.file }}
