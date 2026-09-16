@@ -394,3 +394,33 @@ def test_calico_encapsulation_default():
     with open(os.path.join(ROLE_TASKS, "../defaults/main.yml")) as f:
         defaults = yaml.safe_load(f)
     assert defaults["ctlabs_k8s_pod_cidr_encapsulation"] == "IPIP"
+
+
+def test_precheck_lb_fact():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    names = [t.get("name") for t in precheck]
+    assert "ctlabs_k8s.tasks.precheck.lb.fact" in names
+    assert "ctlabs_k8s.tasks.precheck.lb.supported" in names
+    fact = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.lb.fact")
+    assert "ctg_facts.ctlabs_k8s.lb" in fact["set_fact"]["ctlabs_k8s_lb"]
+    assert "default" in fact["set_fact"]["ctlabs_k8s_lb"]
+    sup = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.lb.supported")
+    assert "ctlabs_k8s.defaults.config.lb_supported" in sup["assert"]["that"]
+
+
+def test_lb_defaults():
+    with open(os.path.join(ROLE_TASKS, "../defaults/main.yml")) as f:
+        defaults = yaml.safe_load(f)
+    cfg = defaults["ctlabs_k8s"]["defaults"]["config"]
+    assert cfg["lb"] == "kube-vip"
+    assert cfg["lb_supported"] == ["kube-vip", "metallb", "none"]
+
+
+def test_kube_vip_svc_enable_gated_by_lb():
+    tpl = _facts_env().get_template("kube-vip.yml.j2")
+    ctx = {"ansible_default_ipv4": {"address": "192.168.30.31"}}
+    on = tpl.render(ctlabs_k8s_lb="kube-vip", **ctx)
+    off = tpl.render(ctlabs_k8s_lb="metallb", **ctx)
+    assert 'name: svc_enable\n      value: "true"' in on
+    assert 'name: svc_enable\n      value: "false"' in off

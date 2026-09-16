@@ -127,7 +127,6 @@ ctlabs_k8s:
           template: local-path-provisioner.yml.j2
 
       pid_cidr        : 172.31.0.0/16
-      kube_vip        : false
       # Services LoadBalancer provider — exactly ONE may be active at a time.
       #   kube-vip : host-IP LB (k3s/klipper style). kube-vip already runs on the
       #              master for the apiserver VIP (.31); LoadBalancer services are

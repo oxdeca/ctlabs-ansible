@@ -33,7 +33,7 @@ spec:
     - name: vip_ddns
       value: "false"
     - name: svc_enable
-      value: "true"
+      value: "{{ 'true' if ctlabs_k8s_lb == 'kube-vip' else 'false' }}"
     - name: vip_startleader
       value: "false"
     - name: vip_addpeerstolb
