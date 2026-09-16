@@ -150,7 +150,7 @@
       register: crd_wait
       until: crd_wait is success
       retries: 5
-      delay: 3
+      delay: 5
 
     - name: ctlabs_k8s.tasks.config.calico.custom-resources
       environment:
