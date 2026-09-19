@@ -104,7 +104,7 @@ It contains `vault_root_token` and `vault_unseal_keys_b64`. **Treat this file as
 - **Vault sealed:** not recoverable.
 - **Rekey does NOT help:** a rekey requires a **quorum of the existing unseal  keys** to authorize (HashiCorp `operator rekey` docs). With `secret_shares = 1`,  that means the one lost key is still required. Key loss is unrecoverable by  design.
 
-The only hard protection is redundancy: keep a second copy of the init output file off-host, or increase `secret_shares`/`secret_threshold` at init so losing one share doesn't lock the vault.
+The only hard protection is redundancy: keep a second copy of the init output file off-host, use a sealed `vault-backup.py` archive (below — it embeds the keys, encrypted), or increase `secret_shares`/`secret_threshold` at init so losing one share doesn't lock the vault.
 
 ### Seal-key rotation (compromise, routine rotation)
 
@@ -180,4 +180,49 @@ Flags: `--addr` (or `VAULT_ADDR`), `--token` (or `VAULT_TOKEN`), `--out` (defaul
 
 Exports: engines + auth methods (token/ system/ identity/ skipped), ACL policies (inline HCL, default/root skipped), userpass users (name + policies only), approle roles (incl. `secret_id_ttl` / `secret_id_bound_cidrs` / `token_ttl` / `secret_id_num_uses`), jwt/oidc mount config + roles.
 
-**Tradeoff (documented):** this is *config-restore, not storage-restore*. userpass passwords and KV/secret data are NOT restored by it (Vault cannot read passwords back; KV data lives in storage). A true data-level restore still requires the storage snapshot (`vault-backup.py` tar archives) **and** the matching unseal keys. The exported user entries carry no `password` — add them to the fact file before bootstrap on the new host.
+**Tradeoff (documented):** this is *config-restore, not storage-restore*. userpass passwords and KV/secret data are NOT restored by it (Vault cannot read passwords back; KV data lives in storage). For full data-level restore use `vault-backup.py` sealed archives (below). The exported user entries carry no `password` — add them to the fact file before bootstrap on the new host.
+
+## Backup & Restore — sealed `.vback` archives (`vault-backup.py`)
+
+`vault-backup.py` (installed to `/usr/sbin/vault-backup.py`) builds a **single, self-contained, encrypted** archive of the Vault *storage* — including the unseal key(s) + root token it needs to come back up on restore:
+
+```
+vault-(snap|full)-<ts>.vback
+  = magic + salt + Fernet( tar.gz { ctlabs-restore-meta.json, data/, [config/] } )
+```
+
+- **Fernet** (AES-128-CBC + HMAC-SHA256, authenticated) keyed by **PBKDF2-HMAC-SHA256** (300k iterations, random salt). Needs `python3-cryptography`.
+- **Passphrase is never stored**: provide it via `VAULT_BACKUP_PASSPHRASE`, `--passphrase-file <mode-0600-file>`, or an interactive prompt — **never** on the command line. Keep it out-of-band (password manager / custodian). Without it an archive yields nothing (confidentiality) and any tampering is detected (authenticity).
+- The controller keyring (`/root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
+
+### Usage
+
+```sh
+# on the vault host
+vault-backup.py backup-full \
+  --keys-file /path/to/.ctlabs_vault_init_output_<node>.yml \
+  --passphrase-file /etc/vault-backup.pw          # or VAULT_BACKUP_PASSPHRASE
+# -> /var/backups/vault/vault-full-<ts>.vback (mode 0600)
+
+vault-backup.py restore-full /var/backups/vault/vault-full-<ts>.vback \
+  --passphrase-file /etc/vault-backup.pw          # prompts YES confirmation
+```
+
+Subcommands: `backup-snap` / `backup-full` (data / data+config), `restore-snap` / `restore-full`. Common flags: `--keys-file`, `--passphrase-file`, `--addr` (default `api_addr` from `vault.hcl`), `--ca-cert`, `--data-dir`, `--config-dir`, `--out-dir`, `--service`; backup also `--force` / `--no-unseal`; restore also `--yes`.
+
+### Safety properties
+
+- **Refuses to stop the vault when it can't unseal it afterwards** (e.g. running but no key available) unless `--force` — this removes the "service restart with lost key = permanently sealed" trap.
+- After every stop/start it **auto-unseals** with the embedded key and **verifies the root token** (`auth/token/lookup-self`) — proving on every run that the keyring still matches the vault (catches post-rekey staleness).
+- **Restore verifies the archive (magic + auth) before touching anything**, moves the existing data dir aside (`.pre-<ts>`, newest kept) instead of deleting, extracts into a staging dir, swaps, starts, and unseals. Bad passphrase or tampering aborts with a clean error — nothing is touched.
+- Archives are world-unreadable (mode 0600). Old archives are pruned after `RETENTION_DAYS`.
+
+### Migration note
+
+Legacy backups from the old script are plaintext `.tar.gz` (e.g. `vault-snap-*.tar.gz`) and contain **no keys** — unusable for restore without the keyring, and sensitive. After you have a verified `.vback` from the same vault, purge the old `.tar.gz` files. Never keep an unencrypted archive alongside a `.vback`.
+
+### Restore checklist (e.g. onto a fresh host)
+
+1. Install/run the role so `/usr/sbin/vault-backup.py` exists (fresh hosts re-init or restore directly).
+2. Copy the `.vback` **and** the passphrase (separately) to the host; `systemctl stop vault` is handled by the script.
+3. `vault-backup.py restore-full <archive> ...` — the script replaces the storage, restarts the service and unseals; verify with the embedded root token.
