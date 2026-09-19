@@ -14,6 +14,25 @@ ctlabs_vault_agent_cache   : false
 ctlabs_vault_agent_sink    : true
 ctlabs_vault_proxy_socktype: unix
 
+# Declarative vault setup (engines/auth/policies/users/approle/jwt).
+# Applied idempotently after init by tasks/bootstrap.yml (server mode only).
+# Overridden per host via local fact ctlabs_vault_setup
+# (/etc/ansible/facts.d/ctlabs_vault_setup.fact -> ctg_facts.ctlabs_vault_setup).
+# This default mirrors the historical hard-coded init.yml bootstrap.
+ctlabs_vault_setup:
+  auth:
+    - path       : userpass
+      type       : userpass
+      description: User/Pass Authentication
+  policies:
+    - name   : ctlabs
+      source : template
+      template: ctlabs.hcl.j2
+  users:
+    - username : ctlabs
+      password : "secret123!"
+      policies : ["default", "ctlabs"]
+
 # role defaults
 ctlabs_vault:
   defaults:
@@ -44,6 +63,9 @@ ctlabs_vault:
       backup:
         script: vault-backup.py
         dst   : /usr/sbin/vault-backup.py
+      export:
+        script: vault-export.py
+        dst   : /usr/sbin/vault-export.py
     config:
       dir   : /etc/vault.d
       server:

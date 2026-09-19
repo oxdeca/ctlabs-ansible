@@ -73,3 +73,14 @@
     owner : root
     group : root
     mode  : '0750'
+
+#
+# Export Script
+#
+- name: ctlabs_vault.tasks.package.export.script
+  copy:
+    src   : "{{ ctlabs_vault.defaults.files.export.script }}"
+    dest  : "{{ ctlabs_vault.defaults.files.export.dst    }}"
+    owner : root
+    group : root
+    mode  : '0750'

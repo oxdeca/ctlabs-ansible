@@ -1,0 +1,324 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/bootstrap.yml
+# Description : declarative, idempotent vault setup (server mode only)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.bootstrap
+  when: ctlabs_vault_install_type == 'server'
+  block:
+    - name: ctlabs_vault.tasks.bootstrap.setup.var
+      set_fact:
+        ctlabs_vault_setup_effective: "{{ ctlabs_vault_setup }}"
+
+    - name: ctlabs_vault.tasks.bootstrap.setup.local_fact
+      set_fact:
+        ctlabs_vault_setup_effective: "{{ ctg_facts.ctlabs_vault_setup | default(ctlabs_vault_setup_effective) }}"
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.items
+      set_fact:
+        ctlabs_vault_jwt_items: "{{ [ctlabs_vault_setup_effective['jwt']] if ('jwt' in ctlabs_vault_setup_effective) else [] }}"
+
+    - name: ctlabs_vault.tasks.bootstrap.root_token.slurp
+      slurp:
+        src: "/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+      delegate_to: localhost
+      register: vault_bootstrap_init_slurp
+      failed_when: false
+
+    - name: ctlabs_vault.tasks.bootstrap.token.ok
+      set_fact:
+        ctlabs_vault_bootstrap_token_ok: "{{ (vault_bootstrap_init_slurp['content'] | default('')) | length > 0 }}"
+
+    - name: ctlabs_vault.tasks.bootstrap.root_token.fact
+      set_fact:
+        ctlabs_vault_root_token: >-
+          {{ (vault_bootstrap_init_slurp['content'] | b64decode | from_yaml)['vault_root_token'] }}
+      when: ctlabs_vault_bootstrap_token_ok
+
+    - name: ctlabs_vault.tasks.bootstrap.skip.missing_init_output
+      when: not ctlabs_vault_bootstrap_token_ok
+      debug:
+        msg: >-
+          Skipping ctlabs_vault bootstrap: init output file
+          /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+          not present on the controller (vault_root_token required)
+
+- name: ctlabs_vault.tasks.bootstrap.apply
+  when: (ctlabs_vault_install_type == 'server') and (ctlabs_vault_bootstrap_token_ok | default(false))
+  vars:
+    ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+  block:
+    #
+    # Secrets Engines
+    #
+    - name: ctlabs_vault.tasks.bootstrap.engine.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/mounts/{{ item['path'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_setup_effective['engines'] | default([]) }}"
+      register: vault_bootstrap_engine_read
+
+    - name: ctlabs_vault.tasks.bootstrap.engine.enable
+      vars:
+        vault_bootstrap_engine_body: >-
+          {{ {'type': item.item['type'], 'description': item.item['description'] | default('')}
+               | combine({'options': item.item['options']} if 'options' in item.item else {})
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/mounts/{{ item.item['path'] }}"
+        method       : POST
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_engine_body }}"
+      loop: "{{ vault_bootstrap_engine_read.results }}"
+      when: item.status == 404
+
+    #
+    # Auth Methods
+    #
+    - name: ctlabs_vault.tasks.bootstrap.auth.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item['path'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_setup_effective['auth'] | default([]) }}"
+      register: vault_bootstrap_auth_read
+
+    - name: ctlabs_vault.tasks.bootstrap.auth.enable
+      vars:
+        vault_bootstrap_auth_body: >-
+          {{ {'type': item.item['type'], 'description': item.item['description'] | default('')}
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item.item['path'] }}"
+        method       : POST
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_auth_body }}"
+      loop: "{{ vault_bootstrap_auth_read.results }}"
+      when: item.status == 404
+
+    #
+    # ACL Policies
+    #
+    - name: ctlabs_vault.tasks.bootstrap.policy.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/policies/acl/{{ item['name'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_setup_effective['policies'] | default([]) }}"
+      register: vault_bootstrap_policy_read
+
+    - name: ctlabs_vault.tasks.bootstrap.policy.write
+      vars:
+        vault_bootstrap_policy_rendered: >-
+          {{
+            (lookup('template', item.item['template']) if (item.item['source'] == 'template') else
+            (lookup('file', item.item['policy']) if (item.item['source'] == 'file') else item.item['policy']))
+          }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/policies/acl/{{ item.item['name'] }}"
+        method       : PUT
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ {'policy': vault_bootstrap_policy_rendered} | to_json }}"
+      loop: "{{ vault_bootstrap_policy_read.results }}"
+      when: (item.status == 404) or (item.json['data']['policy'] != vault_bootstrap_policy_rendered)
+
+    #
+    # Userpass Users
+    #
+    - name: ctlabs_vault.tasks.bootstrap.user.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['auth_path'] | default('userpass') }}/users/{{ item['username'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_setup_effective['users'] | default([]) }}"
+      register: vault_bootstrap_user_read
+
+    - name: ctlabs_vault.tasks.bootstrap.user.create
+      vars:
+        vault_bootstrap_user_body: >-
+          {{ {'password': item.item['password'],
+              'policies': item.item['policies'] | default([])} | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['auth_path'] | default('userpass') }}/users/{{ item.item['username'] }}"
+        method       : POST
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_user_body }}"
+      loop: "{{ vault_bootstrap_user_read.results }}"
+      when: (item.status == 404) and ('password' in item.item)
+
+    - name: ctlabs_vault.tasks.bootstrap.user.policies
+      vars:
+        vault_bootstrap_user_policies: >-
+          {{ {'policies': item.item['policies'] | default([])} | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['auth_path'] | default('userpass') }}/users/{{ item.item['username'] }}"
+        method       : POST
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_user_policies }}"
+      loop: "{{ vault_bootstrap_user_read.results }}"
+      when: item.status == 200
+
+    - name: ctlabs_vault.tasks.bootstrap.user.skip.no_password
+      loop: "{{ vault_bootstrap_user_read.results }}"
+      when: (item.status == 404) and ('password' not in item.item)
+      debug:
+        msg: >-
+          Skipping creation of userpass user {{ item.item['username'] }}: no 'password'
+          in the vault setup fact (Vault cannot read back stored passwords; add one
+          to ctlabs_vault_setup or create the user manually)
+
+    #
+    # AppRole Roles
+    #
+    - name: ctlabs_vault.tasks.bootstrap.approle.role.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['auth_path'] | default('approle') }}/role/{{ item['name'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_setup_effective['approle_roles'] | default([]) }}"
+      register: vault_bootstrap_approle_read
+
+    - name: ctlabs_vault.tasks.bootstrap.approle.role.create
+      vars:
+        vault_bootstrap_approle_body: >-
+          {{ {}
+               | combine({'token_policies': item.item['token_policies']} if 'token_policies' in item.item else {})
+               | combine({'token_ttl': item.item['token_ttl']} if 'token_ttl' in item.item else {})
+               | combine({'token_max_ttl': item.item['token_max_ttl']} if 'token_max_ttl' in item.item else {})
+               | combine({'secret_id_ttl': item.item['secret_id_ttl']} if 'secret_id_ttl' in item.item else {})
+               | combine({'secret_id_num_uses': item.item['secret_id_num_uses'] | int} if 'secret_id_num_uses' in item.item else {})
+               | combine({'secret_id_bound_cidrs': item.item['secret_id_bound_cidrs']} if 'secret_id_bound_cidrs' in item.item else {})
+               | combine({'bind_secret_id': item.item['bind_secret_id'] | bool} if 'bind_secret_id' in item.item else {})
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['auth_path'] | default('approle') }}/role/{{ item.item['name'] }}"
+        method       : PUT
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_approle_body }}"
+      loop: "{{ vault_bootstrap_approle_read.results }}"
+      when: item.status == 404
+
+    #
+    # JWT / OIDC
+    #
+    - name: ctlabs_vault.tasks.bootstrap.jwt.mount.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item['mount'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_jwt_items }}"
+      register: vault_bootstrap_jwt_mount
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.mount.enable
+      vars:
+        vault_bootstrap_jwt_auth_body: >-
+          {{ {'type': 'jwt', 'description': 'JSON Web Token Authentication'} | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item.item['mount'] }}"
+        method       : POST
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_jwt_auth_body }}"
+      loop: "{{ vault_bootstrap_jwt_mount.results }}"
+      when: item.status == 404
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.config.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['mount'] }}/config"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_jwt_items }}"
+      register: vault_bootstrap_jwt_config
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.config.write
+      vars:
+        vault_bootstrap_jwt_cfg_body: >-
+          {{ {'oidc_discovery_url': item.item['discovery_url']}
+               | combine({'default_role': item.item['default_role']} if 'default_role' in item.item else {})
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['mount'] }}/config"
+        method       : POST
+        validate_certs: false
+        status_code  : [200]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_jwt_cfg_body }}"
+      loop: "{{ vault_bootstrap_jwt_config.results }}"
+      when: (item.status == 404) or (item.json['data']['oidc_discovery_url'] != item.item['discovery_url'])
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.role.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item[0]['mount'] }}/role/{{ item[1]['name'] }}"
+        validate_certs: false
+        status_code  : [200, 404]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_jwt_items | subelements('roles', skip_missing=True) }}"
+      register: vault_bootstrap_jwt_role
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.role.create
+      vars:
+        vault_bootstrap_jwt_role_body: >-
+          {{ {'role_type': 'jwt'}
+               | combine({'bound_audiences': item.item[1]['bound_audiences']} if 'bound_audiences' in item.item[1] else {})
+               | combine({'user_claim': item.item[1]['user_claim']} if 'user_claim' in item.item[1] else {})
+               | combine({'claim_mappings': item.item[1]['claim_mappings']} if 'claim_mappings' in item.item[1] else {})
+               | combine({'token_policies': item.item[1]['token_policies']} if 'token_policies' in item.item[1] else {})
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item[0]['mount'] }}/role/{{ item.item[1]['name'] }}"
+        method       : PUT
+        validate_certs: false
+        status_code  : [204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_jwt_role_body }}"
+      loop: "{{ vault_bootstrap_jwt_role.results }}"
+      when: item.status == 404

@@ -32,3 +32,8 @@
   tags:
     - ctlabs_vault
     - ctlabs_vault.init
+
+- import_tasks: bootstrap.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.bootstrap

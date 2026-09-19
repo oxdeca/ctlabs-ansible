@@ -25,6 +25,7 @@ The install type is resolved per host in `tasks/precheck.yml`:
 - `ctlabs_vault.config`
 - `ctlabs_vault.service`
 - `ctlabs_vault.init`
+- `ctlabs_vault.bootstrap`
 
 ## Variables
 
@@ -116,3 +117,67 @@ vault operator rekey -nonce=<nonce>                          # prompts for the c
 ```
 
 The final command outputs the **new** unseal key(s) and a rekey nonce — persist the new `vault_unseal_keys_b64` into the init output file immediately, then destroy the previous records.
+
+## Declarative Setup (`bootstrap.yml`)
+
+After init, a `server` vault is bootstrapped from a declarative setup instead of the historical hard-coded `init.yml` steps (enable userpass, create the `ctlabs` user + policy). The role applies engines, auth methods, policies, userpass users, approle roles and jwt/oidc config idempotently — every write is preceded by a read.
+
+### Source of truth (`ctlabs_vault_setup`)
+
+Resolution order (same local-facts pattern as the rest of the role):
+
+1. Local fact `ctg_facts.ctlabs_vault_setup` (file `/etc/ansible/facts.d/ctlabs_vault_setup.fact`) — authoritative, per host
+2. Role default `ctlabs_vault_setup` in `defaults/main.yml` — fallback that mirrors today's behavior (enable `userpass`, user `ctlabs` / policy `ctlabs` from `ctlabs.hcl.j2`)
+
+### Fact schema
+
+```json
+{
+  "engines": [
+    { "path": "kvv2", "type": "kv", "description": "...", "options": { "version": "2" } }
+  ],
+  "auth": [
+    { "path": "userpass", "type": "userpass", "description": "..." },
+    { "path": "approle",  "type": "approle" }
+  ],
+  "policies": [
+    { "name": "ctlabs", "policy": "<HCL or template/file reference>", "source": "template|file|inline" }
+  ],
+  "users": [
+    { "username": "ctlabs", "password": "secret123!", "policies": ["default", "ctlabs"], "auth_path": "userpass" }
+  ],
+  "approle_roles": [
+    { "name": "atlantis-runner", "auth_path": "approle", "token_policies": ["cf-ci"],
+      "token_ttl": "1h", "token_max_ttl": "24h", "secret_id_ttl": "24h", "secret_id_num_uses": 0,
+      "secret_id_bound_cidrs": ["192.168.99.5/32"], "bind_secret_id": true }
+  ],
+  "jwt": { "mount": "jwt", "discovery_url": "https://.../.well-known/openid-configuration",
+           "default_role": "default",
+           "roles": [ { "name": "default", "bound_audiences": ["..."], "user_claim": "...",
+                        "claim_mappings": {}, "token_policies": [] } ] }
+}
+```
+
+Notes:
+
+- `policies.source` — `template` renders a role template (`template: ctlabs.hcl.j2`), `file` reads a static HCL file (path on the controller), `inline` uses `policy` verbatim.
+- `engines` use Vault's API-native form: kv-v2 = `"type": "kv"` + `"options": { "version": "2" }` (the CLI's `kv-v2` alias is expanded to this; the exporter emits this form). Duration-like params (`token_ttl`, `secret_id_ttl`, ...) accept Go duration strings (`1h`) or integer seconds (`3600`).
+- `auth_path` on users/roles defaults to `userpass` / `approle` when omitted. `engines`, `auth`, `policies`, `users`, `approle_roles`, `jwt` are all optional.
+- **Passwords are input-only**: creating a *new* user requires `password` (Vault can't read it back). Existing users get policies reconciled only — a changed `password` field has **no effect**. The bootstrap skips (with a message) creation of a new user that has no `password`.
+- **Secrets never leave the host**: the root token comes from `vault_root_token` in the init output file on the controller (never written to a `.fact` file), and passwords live in the fact file / role defaults only — nothing is written back to disk by the role.
+- `approle_roles` and `jwt.roles` are created when absent (404). Their parameters are set only for keys present in the fact (PUT is a full-set write, so an absent key is not clobbered). Changing parameters of an *existing* role is done via `vault-auth` / `vault write`, not by re-running bootstrap.
+
+### Exporting an existing setup — `vault-export.py`
+
+`vault-export.py` (installed to `/usr/sbin/vault-export.py`) dumps the *configuration* of a live Vault into the fact file above, so a brand-new host can reproduce it after a fresh init — **without the seal keys**. It uses the Vault HTTP API directly (urlib/stdlib only, no `vault` binary, no third-party deps):
+
+```sh
+vault-export.py --addr https://ansible.ctlabs.internal:8200 --token "$(cat .ctlabs_vault_init_output_*.yml ...)" \
+  --insecure --out /etc/ansible/facts.d/ctlabs_vault_setup.fact
+```
+
+Flags: `--addr` (or `VAULT_ADDR`), `--token` (or `VAULT_TOKEN`), `--out` (default stdout; mode `0600`), `--insecure` (self-signed lab CA), `--ca-cert <ca.crt>`.
+
+Exports: engines + auth methods (token/ system/ identity/ skipped), ACL policies (inline HCL, default/root skipped), userpass users (name + policies only), approle roles (incl. `secret_id_ttl` / `secret_id_bound_cidrs` / `token_ttl` / `secret_id_num_uses`), jwt/oidc mount config + roles.
+
+**Tradeoff (documented):** this is *config-restore, not storage-restore*. userpass passwords and KV/secret data are NOT restored by it (Vault cannot read passwords back; KV data lives in storage). A true data-level restore still requires the storage snapshot (`vault-backup.py` tar archives) **and** the matching unseal keys. The exported user entries carry no `password` — add them to the fact file before bootstrap on the new host.
