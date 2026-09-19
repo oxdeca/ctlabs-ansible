@@ -57,7 +57,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/mounts/{{ item['path'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_setup_effective['engines'] | default([]) }}"
@@ -79,7 +79,7 @@
         body_format  : json
         body         : "{{ vault_bootstrap_engine_body }}"
       loop: "{{ vault_bootstrap_engine_read.results }}"
-      when: item.status == 404
+      when: item.status in [400, 404]
 
     #
     # Auth Methods
@@ -88,7 +88,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item['path'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_setup_effective['auth'] | default([]) }}"
@@ -109,7 +109,7 @@
         body_format  : json
         body         : "{{ vault_bootstrap_auth_body }}"
       loop: "{{ vault_bootstrap_auth_read.results }}"
-      when: item.status == 404
+      when: item.status in [400, 404]
 
     #
     # ACL Policies
@@ -118,7 +118,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/policies/acl/{{ item['name'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_setup_effective['policies'] | default([]) }}"
@@ -141,7 +141,7 @@
         body_format  : json
         body         : "{{ {'policy': vault_bootstrap_policy_rendered} | to_json }}"
       loop: "{{ vault_bootstrap_policy_read.results }}"
-      when: (item.status == 404) or (item.json['data']['policy'] != vault_bootstrap_policy_rendered)
+      when: (item.status in [400, 404]) or (item.json['data']['policy'] != vault_bootstrap_policy_rendered)
 
     #
     # Userpass Users
@@ -150,7 +150,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['auth_path'] | default('userpass') }}/users/{{ item['username'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_setup_effective['users'] | default([]) }}"
@@ -171,7 +171,7 @@
         body_format  : json
         body         : "{{ vault_bootstrap_user_body }}"
       loop: "{{ vault_bootstrap_user_read.results }}"
-      when: (item.status == 404) and ('password' in item.item)
+      when: (item.status in [400, 404]) and ('password' in item.item)
 
     - name: ctlabs_vault.tasks.bootstrap.user.policies
       vars:
@@ -191,7 +191,7 @@
 
     - name: ctlabs_vault.tasks.bootstrap.user.skip.no_password
       loop: "{{ vault_bootstrap_user_read.results }}"
-      when: (item.status == 404) and ('password' not in item.item)
+      when: (item.status in [400, 404]) and ('password' not in item.item)
       debug:
         msg: >-
           Skipping creation of userpass user {{ item.item['username'] }}: no 'password'
@@ -205,7 +205,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['auth_path'] | default('approle') }}/role/{{ item['name'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_setup_effective['approle_roles'] | default([]) }}"
@@ -233,7 +233,7 @@
         body_format  : json
         body         : "{{ vault_bootstrap_approle_body }}"
       loop: "{{ vault_bootstrap_approle_read.results }}"
-      when: item.status == 404
+      when: item.status in [400, 404]
 
     #
     # JWT / OIDC
@@ -242,7 +242,7 @@
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item['mount'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_jwt_items }}"
@@ -262,13 +262,13 @@
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_auth_body }}"
       loop: "{{ vault_bootstrap_jwt_mount.results }}"
-      when: item.status == 404
+      when: item.status in [400, 404]
 
     - name: ctlabs_vault.tasks.bootstrap.jwt.config.read
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['mount'] }}/config"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_jwt_items }}"
@@ -290,13 +290,13 @@
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_cfg_body }}"
       loop: "{{ vault_bootstrap_jwt_config.results }}"
-      when: (item.status == 404) or (item.json['data']['oidc_discovery_url'] != item.item['discovery_url'])
+      when: (item.status in [400, 404]) or (item.json['data']['oidc_discovery_url'] != item.item['discovery_url'])
 
     - name: ctlabs_vault.tasks.bootstrap.jwt.role.read
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item[0]['mount'] }}/role/{{ item[1]['name'] }}"
         validate_certs: false
-        status_code  : [200, 404]
+        status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
       loop  : "{{ ctlabs_vault_jwt_items | subelements('roles', skip_missing=True) }}"
@@ -321,4 +321,4 @@
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_role_body }}"
       loop: "{{ vault_bootstrap_jwt_role.results }}"
-      when: item.status == 404
+      when: item.status in [400, 404]

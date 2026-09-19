@@ -96,6 +96,27 @@ def test_bootstrap_idempotent_read_before_write(role_dir):
         assert "status" in str(t["when"]), f"write task '{t.get('name')}' must check read result status"
 
 
+def test_bootstrap_reads_accept_vault_400_missing(role_dir):
+    """Vault answers 400 (not 404) when an auth/mount path is missing; reads must
+    accept it and the create gating must treat 400+404 as 'not found'."""
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    read_tasks = 0
+    for t in _all_tasks(bootstrap):
+        uri = t.get("uri") or {}
+        if not uri or uri.get("method") in ("POST", "PUT"):
+            continue
+        read_tasks += 1
+        assert 400 in uri["status_code"], f"read '{t.get('name')}' must accept 400"
+        assert 404 in uri["status_code"], f"read '{t.get('name')}' must accept 404"
+    assert read_tasks >= 8, f"expected >=8 read tasks, found {read_tasks}"
+    write_tasks = [t for t in _all_tasks(bootstrap)
+                   if (t.get("uri") or {}).get("method") in ("POST", "PUT")]
+    for t in write_tasks:
+        when = str(t["when"])
+        assert ("in [400, 404]" in when) or ("200" in when), \
+            f"write '{t.get('name')}' must gate on missing (in [400, 404]) or existing (200) status"
+
+
 def test_bootstrap_defaults_fallback(role_dir):
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)
