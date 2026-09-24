@@ -1,3 +1,7 @@
+# -----------------------------------------------------------------------------
+# ctlabs acls
+# -----------------------------------------------------------------------------
+
 path "secret/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
@@ -6,10 +10,17 @@ path "kv/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
+# -----------------------------------------------------------------------------
+# Authentication Methods
+# -----------------------------------------------------------------------------
 path "auth/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
+
+# -----------------------------------------------------------------------------
+# sys
+# -----------------------------------------------------------------------------
 path "sys/policies/acl/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
@@ -28,4 +39,26 @@ path "sys/rekey" {
 
 path "sys/auth" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# -----------------------------------------------------------------------------
+# WIF-GCP Setup
+# -----------------------------------------------------------------------------
+path "identity/oidc/config" {
+  capabilities = ["read", "update"]
+}
+
+path "identity/oidc/key/*" {
+  capabilities = ["create", "read", "update", "delete"]
+}
+
+path "identity/oidc/role/*" {
+  capabilities = ["create", "read", "update", "delete"]
+}
+
+# -----------------------------------------------------------------------------
+# WIF-GCP UserToken
+# -----------------------------------------------------------------------------
+path "identity/oidc/token/*" {
+  capabilities = ["read"]
 }
