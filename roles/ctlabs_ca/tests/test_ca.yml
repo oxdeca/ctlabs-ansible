@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ca/tests/test_ca.yml
+# Description : test playbook for ctlabs_ca (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ca.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctlabs_ca_domain: ctlabs.internal
+    CTLABS_HOST: 192.168.30.1
+    CTLABS_DOMAIN: ctlabs.internal
+  roles:
+    - ctlabs_ca
