@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_guacamole.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_guacamole.tasks.precheck.user_mapping.users
+  set_fact:
+    ctlabs_guacamole_users: "{{ ctg_facts.ctlabs_guacamole.users | default(ctlabs_guacamole.defaults.config.user_mapping.users) }}"

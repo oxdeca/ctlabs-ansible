@@ -33,6 +33,64 @@ ctlabs_guacamole:
       user_mapping:
         template : user-mapping.xml.j2
         file     : user-mapping.xml
+        users:
+          - username: ctlabs
+            password: secret123!
+            connections:
+              - name: "{{ ansible_nodename }}"
+                protocol: ssh
+                params:
+                  hostname     : "{{ ansible_nodename }}"
+                  port         : 22
+                  username     : root
+                  font-size    : 12
+                  color-scheme: |
+                    foreground: rgb:ff/ff/ff;
+                    background: rgb:2e/07/24;
+              - name: dc1-vnc
+                protocol: vnc
+                params:
+                  hostname    : 192.168.30.13
+                  port        : 5900
+                  ignore-cert : true
+                  color-depth : 24
+                  width       : 1920
+                  height      : 1200
+              - name: dc01
+                protocol: rdp
+                params:
+                  hostname    : 192.168.30.14
+                  port        : 3389
+                  ignore-cert : true
+                  color-depth : 24
+                  width       : 1920
+                  height      : 1200
+              - name: dc2-vnc
+                protocol: vnc
+                params:
+                  hostname    : 192.168.30.23
+                  port        : 5900
+                  ignore-cert : true
+                  color-depth : 24
+                  width       : 1920
+                  height      : 1200
+              - name: dc02
+                protocol: rdp
+                params:
+                  hostname    : 192.168.30.24
+                  port        : 3389
+                  ignore-cert : true
+                  color-depth : 24
+                  width       : 1920
+                  height      : 1200
+              - name: h3
+                protocol: rdp
+                params:
+                  hostname      : 192.168.10.17
+                  port          : 3389
+                  ignore-cert   : true
+                  color-depth   : 24
+                  resize-method : display-update
       httpd:
         template: guacamole.conf.j2
         file:

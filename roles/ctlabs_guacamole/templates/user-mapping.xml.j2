@@ -1,70 +1,21 @@
 <!--
   # ~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+
   # File        : ctlabs-ansible/roles/ctlabs_guacamole/templates/user-mapping.xml.j2
-  # Description : main defaults file
+  # Description : guacamole user-mapping.xml, driven by ctlabs_guacamole_users
   # ~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+
 -->
 
 <user-mapping>
-  <authorize username="ctlabs" password="secret123!">
-
-    <connection name="{{ ansible_nodename }}">
-      <protocol>ssh</protocol>
-      <param name="hostname">{{ ansible_nodename }}</param>
-      <param name="port">22</param>
-      <param name="username">root</param>
-      <param name="font-size">12</param>
-      <param name="color-scheme">
-        foreground: rgb:ff/ff/ff;
-        background: rgb:2e/07/24;
-      </param>
+{% for user in ctlabs_guacamole_users %}
+  <authorize username="{{ user.username }}" password="{{ user.password }}">
+{%   for conn in user.connections | default([]) %}
+    <connection name="{{ conn.name }}">
+      <protocol>{{ conn.protocol }}</protocol>
+{%     for key, value in (conn.params | default({})).items() %}
+      <param name="{{ key }}">{{ (value | lower) if (value is sameas true or value is sameas false) else value }}</param>
+{%     endfor %}
     </connection>
-
-    <connection name="dc1-vnc">
-      <protocol>vnc</protocol>
-      <param name="hostname">192.168.30.13</param>
-      <param name="port">5900</param>
-      <param name="ignore-cert">true</param>
-      <param name="color-depth">24</param>
-      <param name="width">1920</param>
-      <param name="height">1200</param>
-    </connection>
-    <connection name="dc01">
-      <protocol>rdp</protocol>
-      <param name="hostname">192.168.30.14</param>
-      <param name="port">3389</param>
-      <param name="ignore-cert">true</param>
-      <param name="color-depth">24</param>
-      <param name="width">1920</param>
-      <param name="height">1200</param>
-    </connection>
-
-    <connection name="dc2-vnc">
-      <protocol>vnc</protocol>
-      <param name="hostname">192.168.30.23</param>
-      <param name="port">5900</param>
-      <param name="ignore-cert">true</param>
-      <param name="color-depth">24</param>
-      <param name="width">1920</param>
-      <param name="height">1200</param>
-    </connection>
-    <connection name="dc02">
-      <protocol>rdp</protocol>
-      <param name="hostname">192.168.30.24</param>
-      <param name="port">3389</param>
-      <param name="ignore-cert">true</param>
-      <param name="color-depth">24</param>
-      <param name="width">1920</param>
-      <param name="height">1200</param>
-    </connection>
-    <connection name="h3">
-      <protocol>rdp</protocol>
-      <param name="hostname">192.168.10.17</param>
-      <param name="port">3389</param>
-      <param name="ignore-cert">true</param>
-      <param name="color-depth">24</param>
-      <param name="resize-method">display-update</param>
-    </connection>
-
+{%   endfor %}
   </authorize>
+{% endfor %}
 </user-mapping>

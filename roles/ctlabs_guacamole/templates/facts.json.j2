@@ -1,0 +1,8 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_guacamole/templates/facts.json.j2
+ # Description : ctlabs_guacamole local facts template
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{
+  "users" : {{ (_facts.users | default([])) | to_json }}
+}
