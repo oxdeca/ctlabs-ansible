@@ -14,7 +14,7 @@ ctg_facts       : >-
                       'ctlabs_ad': (ansible_ctlabs_ad | from_json) if ansible_ctlabs_ad is defined else {}
                     }
                   }}
-ctg_facts_dir   : "/etc/ansible/facts.d"
+ctg_facts_dir   : "{{ 'C:/ProgramData/ansible/facts.d' if ctg_os_family == 'windows' else '/etc/ansible/facts.d' }}"
 ctg_domain      : "{{ CTLABS_DOMAIN            | default('ctlabs.internal') }}"
 ctg_project     : "{{ ctg_facts.ctlabs.project | default() }}"
 ctg_env         : "{{ ctg_facts.ctlabs.env     | default() }}"
