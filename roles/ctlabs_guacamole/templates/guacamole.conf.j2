@@ -3,6 +3,22 @@
 # Description : guacamole httpd configurations
 # -------------------------------------------------------------------------------------
 
-RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
-ProxyPass        / http://127.0.0.1:8080/
-ProxyPassReverse / http://127.0.0.1:8080/
+# Ensure necessary proxy modules are loaded
+<IfModule mod_proxy.c>
+
+  # Preserve host and protocol headers for Tomcat
+  ProxyPreserveHost On
+  RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
+
+  # 1. Automatically redirect root (/) to /guacamole/
+  RedirectMatch 301 ^/$ /guacamole/
+
+  # 2. Proxy WebSocket connections (required for Guacamole performance)
+  ProxyPass        /guacamole/websocket-tunnel ws://127.0.0.1:8080/guacamole/websocket-tunnel
+  ProxyPassReverse /guacamole/websocket-tunnel ws://127.0.0.1:8080/guacamole/websocket-tunnel
+
+  # 3. Proxy standard HTTP/HTTPS traffic to Tomcat on port 8081
+  ProxyPass        /guacamole/ http://127.0.0.1:8080/guacamole/
+  ProxyPassReverse /guacamole/ http://127.0.0.1:8080/guacamole/
+
+</IfModule>
