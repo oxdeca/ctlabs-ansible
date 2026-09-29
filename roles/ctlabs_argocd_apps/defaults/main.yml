@@ -1,0 +1,76 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/defaults/main.yml
+# Description : main defaults
+#
+# This role does NOT install ArgoCD itself - that is ctlabs_helm's job (the
+# argo/argo-cd chart). This role only declares the ArgoCD 'Application' objects
+# that ArgoCD then manages (cert-manager, external-secrets, ...).
+# ------------------------------------------------------------------------------
+
+ctlabs_argocd_apps:
+  defaults:
+    #
+    # namespace holding the ArgoCD control plane, i.e. where the Application
+    # CRs are created (the argo-cd chart namespace - 'argo' in the ctlabs labs).
+    #
+    namespace  : argocd
+
+    #
+    # cluster access. Empty kubeconfig = controller/kubeconfig default. Set
+    # 'interpreter' to an 'ip vrf exec default python3' wrapper on hosts whose
+    # cluster lives in the data VRF.
+    #
+    kubeconfig : ""
+    interpreter: ""
+
+    #
+    # defaults for the Application spec. Everything an application declares
+    # itself wins; these only fill the gaps.
+    #
+    project    : default
+    server     : https://kubernetes.default.svc
+    sync_policy:
+      automated:
+        prune    : true
+        selfHeal : true
+      syncOptions:
+        - CreateNamespace=true
+
+    #
+    # ArgoCD's cascade-delete finalizer: deleting an Application removes the
+    # resources it created. Set to [] to keep resources behind.
+    #
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+
+    #
+    # after applying, wait for each Application to report Synced + Healthy.
+    #
+    wait        : true
+    wait_timeout: 600
+    wait_delay  : 10
+
+    #
+    # how long to wait for the argoproj.io Application CRD to be Established
+    # (it only exists once the argo-cd chart is installed).
+    #
+    crd_wait: 300
+
+    #
+    # The applications to declare. Per-cluster inventory - normally supplied
+    # per host as the ctlabs_argocd_apps local fact, not edited here.
+    #
+    # 'source' is ArgoCD's own spec.source, passed through verbatim, so any
+    # source form ArgoCD supports (chart / directory / kustomize / plugin /
+    # plain path) works without touching this role.
+    #
+    applications: []
+  os:
+    - centos8
+    - centos9
+    - redhat8
+    - redhat9
+    - debian11
+    - debian12

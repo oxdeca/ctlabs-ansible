@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_argocd_apps.yml
+# Description : test playbook for ctlabs_argocd_apps (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_argocd_apps.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+  roles:
+    - ctlabs_argocd_apps

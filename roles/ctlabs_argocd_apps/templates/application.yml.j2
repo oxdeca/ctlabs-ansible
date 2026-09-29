@@ -1,0 +1,34 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_argocd_apps/templates/application.yml.j2
+ # Description : ArgoCD Application (argoproj.io/v1alpha1)
+ #
+ # spec.source is written through VERBATIM. ArgoCD supports five mutually
+ # exclusive source forms (chart / directory / kustomize / plugin / plain path)
+ # plus 'repository' credentials, and new ones keep appearing - so this role
+ # never enumerates or filters its keys. A source format this role has never
+ # heard of costs zero changes here: just write the keys into the fact file.
+ #
+ # Only what needs cluster context is filled in: the object's name and
+ # namespace, the destination server, and the sync policy defaults. Anything
+ # the application declares itself wins. metadata and spec are dumped as whole
+ # mappings so nothing here has to re-indent nested source keys by hand.
+#}
+{% set _finalizers = ctlabs_argocd_apps_finalizers %}
+{% set _metadata   = {'name': app['name'], 'namespace': ctlabs_argocd_apps_namespace} %}
+{% if _finalizers | length > 0 %}
+{%   set _metadata = _metadata | combine({'finalizers': _finalizers}) %}
+{% endif %}
+{% set _spec       = {
+                        'project'    : app['project'] | default(ctlabs_argocd_apps_project, true),
+                        'source'     : app['source'],
+                        'destination': {'server': ctlabs_argocd_apps_server} | combine(app['destination'] | default({}), recursive = true),
+                        'syncPolicy' : ctlabs_argocd_apps_sync_policy | combine(app['syncPolicy'] | default({}), recursive = true)
+                      } %}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+{{ _metadata | to_nice_yaml(indent = 2) | indent(2, true) }}
+spec:
+{{ _spec | to_nice_yaml(indent = 2) | indent(2, true) }}
+

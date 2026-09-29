@@ -1,0 +1,160 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_render.yml
+# Description : render the Application template for every source form and
+#               assert the result, without needing a cluster.
+#
+# Covers what --syntax-check cannot: that the verbatim source passthrough
+# actually round-trips through to_nice_yaml (booleans stay booleans, nested
+# valuesObject keeps its types), and that the role's defaults merge in where the
+# application stays silent.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_argocd_apps.test.render
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ctlabs_argocd_apps_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
+    ctlabs_argocd_apps_namespace : argo
+    ctlabs_argocd_apps_project   : default
+    ctlabs_argocd_apps_server    : https://kubernetes.default.svc
+    ctlabs_argocd_apps_sync_policy:
+      automated:
+        prune    : true
+        selfHeal : true
+      syncOptions:
+        - CreateNamespace=true
+    ctlabs_argocd_apps_finalizers:
+      - resources-finalizer.argocd.argoproj.io
+
+    test_app_helm:
+      name: cert-manager
+      source:
+        repoURL       : https://charts.jetstack.io
+        chart         : cert-manager
+        targetRevision: v1.19.1
+        helm:
+          valuesObject:
+            crds:
+              enabled: true
+              keep: true
+            startupapicheck:
+              enabled: false
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      destination:
+        namespace: cert-manager
+
+    test_app_directory:
+      name: external-secrets
+      source:
+        repoURL       : https://raw.githubusercontent.com/external-secrets/external-secrets/main
+        targetRevision: main
+        path          : deploy/crds/bundle.yaml
+        directory:
+          recurse: true
+        repository:
+          type    : git
+          repoURL : https://git.ctlabs.internal/infra/charts.git
+          username: argocd
+          password: $repo-creds
+        sourceFormTheRoleHasNeverHeardOf:
+          nested: true
+      project: platform
+      syncPolicy:
+        automated:
+          selfHeal: false
+      destination:
+        namespace: external-secrets
+
+    test_app_no_finalizers:
+      name: platform-apps
+      source:
+        repoURL      : https://git.ctlabs.internal/infra/apps.git
+        targetRevision: main
+        path         : overlays/lab
+        helm:
+          valuesObject:
+            replicaCount: 3
+            debug       : false
+  tasks:
+
+    #
+    # helm chart source, application says nothing about sync/destination
+    #
+    - name: ctlabs_argocd_apps.test.render.helm
+      vars:
+        app: "{{ test_app_helm }}"
+      set_fact:
+        rendered_helm: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+
+    - name: ctlabs_argocd_apps.test.render.helm.assert
+      assert:
+        that:
+          - rendered_helm['apiVersion'] == 'argoproj.io/v1alpha1'
+          - rendered_helm['kind'] == 'Application'
+          - rendered_helm['metadata']['name'] == 'cert-manager'
+          - rendered_helm['metadata']['namespace'] == 'argo'
+          - rendered_helm['metadata']['finalizers'] == ['resources-finalizer.argocd.argoproj.io']
+          - rendered_helm['spec']['project'] == 'default'
+          - rendered_helm['spec']['source']['repoURL'] == 'https://charts.jetstack.io'
+          - rendered_helm['spec']['source']['chart'] == 'cert-manager'
+          - rendered_helm['spec']['source']['targetRevision'] == 'v1.19.1'
+          # nested chart values keep their native types (booleans stay booleans)
+          - rendered_helm['spec']['source']['helm']['valuesObject']['crds']['enabled'] == true
+          - rendered_helm['spec']['source']['helm']['valuesObject']['crds']['keep'] == true
+          - rendered_helm['spec']['source']['helm']['valuesObject']['startupapicheck']['enabled'] == false
+          - rendered_helm['spec']['destination']['namespace'] == 'cert-manager'
+          - rendered_helm['spec']['destination']['server'] == 'https://kubernetes.default.svc'
+          # per-app syncPolicy deep-merges: automated default kept, syncOptions added
+          - rendered_helm['spec']['syncPolicy']['automated']['prune'] == true
+          - rendered_helm['spec']['syncPolicy']['automated']['selfHeal'] == true
+          - rendered_helm['spec']['syncPolicy']['syncOptions'] == ['CreateNamespace=true', 'ServerSideApply=true']
+
+    #
+    # plain manifests: no chart key at all, repository credentials, unknown
+    # source keys survive untouched, syncPolicy deep-merges over the default
+    #
+    - name: ctlabs_argocd_apps.test.render.directory
+      vars:
+        app: "{{ test_app_directory }}"
+      set_fact:
+        rendered_directory: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+
+    - name: ctlabs_argocd_apps.test.render.directory.assert
+      assert:
+        that:
+          - "'chart' not in rendered_directory['spec']['source']"
+          - rendered_directory['spec']['source']['path'] == 'deploy/crds/bundle.yaml'
+          - rendered_directory['spec']['source']['directory']['recurse'] == true
+          - rendered_directory['spec']['source']['repository']['type'] == 'git'
+          - rendered_directory['spec']['source']['repository']['username'] == 'argocd'
+          - rendered_directory['spec']['source']['sourceFormTheRoleHasNeverHeardOf']['nested'] == true
+          - rendered_directory['spec']['project'] == 'platform'
+          - rendered_directory['spec']['syncPolicy']['automated']['selfHeal'] == false
+          - rendered_directory['spec']['syncPolicy']['automated']['prune'] == true
+          - rendered_directory['spec']['syncPolicy']['syncOptions'] == ['CreateNamespace=true']
+
+    #
+    # finalizers opt-out + valuesObject type fidelity (int stays int, bool
+    # stays bool - the Jinja True/False trap)
+    #
+    - name: ctlabs_argocd_apps.test.render.values_object
+      vars:
+        app: "{{ test_app_no_finalizers }}"
+        ctlabs_argocd_apps_finalizers: []
+      set_fact:
+        rendered_values: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+
+    - name: ctlabs_argocd_apps.test.render.values_object.assert
+      assert:
+        that:
+          - "'finalizers' not in rendered_values['metadata']"
+          - rendered_values['spec']['source']['path'] == 'overlays/lab'
+          - rendered_values['spec']['source']['helm']['valuesObject']['replicaCount'] == 3
+          - rendered_values['spec']['source']['helm']['valuesObject']['debug'] == false
+          - rendered_values['spec']['destination']['server'] == 'https://kubernetes.default.svc'

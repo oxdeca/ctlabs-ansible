@@ -1,0 +1,71 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_facts.yml
+# Description : render the local facts template and assert which keys survive
+#
+# The failure mode this guards is silent: a fact file that renders, but drops
+# or defaults every per-host knob, leaves the role running on role defaults
+# while looking healthy. In particular an absent knob must stay ABSENT (so
+# precheck's `| default(...)` can apply), never be written out as a blank.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_argocd_apps.test.facts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ctlabs_argocd_apps_template: "{{ playbook_dir | dirname }}/templates/facts.json.j2"
+    apps:
+      - name: cert-manager
+        source:
+          repoURL: https://charts.jetstack.io
+          chart: cert-manager
+  tasks:
+
+    - name: ctlabs_argocd_apps.test.facts.full
+      vars:
+        ctlabs_role_facts:
+          namespace  : argo
+          kubeconfig : /etc/rancher/k3s/k3s.yaml
+          wait       : false
+          applications: "{{ apps }}"
+      set_fact:
+        facts_full: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+
+    - name: ctlabs_argocd_apps.test.facts.applications_only
+      vars:
+        ctlabs_role_facts:
+          applications: "{{ apps }}"
+      set_fact:
+        facts_apps_only: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+
+    - name: ctlabs_argocd_apps.test.facts.empty
+      vars:
+        ctlabs_role_facts: {}
+      set_fact:
+        facts_empty: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+
+    - name: ctlabs_argocd_apps.test.facts.assert
+      assert:
+        that:
+          # every explicitly set knob is forwarded, with its type intact
+          - facts_full['namespace'] == 'argo'
+          - facts_full['kubeconfig'] == '/etc/rancher/k3s/k3s.yaml'
+          - facts_full['wait'] == false
+          - facts_full['applications'] == apps
+
+          # an unset knob is absent, NOT written out as a blank - a defined
+          # "" would shadow the role default in precheck.yml
+          - "'interpreter' not in facts_full"
+          - "'sync_policy' not in facts_full"
+          - "'finalizers' not in facts_full"
+
+          # absent knobs stay absent, so precheck can apply role defaults
+          # (quote the whole expression: a bare '{' starts a YAML flow mapping)
+          - "facts_apps_only == {'applications': apps}"
+          - "facts_empty == {'applications': []}"
+
+          # keys outside the whitelist never leak into the fact file
+          - "'site' not in facts_full"
+          - "'env' not in facts_full"
