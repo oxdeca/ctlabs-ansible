@@ -153,6 +153,64 @@ an annotation, so it sidesteps the cap. Set it per application:
 `spec.syncPolicy` is deep-merged over the role default, so declaring
 `syncOptions` this way keeps the default `automated: {prune, selfHeal}` intact.
 
+### This role installs apps; it does not configure them
+
+> Full worked examples — a Cloudflare DNS-01 `ClusterIssuer`, a Vault-backed
+> `ClusterSecretStore` on vdb1, and the matching facts entry for both — are in
+> **[`docs/config-examples.md`](docs/config-examples.md)**. Every snippet there
+> was run against the live rke21 cluster.
+
+The role's job ends at "cert-manager and external-secrets are running". What
+you then want — a `ClusterIssuer` doing a Cloudflare DNS-01 challenge, a
+`ClusterSecretStore` pointed at Vault — is **not** an ArgoCD Application and does
+not belong in the `applications:` list. Those are plain custom resources that
+cert-manager and external-secrets each define and watch; there is no chart, no
+version to pin, and nothing to reconcile upstream.
+
+The distinction that keeps this sane:
+
+| | installed by this role | configured by |
+|---|---|---|
+| what | cert-manager, external-secrets, … the operator | `Issuer`/`ClusterIssuer`, `SecretStore`/`ClusterSecretStore`, `ExternalSecret` |
+| shape | ArgoCD `Application` → chart | the operator's own CRs, versioned in git |
+| who reconciles | ArgoCD | whoever owns the config — usually ArgoCD again, via a *second* Application |
+
+So there are two defensible ways to manage the config half, and they are not
+exclusive:
+
+1. **App-of-apps (recommended, most GitOps-idiomatic).** Put the `Issuer` and
+   `ClusterSecretStore` YAML in a git repo and add *one more* Application to the
+   facts pointing at that directory. Same role, same passthrough, no new
+   mechanics — a `directory`/`kustomize` source is already supported (see the
+   render test). Secrets referenced by them stay out of git; only the reference
+   is committed. Verified on rke21: the ArgoCD application-controller can create
+   cluster-scoped `clusterissuers.cert-manager.io` and
+   `clustersecretstores.external-secrets.io`, so the default project is not a
+   blocker.
+2. **A second role** (e.g. `ctlabs_cert_manager`, `ctlabs_external_secrets`)
+   that declares those CRs directly. Fine if you want Ansible to own them, but
+   it re-introduces imperative drift-tolerance concerns and duplicates git's
+   job — prefer (1) unless you need the CRs before ArgoCD is up.
+
+Do **not** bolt config onto the install by adding the operator's CRs to the
+chart's `valuesObject`: that only works for charts that happen to template them,
+and it ties your DNS/Vault topology to a chart's release cycle.
+
+Two version traps in the config layer, both hit live on rke21 with
+external-secrets 2.11.0:
+
+- **`apiVersion` must be `external-secrets.io/v1`, not `v1beta1`.** The CRD
+  still lists `v1beta1` in `spec.versions`, but with `served: false` — so
+  copy-pasted docs and older examples fail with
+  `no matches for kind "ClusterSecretStore" in version "external-secrets.io/v1beta1"`.
+  Check `kubectl get crd clustersecretstores.external-secrets.io -o jsonpath='{.spec.versions[*].name}'`
+  together with the `served` flag; the name alone lies.
+- **cert-manager's `selector` is a sibling of `dns01`, not a child of it.**
+  Nesting it inside `dns01` fails with a strict-decoding error naming the exact
+  field. `kubectl apply --dry-run=server` validates all of this without
+  creating anything, which is the cheap way to check a config CR before it goes
+  anywhere near git.
+
 ### Other source forms
 
 Plain manifests from a git repo:
