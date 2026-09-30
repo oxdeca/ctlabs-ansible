@@ -90,29 +90,35 @@ spec:
 ### The facts entry — one Application per config directory
 
 ```yaml
-# in the ctlabs_argoapp: profile block
-# (the fact key is ctlabs_argoapp - it was ctlabs_argocd_apps before the role
-#  rename; update any existing fact files accordingly)
-ctlabs_argoapp:
-  namespace  : argo
-  kubeconfig : /etc/rancher/rke2/rke2.yaml
-  interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
-  applications:
-    # ... the operators themselves ...
+# in setup_profiles.yml — the block MUST be keyed by the role_profiles profile
+# name ('argoapp', matching role_profiles.yml's argoapp: entry). Keyed
+# 'ctlabs_argoapp' instead, lab.rb's build_play_setup silently ignores the block,
+# no fact is written, and every knob here falls through to the role defaults.
+# (The on-host fact file is still /etc/ansible/facts.d/ctlabs_argoapp.fact and
+# precheck reads ctg_facts.ctlabs_argoapp.* — those names are correct and unchanged.)
+argoapp:
+  role: argoapp
+  defaults:
+    namespace  : argo
+    interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+    applications:
+      # ... the operators themselves ...
 
-    - name: lab-issuers
-      source:
-        repoURL       : git://192.168.30.41:9418/config-repo.git
-        targetRevision: main
-        path          : clusters/lab-issuers
-        directory:
-          recurse     : true
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true
-      destination:
-        namespace: default
+      - name: lab-issuers
+        source:
+          repoURL       : git://192.168.30.41:9418/config-repo.git
+          targetRevision: main
+          path          : clusters/lab-issuers
+          directory:
+            recurse     : true
+        syncPolicy:
+          syncOptions:
+            - CreateNamespace=true
+            - ServerSideApply=true
+        destination:
+          namespace: default
+  rke21:
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
 ```
 
 This is **live-verified** on rke21: the app goes `Synced`/`Healthy` and the

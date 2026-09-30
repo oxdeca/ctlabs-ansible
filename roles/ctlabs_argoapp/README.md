@@ -295,7 +295,7 @@ Written to `/etc/ansible/facts.d/ctlabs_argoapp.fact`:
 
 Per-host resolution via `ctg_facts.ctlabs_argoapp.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default.
 
-## ctlabs play.setup (install cert-manager and external-secerts)
+## ctlabs play.setup (install cert-manager and external-secrets)
 ```yml
 argoapp:
   hosts: [rke21]
@@ -333,6 +333,69 @@ argoapp:
       destination:
         namespace: external-secrets
 ```
+
+The block above is the explicit `play.setup.argoapp` form. The standard,
+profile-based form splits it across **two** lab files that must agree on the
+profile name:
+
+- `role_profiles.yml` declares the profile (`argoapp:` with `role`, `tags`, `hosts`)
+- `setup_profiles.yml` holds the data, keyed by the **same short name** — `defaults:`
+  for every host, node-name keys (`rke21:`) for per-host overrides
+
+```yml
+# role_profiles.yml
+argoapp:
+  role: ctlabs_argoapp
+  tags: [argoapp]
+  hosts: [rke21]
+
+# setup_profiles.yml
+argoapp:
+  role: argoapp
+  defaults:
+    namespace  : argo
+    interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+    applications:
+      - name: cert-manager
+        source:
+          repoURL: https://charts.jetstack.io
+          chart  : cert-manager
+          targetRevision: v1.21.2
+          helm:
+            valuesObject:
+              crds:
+                enabled: true
+                keep   : true
+              startupapicheck:
+                enabled: false
+        syncPolicy:
+          syncOptions:
+            - CreateNamespace=true
+            - ServerSideApply=true
+        destination:
+          namespace: cert-manager
+  rke21:
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
+```
+
+**The block key in `setup_profiles.yml` MUST match the `role_profiles.yml`
+profile name (`argoapp`).** Keyed `ctlabs_argoapp` instead, `lab.rb`'s
+`build_play_setup` silently ignores it: no fact is written, the role runs on its
+defaults, and it no-ops while looking perfectly healthy. The fact file itself is
+still `/etc/ansible/facts.d/ctlabs_argoapp.fact` and precheck reads
+`ctg_facts.ctlabs_argoapp.*` — only the setup_profiles *block key* is the short
+name.
+
+Hosts in the profile need the lab's ansible play to carry the `argoapp` tag (add
+it to the lab play's `tags:` and let the playbooks regenerate — they're written
+as part of `lab up`), then:
+
+```sh
+ansible-playbook playbooks/ctlabs.yml -t argoapp
+```
+
+`ctlabs_helm` must run first (ideally via `-t helm`) so the ArgoCD chart exists;
+the role only applies Applications.
 
 ## Tests
 
