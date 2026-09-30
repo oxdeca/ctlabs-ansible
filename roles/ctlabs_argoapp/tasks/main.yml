@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/main.yml
+# Description : main ctlabs_argoapp tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_argoapp
+    - ctlabs_argoapp.precheck
+    - ctlabs_argoapp.applications
+
+- import_tasks: applications.yml
+  tags:
+    - ctlabs_argoapp
+    - ctlabs_argoapp.applications

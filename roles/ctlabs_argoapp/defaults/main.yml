@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/defaults/main.yml
 # Description : main defaults
 #
 # This role does NOT install ArgoCD itself - that is ctlabs_helm's job (the
@@ -9,13 +9,17 @@
 # that ArgoCD then manages (cert-manager, external-secrets, ...).
 # ------------------------------------------------------------------------------
 
-ctlabs_argocd_apps:
+ctlabs_argoapp:
   defaults:
     #
     # namespace holding the ArgoCD control plane, i.e. where the Application
-    # CRs are created (the argo-cd chart namespace - 'argo' in the ctlabs labs).
+    # CRs are created. This is the argo-cd chart's RELEASE NAMESPACE, not the
+    # release name - ctlabs_helm deploys release 'argocd' into namespace 'argo'
+    # ('helm list -A' shows NAME=argocd, NAMESPACE=argo). Getting these mixed up
+    # silently targets the wrong namespace, so the precheck resolves the
+    # controller there and fails loudly.
     #
-    namespace  : argocd
+    namespace  : argo
 
     #
     # cluster access. Empty kubeconfig = controller/kubeconfig default. Set
@@ -60,7 +64,7 @@ ctlabs_argocd_apps:
 
     #
     # The applications to declare. Per-cluster inventory - normally supplied
-    # per host as the ctlabs_argocd_apps local fact, not edited here.
+    # per host as the ctlabs_argoapp local fact, not edited here.
     #
     # 'source' is ArgoCD's own spec.source, passed through verbatim, so any
     # source form ArgoCD supports (chart / directory / kustomize / plugin /

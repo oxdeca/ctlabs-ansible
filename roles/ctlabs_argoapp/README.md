@@ -1,4 +1,4 @@
-# Ansible Role `ctlabs_argocd_apps`
+# Ansible Role `ctlabs_argoapp`
 
 Declares ArgoCD `Application` objects — cert-manager, external-secrets, and
 anything else you want reconciled by ArgoCD instead of by `helm`.
@@ -12,12 +12,12 @@ list on every cluster lab.
 
 ## Ansible Tags
 
-| Tag                               | Targets                          |
-|-----------------------------------|----------------------------------|
-| `ctlabs_argocd_apps`              | all role tasks                   |
-| `ctlabs_argocd_apps.precheck`     | prechecks only                   |
-| `ctlabs_argocd_apps.applications` | CRD wait + apply + health wait   |
-| `ctlabs_argocd_apps.facts`        | local facts write (setup play)   |
+| Tag                           | Targets                          |
+|-------------------------------|----------------------------------|
+| `ctlabs_argoapp`              | all role tasks                   |
+| `ctlabs_argoapp.precheck`     | prechecks only                   |
+| `ctlabs_argoapp.applications` | CRD wait + apply + health wait   |
+| `ctlabs_argoapp.facts`        | local facts write (setup play)   |
 
 ## Prechecks
 
@@ -27,23 +27,44 @@ list on every cluster lab.
   ArgoCD must never manage the same release, or they revert each other forever
   and the app sits permanently `OutOfSync` with no obvious cause. The precheck
   reads `ctg_facts.ctlabs_helm.charts` and fails loudly on a conflict.
+- **An ArgoCD control plane is actually there to target.** 
+  The role depends on `ctlabs_helm` having installed `argo/argo-cd` *before* it runs, so a wrong play
+  order or a wrong namespace must fail here — loudly — rather than as a mystery
+  timeout deep in `applications.yml`. When `applications` is non-empty the
+  precheck verifies, via `kubernetes.core.k8s_info` (no shell/kubectl):
+  1. the `applications.argoproj.io` CRD is `Established` (fast 30 s fail-fast
+     signal that complements the tolerant `crd_wait` loop that runs just before
+     the apply), and
+  2. an ArgoCD **application controller has ≥1 ready replica** in
+     `defaults.namespace`, probing both a `Deployment` (helm chart) and a
+     `StatefulSet` (operator) via label
+     `app.kubernetes.io/component=application-controller`.
+
+  The CRD check alone is not enough: an `Established` CRD outlives a
+  failed/rolled-back install, and a dead controller means Applications are
+  created, look fine in `kubectl get`, and are silently **never** reconciled —
+  the run would report success while the cluster quietly stays `OutOfSync`. This
+  closes that hole.
+
+  With `applications: []` the role stays a **complete no-op** — these checks are
+  all guarded on `applications | length > 0`, so no cluster contact at all.
 
 ## Configuration
 
 | Variable                                     | Default                                             | Description                                                                                  |
 |----------------------------------------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `ctlabs_argocd_apps.defaults.namespace`      | `argocd`                                            | ArgoCD control-plane namespace (Application CRs go here; the ctlabs labs use `argo`)         |
-| `ctlabs_argocd_apps.defaults.kubeconfig`     | `""`                                                | `KUBECONFIG` path; empty = controller default                                                |
-| `ctlabs_argocd_apps.defaults.interpreter`    | `""`                                                | `ansible_python_interpreter` override, e.g. `/usr/sbin/ip vrf exec default /usr/bin/python3` |
-| `ctlabs_argocd_apps.defaults.project`        | `default`                                           | default ArgoCD AppProject                                                                    |
-| `ctlabs_argocd_apps.defaults.server`         | `https://kubernetes.default.svc`                    | default destination API server                                                               |
-| `ctlabs_argocd_apps.defaults.sync_policy`    | automated (prune, selfHeal, `CreateNamespace=true`) | default `spec.syncPolicy`                                                                    |
-| `ctlabs_argocd_apps.defaults.finalizers`     | `[resources-finalizer.argocd.argoproj.io]`          | cascade-delete resources on Application removal; `[]` keeps them                             |
-| `ctlabs_argocd_apps.defaults.wait`           | `true`                                              | wait for `Synced` + `Healthy` after apply                                                    |
-| `ctlabs_argocd_apps.defaults.wait_timeout`   | `600`                                               | per-application wait budget (seconds)                                                        |
-| `ctlabs_argocd_apps.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
-| `ctlabs_argocd_apps.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
-| `ctlabs_argocd_apps.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
+| `ctlabs_argoapp.defaults.namespace`      | `argo`                                               | ArgoCD control-plane **namespace** (Application CRs go here). `ctlabs_helm` deploys release `argocd` into namespace `argo` (`helm list -A`: NAME=`argocd`, NAMESPACE=`argo`) — the release *name* is not the namespace |
+| `ctlabs_argoapp.defaults.kubeconfig`     | `""`                                                | `KUBECONFIG` path; empty = controller default                                                |
+| `ctlabs_argoapp.defaults.interpreter`    | `""`                                                | `ansible_python_interpreter` override, e.g. `/usr/sbin/ip vrf exec default /usr/bin/python3` |
+| `ctlabs_argoapp.defaults.project`        | `default`                                           | default ArgoCD AppProject                                                                    |
+| `ctlabs_argoapp.defaults.server`         | `https://kubernetes.default.svc`                    | default destination API server                                                               |
+| `ctlabs_argoapp.defaults.sync_policy`    | automated (prune, selfHeal, `CreateNamespace=true`) | default `spec.syncPolicy`                                                                    |
+| `ctlabs_argoapp.defaults.finalizers`     | `[resources-finalizer.argocd.argoproj.io]`          | cascade-delete resources on Application removal; `[]` keeps them                             |
+| `ctlabs_argoapp.defaults.wait`           | `true`                                              | wait for `Synced` + `Healthy` after apply                                                    |
+| `ctlabs_argoapp.defaults.wait_timeout`   | `600`                                               | per-application wait budget (seconds)                                                        |
+| `ctlabs_argoapp.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
+| `ctlabs_argoapp.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
+| `ctlabs_argoapp.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
 
 ### Application fields
 
@@ -169,47 +190,37 @@ version to pin, and nothing to reconcile upstream.
 
 The distinction that keeps this sane:
 
-| | installed by this role | configured by |
-|---|---|---|
-| what | cert-manager, external-secrets, … the operator | `Issuer`/`ClusterIssuer`, `SecretStore`/`ClusterSecretStore`, `ExternalSecret` |
-| shape | ArgoCD `Application` → chart | the operator's own CRs, versioned in git |
-| who reconciles | ArgoCD | whoever owns the config — usually ArgoCD again, via a *second* Application |
+|                | installed by this role                         | configured by                                                                  |
+|----------------|------------------------------------------------|--------------------------------------------------------------------------------|
+| what           | cert-manager, external-secrets, … the operator | `Issuer`/`ClusterIssuer`, `SecretStore`/`ClusterSecretStore`, `ExternalSecret` |
+| shape          | ArgoCD `Application` → chart                   | the operator's own CRs, versioned in git                                       |
+| who reconciles | ArgoCD                                         | whoever owns the config — usually ArgoCD again, via a *second* Application     |
 
 So there are two defensible ways to manage the config half, and they are not
 exclusive:
 
-1. **App-of-apps (recommended, most GitOps-idiomatic).** Put the `Issuer` and
-   `ClusterSecretStore` YAML in a git repo and add *one more* Application to the
-   facts pointing at that directory. Same role, same passthrough, no new
-   mechanics — a `directory`/`kustomize` source is already supported (see the
-   render test). Secrets referenced by them stay out of git; only the reference
-   is committed. Verified on rke21: the ArgoCD application-controller can create
-   cluster-scoped `clusterissuers.cert-manager.io` and
-   `clustersecretstores.external-secrets.io`, so the default project is not a
-   blocker.
-2. **A second role** (e.g. `ctlabs_cert_manager`, `ctlabs_external_secrets`)
-   that declares those CRs directly. Fine if you want Ansible to own them, but
-   it re-introduces imperative drift-tolerance concerns and duplicates git's
+1. **App-of-apps (recommended, most GitOps-idiomatic).**
+   Put the `Issuer` and `ClusterSecretStore` YAML in a git repo and add *one more* Application to the facts pointing at that directory. 
+   Same role, same passthrough, no new mechanics — a `directory`/`kustomize` source is already supported (see the render test).
+   Secrets referenced by them stay out of git; only the reference is committed. Verified on rke21: the ArgoCD application-controller
+   can create cluster-scoped `clusterissuers.cert-manager.io` and `clustersecretstores.external-secrets.io`, so the default project is not a blocker.
+2. **A second role**
+   (e.g. `ctlabs_cert_manager`, `ctlabs_external_secrets`) that declares those CRs directly.
+   Fine if you want Ansible to own them, but it re-introduces imperative drift-tolerance concerns and duplicates git's
    job — prefer (1) unless you need the CRs before ArgoCD is up.
 
-Do **not** bolt config onto the install by adding the operator's CRs to the
-chart's `valuesObject`: that only works for charts that happen to template them,
+Do **not** bolt config onto the install by adding the operator's CRs to the chart's `valuesObject`: that only works for charts that happen to template them,
 and it ties your DNS/Vault topology to a chart's release cycle.
 
-Two version traps in the config layer, both hit live on rke21 with
-external-secrets 2.11.0:
+Two version traps in the config layer, both hit live on rke21 with external-secrets 2.11.0:
 
-- **`apiVersion` must be `external-secrets.io/v1`, not `v1beta1`.** The CRD
-  still lists `v1beta1` in `spec.versions`, but with `served: false` — so
-  copy-pasted docs and older examples fail with
+- **`apiVersion` must be `external-secrets.io/v1`, not `v1beta1`.** 
+  The CRD still lists `v1beta1` in `spec.versions`, but with `served: false` — so copy-pasted docs and older examples fail with
   `no matches for kind "ClusterSecretStore" in version "external-secrets.io/v1beta1"`.
-  Check `kubectl get crd clustersecretstores.external-secrets.io -o jsonpath='{.spec.versions[*].name}'`
-  together with the `served` flag; the name alone lies.
+  Check `kubectl get crd clustersecretstores.external-secrets.io -o jsonpath='{.spec.versions[*].name}'` together with the `served` flag; the name alone lies.
 - **cert-manager's `selector` is a sibling of `dns01`, not a child of it.**
-  Nesting it inside `dns01` fails with a strict-decoding error naming the exact
-  field. `kubectl apply --dry-run=server` validates all of this without
-  creating anything, which is the cheap way to check a config CR before it goes
-  anywhere near git.
+  Nesting it inside `dns01` fails with a strict-decoding error naming the exact field. `kubectl apply --dry-run=server` validates all of this without
+  creating anything, which is the cheap way to check a config CR before it goes anywhere near git.
 
 ### Other source forms
 
@@ -248,13 +259,11 @@ Kustomize overlay, with a per-app sync policy and private-repo credentials:
     namespace: platform
 ```
 
-Use `helm.valuesObject`, not `helm.values`, for nested values — it is a native
-mapping in the object, so ints and booleans stay typed instead of degrading into
-strings the way templated inline YAML does.
+Use `helm.valuesObject`, not `helm.values`, for nested values — it is a native mapping in the object, so ints and booleans stay typed instead of degrading into strings the way templated inline YAML does.
 
 ## Local Facts
 
-Written to `/etc/ansible/facts.d/ctlabs_argocd_apps.fact`:
+Written to `/etc/ansible/facts.d/ctlabs_argoapp.fact`:
 
 ```json
 {
@@ -284,12 +293,49 @@ Written to `/etc/ansible/facts.d/ctlabs_argocd_apps.fact`:
 }
 ```
 
-Per-host resolution via `ctg_facts.ctlabs_argocd_apps.*` — fact is authoritative,
-falls back to role defaults. Only knobs actually set for a host are written to
-the fact file, so an absent key still reaches the role default.
+Per-host resolution via `ctg_facts.ctlabs_argoapp.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default.
+
+## ctlabs play.setup (install cert-manager and external-secerts)
+```yml
+argoapp:
+  hosts: [rke21]
+  namespace: argo
+  kubeconfig: /etc/rancher/rke2/rke2.yaml
+  interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+  applications:
+    - name: cert-manager
+      source:
+        repoURL: https://charts.jetstack.io
+        chart  : cert-manager
+        targetRevision: v1.21.2
+        helm:
+          valuesObject:
+            crds:
+              enabled: true
+              keep   : true
+            startupapicheck:
+              enabled: false
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      destination:
+        namespace: cert-manager
+    - name: external-secrets
+      source:
+        repoURL: https://charts.external-secrets.io
+        chart  : external-secrets
+        targetRevision: 2.11.0
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      destination:
+        namespace: external-secrets
+```
 
 ## Tests
 
 ```sh
-pytest -sv roles/ctlabs_argocd_apps/tests
+pytest -sv roles/ctlabs_argoapp/tests
 ```

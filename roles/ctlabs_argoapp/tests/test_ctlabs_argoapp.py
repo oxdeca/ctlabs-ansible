@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_ctlabs_argocd_apps.py
-# Description : pytest tests for ctlabs_argocd_apps role
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tests/test_ctlabs_argoapp.py
+# Description : pytest tests for ctlabs_argoapp role
 # ------------------------------------------------------------------------------
 
 import glob
@@ -37,7 +37,7 @@ def test_role_files_exist(role_dir):
 
 def test_playbook_syntax_check(role_dir):
     _, env = _repo_env()
-    playbook = os.path.join(role_dir, "tests", "test_argocd_apps.yml")
+    playbook = os.path.join(role_dir, "tests", "test_argoapp.yml")
     result = subprocess.run(
         ["ansible-playbook", "--syntax-check", playbook],
         env=env,
@@ -114,12 +114,12 @@ def test_helm_conflict_guard_fails_loudly(role_dir):
     with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
         precheck = yaml.safe_load(f)
     names = [t.get("name") for t in precheck]
-    assert "ctlabs_argocd_apps.tasks.precheck.helm.charts" in names
-    guard = next(t for t in precheck if t.get("name") == "ctlabs_argocd_apps.tasks.precheck.helm.conflict")
+    assert "ctlabs_argoapp.tasks.precheck.helm.charts" in names
+    guard = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.helm.conflict")
     assert "assert" in guard, "the helm conflict guard must fail, not silently skip"
-    assert "ctlabs_argocd_apps_conflicts | length == 0" in guard["assert"]["that"][0]
-    charts = next(t for t in precheck if t.get("name") == "ctlabs_argocd_apps.tasks.precheck.helm.charts")
-    assert ".ctlabs_helm" in charts["set_fact"]["ctlabs_argocd_apps_helm_charts"]
+    assert "ctlabs_argoapp_conflicts | length == 0" in guard["assert"]["that"][0]
+    charts = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.helm.charts")
+    assert ".ctlabs_helm" in charts["set_fact"]["ctlabs_argoapp_helm_charts"]
 
 
 def test_role_is_noop_without_applications(role_dir):
@@ -128,7 +128,7 @@ def test_role_is_noop_without_applications(role_dir):
     with open(os.path.join(role_dir, "tasks", "applications.yml")) as f:
         tasks = yaml.safe_load(f)
     assert len(tasks) == 1, "applications.yml should be a single guarded block"
-    assert tasks[0]["when"] == "ctlabs_argocd_apps_applications | length > 0"
+    assert tasks[0]["when"] == "ctlabs_argoapp_applications | length > 0"
 
 
 def test_numeric_wait_knobs_are_cast_at_point_of_use(role_dir):
@@ -141,12 +141,12 @@ def test_numeric_wait_knobs_are_cast_at_point_of_use(role_dir):
         block = yaml.safe_load(f)[0]["block"]
     wait = next(t for t in block if t.get("name", "").endswith(".wait"))
     assert wait["retries"] == (
-        "{{ ctlabs_argocd_apps_wait_timeout | int // ctlabs_argocd_apps_wait_delay | int }}"
+        "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
     )
-    assert wait["delay"] == "{{ ctlabs_argocd_apps_wait_delay | int }}"
-    assert wait["when"] == "app['wait'] | default(ctlabs_argocd_apps_wait) | bool"
+    assert wait["delay"] == "{{ ctlabs_argoapp_wait_delay | int }}"
+    assert wait["when"] == "app['wait'] | default(ctlabs_argoapp_wait) | bool"
     crd = next(t for t in block if t.get("name", "").endswith(".crd.available"))
-    assert crd["kubernetes.core.k8s_info"]["wait_timeout"] == "{{ ctlabs_argocd_apps_crd_wait | int }}"
+    assert crd["kubernetes.core.k8s_info"]["wait_timeout"] == "{{ ctlabs_argoapp_crd_wait | int }}"
 
     for path in glob.glob(os.path.join(role_dir, "tasks", "*.yml")):
         with open(path) as f2:
@@ -155,3 +155,81 @@ def test_numeric_wait_knobs_are_cast_at_point_of_use(role_dir):
             code = line.split("#")[0]
             if "//" in code:
                 assert "| int //" in code, f"{os.path.basename(path)}: uncasted floor division: {code.strip()}"
+
+
+def test_precheck_verifies_argocd_instance_exists(role_dir):
+    # The OS check alone was not enough: the role targets an ArgoCD control
+    # plane that some OTHER role (ctlabs_helm) installed, so a wrong play order
+    # or a wrong namespace was only discovered as a mystery timeout / NoMatches
+    # deep in applications.yml. The precheck must therefore verify the CRD is
+    # Established AND that an application controller actually has a ready
+    # replica - an Established CRD survives a broken controller, in which case
+    # the Applications would be created and silently never reconciled.
+    with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    names = [t.get("name") for t in precheck]
+
+    crd = next(t for t in precheck if t.get("name", "").endswith("argocd.crd"))
+    assert crd["kubernetes.core.k8s_info"]["name"] == "applications.argoproj.io"
+    assert crd["kubernetes.core.k8s_info"]["wait_condition"] == {
+        "type": "Established",
+        "status": "True",
+    }
+
+    # both workload shapes must be probed: the helm chart runs the controller as
+    # a Deployment, the operator as a StatefulSet.
+    probe = [
+        t for t in precheck
+        if ".argocd.controller" in t.get("name", "")
+        and "kubernetes.core.k8s_info" in t
+    ]
+    kinds = {t["kubernetes.core.k8s_info"]["kind"] for t in probe}
+    assert kinds == {"Deployment", "StatefulSet"}, f"controller probes cover {kinds}"
+    for task in probe:
+        assert task["kubernetes.core.k8s_info"]["namespace"] == "{{ ctlabs_argoapp_namespace }}"
+        assert task["kubernetes.core.k8s_info"]["label_selectors"] == [
+            "app.kubernetes.io/component=application-controller"
+        ]
+
+    guard = next(
+        t for t in precheck if t.get("name", "").endswith("argocd.controller.assert")
+    )
+    assert "assert" in guard, "a missing controller must fail, not be skipped"
+    assert "_argoapp_ctrl_resources | length > 0" in guard["assert"]["that"]
+    assert "_argoapp_ctrl_ready | int >= 1" in guard["assert"]["that"]
+    # the failure has to name the actual dependency, not just "not ready"
+    assert "ctlabs_helm" in guard["assert"]["fail_msg"]
+
+
+def test_argocd_precheck_is_guarded_and_safe_on_empty(role_dir):
+    # Two invariants: (1) applications=[] must stay a complete no-op, so every
+    # new cluster-touching precheck task is guarded; (2) the ready-replica count
+    # must never be computed with max() over a possibly-empty list, which raises
+    # and swallows the human-readable fail_msg.
+    with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+
+    for task in precheck:
+        name = task.get("name", "")
+        if ".argocd." not in name:
+            continue
+        assert task.get("when") == "ctlabs_argoapp_applications | length > 0", (
+            f"{name} contacts the cluster and must be guarded by applications>0"
+        )
+
+    ready = next(
+        t for t in precheck if t.get("name", "").endswith("argocd.controller.ready")
+    )
+    assert "| sum" in ready["set_fact"]["_argoapp_ctrl_ready"]
+    assert "max" not in ready["set_fact"]["_argoapp_ctrl_ready"]
+    assert "default=0" in ready["set_fact"]["_argoapp_ctrl_ready"]
+
+
+def test_default_namespace_is_the_chart_release_namespace(role_dir):
+    # ctlabs_helm deploys release 'argocd' into NAMESPACE 'argo' (helm list -A
+    # shows NAME=argocd, NAMESPACE=argo). Defaulting to 'argocd' looked right -
+    # it is the release name - but targeted a namespace that does not exist, so
+    # every Application would land nowhere.
+    with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)
+    assert defaults["ctlabs_argoapp"]["defaults"]["namespace"] == "argo"

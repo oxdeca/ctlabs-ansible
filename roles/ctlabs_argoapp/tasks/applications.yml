@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tasks/applications.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/applications.yml
 # Description : declare the ArgoCD Application objects
 #
 # ArgoCD itself is installed by ctlabs_helm (argo/argo-cd chart); this file
@@ -10,24 +10,24 @@
 # use it.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argocd_apps.tasks.applications
-  when: ctlabs_argocd_apps_applications | length > 0
+- name: ctlabs_argoapp.tasks.applications
+  when: ctlabs_argoapp_applications | length > 0
   block:
     #
     # The Application CRD only exists once the argo-cd chart is installed, so
     # the apply below can lose a race against it on a fresh cluster.
     #
-    - name: ctlabs_argocd_apps.tasks.applications.crd.available
+    - name: ctlabs_argoapp.tasks.applications.crd.available
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argocd_apps_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argocd_apps_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s_info:
         api_version  : v1
         kind         : CustomResourceDefinition
         name         : applications.argoproj.io
         wait         : true
-        wait_timeout : "{{ ctlabs_argocd_apps_crd_wait | int }}"
+        wait_timeout : "{{ ctlabs_argoapp_crd_wait | int }}"
         wait_condition:
           type   : Established
           status: "True"
@@ -36,15 +36,15 @@
       retries: 30
       delay  : 5
 
-    - name: ctlabs_argocd_apps.tasks.applications.apply
+    - name: ctlabs_argoapp.tasks.applications.apply
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argocd_apps_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argocd_apps_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s:
         state     : present
         definition: "{{ lookup('template', 'application.yml.j2') | from_yaml }}"
-      loop: "{{ ctlabs_argocd_apps_applications }}"
+      loop: "{{ ctlabs_argoapp_applications }}"
       loop_control:
         loop_var: app
       register: res_apply
@@ -62,24 +62,24 @@
     # "unsupported operand type(s) for //: 'str' and 'str'" and kills the wait
     # after the Applications were already applied. Cast where they are used.
     #
-    - name: ctlabs_argocd_apps.tasks.applications.wait
+    - name: ctlabs_argoapp.tasks.applications.wait
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argocd_apps_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argocd_apps_kubeconfig | default(omit, true) }}"
-      when: app['wait'] | default(ctlabs_argocd_apps_wait) | bool
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+      when: app['wait'] | default(ctlabs_argoapp_wait) | bool
       kubernetes.core.k8s_info:
         api_version: argoproj.io/v1alpha1
         kind       : Application
         name       : "{{ app['name'] }}"
-        namespace  : "{{ ctlabs_argocd_apps_namespace }}"
+        namespace  : "{{ ctlabs_argoapp_namespace }}"
       register: res_status
       until    : >-
         (res_status.resources | default([]) | length > 0)
         and (res_status.resources[0]['status']['sync']['status']   | default('')) == 'Synced'
         and (res_status.resources[0]['status']['health']['status'] | default('')) == 'Healthy'
-      retries  : "{{ ctlabs_argocd_apps_wait_timeout | int // ctlabs_argocd_apps_wait_delay | int }}"
-      delay    : "{{ ctlabs_argocd_apps_wait_delay | int }}"
-      loop     : "{{ ctlabs_argocd_apps_applications }}"
+      retries  : "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
+      delay    : "{{ ctlabs_argoapp_wait_delay | int }}"
+      loop     : "{{ ctlabs_argoapp_applications }}"
       loop_control:
         loop_var: app

@@ -1,6 +1,6 @@
-# Configuring cert-manager / external-secrets with `ctlabs_argocd_apps`
+# Configuring cert-manager / external-secrets with `ctlabs_argoapp`
 
-`ctlabs_argocd_apps` **installs the operators**. 
+`ctlabs_argoapp` **installs the operators**. 
   Their configuration is not an ArgoCD Application and does not belong in the same `applications:` list 
     — an `Issuer` or a `ClusterSecretStore` is a plain custom resource that cert-manager / external-secrets each define and watch.
 
@@ -90,8 +90,10 @@ spec:
 ### The facts entry — one Application per config directory
 
 ```yaml
-# in the argocd: profile block
-argocd:
+# in the ctlabs_argoapp: profile block
+# (the fact key is ctlabs_argoapp - it was ctlabs_argocd_apps before the role
+#  rename; update any existing fact files accordingly)
+ctlabs_argoapp:
   namespace  : argo
   kubeconfig : /etc/rancher/rke2/rke2.yaml
   interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
@@ -206,31 +208,27 @@ spec:
         property: password
 ```
 
-Live-verified: `Ready=True secret synced`, the k8s Secret gets the values, and
-**rotating the value in vault propagates to the k8s Secret** — that's real
-continuous sync, not a one-time copy.
+Live-verified: `Ready=True secret synced`, the k8s Secret gets the values, and **rotating the value in vault propagates to the k8s Secret** — that's real continuous sync, not a one-time copy.
 
 ---
 
 ## Schema traps, all hit live against external-secrets 2.11.0
 
-| wrong | right | symptom |
-|---|---|---|
-| `apiVersion: external-secrets.io/v1beta1` | `external-secrets.io/v1` | `no matches for kind "ClusterSecretStore" in version "external-secrets.io/v1beta1"` — 2.11.0 has `v1beta1` at `served: false` |
-| `caProvider: {configMap: {...}}` | `caProvider: {type, name, key, namespace}` | `unknown field "spec.provider.vault.caProvider.configMap"` |
-| `auth.userpass` | `auth.userPass` | `unknown field ... auth.userpass` |
-| `auth.userPass.path: auth/userpass/login` | omit it | 403 on `auth/auth/userpass/login/login/ctlabs` |
+| wrong                                     | right | symptom |
+|-------------------------------------------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `apiVersion: external-secrets.io/v1beta1` | `external-secrets.io/v1`                   | `no matches for kind "ClusterSecretStore" in version "external-secrets.io/v1beta1"` — 2.11.0 has `v1beta1` at `served: false` |
+| `caProvider: {configMap: {...}}`          | `caProvider: {type, name, key, namespace}` | `unknown field "spec.provider.vault.caProvider.configMap"`                                                                    |
+| `auth.userpass`                           | `auth.userPass`                            | `unknown field ... auth.userpass`                                                                                             |
+| `auth.userPass.path: auth/userpass/login` | omit it                                    | 403 on `auth/auth/userpass/login/login/ctlabs`                                                                                |
 
-The CRD still *lists* `v1beta1` in `spec.versions`, so eyeballing the version
-list lies — check the `served` flag:
+The CRD still *lists* `v1beta1` in `spec.versions`, so eyeballing the version list lies — check the `served` flag:
 
 ```sh
 kubectl get crd clustersecretstores.external-secrets.io \
   -o jsonpath='{.spec.versions[*].name}{"\n"}{.spec.versions[*].served}{"\n"}'
 ```
 
-**Always dry-run a config CR before committing it** — validates against the
-real CRD, creates nothing:
+**Always dry-run a config CR before committing it** — validates against the real CRD, creates nothing:
 
 ```sh
 kubectl apply -f clusterissuer.yaml --dry-run=server
@@ -240,17 +238,13 @@ kubectl apply -f clusterissuer.yaml --dry-run=server
 
 ## Networking: where the git host (and vault) must live
 
-Pods have **no VRF awareness** — they egress via the main table, so they cannot
-reach `192.168.99.0/24` (the management network) at all. Anything ArgoCD or
-external-secrets fetches must be internet-reachable or on a **data-plane**
-address.
+Pods have **no VRF awareness** — they egress via the main table, so they cannot reach `192.168.99.0/24` (the management network) at all. Anything ArgoCD or
+external-secrets fetches must be internet-reachable or on a **data-plane** address.
 
-Vault on vdb1 is `192.168.30.11:8200`, and pods resolve
-`vdb1.ctlabs.internal` → `192.168.30.11` via cluster DNS, which is why the store
-uses the **name** rather than the IP: vault's serving certificate has
-`DNS:vdb1.ctlabs.internal` in its SAN but `api_addr` is the bare IP, so an
+Vault on vdb1 is `192.168.30.11:8200`, and pods resolve `vdb1.ctlabs.internal` → `192.168.30.11` via cluster DNS, which is why the store
+uses the **name** rather than the IP: vault's serving certificate has `DNS:vdb1.ctlabs.internal` in its SAN but `api_addr` is the bare IP, so an
 IP-based `server:` fails TLS verification.
 
-> Testing note: a `busybox` pod reaching vault gives `TLS error (alert 47)`. That
-> is **not** a network fault — busybox's TLS stack is too weak for vault's
-> TLSv1.3. `curl`/`openssl` from the same pod network work fine. Don't chase it.
+> Testing note: a `busybox` pod reaching vault gives `TLS error (alert 47)`.
+> That is **not** a network fault — busybox's TLS stack is too weak for vault's TLSv1.3. 
+> `curl`/`openssl` from the same pod network work fine. Don't chase it.

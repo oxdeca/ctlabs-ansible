@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_render.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tests/test_render.yml
 # Description : render the Application template for every source form and
 #               assert the result, without needing a cluster.
 #
@@ -11,22 +11,22 @@
 # application stays silent.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argocd_apps.test.render
+- name: ctlabs_argoapp.test.render
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    ctlabs_argocd_apps_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
-    ctlabs_argocd_apps_namespace : argo
-    ctlabs_argocd_apps_project   : default
-    ctlabs_argocd_apps_server    : https://kubernetes.default.svc
-    ctlabs_argocd_apps_sync_policy:
+    ctlabs_argoapp_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
+    ctlabs_argoapp_namespace : argo
+    ctlabs_argoapp_project   : default
+    ctlabs_argoapp_server    : https://kubernetes.default.svc
+    ctlabs_argoapp_sync_policy:
       automated:
         prune    : true
         selfHeal : true
       syncOptions:
         - CreateNamespace=true
-    ctlabs_argocd_apps_finalizers:
+    ctlabs_argoapp_finalizers:
       - resources-finalizer.argocd.argoproj.io
 
     test_app_helm:
@@ -86,13 +86,13 @@
     #
     # helm chart source, application says nothing about sync/destination
     #
-    - name: ctlabs_argocd_apps.test.render.helm
+    - name: ctlabs_argoapp.test.render.helm
       vars:
         app: "{{ test_app_helm }}"
       set_fact:
-        rendered_helm: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+        rendered_helm: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
 
-    - name: ctlabs_argocd_apps.test.render.helm.assert
+    - name: ctlabs_argoapp.test.render.helm.assert
       assert:
         that:
           - rendered_helm['apiVersion'] == 'argoproj.io/v1alpha1'
@@ -119,13 +119,13 @@
     # plain manifests: no chart key at all, repository credentials, unknown
     # source keys survive untouched, syncPolicy deep-merges over the default
     #
-    - name: ctlabs_argocd_apps.test.render.directory
+    - name: ctlabs_argoapp.test.render.directory
       vars:
         app: "{{ test_app_directory }}"
       set_fact:
-        rendered_directory: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+        rendered_directory: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
 
-    - name: ctlabs_argocd_apps.test.render.directory.assert
+    - name: ctlabs_argoapp.test.render.directory.assert
       assert:
         that:
           - "'chart' not in rendered_directory['spec']['source']"
@@ -143,14 +143,14 @@
     # finalizers opt-out + valuesObject type fidelity (int stays int, bool
     # stays bool - the Jinja True/False trap)
     #
-    - name: ctlabs_argocd_apps.test.render.values_object
+    - name: ctlabs_argoapp.test.render.values_object
       vars:
         app: "{{ test_app_no_finalizers }}"
-        ctlabs_argocd_apps_finalizers: []
+        ctlabs_argoapp_finalizers: []
       set_fact:
-        rendered_values: "{{ lookup('template', ctlabs_argocd_apps_template) | from_yaml }}"
+        rendered_values: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
 
-    - name: ctlabs_argocd_apps.test.render.values_object.assert
+    - name: ctlabs_argoapp.test.render.values_object.assert
       assert:
         that:
           - "'finalizers' not in rendered_values['metadata']"

@@ -1,0 +1,211 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/precheck.yml
+# Description : tasks prechecks
+#
+# Resolves the per-host local fact (ctg_facts.ctlabs_argoapp) against the
+# role defaults, then validates the application list.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_argoapp.tasks.precheck
+  block:
+    - name: ctlabs_argoapp.tasks.precheck.os.supported
+      assert:
+        that: ctg_os is in ctlabs_argoapp.os
+        fail_msg: "OS[{{ctg_os}}] is not supported!"
+  rescue:
+    - name: ctlabs_argoapp.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_argoapp.tasks.precheck.fact
+  set_fact:
+    ctlabs_argoapp_fact: "{{ (ctg_facts | default({}, true)).ctlabs_argoapp | default({}, true) }}"
+
+#
+# resolution chain: local fact -> role default
+#
+# plain `| default(...)` (no `true`), not `| default(..., true)`: the boolean
+# form also substitutes on a DEFINED but falsey value, which would silently
+# override the documented opt-outs (finalizers: [], wait: false) with the
+# defaults. Only an absent key may fall through.
+#
+- name: ctlabs_argoapp.tasks.precheck.resolve
+  set_fact:
+    ctlabs_argoapp_applications : "{{ ctlabs_argoapp_fact['applications'] | default(ctlabs_argoapp.defaults.applications) }}"
+    ctlabs_argoapp_kubeconfig   : "{{ ctlabs_argoapp_fact['kubeconfig']   | default(ctlabs_argoapp.defaults.kubeconfig) }}"
+    ctlabs_argoapp_interpreter  : "{{ ctlabs_argoapp_fact['interpreter']  | default(ctlabs_argoapp.defaults.interpreter) }}"
+    ctlabs_argoapp_namespace    : "{{ ctlabs_argoapp_fact['namespace']    | default(ctlabs_argoapp.defaults.namespace) }}"
+    ctlabs_argoapp_project      : "{{ ctlabs_argoapp_fact['project']      | default(ctlabs_argoapp.defaults.project) }}"
+    ctlabs_argoapp_server       : "{{ ctlabs_argoapp_fact['server']       | default(ctlabs_argoapp.defaults.server) }}"
+    ctlabs_argoapp_sync_policy  : "{{ ctlabs_argoapp_fact['sync_policy']  | default(ctlabs_argoapp.defaults.sync_policy) }}"
+    ctlabs_argoapp_finalizers   : "{{ ctlabs_argoapp_fact['finalizers']   | default(ctlabs_argoapp.defaults.finalizers) }}"
+    ctlabs_argoapp_crd_wait     : "{{ ctlabs_argoapp_fact['crd_wait']     | default(ctlabs_argoapp.defaults.crd_wait) | int }}"
+    ctlabs_argoapp_wait         : "{{ ctlabs_argoapp_fact['wait']         | default(ctlabs_argoapp.defaults.wait) }}"
+    ctlabs_argoapp_wait_timeout : "{{ ctlabs_argoapp_fact['wait_timeout'] | default(ctlabs_argoapp.defaults.wait_timeout) | int }}"
+
+- name: ctlabs_argoapp.tasks.precheck.wait_delay
+  set_fact:
+    ctlabs_argoapp_wait_delay: "{{ [ctlabs_argoapp.defaults.wait_delay, ctlabs_argoapp_wait_timeout | int] | min | int }}"
+
+#
+# 'source' is opaque to this role, but these three fields are required by
+# ArgoCD itself for any application, so catching them here beats a cryptic
+# 'InvalidApplicationSpec' from the API server later.
+#
+- name: ctlabs_argoapp.tasks.precheck.applications.spec
+  assert:
+    that:
+      - "'name' in app"
+      - "'source' in app"
+      - "app['source'] is mapping"
+      - "'repoURL' in app['source']"
+    fail_msg: >-
+      Application[{{ app | to_json }}] needs 'name' and a 'source' mapping
+      containing at least 'repoURL' (plus exactly one of chart/path/directory/
+      kustomize/plugin, per ArgoCD's spec.source).
+  loop: "{{ ctlabs_argoapp_applications }}"
+  loop_control:
+    loop_var: app
+
+- name: ctlabs_argoapp.tasks.precheck.helm.charts
+  set_fact:
+    ctlabs_argoapp_helm_charts: "{{ ((ctg_facts | default({}, true)).ctlabs_helm | default({}, true)).charts | default([], true) }}"
+
+#
+# Helm and ArgoCD must never manage the same release: both would keep
+# reverting each other and the app goes permanently OutOfSync with no obvious
+# cause. This is a config error on both sides, so fail loudly rather than
+# silently dropping one of them.
+#
+- name: ctlabs_argoapp.tasks.precheck.helm.conflict.fact
+  set_fact:
+    ctlabs_argoapp_conflicts: >-
+      {{
+        (ctlabs_argoapp_helm_charts    | map(attribute='name') | map('lower') | list)
+        | intersect(
+            ctlabs_argoapp_applications | map(attribute='name') | map('lower') | list
+          )
+      }}
+
+- name: ctlabs_argoapp.tasks.precheck.helm.conflict
+  when: ctlabs_argoapp_applications | length > 0
+  assert:
+    that:
+      - ctlabs_argoapp_conflicts | length == 0
+    fail_msg: >-
+      [{{ ctlabs_argoapp_conflicts | join(', ') }}] is declared BOTH as a
+      ctlabs_helm chart and as an ArgoCD application. Helm and ArgoCD would
+      fight over the same resources forever. Keep it in one place only.
+
+#
+# When applications are declared, we must be able to target an ArgoCD control
+# plane. This is an EARLY, fast-fail signal: the CRD must already be Established
+# (ctlabs_helm installs argo-cd and waits for it, and must run before this role).
+# It complements, and does not replace, the tolerant crd_wait loop in
+# applications.yml that runs immediately before the apply - that one tolerates a
+# fresh install still settling, this one turns "ArgoCD isn't here" into a clear
+# message in seconds instead of a timeout or a mystery NoMatches later.
+# Guarded so the applications=[] path stays a complete no-op.
+#
+- name: ctlabs_argoapp.tasks.precheck.argocd.crd
+  when: ctlabs_argoapp_applications | length > 0
+  vars:
+    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+  environment:
+    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+  kubernetes.core.k8s_info:
+    api_version  : v1
+    kind         : CustomResourceDefinition
+    name         : applications.argoproj.io
+    wait         : true
+    wait_timeout : 30
+    wait_condition:
+      type   : Established
+      status: "True"
+  register: _argoapp_crd_precheck
+  until   : _argoapp_crd_precheck is success
+  retries : 3
+  delay   : 5
+
+#
+# CRD Established is necessary but NOT sufficient: the CRD outlives a failed or
+# rolled-back argocd install. If the application controller is down, the
+# Applications below are still created and still look fine in `kubectl get` -
+# they just never reconcile, so the run would report success while the cluster
+# quietly stays OutOfSync forever. Fail here instead.
+#
+# 'apps' covers both shapes: the helm chart runs it as a Deployment, the
+# operator as a StatefulSet, and this role must not care which.
+#
+- name: ctlabs_argoapp.tasks.precheck.argocd.controller
+  when: ctlabs_argoapp_applications | length > 0
+  vars:
+    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+  environment:
+    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+  kubernetes.core.k8s_info:
+    api_version    : apps/v1
+    kind           : Deployment
+    namespace      : "{{ ctlabs_argoapp_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/component=application-controller
+  register: _argoapp_ctrl_deploy
+  failed_when: false
+
+- name: ctlabs_argoapp.tasks.precheck.argocd.controller.statefulset
+  when: ctlabs_argoapp_applications | length > 0
+  vars:
+    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+  environment:
+    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+  kubernetes.core.k8s_info:
+    api_version    : apps/v1
+    kind           : StatefulSet
+    namespace      : "{{ ctlabs_argoapp_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/component=application-controller
+  register: _argoapp_ctrl_sts
+  failed_when: false
+
+- name: ctlabs_argoapp.tasks.precheck.argocd.controller.collect
+  when: ctlabs_argoapp_applications | length > 0
+  vars:
+    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+  environment:
+    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+  set_fact:
+    _argoapp_ctrl_resources: >-
+      {{ (_argoapp_ctrl_deploy.resources | default([]))
+         + (_argoapp_ctrl_sts.resources | default([])) }}
+
+- name: ctlabs_argoapp.tasks.precheck.argocd.controller.ready
+  when: ctlabs_argoapp_applications | length > 0
+  vars:
+    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+  environment:
+    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+  set_fact:
+    # readyReplicas summed, and missing/absent -> 0. Kept as a single scalar so
+    # the assert below never calls max() on an empty list (which would raise
+    # before the human-readable fail_msg is ever reached).
+    _argoapp_ctrl_ready: >-
+      {{ _argoapp_ctrl_resources
+         | map(attribute='status', default={})
+         | map(attribute='readyReplicas', default=0)
+         | map('int') | list | sum }}
+
+- name: ctlabs_argoapp.tasks.precheck.argocd.controller.assert
+  when: ctlabs_argoapp_applications | length > 0
+  assert:
+    that:
+      - _argoapp_ctrl_resources | length > 0
+      - _argoapp_ctrl_ready | int >= 1
+    fail_msg: >-
+      No ready ArgoCD application controller found in namespace
+      '{{ ctlabs_argoapp_namespace }}'. The applications.argoproj.io CRD is
+      present, but nothing is running to reconcile Application objects - this
+      role would create them and they would sit OutOfSync forever. ArgoCD is
+      installed by ctlabs_helm (argo/argo-cd) and must run BEFORE this role.
+      Set defaults.namespace to the namespace ArgoCD actually runs in if it is
+      not '{{ ctlabs_argoapp_namespace }}'.

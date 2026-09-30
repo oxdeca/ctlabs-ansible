@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argocd_apps/tests/test_facts.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tests/test_facts.yml
 # Description : render the local facts template and assert which keys survive
 #
 # The failure mode this guards is silent: a fact file that renders, but drops
@@ -10,12 +10,12 @@
 # precheck's `| default(...)` can apply), never be written out as a blank.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argocd_apps.test.facts
+- name: ctlabs_argoapp.test.facts
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    ctlabs_argocd_apps_template: "{{ playbook_dir | dirname }}/templates/facts.json.j2"
+    ctlabs_argoapp_template: "{{ playbook_dir | dirname }}/templates/facts.json.j2"
     apps:
       - name: cert-manager
         source:
@@ -23,7 +23,7 @@
           chart: cert-manager
   tasks:
 
-    - name: ctlabs_argocd_apps.test.facts.full
+    - name: ctlabs_argoapp.test.facts.full
       vars:
         ctlabs_role_facts:
           namespace  : argo
@@ -31,22 +31,22 @@
           wait       : false
           applications: "{{ apps }}"
       set_fact:
-        facts_full: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+        facts_full: "{{ lookup('template', ctlabs_argoapp_template) | from_json }}"
 
-    - name: ctlabs_argocd_apps.test.facts.applications_only
+    - name: ctlabs_argoapp.test.facts.applications_only
       vars:
         ctlabs_role_facts:
           applications: "{{ apps }}"
       set_fact:
-        facts_apps_only: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+        facts_apps_only: "{{ lookup('template', ctlabs_argoapp_template) | from_json }}"
 
-    - name: ctlabs_argocd_apps.test.facts.empty
+    - name: ctlabs_argoapp.test.facts.empty
       vars:
         ctlabs_role_facts: {}
       set_fact:
-        facts_empty: "{{ lookup('template', ctlabs_argocd_apps_template) | from_json }}"
+        facts_empty: "{{ lookup('template', ctlabs_argoapp_template) | from_json }}"
 
-    - name: ctlabs_argocd_apps.test.facts.assert
+    - name: ctlabs_argoapp.test.facts.assert
       assert:
         that:
           # every explicitly set knob is forwarded, with its type intact
