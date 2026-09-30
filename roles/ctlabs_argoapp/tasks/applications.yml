@@ -62,24 +62,187 @@
     # "unsupported operand type(s) for //: 'str' and 'str'" and kills the wait
     # after the Applications were already applied. Cast where they are used.
     #
-    - name: ctlabs_argoapp.tasks.applications.wait
-      vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
-      environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
-      when: app['wait'] | default(ctlabs_argoapp_wait) | bool
-      kubernetes.core.k8s_info:
-        api_version: argoproj.io/v1alpha1
-        kind       : Application
-        name       : "{{ app['name'] }}"
-        namespace  : "{{ ctlabs_argoapp_namespace }}"
-      register: res_status
-      until    : >-
-        (res_status.resources | default([]) | length > 0)
-        and (res_status.resources[0]['status']['sync']['status']   | default('')) == 'Synced'
-        and (res_status.resources[0]['status']['health']['status'] | default('')) == 'Healthy'
-      retries  : "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
-      delay    : "{{ ctlabs_argoapp_wait_delay | int }}"
-      loop     : "{{ ctlabs_argoapp_applications }}"
-      loop_control:
-        loop_var: app
+    #
+    # block/rescue around the wait alone, so the rescue can replace a generic
+    # "task failed" with what ArgoCD actually reported. crd.available and apply
+    # keep failing normally.
+    #
+    #
+    # Waiting for reconciliation.
+    #
+    # The naive shape - one k8s_info per app with `until: Synced and Healthy` -
+    # is a trap, and live-testing against rke21 showed exactly why. A wrong
+    # repository credential leaves the Application at sync.status=Unknown with a
+    # ComparisonError condition while health stays Healthy, so 'Synced and
+    # Healthy' never becomes true and the run burns the entire wait_timeout
+    # (600s per application) only to report a generic failure. The real cause is
+    # visible solely in the ArgoCD UI.
+    #
+    # Two dead ends worth remembering:
+    #   * failed_when does NOT fire between `until` retries - it is only
+    #     evaluated once the retries are exhausted, so it saves nothing.
+    #   * a per-app k8s_info inside a loop registers an AGGREGATE whose per-item
+    #     results live in .results[], so 'res.resources' does not exist. Reading
+    #     it yields an empty list, which looks exactly like "every application
+    #     failed" and manufactures false failures for healthy ones.
+    #
+    # So: read all Applications in ONE un-looped call, and put "errored" INSIDE
+    # the until condition - until is evaluated per attempt, so the loop exits on
+    # either outcome and the decision is made explicitly afterwards.
+    #
+    - name: ctlabs_argoapp.tasks.applications.reconcile
+      block:
+        - name: ctlabs_argoapp.tasks.applications.settle
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            _ours    : "{{ res_settle.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
+            # exited as soon as nothing is left in a merely-progressing state
+            _converged: >-
+              {{ _ours | selectattr('status.sync.status',   'equalto', 'Synced')
+                        | selectattr('status.health.status', 'equalto', 'Healthy') | list }}
+            _errored: >-
+              {{ _ours | selectattr('status.sync.status', 'equalto', 'Unknown') | list }}
+            _pending: "{{ _ours | difference(_converged) | difference(_errored) | list }}"
+          environment:
+            KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind       : Application
+            namespace  : "{{ ctlabs_argoapp_namespace }}"
+          register    : res_settle
+          until       : _pending | length == 0
+          retries     : "{{ ctlabs_argoapp_settle_retries | int }}"
+          delay       : "{{ ctlabs_argoapp_wait_delay | int }}"
+          # exhausting the settle budget is NOT a failure: the app may simply be
+          # rolling out, which is what the long wait below is for
+          failed_when : false
+          changed_when: false
+
+        #
+        # Decide explicitly. An errored application means ArgoCD has said it is
+        # not going to reconcile, so waiting longer cannot help.
+        #
+        #
+        # Conditions are matched on 'type' ONLY. ArgoCD omits the 'status' key
+        # entirely on a ComparisonError, so the obvious
+        # `selectattr('status', 'equalto', 'True')` raises
+        # "'dict object' has no attribute 'status'" - against a dict that
+        # obviously has the fields we want. Observed verbatim on rke21:
+        #   {lastTransitionTime, message, type: ComparisonError}
+        # The presence of the error condition is itself the signal.
+        #
+        - name: ctlabs_argoapp.tasks.applications.settle.errors
+          vars:
+            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+          set_fact:
+            # formatted here, while the resource is in hand: building the
+            # message through a chain of intermediate vars (_errs/_first/_msgs)
+            # re-resolved them against the wrong object and produced a
+            # "'dict object' has no attribute 'status'" on a dict that plainly
+            # had one. One expression, no re-lookup, no selectattr on a
+            # re-templated copy.
+            _argo_problems: >-
+              {{ _argo_problems | default([]) + [ _e.metadata.name
+                 ~ ' [sync=' ~ (((_e.status | default({})).get('sync', {})   | default({})).get('status', 'Unknown'))
+                 ~ ', health=' ~ (((_e.status | default({})).get('health', {}) | default({})).get('status', 'Unknown'))
+                 ~ '] '
+                 ~ (((_e.status | default({})).get('conditions', []) | default([])
+                     | selectattr('type', 'in', ctlabs_argoapp.defaults.error_conditions)
+                     | map(attribute='message') | list | join(' | ')) or 'no condition reported') ] }}
+          loop: "{{ res_settle.resources | default([]) }}"
+          loop_control:
+            loop_var: _e
+          when:
+            - _e.metadata.name in _declared
+            - >-
+              (_e.status | default({})).get('sync', {}).get('status', '') == 'Unknown'
+              or (
+                   ((_e.status | default({})).get('conditions', []) | default([])
+                    | selectattr('type', 'in', ctlabs_argoapp.defaults.error_conditions)
+                    | list | length) > 0
+                 )
+
+        #
+        # Rollback is invoked from HERE, not from a block/rescue around the whole
+        # role. Two reasons, both learned the hard way on rke21:
+        #
+        #   * a rescue makes the play succeed. The recap came back
+        #     `ok=23 failed=0 rescued=1` - a bad credential reported as a GREEN
+        #     run. Re-raising inside the rescue fixes the exit status but the
+        #     recap still reads failed=0, which is precisely the kind of thing
+        #     someone trusts.
+        #   * rollback belongs to the one event where we KNOW we broke something:
+        #     ArgoCD stating it cannot reconcile the credentials we just wrote.
+        #     Rolling back on any unrelated failure (a precheck that needs facts
+        #     a narrow tag skipped, say) reverts good credentials for nothing.
+        #
+        - name: ctlabs_argoapp.tasks.applications.settle.report
+          when: _argo_problems | default([]) | length > 0
+          block:
+
+            - import_tasks: rollback.yml
+
+            - name: ctlabs_argoapp.tasks.applications.settle.report
+              ansible.builtin.fail:
+                msg: >-
+                  ArgoCD cannot reconcile: {{ _argo_problems | default([]) | join('; ') }}.
+                  ArgoCD had already given a definitive answer within the
+                  {{ ctlabs_argoapp_settle_retries | int * ctlabs_argoapp_wait_delay | int }}s
+                  settle budget, so this failed immediately instead of stalling for
+                  the full {{ ctlabs_argoapp_wait_timeout }}s wait_timeout.
+                  Health commonly stays Healthy through a comparison failure: with no
+                  target state there is nothing to diff against, so nothing is pruned
+                  and running workloads are untouched - only reconciliation is blocked.
+                  A repository credential is the usual cause: check the matching
+                  `repositories` entry (url must equal the application's repoURL).
+                  Inspect with:
+                  kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml
+
+        #
+        # Nothing errored, so anything still pending is genuinely rolling out:
+        # that gets the full wait_timeout.
+        #
+        - name: ctlabs_argoapp.tasks.applications.wait
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            _ours    : "{{ res_wait.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
+          environment:
+            KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind       : Application
+            namespace  : "{{ ctlabs_argoapp_namespace }}"
+          register    : res_wait
+          until       : >-
+            (_ours | selectattr('status.sync.status',   'equalto', 'Synced')
+                     | selectattr('status.health.status', 'equalto', 'Healthy') | list | length)
+            >= (_declared | length)
+          retries     : "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
+          delay       : "{{ ctlabs_argoapp_wait_delay | int }}"
+          failed_when : false
+          changed_when: false
+
+        - name: ctlabs_argoapp.tasks.applications.wait.report
+          vars:
+            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            _ours    : "{{ res_wait.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
+            _stuck   : >-
+              {{ _ours | rejectattr('status.sync.status',   'equalto', 'Synced')
+                           | rejectattr('status.health.status', 'equalto', 'Healthy') | list }}
+            _first   : "{{ _stuck | first }}"
+          ansible.builtin.fail:
+            msg: >-
+              Application[{{ _first.metadata.name }}] did not reach Synced+Healthy
+              within {{ ctlabs_argoapp_wait_timeout }}s:
+              sync={{ (_first.status | default({})).get('sync', {}).get('status', 'Unknown') }}
+              health={{ (_first.status | default({})).get('health', {}).get('status', 'Unknown') }}.
+              Affected: {{ _stuck | map(attribute='metadata.name') | map('string') | list | join(', ') }}.
+              Inspect with:
+              kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml
+          when:
+            - (_ours | selectattr('status.sync.status',   'equalto', 'Synced')
+                      | selectattr('status.health.status', 'equalto', 'Healthy') | list | length)
+              < (_declared | length)
+            - _stuck | length > 0

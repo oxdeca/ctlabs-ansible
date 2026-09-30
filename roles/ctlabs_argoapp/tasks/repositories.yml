@@ -1,0 +1,60 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/repositories.yml
+# Description : repository credential Secrets
+#
+# ArgoCD does not accept credentials on the Application - it discovers them from
+# Secrets in its own namespace labelled argocd.argoproj.io/secret-type. This
+# creates those Secrets, so a git-backed application can name nothing but a
+# repoURL and still authenticate.
+#
+# ORDERING IS LOAD-BEARING: this file is imported before applications.yml. The
+# Secrets have to exist before an application that names the repo is created,
+# otherwise the first sync fails with 'repository not found' - and because the
+# role's sync policy is automated + selfHeal, that failure would be retried
+# forever instead of surfacing.
+#
+# An empty list is a complete no-op, exactly like applications.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_argoapp.tasks.repositories
+  when: ctlabs_argoapp_repositories | length > 0
+  block:
+
+    #
+    # Snapshot what is already there BEFORE changing it, so a regression can be
+    # undone. This must never itself fail the run: it exists only to make rollback
+    # possible, and a snapshot that breaks the run defeats its own purpose.
+    #
+    - name: ctlabs_argoapp.tasks.repositories.capture
+      vars:
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+      environment:
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+      kubernetes.core.k8s_info:
+        kind          : Secret
+        namespace     : "{{ ctlabs_argoapp_namespace }}"
+        label_selectors:
+          - argocd.argoproj.io/secret-type=repository
+      register       : ctlabs_argoapp_repo_before
+      failed_when    : false
+      changed_when   : false
+      # holds live credentials
+      no_log         : true
+
+    - name: ctlabs_argoapp.tasks.repositories.apply
+      vars:
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+      environment:
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+      kubernetes.core.k8s:
+        state     : present
+        definition: "{{ lookup('template', 'repository.yml.j2') | from_yaml }}"
+      loop: "{{ ctlabs_argoapp_repositories }}"
+      loop_control:
+        loop_var: repo
+      register: res_repo
+      until   : res_repo is success
+      retries : 30
+      delay   : 5

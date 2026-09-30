@@ -17,6 +17,7 @@
   gather_facts: false
   vars:
     ctlabs_argoapp_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
+    ctlabs_argoapp_repo_template: "{{ playbook_dir | dirname }}/templates/repository.yml.j2"
     ctlabs_argoapp_namespace : argo
     ctlabs_argoapp_project   : default
     ctlabs_argoapp_server    : https://kubernetes.default.svc
@@ -57,11 +58,9 @@
         path          : deploy/crds/bundle.yaml
         directory:
           recurse: true
-        repository:
-          type    : git
-          repoURL : https://git.ctlabs.internal/infra/charts.git
-          username: argocd
-          password: $repo-creds
+        # a real ArgoCD source field this role knows nothing about: proves the
+        # passthrough without documenting something ArgoCD would reject
+        tagPrefix   : release-
         sourceFormTheRoleHasNeverHeardOf:
           nested: true
       project: platform
@@ -81,6 +80,32 @@
           valuesObject:
             replicaCount: 3
             debug       : false
+
+    test_repo_full:
+      name    : ctlabs-git
+      type    : git
+      url     : https://git1.ctlabs.internal:3000/ctlabs/cluster-config.git
+      username: ctlabs
+      password: secret123!
+      insecure: true
+      forceHttpBasicAuth: false
+
+    test_repo_minimal:
+      name: cluster-config
+      url : git://192.168.30.41:9418/config-repo.git
+
+    test_repo_typo:
+      name        : typo-repo
+      url         : https://git1.ctlabs.internal:3000/ctlabs/other.git
+      insecure_ssl: true
+
+    test_repo_ssh:
+      name: ssh-repo
+      url : ssh://git@git1.ctlabs.internal:2222/ctlabs/infra.git
+      sshPrivateKey: |
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        AAAAB3NzaC1yc2EAAAADAQAB
+        -----END OPENSSH PRIVATE KEY-----
   tasks:
 
     #
@@ -116,8 +141,10 @@
           - rendered_helm['spec']['syncPolicy']['syncOptions'] == ['CreateNamespace=true', 'ServerSideApply=true']
 
     #
-    # plain manifests: no chart key at all, repository credentials, unknown
-    # source keys survive untouched, syncPolicy deep-merges over the default
+    # plain manifests: no chart key at all, source keys the role has no model
+    # for survive untouched, syncPolicy deep-merges over the default. NOTE: the
+    # synthetic 'sourceFormTheRoleHasNeverHeardOf' key is a passthrough probe,
+    # not a suggested config - ArgoCD prunes fields outside its CRD schema.
     #
     - name: ctlabs_argoapp.test.render.directory
       vars:
@@ -131,8 +158,7 @@
           - "'chart' not in rendered_directory['spec']['source']"
           - rendered_directory['spec']['source']['path'] == 'deploy/crds/bundle.yaml'
           - rendered_directory['spec']['source']['directory']['recurse'] == true
-          - rendered_directory['spec']['source']['repository']['type'] == 'git'
-          - rendered_directory['spec']['source']['repository']['username'] == 'argocd'
+          - rendered_directory['spec']['source']['tagPrefix'] == 'release-'
           - rendered_directory['spec']['source']['sourceFormTheRoleHasNeverHeardOf']['nested'] == true
           - rendered_directory['spec']['project'] == 'platform'
           - rendered_directory['spec']['syncPolicy']['automated']['selfHeal'] == false
@@ -158,3 +184,91 @@
           - rendered_values['spec']['source']['helm']['valuesObject']['replicaCount'] == 3
           - rendered_values['spec']['source']['helm']['valuesObject']['debug'] == false
           - rendered_values['spec']['destination']['server'] == 'https://kubernetes.default.svc'
+
+    #
+    # repository credentials Secret
+    #
+    - name: ctlabs_argoapp.test.render.repository
+      vars:
+        repo: "{{ test_repo_full }}"
+      set_fact:
+        rendered_repo: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+
+    - name: ctlabs_argoapp.test.render.repository.assert
+      assert:
+        that:
+          - rendered_repo['apiVersion'] == 'v1'
+          - rendered_repo['kind'] == 'Secret'
+          - rendered_repo['metadata']['name'] == 'ctlabs-git'
+          # must land in ArgoCD's own namespace, or the Secret is invisible to it
+          - rendered_repo['metadata']['namespace'] == 'argo'
+          # this label is the entire discovery mechanism - without it the
+          # credentials exist and are simply never read
+          - rendered_repo['metadata']['labels']['argocd.argoproj.io/secret-type'] == 'repository'
+          - rendered_repo['stringData']['type'] == 'git'
+          - rendered_repo['stringData']['url'] == 'https://git1.ctlabs.internal:3000/ctlabs/cluster-config.git'
+          - rendered_repo['stringData']['username'] == 'ctlabs'
+          - rendered_repo['stringData']['password'] == 'secret123!'
+          # booleans must be STRINGS: stringData rejects a real YAML boolean at
+          # the API server, and Jinja would render True/False anyway
+          - rendered_repo['stringData']['insecure'] == 'true'
+          - rendered_repo['stringData']['forceHttpBasicAuth'] == 'false'
+          - rendered_repo['stringData']['insecure'] is string
+          # unset keys stay absent rather than being written as blanks
+          - "'project' not in rendered_repo['stringData']"
+          - "'sshPrivateKey' not in rendered_repo['stringData']"
+
+    #
+    # minimal entry: type defaults to git, booleans omitted entirely
+    #
+    - name: ctlabs_argoapp.test.render.repository.minimal
+      vars:
+        repo: "{{ test_repo_minimal }}"
+      set_fact:
+        rendered_repo_min: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+
+    - name: ctlabs_argoapp.test.render.repository.minimal.assert
+      assert:
+        that:
+          - rendered_repo_min['stringData']['type'] == 'git'
+          - rendered_repo_min['stringData']['url'] == 'git://192.168.30.41:9418/config-repo.git'
+          - "'insecure' not in rendered_repo_min['stringData']"
+          - "'username' not in rendered_repo_min['stringData']"
+
+    #
+    # unrecognised key: ArgoCD silently ignores stringData keys it does not know,
+    # so an unfiltered splat would turn a typo into a mystery TLS failure rather
+    # than an error. The allowlist must drop it.
+    #
+    - name: ctlabs_argoapp.test.render.repository.allowlist
+      vars:
+        repo: "{{ test_repo_typo }}"
+      set_fact:
+        rendered_repo_typo: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+
+    - name: ctlabs_argoapp.test.render.repository.allowlist.assert
+      assert:
+        that:
+          - "'insecure_ssl' not in rendered_repo_typo['stringData']"
+          - "'insecure' not in rendered_repo_typo['stringData']"
+          - rendered_repo_typo['stringData']['url'] == 'https://git1.ctlabs.internal:3000/ctlabs/other.git'
+
+    #
+    # multi-line value fidelity: to_nice_yaml re-indents a multi-line string
+    # into a literal block, which silently corrupts a PEM. The SSH key must come
+    # back byte-identical or the repo simply fails to authenticate.
+    #
+    - name: ctlabs_argoapp.test.render.repository.ssh
+      vars:
+        repo: "{{ test_repo_ssh }}"
+      set_fact:
+        rendered_repo_ssh: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+
+    - name: ctlabs_argoapp.test.render.repository.ssh.assert
+      assert:
+        that:
+          - rendered_repo_ssh['stringData']['sshPrivateKey'] == test_repo_ssh['sshPrivateKey']
+          - rendered_repo_ssh['stringData']['sshPrivateKey'].startswith('-----BEGIN OPENSSH PRIVATE KEY-----')
+          - "'sshPrivateKey' in rendered_repo_ssh['stringData']"
+          # type is defaulted and still emitted alongside an ssh source
+          - rendered_repo_ssh['stringData']['type'] == 'git'

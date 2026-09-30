@@ -21,15 +21,23 @@
         source:
           repoURL: https://charts.jetstack.io
           chart: cert-manager
+    repos:
+      - name    : ctlabs-git
+        type    : git
+        url     : https://git1.ctlabs.internal:3000/ctlabs/cluster-config.git
+        username: ctlabs
+        password: secret123!
+        insecure: true
   tasks:
 
     - name: ctlabs_argoapp.test.facts.full
       vars:
         ctlabs_role_facts:
-          namespace  : argo
-          kubeconfig : /etc/rancher/k3s/k3s.yaml
-          wait       : false
-          applications: "{{ apps }}"
+          namespace    : argo
+          kubeconfig   : /etc/rancher/k3s/k3s.yaml
+          wait         : false
+          applications : "{{ apps }}"
+          repositories : "{{ repos }}"
       set_fact:
         facts_full: "{{ lookup('template', ctlabs_argoapp_template) | from_json }}"
 
@@ -55,6 +63,11 @@
           - facts_full['wait'] == false
           - facts_full['applications'] == apps
 
+          # repositories round-trip whole, including the boolean that the
+          # repository template later has to stringify
+          - facts_full['repositories'] == repos
+          - facts_full['repositories'][0]['insecure'] == true
+
           # an unset knob is absent, NOT written out as a blank - a defined
           # "" would shadow the role default in precheck.yml
           - "'interpreter' not in facts_full"
@@ -65,6 +78,10 @@
           # (quote the whole expression: a bare '{' starts a YAML flow mapping)
           - "facts_apps_only == {'applications': apps}"
           - "facts_empty == {'applications': []}"
+          # repositories is forwarded only when actually set, so it can never
+          # shadow a non-empty role default with a written-out empty list
+          - "'repositories' not in facts_apps_only"
+          - "'repositories' not in facts_empty"
 
           # keys outside the whitelist never leak into the fact file
           - "'site' not in facts_full"

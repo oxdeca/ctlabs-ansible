@@ -1,0 +1,53 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_argoapp/templates/repository.yml.j2
+ # Description : ArgoCD repository credentials Secret
+ #
+ # ArgoCD reads repository credentials from Secrets in its own namespace,
+ # labelled argocd.argoproj.io/secret-type - never from the Application. This
+ # renders one such Secret per entry in the resolved repositories list.
+ #
+ # Two things this template exists to get right:
+ #
+ #   1. KEY ALLOWLIST. ArgoCD silently ignores stringData keys it does not
+ #      recognise, so an unfiltered splat turns a typo ('insecure_ssl') into a
+ #      mystery TLS failure at sync time instead of an error here. Only the
+ #      documented keys are emitted.
+#   2. STRINGIFIED BOOLEANS. stringData values must be strings; the API server
+#      rejects a real YAML boolean. Jinja renders those as True/False anyway,
+#      so they are normalised to 'true'/'false' explicitly.
+#   3. EXACT MULTILINE VALUES. stringData is emitted key by key as a JSON-quoted
+#      scalar rather than through to_nice_yaml, which re-indents a multi-line
+#      value into a literal block and silently corrupts a PEM (sshPrivateKey,
+#      tlsClientCertData). JSON escaping round-trips exactly.
+ #
+ # namespace() rather than a bare {% set %}: ansible's templar does not carry a
+ # {% set %} out of a loop body, which would silently drop every accumulated key
+ # (the same trap that made facts.json.j2 a single expression).
+ #}
+{% set _repo  = repo %}
+{% set _bools = ['insecure', 'forceHttpBasicAuth', 'enableLfs', 'enableOCI'] %}
+{% set _strs  = ['url', 'username', 'password', 'sshPrivateKey', 'bearerToken', 'project', 'tlsClientCertData', 'proxy', 'noProxy'] %}
+{% set _ns    = namespace(data={'type': _repo['type'] | default('git', true)}) %}
+{% for _key in _strs %}
+{%   if _key in _repo %}
+{%     set _ns.data = _ns.data | combine({_key: _repo[_key] | string}) %}
+{%   endif %}
+{% endfor %}
+{% for _key in _bools %}
+{%   if _key in _repo %}
+{%     set _ns.data = _ns.data | combine({_key: 'true' if _repo[_key] | bool else 'false'}) %}
+{%   endif %}
+{% endfor %}
+{% set _meta = {'name'     : _repo['name'],
+                'namespace': ctlabs_argoapp_namespace,
+                'labels'   : {'argocd.argoproj.io/secret-type': _repo['secret_type'] | default('repository', true)}} %}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+{{ _meta | to_nice_yaml(indent = 2) | indent(2, true) }}
+type: Opaque
+stringData:
+{% for _key, _val in _ns.data.items() %}
+  {{ _key }}: {{ _val | to_json }}
+{% endfor %}

@@ -11,5 +11,5 @@
  # not carry `set` out of a loop body, which silently drops every forwarded key.
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
-{% set _knobs = ['namespace', 'kubeconfig', 'interpreter', 'project', 'server', 'wait', 'wait_timeout', 'crd_wait', 'sync_policy', 'finalizers'] %}
+{% set _knobs = ['namespace', 'kubeconfig', 'interpreter', 'project', 'server', 'wait', 'wait_timeout', 'crd_wait', 'sync_policy', 'finalizers', 'repositories'] %}
 {{ _facts | dict2items | selectattr('key', 'in', _knobs) | items2dict | combine({'applications': _facts.applications | default([])}) | to_nice_json(indent = 2) }}

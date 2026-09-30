@@ -57,11 +57,69 @@ ctlabs_argoapp:
     wait_delay  : 10
 
     #
+    # how long to keep watching for a DEFINITIVE outcome after the apply, before
+    # concluding the application is merely still rolling out and handing over to
+    # wait_timeout. This is what turns a dead repository credential into a fast,
+    # explanatory failure instead of a silent 600s stall - ArgoCD reports it as
+    # sync.status=Unknown while health stays Healthy, so the naive
+    # 'Synced + Healthy' wait never succeeds and never says why.
+    #
+    settle_retries: 6
+
+    #
+    # ArgoCD condition types that mean "this Application is not going to
+    # reconcile, stop waiting for it". Waiting on Synced+Healthy alone turns any
+    # of these into a silent wait_timeout stall whose real cause is only visible
+    # in the ArgoCD UI. Note that health usually stays Healthy through all of
+    # them - a failed comparison means there is no target state to diff against,
+    # so running workloads are untouched and nothing can be pruned.
+    #
+    error_conditions:
+      - ComparisonError
+      - SyncError
+      - InvalidSpecError
+      - DeletionError
+
+    #
     # how long to wait for the argoproj.io Application CRD to be Established
     # (it only exists once the argo-cd chart is installed).
     #
     crd_wait: 300
 
+    #
+    #
+    # Git repositories the applications are allowed to fetch from, with the
+    # credentials ArgoCD needs to do so. ArgoCD does NOT accept credentials on
+    # the Application: it discovers them from Secrets in the ArgoCD namespace
+    # labelled 'argocd.argoproj.io/secret-type: repository'. This list is what
+    # creates those Secrets, which is why an application can name nothing but a
+    # repoURL and still authenticate.
+    #
+    # Per entry:
+    #   name            (required) Secret name, unique per repository
+    #   url             (required) must match the application's source.repoURL
+    #   type                  : 'git' (default) | 'helm' | 'oci'
+    #   username, password    : HTTPS basic auth
+    #   sshPrivateKey         : SSH auth, PEM content
+    #   bearerToken           : HTTP bearer token
+    #   insecure              : skip the repository server's TLS verification.
+    #                           Needed for the self-signed ctlabs_ca certs the
+    #                           lab git host serves - the alternative is mounting
+    #                           that CA into argocd-repo-server.
+    #   forceHttpBasicAuth    : skip auth method negotiation, force basic auth
+    #   enableLfs, enableOCI, project, proxy, noProxy, tlsClientCertData
+    #
+    # Anything outside that list is dropped rather than passed through: ArgoCD
+    # silently ignores stringData keys it does not recognise, so a typo
+    # ('insecure_ssl') would surface as a mystery TLS failure, not an error.
+    #
+    # Secrets policy: credentials live here in PLAINTEXT in the local fact file,
+    # the same way ctlabs_gitea keeps its own. Fine for a lab; anything shared or
+    # long-lived should come from ctlabs_vault instead.
+    #
+    # An empty list is a complete no-op, exactly like applications.
+    #
+    repositories: []
     #
     # The applications to declare. Per-cluster inventory - normally supplied
     # per host as the ctlabs_argoapp local fact, not edited here.

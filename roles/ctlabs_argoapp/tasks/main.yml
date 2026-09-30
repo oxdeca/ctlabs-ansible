@@ -9,6 +9,18 @@
   tags:
     - ctlabs_argoapp
     - ctlabs_argoapp.precheck
+    # 'applications' and 'repositories' are carried here because this file is
+    # where both lists get resolved: whichever of the two task files a caller
+    # selects on its own must still pull precheck in with it
+    - ctlabs_argoapp.applications
+    - ctlabs_argoapp.repositories
+
+- import_tasks: repositories.yml
+  tags:
+    - ctlabs_argoapp
+    - ctlabs_argoapp.repositories
+    # also tagged 'applications': limiting a run to -t ctlabs_argoapp.applications
+    # must still create the credentials its git-backed apps need
     - ctlabs_argoapp.applications
 
 - import_tasks: applications.yml

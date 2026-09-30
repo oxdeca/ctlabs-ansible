@@ -33,6 +33,7 @@
 - name: ctlabs_argoapp.tasks.precheck.resolve
   set_fact:
     ctlabs_argoapp_applications : "{{ ctlabs_argoapp_fact['applications'] | default(ctlabs_argoapp.defaults.applications) }}"
+    ctlabs_argoapp_repositories: "{{ ctlabs_argoapp_fact['repositories'] | default(ctlabs_argoapp.defaults.repositories) }}"
     ctlabs_argoapp_kubeconfig   : "{{ ctlabs_argoapp_fact['kubeconfig']   | default(ctlabs_argoapp.defaults.kubeconfig) }}"
     ctlabs_argoapp_interpreter  : "{{ ctlabs_argoapp_fact['interpreter']  | default(ctlabs_argoapp.defaults.interpreter) }}"
     ctlabs_argoapp_namespace    : "{{ ctlabs_argoapp_fact['namespace']    | default(ctlabs_argoapp.defaults.namespace) }}"
@@ -42,6 +43,7 @@
     ctlabs_argoapp_finalizers   : "{{ ctlabs_argoapp_fact['finalizers']   | default(ctlabs_argoapp.defaults.finalizers) }}"
     ctlabs_argoapp_crd_wait     : "{{ ctlabs_argoapp_fact['crd_wait']     | default(ctlabs_argoapp.defaults.crd_wait) | int }}"
     ctlabs_argoapp_wait         : "{{ ctlabs_argoapp_fact['wait']         | default(ctlabs_argoapp.defaults.wait) }}"
+    ctlabs_argoapp_settle_retries: "{{ ctlabs_argoapp_fact['settle_retries'] | default(ctlabs_argoapp.defaults.settle_retries) | int }}"
     ctlabs_argoapp_wait_timeout : "{{ ctlabs_argoapp_fact['wait_timeout'] | default(ctlabs_argoapp.defaults.wait_timeout) | int }}"
 
 - name: ctlabs_argoapp.tasks.precheck.wait_delay
@@ -53,6 +55,21 @@
 # ArgoCD itself for any application, so catching them here beats a cryptic
 # 'InvalidApplicationSpec' from the API server later.
 #
+- name: ctlabs_argoapp.tasks.precheck.waiting
+  vars:
+    _c: "{{ ctlabs_argoapp_wait }}"
+  set_fact:
+    # Which applications opted in to being waited on. Precomputed ONCE here
+    # because the settle/wait phases read every Application in a single pass and
+    # so cannot re-evaluate a per-item `when`. Without this the per-app
+    # `wait: false` opt-out silently stops working - an un-waited app would be
+    # waited on, and could fail the run.
+    ctlabs_argoapp_waiting: "{{ ctlabs_argoapp_waiting | default([]) + [ _a.name ] }}"
+  loop: "{{ ctlabs_argoapp_applications }}"
+  loop_control:
+    loop_var: _a
+  when: _a['wait'] | default(_c) | bool
+
 - name: ctlabs_argoapp.tasks.precheck.applications.spec
   assert:
     that:
@@ -67,6 +84,77 @@
   loop: "{{ ctlabs_argoapp_applications }}"
   loop_control:
     loop_var: app
+
+- name: ctlabs_argoapp.tasks.precheck.repositories.spec
+  assert:
+    that:
+      - "'name' in r"
+      - "'url' in r"
+    fail_msg: >-
+      Repository[{{ r | to_json }}] needs 'name' (the Secret name ArgoCD will
+      discover it under) and 'url' (which must match the source.repoURL of the
+      application that uses it).
+  loop: "{{ ctlabs_argoapp_repositories }}"
+  loop_control:
+    loop_var: r
+
+#
+# spec.source is a verbatim passthrough, so a key ArgoCD does not know is
+# dropped by the API server and the setting silently has no effect. This is
+# worse here than it sounds: kubectl rejects it loudly, but kubernetes.core.k8s
+# (this role's client) does not request strict field validation, so the
+# Application is CREATED successfully, the field is pruned server-side, and the
+# only symptom is a later 'repository not found' / 'authentication required'
+# pointing nowhere near the cause. A stale credentials example in the README
+# once did exactly this.
+#
+# We deliberately do not model ArgoCD's source schema - it is deeply nested and
+# changes between releases, and encoding it would reject valid config the day
+# ArgoCD adds a field. But the TOP-LEVEL key set is small and stable, so check
+# that and warn. Never fail on it: a future ArgoCD field must not become a hard
+# blocker. List taken from the applications.argoproj.io CRD schema (v3.5.3).
+#
+- name: ctlabs_argoapp.tasks.precheck.applications.source.keys
+  vars:
+    _source_keys_known:
+      - chart
+      - directory
+      - helm
+      - kustomize
+      - name
+      - path
+      - plugin
+      - ref
+      - repoURL
+      - tagPrefix
+      - targetRevision
+    _source_keys_unknown: "{{ app['source'].keys() | difference(_source_keys_known) }}"
+  loop: "{{ ctlabs_argoapp_applications }}"
+  loop_control:
+    loop_var: app
+  when: _source_keys_unknown | length > 0
+  changed_when: false
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: Application[{{ app['name'] }}] has source key(s)
+      {{ _source_keys_unknown | join(', ') }}, which are not fields of ArgoCD's
+      spec.source. The API server will drop {{ 'them' if _source_keys_unknown | length > 1 else 'it' }}
+      and {{ 'they will' if _source_keys_unknown | length > 1 else 'it will' }}
+      have no effect. Known keys: {{ _source_keys_known | join(', ') }}.
+
+#
+# Two entries sharing a name are one Secret: the second apply silently replaces
+# the first, so one of the repositories ends up with the other's credentials and
+# the failure only shows up as an auth error at sync time.
+#
+- name: ctlabs_argoapp.tasks.precheck.repositories.names
+  assert:
+    that:
+      - (ctlabs_argoapp_repositories | map(attribute='name') | list | unique | length) == (ctlabs_argoapp_repositories | length)
+    fail_msg: >-
+      Repository names must be unique: [{{ ctlabs_argoapp_repositories | map(attribute='name') | list | join(', ') }}].
+      Two entries with the same name are the same Secret, so one repository ends
+      up silently using the other's credentials.
 
 - name: ctlabs_argoapp.tasks.precheck.helm.charts
   set_fact:

@@ -17,12 +17,15 @@ list on every cluster lab.
 | `ctlabs_argoapp`              | all role tasks                   |
 | `ctlabs_argoapp.precheck`     | prechecks only                   |
 | `ctlabs_argoapp.applications` | CRD wait + apply + health wait   |
+| `ctlabs_argoapp.repositories` | repository credential Secrets    |
 | `ctlabs_argoapp.facts`        | local facts write (setup play)   |
 
 ## Prechecks
 
 - OS: centos8, centos9, redhat8, redhat9, debian11, debian12
 - Each application has `name` and a `source` mapping containing at least `repoURL`
+- Each repository has a unique `name` and a `url` (a duplicate name is the same
+  Secret, so one repository would silently take another's credentials)
 - **No application name may collide with a `ctlabs_helm` chart name** — Helm and
   ArgoCD must never manage the same release, or they revert each other forever
   and the app sits permanently `OutOfSync` with no obvious cause. The precheck
@@ -61,10 +64,13 @@ list on every cluster lab.
 | `ctlabs_argoapp.defaults.sync_policy`    | automated (prune, selfHeal, `CreateNamespace=true`) | default `spec.syncPolicy`                                                                    |
 | `ctlabs_argoapp.defaults.finalizers`     | `[resources-finalizer.argocd.argoproj.io]`          | cascade-delete resources on Application removal; `[]` keeps them                             |
 | `ctlabs_argoapp.defaults.wait`           | `true`                                              | wait for `Synced` + `Healthy` after apply                                                    |
-| `ctlabs_argoapp.defaults.wait_timeout`   | `600`                                               | per-application wait budget (seconds)                                                        |
+| `ctlabs_argoapp.defaults.wait_timeout`   | `600`                                               | wait budget for an app still rolling out (seconds)                                          |
 | `ctlabs_argoapp.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
+| `ctlabs_argoapp.defaults.settle_retries` | `6`                                                | polls before concluding an app is merely rolling out; see [Failing fast](#failing-fast-on-bad-credentials) |
+| `ctlabs_argoapp.defaults.error_conditions` | `[ComparisonError, SyncError, InvalidSpecError, DeletionError]` | ArgoCD condition types that mean "cannot reconcile", not "still working"   |
 | `ctlabs_argoapp.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
 | `ctlabs_argoapp.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
+| `ctlabs_argoapp.defaults.repositories`   | `[]`                                                | git/helm repositories ArgoCD may fetch, with credentials (see below)                        |
 
 ### Application fields
 
@@ -238,7 +244,8 @@ Plain manifests from a git repo:
     namespace: external-secrets
 ```
 
-Kustomize overlay, with a per-app sync policy and private-repo credentials:
+Kustomize overlay, with a per-app sync policy. Credentials come from
+`repositories` (below), not from the Application:
 
 ```yaml
 - name: platform-apps
@@ -247,11 +254,6 @@ Kustomize overlay, with a per-app sync policy and private-repo credentials:
     targetRevision: main
     path         : overlays/lab
     kustomize    : {}
-    repository   :
-      type: git
-      repoURL  : https://git.ctlabs.internal/infra/charts.git
-      username : argocd
-      password : $repo-creds
   syncPolicy:
     automated:
       selfHeal: false
@@ -260,6 +262,151 @@ Kustomize overlay, with a per-app sync policy and private-repo credentials:
 ```
 
 Use `helm.valuesObject`, not `helm.values`, for nested values — it is a native mapping in the object, so ints and booleans stay typed instead of degrading into strings the way templated inline YAML does.
+
+## Repository credentials
+
+ArgoCD does **not** accept credentials on the Application. It discovers them
+from Secrets in its own namespace carrying the label
+`argocd.argoproj.io/secret-type: repository`. Without such a Secret, an
+application pointing at a private repo is created perfectly happily and then
+fails every sync with an auth error — nothing in `spec` can fix that.
+
+`defaults.repositories` is what creates those Secrets:
+
+```yaml
+repositories:
+  - name    : ctlabs-git
+    type    : git
+    url     : https://git1.ctlabs.internal:3000/ctlabs/cluster-config.git
+    username: ctlabs
+    password: secret123!
+    insecure: true              # repo server serves a self-signed ctlabs_ca cert
+    forceHttpBasicAuth: true
+  - name: infra-ssh
+    url : ssh://git@git1.ctlabs.internal:2222/ctlabs/infra.git
+    sshPrivateKey: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      ...
+      -----END OPENSSH PRIVATE KEY-----
+```
+
+The application then references only the URL:
+
+```yaml
+- name: lab-issuers
+  source:
+    repoURL       : https://git1.ctlabs.internal:3000/ctlabs/cluster-config.git
+    targetRevision: main
+    path          : clusters/rke201
+    directory:
+      recurse: true
+```
+
+| Field                   | Purpose                                                                       |
+|-------------------------|-------------------------------------------------------------------------------|
+| `name`                  | Secret name; must be unique per repository                                    |
+| `url`                   | must match the `source.repoURL` of the application using it                   |
+| `type`                  | `git` (default), `helm`, `oci`                                               |
+| `username` / `password` | HTTPS basic auth                                                              |
+| `sshPrivateKey`         | SSH auth, PEM content                                                         |
+| `bearerToken`           | HTTP bearer token                                                             |
+| `insecure`              | skip the repo server's **TLS verification** — for the self-signed ctlabs_ca certs the lab git host serves. The alternative is mounting that CA into `argocd-repo-server` |
+| `forceHttpBasicAuth`    | skip auth-method negotiation, force basic auth                               |
+| `enableLfs`, `enableOCI`, `project`, `proxy`, `noProxy`, `tlsClientCertData` | passed through when set |
+
+Notes:
+
+- **Keys are allowlisted.** ArgoCD silently ignores `stringData` keys it does not
+  recognise, so an unfiltered splat would turn a typo (`insecure_ssl`) into a
+  mystery TLS failure at sync time rather than an error. Unknown keys are dropped.
+- **Booleans are stringified.** `stringData` values must be strings; the API
+  server rejects a real YAML boolean.
+- **Applied before the applications.** The Secrets must exist before an
+  application naming the repo is created, so `repositories` is also tagged
+  `ctlabs_argoapp.applications` — a `-t ctlabs_argoapp.applications` run still
+  creates the credentials its apps need.
+- **Empty list is a complete no-op**, like `applications`.
+- **Where the repo lives is out of scope.** ArgoCD's repo-server is a pod, so
+  the repository must be reachable from the cluster's *data* network; the
+  ansible controller's management address is not reachable from a pod (no VRF
+  awareness in the pod network). `git://` needs no credentials at all and so
+  needs no entry here.
+
+### Secrets policy
+
+Credentials are stored **in plaintext in the local fact file**
+(`/etc/ansible/facts.d/ctlabs_argoapp.fact`), the same way `ctlabs_gitea` keeps
+its own. Acceptable for a lab; anything shared or long-lived should come from
+`ctlabs_vault` instead. A vault-backed variant (read the password at apply time
+so it never lands in a fact file) is a deliberate non-goal for now.
+
+## Failing fast on bad credentials
+
+A wrong credential is the failure mode this role is most likely to cause, and
+ArgoCD makes it awkward to detect:
+
+- The Application goes to `sync.status=Unknown` with a `ComparisonError`
+  condition — but `health.status` **stays `Healthy`**.
+- Health stays Healthy because with no target state there is nothing to compare
+  against, so there is nothing to prune. Verified on rke21 with
+  `automated.prune: true`: the running pod stayed `Running`. A broken credential
+  does **not** harm workloads; it blocks reconciliation of every application on
+  that repository while looking perfectly healthy.
+
+So a naive `until: sync is Synced and health is Healthy` never becomes true. It
+burns the whole `wait_timeout` (600s per application) and then reports something
+useless, with the real cause visible only in the ArgoCD UI.
+
+This role therefore reads all Applications in one pass and watches for a
+*definitive* outcome before falling back to the long wait:
+
+| phase | budget | purpose |
+|---|---|---|
+| `settle` | `settle_retries` × `wait_delay` (default 60s) | wait for all declared apps to reach `Synced`+`Healthy`, or for ArgoCD to state it cannot |
+| `wait` | `wait_timeout` (default 600s) | for anything still genuinely rolling out |
+
+If any Application lands on `sync.status=Unknown`, or carries a condition whose
+`type` is in `error_conditions`, the run fails immediately, quoting ArgoCD's own
+message:
+
+```
+ArgoCD cannot reconcile: ctlabs-scratch-gb [sync=Unknown, health=Healthy] Failed to
+load target state: ... authentication required: Invalid username or token. ...
+```
+
+Two mechanisms that look correct and are not, both measured rather than assumed:
+
+- **`failed_when` does not fire between `until` retries.** It is only evaluated
+  once the retries are exhausted, so it saves nothing (measured: 82s against a
+  60s budget). The "errored" test has to live *inside* the `until` condition,
+  which is re-evaluated per attempt.
+- **Conditions are matched on `type`, never on `status`.** ArgoCD omits the
+  `status` key entirely on a `ComparisonError`, so the obvious
+  `selectattr('status', 'equalto', 'True')` raises
+  `'dict object' has no attribute 'status'` — against a dict that obviously has
+  the fields you want.
+
+### Rollback
+
+If the reconcile fails for a credential the role just wrote, the role undoes its
+own change: a Secret it created is deleted, a Secret it modified is restored to
+the exact prior bytes.
+
+- Triggered **only** from the definitive-error path. Rolling back after an
+  unrelated failure (a precheck that a narrow tag left without facts, say) would
+  revert good credentials for no reason.
+- Deliberately **not** a `block`/`rescue` around the whole role. A rescue makes
+  the play succeed — measured: `ok=23 failed=0 rescued=1`, a bad credential
+  reported as a *green* run. Rolling back from the fail-fast path keeps the recap
+  honest (`failed=1`).
+- Only Secrets listed in `repositories` are touched. Anything the role did not
+  touch is left alone, including credentials that predate it.
+- No-op when the run changed no credential — restoring identical bytes would be
+  pointless, and deleting a pre-existing Secret would be destructive.
+
+Restoring credentials restores the ability to reconcile. It does not repair the
+already-`Unknown` Application: once the credential is correct it still needs a
+sync (or a hard refresh, if ArgoCD is serving a cached manifest).
 
 ## Local Facts
 
