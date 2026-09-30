@@ -19,8 +19,11 @@ Installs [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) via
 - Node.js 22.x via NodeSource (Debian/RedHat)
 - `claude` system user
 - Claude Code config at `~/.claude/settings.json`
+- Custom slash commands at `~/.claude/commands/*.md`
 
 Both provider configuration and OTLP telemetry are **opt-in** — disabled by default. Enable via local facts.
+
+Note: `~` is expanded on the target host by the `ansible_user` connecting (root on every lab host today, since these roles run with no `become_user`) — not the `claude` system user's `/home/claude`. This matches existing `settings.json` behavior, so slash commands land wherever `claude`/`opencode` are actually run interactively.
 
 ## Provider Configuration
 
@@ -59,6 +62,20 @@ Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude_cod
 | `fallback_model` | `["haiku"]` | Fallback model list |
 | `gce_metadata_host` | `""` | `GCE_METADATA_HOST` override (vertexai only) |
 
+## Custom Commands
+
+Slash commands are rendered as individual Markdown files in `~/.claude/commands/` via `ctg_facts.ctlabs_claude_code.commands` (merged over `ctlabs_claude_code.defaults.config.commands`, resolved in `precheck.yml` as `ctlabs_claude_code_commands`). Each key becomes `<name>.md`:
+
+```yaml
+ctlabs_claude_code:
+  defaults:
+    config:
+      commands:
+        end:
+          description: "End session — update memory files and save daily notes"
+          template: "..."
+```
+
 ## Local Facts Example
 
 `/etc/ansible/facts.d/ctlabs_claude_code.fact`:
@@ -93,4 +110,3 @@ Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude_cod
 ```sh
 pytest -sv roles/ctlabs_claude_code/tests
 ```
-

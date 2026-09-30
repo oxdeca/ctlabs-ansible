@@ -1,0 +1,9 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_claude_code/templates/command.md.j2
+ # Description : ~/.claude/commands/<name>.md template
+#}
+---
+description: {{ item.value.description }}
+---
+
+{{ item.value.template }}

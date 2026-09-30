@@ -1,0 +1,14 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_opencode/templates/opencode_managed.json.j2
+ # Description : /etc/opencode/opencode.json managed config template (applies to every OS user)
+#}
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+{% for key, val in ctlabs_opencode_commands.items() %}
+    "{{ key }}": {
+      "description": "{{ val.description }}",
+      "template": "{{ val.template }}"
+    }{% if not loop.last %},{% endif %}
+{% endfor %}  }
+}

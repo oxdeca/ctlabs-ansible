@@ -31,3 +31,7 @@
 - name: ctlabs_claude_code.tasks.precheck.settings
   set_fact:
     ctlabs_claude_code_settings: "{{ ctlabs_claude_code.defaults.config.preferences | combine(ctg_facts.ctlabs_claude_code.preferences | default({}), recursive=true) }}"
+
+- name: ctlabs_claude_code.tasks.precheck.commands
+  set_fact:
+    ctlabs_claude_code_commands: "{{ ctlabs_claude_code.defaults.config.commands | combine(ctg_facts.ctlabs_claude_code.commands | default({}), recursive=true) }}"

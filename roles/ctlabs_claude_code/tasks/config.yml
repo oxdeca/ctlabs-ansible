@@ -41,3 +41,17 @@
   template:
     src  : "{{ ctlabs_claude_code.defaults.config.settings.template }}"
     dest : "{{ ctlabs_claude_code.defaults.config.settings.file     }}"
+
+- name: ctlabs_claude_code.tasks.config.commands.dir
+  file:
+    path : "{{ ctlabs_claude_code.defaults.config.commands_dir }}"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_claude_code.tasks.config.commands.files
+  template:
+    src : command.md.j2
+    dest: "{{ ctlabs_claude_code.defaults.config.commands_dir }}/{{ item.key }}.md"
+  loop: "{{ ctlabs_claude_code_commands | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

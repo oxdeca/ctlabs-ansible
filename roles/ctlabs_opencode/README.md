@@ -18,7 +18,8 @@ Installs [OpenCode](https://opencode.ai) — an AI coding assistant — via npm 
 - Node.js 22.x via NodeSource (Debian/RedHat)
 - `opencode` system user
 - Profile snippet at `/etc/profile.d/opencode.sh`
-- OpenCode config at `~/.config/opencode/opencode.json`
+- OpenCode config at `~/.config/opencode/opencode.json` (opencode user only)
+- Managed OpenCode config at `/etc/opencode/opencode.json` (applies to **every** OS user, including root)
 
 ## Configuration
 
@@ -27,8 +28,24 @@ Installs [OpenCode](https://opencode.ai) — an AI coding assistant — via npm 
 | `ctlabs_opencode.defaults.repos` | NodeSource `node_22.x` | per OS family |
 | `ctlabs_opencode.defaults.pkgs.npm` | `[opencode-ai]` | npm packages to install globally |
 | `ctlabs_opencode.defaults.config.dir` | `/home/opencode` | opencode user home |
-| `ctlabs_opencode.defaults.config.settings.file` | `/home/opencode/.config/opencode/opencode.json` | OpenCode config file |
+| `ctlabs_opencode.defaults.config.settings.file` | `/home/opencode/.config/opencode/opencode.json` | OpenCode config file (opencode user only) |
+| `ctlabs_opencode.defaults.config.commands` | `{end: {...}, graphify: {...}}` | Custom slash commands, rendered into the managed config |
+| `ctlabs_opencode.defaults.config.managed.file` | `/etc/opencode/opencode.json` | Managed config file (every user) |
 | `ctlabs_opencode.defaults.mcp_servers` | `{graphify: {type: remote, url: "http://127.0.0.1:8080/mcp"}}` | MCP servers to register |
+
+### Custom Commands
+
+OpenCode loads a **managed** config from `/etc/opencode/opencode.json` (Linux) at the highest priority tier, merged in for every OS user regardless of home directory — this is where slash commands like `/end` live so they work for `root` (the interactive user on these lab hosts) as well as the `opencode` service account. Override or add commands via `ctg_facts.ctlabs_opencode.commands` (merged over `ctlabs_opencode.defaults.config.commands`, resolved in `precheck.yml` as `ctlabs_opencode_commands`):
+
+```yaml
+ctlabs_opencode:
+  defaults:
+    config:
+      commands:
+        end:
+          description: "End session — update memory files and save daily notes"
+          template: "..."
+```
 
 ### MCP Servers
 

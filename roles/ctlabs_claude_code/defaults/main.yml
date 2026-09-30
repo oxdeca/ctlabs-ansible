@@ -48,6 +48,11 @@ ctlabs_claude_code:
         dir     : ~/.claude
         template: settings.json.j2
         file    : ~/.claude/settings.json
+      commands_dir: ~/.claude/commands
+      commands:
+        end:
+          description: "End session — update memory files and save daily notes"
+          template: "Write a structured daily note to `memory/YYYY-MM-DD.md` for today covering what we worked on, decisions made, and TODOs. Then review `MEMORY.md` — promote anything important from today that should live in long-term memory, and remove any outdated info. Summarize what was done before session ends."
       provider:
         active     : anthropic
         anthropic:

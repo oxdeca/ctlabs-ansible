@@ -6,15 +6,5 @@
       "type": "{{ val.type }}",
       "url": "{{ val.url }}"
     }{% if not loop.last %},{% endif %}
-{% endfor %}  }{% endif %},
-  "command": {
-    "end": {
-      "description": "End session — update memory files and save daily notes",
-      "template": "Write a structured daily note to `memory/YYYY-MM-DD.md` for today covering what we worked on, decisions made, and TODOs. Then review `MEMORY.md` — promote anything important from today that should live in long-term memory, and remove any outdated info. Summarize what was done before session ends."
-    },
-    "graphify": {
-      "description": "Update or query the knowledge graph via graphify",
-      "template": ""
-    }
-  }
+{% endfor %}  }{% endif %}
 }

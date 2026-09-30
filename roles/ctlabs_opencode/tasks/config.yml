@@ -48,3 +48,19 @@
   template:
     src  : "{{ ctlabs_opencode.defaults.config.settings.template }}"
     dest : "{{ ctlabs_opencode.defaults.config.settings.file }}"
+
+- name: ctlabs_opencode.tasks.config.managed.dir
+  file:
+    path : "{{ ctlabs_opencode.defaults.config.managed.dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode : '0755'
+
+- name: ctlabs_opencode.tasks.config.managed.file
+  template:
+    src  : "{{ ctlabs_opencode.defaults.config.managed.template }}"
+    dest : "{{ ctlabs_opencode.defaults.config.managed.file }}"
+    owner: root
+    group: root
+    mode : '0644'

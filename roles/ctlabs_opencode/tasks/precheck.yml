@@ -14,3 +14,7 @@
   rescue:
     - name: ctlabs_opencode.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_opencode.tasks.precheck.commands
+  set_fact:
+    ctlabs_opencode_commands: "{{ ctlabs_opencode.defaults.config.commands | combine(ctg_facts.ctlabs_opencode.commands | default({}), recursive=true) }}"
