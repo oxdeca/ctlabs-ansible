@@ -97,12 +97,29 @@
             ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
             _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
             _ours    : "{{ res_settle.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
+            #
             # exited as soon as nothing is left in a merely-progressing state
+            #
+            # The 'defined' guards below are load-bearing, and they are there for
+            # one specific reason: an Application created moments ago has NO
+            # 'status' key at all - ArgoCD has not reconciled it yet - and one
+            # mid-apply can have a 'status' with no 'sync'/'health' inside it.
+            # Under Ansible's strict undefined, `selectattr('status.sync.status',
+            # 'equalto', ...)` then raises "'dict object' has no attribute
+            # 'status'" - killing the run at the FIRST poll, i.e. immediately
+            # after apply, which is exactly when a fresh cluster always reads
+            # like that. Filter to the reported ones first and compare only
+            # those; an unreported Application is simply 'not converged' and
+            # stays pending, which is the truthful answer.
+            #
             _converged: >-
-              {{ _ours | selectattr('status.sync.status',   'equalto', 'Synced')
+              {{ _ours | selectattr('status.sync.status',   'defined')
+                        | selectattr('status.health.status', 'defined')
+                        | selectattr('status.sync.status',   'equalto', 'Synced')
                         | selectattr('status.health.status', 'equalto', 'Healthy') | list }}
             _errored: >-
-              {{ _ours | selectattr('status.sync.status', 'equalto', 'Unknown') | list }}
+              {{ _ours | selectattr('status.sync.status', 'defined')
+                        | selectattr('status.sync.status', 'equalto', 'Unknown') | list }}
             _pending: "{{ _ours | difference(_converged) | difference(_errored) | list }}"
           environment:
             KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
@@ -216,7 +233,9 @@
             namespace  : "{{ ctlabs_argoapp_namespace }}"
           register    : res_wait
           until       : >-
-            (_ours | selectattr('status.sync.status',   'equalto', 'Synced')
+            (_ours | selectattr('status.sync.status',   'defined')
+                     | selectattr('status.health.status', 'defined')
+                     | selectattr('status.sync.status',   'equalto', 'Synced')
                      | selectattr('status.health.status', 'equalto', 'Healthy') | list | length)
             >= (_declared | length)
           retries     : "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
@@ -229,8 +248,10 @@
             _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
             _ours    : "{{ res_wait.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
             _stuck   : >-
-              {{ _ours | rejectattr('status.sync.status',   'equalto', 'Synced')
-                           | rejectattr('status.health.status', 'equalto', 'Healthy') | list }}
+              {{ _ours | selectattr('status.sync.status',   'defined')
+                         | selectattr('status.health.status', 'defined')
+                         | rejectattr('status.sync.status',   'equalto', 'Synced')
+                         | rejectattr('status.health.status', 'equalto', 'Healthy') | list }}
             _first   : "{{ _stuck | first }}"
           ansible.builtin.fail:
             msg: >-
@@ -242,7 +263,9 @@
               Inspect with:
               kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml
           when:
-            - (_ours | selectattr('status.sync.status',   'equalto', 'Synced')
+            - (_ours | selectattr('status.sync.status',   'defined')
+                      | selectattr('status.health.status', 'defined')
+                      | selectattr('status.sync.status',   'equalto', 'Synced')
                       | selectattr('status.health.status', 'equalto', 'Healthy') | list | length)
               < (_declared | length)
             - _stuck | length > 0
