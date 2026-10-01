@@ -140,6 +140,22 @@
         # Decide explicitly. An errored application means ArgoCD has said it is
         # not going to reconcile, so waiting longer cannot help.
         #
+        # ...EXCEPT when the message describes connectivity rather than
+        # configuration. An error_conditions match alone is NOT proof of a broken
+        # input: at lab bring-up the repo-server's very first `helm pull` of a
+        # public chart fails with 'error fetching chart: ... dial tcp
+        # [2607:f8b0:...]: connect: network is unreachable', which ArgoCD reports
+        # as sync.status=Unknown + ComparisonError - byte for byte the same shape
+        # as a rejected credential. Measured on rke21: failing there aborted a lab
+        # startup that converged on its own seconds later, with cert-manager and
+        # external-secrets both ending up Synced+Healthy.
+        #
+        # So the MESSAGE decides, not the condition type. Transient -> not a
+        # problem, not a rollback, just pending: it falls through to the long wait
+        # below, which is where a real rollout belongs anyway. No credential error
+        # matches any pattern in transient_errors, so the fast fail and its
+        # rollback are untouched.
+        #
         #
         # Conditions are matched on 'type' ONLY. ArgoCD omits the 'status' key
         # entirely on a ComparisonError, so the obvious
@@ -152,6 +168,15 @@
         - name: ctlabs_argoapp.tasks.applications.settle.errors
           vars:
             _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            # every condition message flattened into one searchable string, and
+            # lowercased because the patterns are lowercase. 'default=""' because
+            # a condition carrying no message must not raise here - this runs over
+            # every Application on every run.
+            _msgtxt: >-
+              {{ ((_e.status | default({})).get('conditions', []) | default([])
+                  | map(attribute='message', default='') | join(' ')) | lower }}
+            _transient: >-
+              {{ ctlabs_argoapp_transient_errors | select('in', _msgtxt) | list | length > 0 }}
           set_fact:
             # formatted here, while the resource is in hand: building the
             # message through a chain of intermediate vars (_errs/_first/_msgs)
@@ -172,6 +197,11 @@
             loop_var: _e
           when:
             - _e.metadata.name in _declared
+            # transient connectivity: not this task's business. Must be checked
+            # FIRST-class (its own condition, not an 'or' inside the next one) so
+            # a sync.status=Unknown chart-fetch failure cannot be mistaken for a
+            # definitive error just because ArgoCD used the same condition type.
+            - not _transient
             - >-
               (_e.status | default({})).get('sync', {}).get('status', '') == 'Unknown'
               or (
@@ -260,12 +290,22 @@
                         | selectattr('status.health.status', 'equalto', 'Healthy') | list }}
             _stuck   : "{{ _ours | difference(_converged) | list }}"
             _first   : "{{ _stuck | first }}"
+            # what ArgoCD last said, verbatim. Without it a stuck Application
+            # reports only sync=Unknown/health=Healthy, which is the same useless
+            # pair the fast-fail path exists to replace - and the transient
+            # errors deliberately handed over to this wait are exactly the ones
+            # whose cause lives in the message.
+            _errmsg  : >-
+              {{ (((_first.status | default({})).get('conditions', []) | default([])
+                   | map(attribute='message', default='') | join(' | ')) | trim)
+                 or 'no condition reported' }}
           ansible.builtin.fail:
             msg: >-
               Application[{{ _first.metadata.name }}] did not reach Synced+Healthy
               within {{ ctlabs_argoapp_wait_timeout }}s:
               sync={{ (_first.status | default({})).get('sync', {}).get('status', 'Unknown') }}
               health={{ (_first.status | default({})).get('health', {}).get('status', 'Unknown') }}.
+              ArgoCD said: {{ _errmsg }}.
               Affected: {{ _stuck | map(attribute='metadata.name') | map('string') | list | join(', ') }}.
               Inspect with:
               kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml

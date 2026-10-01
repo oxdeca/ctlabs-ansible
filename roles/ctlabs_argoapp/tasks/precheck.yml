@@ -44,6 +44,7 @@
     ctlabs_argoapp_crd_wait     : "{{ ctlabs_argoapp_fact['crd_wait']     | default(ctlabs_argoapp.defaults.crd_wait) | int }}"
     ctlabs_argoapp_wait         : "{{ ctlabs_argoapp_fact['wait']         | default(ctlabs_argoapp.defaults.wait) }}"
     ctlabs_argoapp_settle_retries: "{{ ctlabs_argoapp_fact['settle_retries'] | default(ctlabs_argoapp.defaults.settle_retries) | int }}"
+    ctlabs_argoapp_transient_errors: "{{ ctlabs_argoapp_fact['transient_errors'] | default(ctlabs_argoapp.defaults.transient_errors) }}"
     ctlabs_argoapp_wait_timeout : "{{ ctlabs_argoapp_fact['wait_timeout'] | default(ctlabs_argoapp.defaults.wait_timeout) | int }}"
 
 - name: ctlabs_argoapp.tasks.precheck.wait_delay

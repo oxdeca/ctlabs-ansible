@@ -81,6 +81,56 @@ ctlabs_argoapp:
       - DeletionError
 
     #
+    # Substrings that mark an ArgoCD error message as TRANSIENT rather than
+    # definitive. Matched case-insensitively against the concatenated condition
+    # messages of an Application that is errored; an Application whose message
+    # contains any of these is NOT failed on and NOT rolled back - it is handed
+    # to the long wait, because ArgoCD retries it on its own.
+    #
+    # Why this list exists (measured on rke21 at lab bring-up): the first
+    # `helm pull` of a public chart can fail while pod networking is still coming
+    # up -
+    #   failed to generate manifest for source 1 of 1: rpc error: code = Unknown
+    #   desc = error fetching chart: ... failed running helm: `helm pull ...
+    #   https://charts.external-secrets.io` failed: Get
+    #   "https://charts.external-secrets.io/index.yaml": dial tcp
+    #   [2607:f8b0:4023:1803::79]:443: connect: network is unreachable
+    # That reports as sync.status=Unknown + ComparisonError, exactly like a bad
+    # credential, and health stays Healthy because nothing has been deployed yet.
+    # Failing there aborted a lab startup that then converged on its own within
+    # seconds. Everything below describes connectivity, not configuration.
+    #
+    # Deliberately NOT in the list: 'authentication required', 'invalid username
+    # or token', 'repository not found', 'permission denied', 'chart ... not
+    # found'. Those stay definitive - a credential or a pinned version will
+    # never fix itself, and that is exactly what the fast fail is for.
+    #
+    # 'failed to generate manifest' is the umbrella for a helm/render failure and
+    # is a deliberate over-approximation: a genuinely bad manifest config then
+    # costs wait_timeout before failing instead of failing fast. Cost is time,
+    # never a false green.
+    #
+    # Set to [] per host to make every error definitive again.
+    #
+    transient_errors:
+      - 'error fetching chart'
+      - 'failed to fetch chart'
+      - 'not a valid chart repository or cannot be reached'
+      - 'failed to generate manifest'
+      - 'dial tcp'
+      - 'network is unreachable'
+      - 'no route to host'
+      - 'no such host'
+      - 'could not resolve host'
+      - 'temporary failure in name resolution'
+      - 'i/o timeout'
+      - 'tls handshake timeout'
+      - 'context deadline exceeded'
+      - 'connection refused'
+      - 'connection reset by peer'
+      - 'unexpected eof'
+
+    #
     # how long to wait for the argoproj.io Application CRD to be Established
     # (it only exists once the argo-cd chart is installed).
     #

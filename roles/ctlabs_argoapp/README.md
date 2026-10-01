@@ -68,6 +68,7 @@ list on every cluster lab.
 | `ctlabs_argoapp.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
 | `ctlabs_argoapp.defaults.settle_retries` | `6`                                                | polls before concluding an app is merely rolling out; see [Failing fast](#failing-fast-on-bad-credentials) |
 | `ctlabs_argoapp.defaults.error_conditions` | `[ComparisonError, SyncError, InvalidSpecError, DeletionError]` | ArgoCD condition types that mean "cannot reconcile", not "still working"   |
+| `ctlabs_argoapp.defaults.transient_errors` | connectivity substrings (see [Transient errors](#transient-errors-wait-dont-fail)) | error **messages** that mean "not ready yet", not "misconfigured" — these are waited out instead of failed |
 | `ctlabs_argoapp.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
 | `ctlabs_argoapp.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
 | `ctlabs_argoapp.defaults.repositories`   | `[]`                                                | git/helm repositories ArgoCD may fetch, with credentials (see below)                        |
@@ -373,6 +374,45 @@ message:
 ArgoCD cannot reconcile: ctlabs-scratch-gb [sync=Unknown, health=Healthy] Failed to
 load target state: ... authentication required: Invalid username or token. ...
 ```
+
+### Transient errors: wait, don't fail
+
+The condition type alone is **not** proof of a misconfiguration. ArgoCD reports
+every failure to produce manifests as `ComparisonError` + `sync.status=Unknown`,
+including the ones that fix themselves. Measured on rke21 during lab bring-up,
+the repo-server's very first `helm pull` of a public chart failed while pod
+networking was still coming up:
+
+```
+external-secrets [sync=Unknown, health=Healthy] Failed to load target state:
+failed to generate manifest for source 1 of 1: rpc error: code = Unknown
+desc = error fetching chart: ... `helm pull --repo
+https://charts.external-secrets.io external-secrets` failed: Get
+"https://charts.external-secrets.io/index.yaml": dial tcp
+[2607:f8b0:4023:1803::79]:443: connect: network is unreachable
+```
+
+That aborted the run — and the applications then converged on their own within
+seconds, `cert-manager` and `external-secrets` both ending up `Synced`+`Healthy`.
+
+So the **message** decides, not the condition type. If the concatenated condition
+messages contain any substring in `transient_errors`, the Application is not
+failed on, not rolled back, and simply falls through to the long `wait`, where a
+rollout belongs anyway. Credential problems match none of those patterns, so the
+fast fail and its rollback are unchanged:
+
+| kind | examples | outcome |
+|---|---|---|
+| connectivity / fetch | `error fetching chart`, `dial tcp`, `network is unreachable`, `no such host`, `i/o timeout`, `context deadline exceeded`, `connection refused`, … | waited out |
+| configuration | `authentication required`, `Invalid username or token`, `repository not found`, `permission denied`, chart version `not found` | fails fast, credentials rolled back |
+
+`failed to generate manifest` is in the list deliberately: it is the umbrella for
+a helm/render failure, so a genuinely bad manifest config costs `wait_timeout`
+before failing instead of failing in 15s. The cost is time, never a false green.
+Set `transient_errors: []` per host to make every error definitive again.
+
+If a transient error does *not* recover, the long wait's own report quotes the
+message ArgoCD gave, so that failure explains itself too.
 
 Two mechanisms that look correct and are not, both measured rather than assumed:
 

@@ -36,6 +36,11 @@
   #   errored   - the ComparisonError case from the earlier bad-credential run
   #
   vars:
+    # the transient patterns come from the ROLE DEFAULTS via the pytest wrapper,
+    # so this exercises the shipped list - a hand-copied one here would keep
+    # passing while the real classification rotted
+    ctlabs_argoapp_transient_errors: "{{ transient_errors }}"
+
     app_fresh:
       metadata:
         name: cert-manager
@@ -80,10 +85,100 @@
           # ArgoCD omits 'status' on the condition entirely - the shape that
           # already forced .get() chains into settle.errors
 
+    #
+    # the REAL message from rke21 lab bring-up, verbatim. Same condition type and
+    # same sync.status as app_errored, but nothing is misconfigured - the
+    # repo-server's first `helm pull` of a public chart hit a not-yet-ready pod
+    # network, and ArgoCD retries it until it succeeds.
+    #
+    app_transient:
+      metadata:
+        name: external-secrets
+      status:
+        sync:
+          status: Unknown
+        health:
+          status: Healthy
+        conditions:
+          - type: ComparisonError
+            lastTransitionTime: "2026-10-01T08:12:44Z"
+            message: >-
+              Failed to load target state: failed to generate manifest for source
+              1 of 1: rpc error: code = Unknown desc = error fetching chart:
+              failed to fetch chart: failed running helm: `helm pull
+              --destination /tmp/a310ce77 --version 2.11.0 --repo
+              https://charts.external-secrets.io external-secrets` failed exit
+              status 1: Error: looks like "https://charts.external-secrets.io"
+              is not a valid chart repository or cannot be reached: Get
+              "https://charts.external-secrets.io/index.yaml": dial tcp
+              [2607:f8b0:4023:1803::79]:443: connect: network is unreachable
+          # health Healthy + sync Unknown: nothing deployed yet, so nothing to
+          # diff against - the shape that made the fast fail abort a lab startup
+          # which then converged on its own
+
+    #
+    # a genuine credential failure, kept separate from app_errored so the two
+    # classification paths are asserted independently
+    #
+    app_badcreds:
+      metadata:
+        name: platform-badcreds
+      status:
+        sync:
+          status: Unknown
+        health:
+          status: Healthy
+        conditions:
+          - type: ComparisonError
+            message: >-
+              Failed to load target state: authentication required: Invalid
+              username or token
+            lastTransitionTime: "2026-09-30T12:51:00Z"
+
+    #
+    # a condition carrying no message at all: _msgtxt flattens with default=''
+    # and must not raise on it
+    #
+    app_silent_error:
+      metadata:
+        name: platform-silent
+      status:
+        sync:
+          status: Unknown
+        health:
+          status: Healthy
+        conditions:
+          - type: ComparisonError
+            lastTransitionTime: "2026-09-30T12:51:00Z"
+
     payload: "{{ [app_fresh, app_empty, app_no_sync, app_syncing, app_healthy, app_errored] }}"
     payload_names: "{{ payload | map(attribute='metadata') | map(attribute='name') | list }}"
 
   tasks:
+
+    #
+    # --- transient vs definitive --------------------------------------------
+    #
+    # The distinction the fast fail is built on. Without it a not-yet-ready pod
+    # network looks exactly like a rejected credential and aborts a lab startup
+    # that was about to converge.
+    #
+    - name: ctlabs_argoapp.test.status.transient
+      vars:
+        _e          : "{{ item }}"
+        _msgtxt     : "{{ expr_transient_msgtxt }}"
+        _transient  : "{{ expr_transient }}"
+      loop: "{{ [app_transient, app_badcreds, app_errored, app_silent_error, app_healthy] }}"
+      loop_control:
+        loop_var: item
+      assert:
+        that:
+          - (_transient | bool) == (item.metadata.name == 'external-secrets')
+        fail_msg: >-
+          {{ item.metadata.name }} classified transient={{ _transient }}
+          (message: '{{ _msgtxt }}') - only a connectivity failure may be
+          transient; a credential failure has to stay definitive or the fast fail
+          (and its rollback) is dead code.
 
     #
     # --- settle phase: mixed payload ---------------------------------------
@@ -221,6 +316,30 @@
           - not (_wait_ok | bool)
           - (_stuck | length) == 1
           - _first.metadata.name == 'cert-manager'
+
+    #
+    # the wait report quotes ArgoCD's own message, which is the only useful
+    # diagnosis for an app stuck at sync=Unknown/health=Healthy - including a
+    # status-less Application ArgoCD never reported on at all, where the .get
+    # chain must fall through to a placeholder instead of raising
+    #
+    - name: ctlabs_argoapp.test.status.wait.errmsg
+      vars:
+        _first : "{{ item }}"
+        _errmsg: "{{ expr_report_errmsg }}"
+      loop: "{{ [app_fresh, app_transient, app_badcreds, app_healthy] }}"
+      loop_control:
+        loop_var: item
+      assert:
+        that:
+          - (_errmsg | length) > 0
+          # no conditions at all (unreported, or healthy) -> the placeholder,
+          # never a raise and never an empty message
+          - ((_errmsg == 'no condition reported')
+             == (item.metadata.name in ['cert-manager', 'platform-healthy']))
+          # a real condition comes through verbatim, so the operator can see the
+          # connectivity failure that was handed over to this wait
+          - ((item.metadata.name != 'external-secrets') or ('network is unreachable' in _errmsg))
 
     #
     # nothing declared at all -> no wait, no stuck list, no crash

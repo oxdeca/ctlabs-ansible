@@ -296,6 +296,7 @@ def _extract_status_expressions(role_dir):
     settle = _find_task(block, ".settle")
     wait = _find_task(block, ".wait")
     report = _find_task(block, ".wait.report")
+    errors = _find_task(block, ".settle.errors")
 
     converged = settle["vars"]["_converged"]
     return {
@@ -310,6 +311,10 @@ def _extract_status_expressions(role_dir):
         "expr_wait_until": "{{ " + wait["until"].strip() + " }}",
         "expr_report_converged": report["vars"]["_converged"],
         "expr_report_stuck": report["vars"]["_stuck"],
+        "expr_report_errmsg": report["vars"]["_errmsg"],
+        # the transient-vs-definitive classification, lifted whole
+        "expr_transient_msgtxt": errors["vars"]["_msgtxt"],
+        "expr_transient": errors["vars"]["_transient"],
     }
 
 
@@ -324,7 +329,17 @@ def test_status_expressions_tolerate_unreported_applications(role_dir):
     # against every shape the CR actually comes back in.
     _, env = _repo_env()
     playbook = os.path.join(role_dir, "tests", "test_status.yml")
-    extra = json.dumps(_extract_status_expressions(role_dir))
+    # the transient patterns are the ROLE's, not the test's: the classification is
+    # only correct if the shipped list covers the connectivity failures and none
+    # of the credential ones. One JSON object - ansible will not parse two.
+    with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
+        transient = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]["transient_errors"]
+    extra = json.dumps(
+        dict(
+            _extract_status_expressions(role_dir),
+            transient_errors=transient,
+        )
+    )
     result = subprocess.run(
         ["ansible-playbook", playbook, "--extra-vars", extra],
         env=env,
@@ -496,6 +511,80 @@ def test_wait_fails_fast_on_argocd_error_conditions(role_dir):
         "DeletionError",
     ]
     assert defaults["settle_retries"] == 6
+
+
+def test_connectivity_failures_are_not_treated_as_bad_credentials(role_dir):
+    # Measured on rke21 at lab bring-up: the repo-server's first `helm pull` of a
+    # public chart failed with 'error fetching chart: ... dial tcp
+    # [2607:f8b0:...]: connect: network is unreachable'. ArgoCD reports that as
+    # sync.status=Unknown + ComparisonError - the same shape as a rejected
+    # credential - so the fast fail aborted a lab startup which then converged on
+    # its own seconds later (cert-manager and external-secrets both ended up
+    # Synced+Healthy). The message has to decide, not the condition type.
+    with open(os.path.join(role_dir, "tasks", "applications.yml")) as f:
+        block = yaml.safe_load(f)[0]["block"]
+    errors = _find_task(block, ".settle.errors")
+
+    # the guard must be its own condition: folded into the 'or' below it, an
+    # Unknown chart-fetch failure is still a definitive error
+    when = errors["when"]
+    assert "not _transient" in when, (
+        "settle.errors must skip transient errors, or a pod network that is not "
+        f"up yet kills the run: {when}"
+    )
+    assert when.index("not _transient") < len(when) - 1, (
+        "the transient guard must be evaluated independently of the "
+        "sync.status/error_conditions test"
+    )
+
+    # ...and it must be a substring match over the condition messages, case
+    # folded on both sides
+    assert "map(attribute='message', default='')" in errors["vars"]["_msgtxt"]
+    assert "| lower" in errors["vars"]["_msgtxt"]
+    assert "select('in', _msgtxt)" in errors["vars"]["_transient"]
+
+    with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]
+    transient = defaults["transient_errors"]
+    assert transient, "the list exists to be non-empty"
+    # lowercasing is the mechanism, so an uppercase pattern can never match
+    for pattern in transient:
+        assert pattern == pattern.lower(), f"pattern would never match: {pattern}"
+
+    # the credential errors the fast fail exists for must NOT be caught by it -
+    # those never fix themselves, and treating them as transient would make the
+    # fast fail and its rollback dead code
+    for definitive in (
+        "authentication required",
+        "invalid username or token",
+        "repository not found",
+        "permission denied",
+        "not found",
+    ):
+        assert not any(
+            definitive in pattern for pattern in transient
+        ), f"{definitive!r} must stay definitive, but is inside {transient}"
+
+    # resolved through the normal fact -> default chain, and settable per host
+    with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(
+        t for t in precheck if t.get("name", "").endswith(".precheck.resolve")
+    )
+    assert resolve["set_fact"]["ctlabs_argoapp_transient_errors"] == (
+        "{{ ctlabs_argoapp_fact['transient_errors'] "
+        "| default(ctlabs_argoapp.defaults.transient_errors) }}"
+    )
+    with open(os.path.join(role_dir, "templates", "facts.json.j2")) as f:
+        assert "'transient_errors'" in f.read()
+
+    # a stuck Application must quote WHY - 'sync=Unknown health=Healthy' alone is
+    # the same useless pair the fast fail was added to replace, and a transient
+    # error is by definition one that did not go on to recover
+    report = _find_task(block, ".wait.report")
+    assert "ArgoCD said" in report["ansible.builtin.fail"]["msg"]
+    assert "_errmsg" in report["ansible.builtin.fail"]["msg"]
+    assert "_errmsg" in report["vars"]
 
 
 def test_precheck_verifies_argocd_instance_exists(role_dir):
