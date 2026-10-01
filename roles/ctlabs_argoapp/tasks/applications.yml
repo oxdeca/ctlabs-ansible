@@ -247,11 +247,18 @@
           vars:
             _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
             _ours    : "{{ res_wait.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
-            _stuck   : >-
+            # "not converged" rather than "Synced but not Healthy": an
+            # Application ArgoCD has never reported on belongs in this list too.
+            # Selecting only the defined ones and rejecting the rest would let a
+            # wholly unreported Application vanish, and the `_stuck | length > 0`
+            # guard below would then skip the fail - a green run for an app that
+            # never synced.
+            _converged: >-
               {{ _ours | selectattr('status.sync.status',   'defined')
-                         | selectattr('status.health.status', 'defined')
-                         | rejectattr('status.sync.status',   'equalto', 'Synced')
-                         | rejectattr('status.health.status', 'equalto', 'Healthy') | list }}
+                        | selectattr('status.health.status', 'defined')
+                        | selectattr('status.sync.status',   'equalto', 'Synced')
+                        | selectattr('status.health.status', 'equalto', 'Healthy') | list }}
+            _stuck   : "{{ _ours | difference(_converged) | list }}"
             _first   : "{{ _stuck | first }}"
           ansible.builtin.fail:
             msg: >-

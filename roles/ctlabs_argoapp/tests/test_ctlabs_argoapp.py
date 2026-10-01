@@ -4,9 +4,12 @@
 # ------------------------------------------------------------------------------
 
 import glob
+import json
 import os
+import re
 import subprocess
 
+import pytest
 import yaml
 
 
@@ -281,6 +284,82 @@ def test_defaults_document_repositories_as_optional(role_dir):
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)
     assert defaults["ctlabs_argoapp"]["defaults"]["repositories"] == []
+
+
+def _extract_status_expressions(role_dir):
+    # Lift the real Jinja out of tasks/applications.yml instead of copying it
+    # into the test playbook. The expressions are the bug - copying them means a
+    # passing test that proves nothing about the shipped code.
+    with open(os.path.join(role_dir, "tasks", "applications.yml")) as f:
+        block = yaml.safe_load(f)[0]["block"]
+
+    settle = _find_task(block, ".settle")
+    wait = _find_task(block, ".wait")
+    report = _find_task(block, ".wait.report")
+
+    converged = settle["vars"]["_converged"]
+    return {
+        "expr_settle_converged": converged,
+        "expr_settle_errored": settle["vars"]["_errored"],
+        "expr_settle_pending": settle["vars"]["_pending"],
+        # `until:` is consumed as an expression, so its value carries no {{ }} -
+        # Ansible evaluates it directly. Ansible does not recursively template,
+        # so handing that string over as a var would leave it as dead text that
+        # always reads as truthy. Wrap it here rather than in the playbook, so
+        # the expression itself is still passed through untouched.
+        "expr_wait_until": "{{ " + wait["until"].strip() + " }}",
+        "expr_report_converged": report["vars"]["_converged"],
+        "expr_report_stuck": report["vars"]["_stuck"],
+    }
+
+
+def test_status_expressions_tolerate_unreported_applications(role_dir):
+    # The role died on a fresh cluster at the first poll after apply with
+    # "'dict object' has no attribute 'status'": a just-created Application has no
+    # 'status' key yet, and selectattr('status.sync.status', ...) walks straight
+    # into the missing key and raises under strict undefined. --syntax-check
+    # cannot catch this - it parses the task, it never evaluates the expression -
+    # and the timing is the worst possible one, because a new cluster always
+    # looks like this. So the expressions are pulled out of the role and run
+    # against every shape the CR actually comes back in.
+    _, env = _repo_env()
+    playbook = os.path.join(role_dir, "tests", "test_status.yml")
+    extra = json.dumps(_extract_status_expressions(role_dir))
+    result = subprocess.run(
+        ["ansible-playbook", playbook, "--extra-vars", extra],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, f"Status expressions failed:\n{result.stdout}\n{result.stderr}"
+
+
+def test_status_expressions_never_compare_a_missing_attribute(role_dir):
+    # A guard on the shape of the expressions, so the 'defined' prefilter cannot
+    # be dropped without this failing. Comparing 'status.sync.status' directly
+    # raises on an unreported Application; the prefilter is what makes that safe.
+    # Checked per expression rather than per line - the prefilter sits on its own
+    # line above the comparison it protects.
+    for name, expression in _extract_status_expressions(role_dir).items():
+        flat = " ".join(str(expression).split())
+        # every nested status path that gets compared must also be prefiltered
+        compared = set(re.findall(r"(?:select|reject)attr\('(status[^']*)',\s*'equalto'", flat))
+        guarded = set(re.findall(r"(?:select|reject)attr\('(status[^']*)',\s*'defined'", flat))
+        for path in compared - guarded:
+            pytest.fail(
+                f"{name}: compares '{path}' without a 'defined' prefilter - "
+                f"an unreported Application has no status and this raises"
+            )
+        # and the guard has to be a prefilter, not a trailing filter: 'defined'
+        # after the comparison does nothing for the entries already evaluated
+        for path in guarded:
+            first_guard = flat.index(f"attr('{path}', 'defined')")
+            first_cmp = flat.find(f"attr('{path}', 'equalto'")
+            if first_cmp != -1 and first_cmp < first_guard:
+                pytest.fail(
+                    f"{name}: compares '{path}' before the 'defined' prefilter "
+                    f"for it - the raise happens during the comparison"
+                )
 
 
 def _find_task(tasks, suffix):
