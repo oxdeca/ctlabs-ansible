@@ -20,6 +20,7 @@ def test_template_exists(role_dir):
         "templates/rke2-agent.service.j2",
         "templates/rke2-agent.sysconfig.j2",
         "templates/rke2.profile.j2",
+        "templates/coredns-helmchartconfig.yml.j2",
     ]
     for f in files:
         path = os.path.join(role_dir, f)

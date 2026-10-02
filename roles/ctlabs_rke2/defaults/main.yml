@@ -40,6 +40,21 @@ ctlabs_rke2:
       gateway_api:
         enabled : true
         provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
+      coredns:
+        resources:
+          requests:
+            cpu   : 100m
+            memory: 128Mi
+          limits:
+            cpu   : 100m
+            memory: 128Mi
+        split_dns:
+          enabled: true
+        public_resolvers:
+          - 8.8.8.8
+          - 8.8.4.4
+          - 1.1.1.1
+          - 1.0.0.1
       server:
         url: "https://{{ ansible_nodename }}:9345"
         token: /var/lib/rancher/rke2/server/token
@@ -67,6 +82,9 @@ ctlabs_rke2:
     bin:
       path: /usr/bin/rke2
       mode: '0750'
+    crictl:
+      src : /var/lib/rancher/rke2/agent/etc/crictl.yaml
+      dest: /etc/crictl.yaml
   os:
     - centos8
     - centos9

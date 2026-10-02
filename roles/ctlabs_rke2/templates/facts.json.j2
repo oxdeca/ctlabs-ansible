@@ -26,4 +26,27 @@
     "enabled" : {{ _facts.servicelb.enabled | default(false) | lower }}
   }
 {% endif %}
+{% if _facts.coredns is defined %},
+  "coredns" : {
+    "resources" : {
+      "requests" : {
+        "cpu"    : "{{ _facts.coredns.resources.requests.cpu    | default('100m') }}",
+        "memory" : "{{ _facts.coredns.resources.requests.memory | default('128Mi') }}"
+      },
+      "limits" : {
+        "cpu"    : "{{ _facts.coredns.resources.limits.cpu    | default('100m') }}",
+        "memory" : "{{ _facts.coredns.resources.limits.memory | default('128Mi') }}"
+      }
+    },
+    "split_dns" : {
+      "enabled" : {{ _facts.coredns.split_dns.enabled | default(true) | lower }}
+{%- if _facts.coredns.split_dns is defined and _facts.coredns.split_dns.domain is defined %},
+      "domain" : "{{ _facts.coredns.split_dns.domain }}"
+{%- endif %}
+{%- if _facts.coredns.split_dns is defined and _facts.coredns.split_dns.nameservers is defined %},
+      "nameservers" : {{ _facts.coredns.split_dns.nameservers | to_json }}
+{%- endif %}
+    }
+  }
+{% endif %}
 }

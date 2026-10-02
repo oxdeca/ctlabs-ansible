@@ -56,7 +56,14 @@
       service:
         name  : "{{ ctlabs_rke2.defaults.service.worker.name }}"
         state : started
-    
+
+- name: ctlabs_rke2.tasks.service.crictl.symlink
+  file:
+    src  : "{{ ctlabs_rke2.defaults.crictl.src  }}"
+    dest : "{{ ctlabs_rke2.defaults.crictl.dest }}"
+    state: link
+    force: true
+
 - name: ctlabs_rke2.tasks.service.cluster
   when: ctlabs_rke2_role == "server"
   block:
@@ -66,7 +73,51 @@
       ansible.builtin.wait_for:
         host  : "{{ ansible_nodename }}"
         port  : 6443
-        delay : 10 
+        delay : 10
+
+    - name: ctlabs_rke2.tasks.service.cluster.coredns.split_dns
+      when: ctlabs_rke2_coredns_split_dns_enabled
+      block:
+        - name: ctlabs_rke2.tasks.service.cluster.coredns.split_dns.resolv_conf.read
+          slurp:
+            src: /etc/resolv.conf
+          register: res_resolv_conf
+
+        - name: ctlabs_rke2.tasks.service.cluster.coredns.split_dns.resolv_conf.parse
+          vars:
+            _resolv_lines: "{{ (res_resolv_conf.content | b64decode).splitlines() }}"
+            _parsed_domain: >-
+              {{
+                (_resolv_lines
+                  | select('match', '^(domain|search)\s')
+                  | map('regex_replace', '^(domain|search)\s+(\S+).*$', '\2')
+                  | list
+                  | first) | default('', true)
+              }}
+            _parsed_nameservers: >-
+              {{
+                _resolv_lines
+                  | select('match', '^nameserver\s')
+                  | map('regex_replace', '^nameserver\s+(\S+).*$', '\1')
+                  | list
+                  | difference(ctlabs_rke2.defaults.config.coredns.public_resolvers)
+              }}
+          set_fact:
+            ctlabs_rke2_dns_domain: "{{ ctg_facts.ctlabs_rke2.coredns.split_dns.domain | default(_parsed_domain) }}"
+            ctlabs_rke2_dns_nameservers: "{{ ctg_facts.ctlabs_rke2.coredns.split_dns.nameservers | default(_parsed_nameservers) }}"
+
+    - name: ctlabs_rke2.tasks.service.cluster.coredns.resources
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'coredns-helmchartconfig.yml.j2') | from_yaml }}"
+      register: res_coredns_config
+      until   : res_coredns_config is success
+      retries : 10
+      delay   : 5
 
     - name: ctlabs_rke2.tasks.service.cluster.ingress.ready
       when:

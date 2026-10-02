@@ -1,0 +1,54 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rke2/templates/coredns-helmchartconfig.yml.j2
+ # Description : HelmChartConfig override for the bundled rke2-coredns chart
+#}
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-coredns
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    resources:
+      requests:
+        cpu: {{ ctlabs_rke2_coredns_resources.requests.cpu }}
+        memory: {{ ctlabs_rke2_coredns_resources.requests.memory }}
+      limits:
+        cpu: {{ ctlabs_rke2_coredns_resources.limits.cpu }}
+        memory: {{ ctlabs_rke2_coredns_resources.limits.memory }}
+{% if ctlabs_rke2_coredns_split_dns_enabled | default(false) and ctlabs_rke2_dns_domain | default('') and ctlabs_rke2_dns_nameservers | default([]) | length > 0 %}
+    servers:
+      - zones:
+          - zone: {{ ctlabs_rke2_dns_domain }}.
+        port: 53
+        plugins:
+          - name: errors
+          - name: cache
+            parameters: 30
+          - name: forward
+            parameters: ". {{ ctlabs_rke2_dns_nameservers | join(' ') }}"
+      - zones:
+          - zone: .
+        port: 53
+        plugins:
+          - name: errors
+          - name: health
+            configBlock: |-
+              lameduck 10s
+          - name: ready
+          - name: kubernetes
+            parameters: cluster.local in-addr.arpa ip6.arpa
+            configBlock: |-
+              pods insecure
+              fallthrough in-addr.arpa ip6.arpa
+              ttl 30
+          - name: prometheus
+            parameters: 0.0.0.0:9153
+          - name: forward
+            parameters: . /etc/resolv.conf
+          - name: cache
+            parameters: 30
+          - name: loop
+          - name: reload
+          - name: loadbalance
+{% endif %}

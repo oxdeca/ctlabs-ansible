@@ -51,6 +51,14 @@
   set_fact:
     ctlabs_rke2_servicelb_enabled: "{{ ctg_facts.ctlabs_rke2.servicelb.enabled | default(ctlabs_rke2.defaults.config.servicelb.enabled) }}"
 
+- name: ctlabs_rke2.tasks.precheck.coredns_resources
+  set_fact:
+    ctlabs_rke2_coredns_resources: "{{ ctg_facts.ctlabs_rke2.coredns.resources | default(ctlabs_rke2.defaults.config.coredns.resources) }}"
+
+- name: ctlabs_rke2.tasks.precheck.coredns_split_dns_enabled
+  set_fact:
+    ctlabs_rke2_coredns_split_dns_enabled: "{{ ctg_facts.ctlabs_rke2.coredns.split_dns.enabled | default(ctlabs_rke2.defaults.config.coredns.split_dns.enabled) }}"
+
 - name: ctlabs_rke2.tasks.precheck.join.vars
   when: ctlabs_rke2_role in ["control", "worker"]
   block:
