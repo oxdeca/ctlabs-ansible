@@ -1,0 +1,90 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_vault/tasks/timer.yml
+# Description : scheduled sealed backup (vault-backup.service + .timer)
+# ------------------------------------------------------------------------------
+#
+# Installs a systemd timer that runs vault-backup.py unattended.
+#
+# The timer is SKIPPED (with a NOTICE, not a failure) when no archive passphrase
+# is available, because vault-backup.py cannot encrypt an archive without one.
+# This role deliberately does not generate one: a passphrase that was invented
+# here and never handed to anyone makes every archive permanently unreadable,
+# which is the same single-owner-secret failure this role already avoids for the
+# recovered-key keyring (/etc/vault-backup/). Supply the passphrase either as
+# ctlabs_vault.defaults.config.backup.passphrase or by placing the file yourself.
+
+- name: ctlabs_vault.tasks.timer
+  when: ctlabs_vault_install_type == 'server'
+  block:
+    - name: ctlabs_vault.tasks.timer.passphrase.write
+      copy:
+        content : "{{ ctlabs_vault.defaults.config.backup.passphrase }}\n"
+        dest    : "{{ ctlabs_vault.defaults.config.backup.passphrase_file }}"
+        owner   : root
+        group   : root
+        mode    : "0400"
+      when   : (ctlabs_vault.defaults.config.backup.passphrase | default('') | length) > 0
+      # the passphrase is a secret -- never echo it into the ansible log
+      no_log : true
+
+    - name: ctlabs_vault.tasks.timer.passphrase.stat
+      stat:
+        path : "{{ ctlabs_vault.defaults.config.backup.passphrase_file }}"
+      register: ctlabs_vault_backup_passphrase_stat
+
+    - name: ctlabs_vault.tasks.timer.passphrase.mode_ok
+      assert:
+        that    : (ctlabs_vault_backup_passphrase_stat.stat.mode | int(base=8)) in [0o600, 0o400]
+        fail_msg: >-
+          {{ ctlabs_vault.defaults.config.backup.passphrase_file }} has mode
+          {{ '%04o' | format(ctlabs_vault_backup_passphrase_stat.stat.mode | int(base=8)) }};
+          vault-backup.py refuses anything but 0600 or 0400, so the scheduled
+          backup would fail. chmod it to 0400.
+        quiet   : true
+      when   : ctlabs_vault_backup_passphrase_stat.stat.exists
+
+    - name: ctlabs_vault.tasks.timer.skip.no_passphrase
+      debug:
+        msg : >-
+          NOT installing {{ ctlabs_vault.defaults.service.backup.timer }}: no
+          archive passphrase at
+          {{ ctlabs_vault.defaults.config.backup.passphrase_file }}. Set
+          ctlabs_vault.defaults.config.backup.passphrase (or create that file
+          with mode 0400) to schedule unattended backups. Manual runs still work:
+          vault-backup.py backup-full --passphrase-file <file>
+      when : not ctlabs_vault_backup_passphrase_stat.stat.exists
+
+    - name: ctlabs_vault.tasks.timer
+      when: ctlabs_vault_backup_passphrase_stat.stat.exists
+      block:
+        - name: ctlabs_vault.tasks.timer.out_dir
+          file:
+            path  : "{{ ctlabs_vault.defaults.config.backup.out_dir }}"
+            state : directory
+            owner : root
+            group : root
+            mode  : "0700"
+
+        - name: ctlabs_vault.tasks.timer.service
+          template:
+            src  : vault-backup.service.j2
+            dest : "/etc/systemd/system/{{ ctlabs_vault.defaults.service.backup.service }}"
+            mode : "0644"
+          notify: ctlabs_vault.handlers.service.vault.reload
+
+        - name: ctlabs_vault.tasks.timer.timer
+          template:
+            src  : vault-backup.timer.j2
+            dest : "/etc/systemd/system/{{ ctlabs_vault.defaults.service.backup.timer }}"
+            mode : "0644"
+          notify: ctlabs_vault.handlers.service.vault.reload
+
+        # enable + start the TIMER only; the .service is Type=oneshot and is
+        # triggered by the timer, so it must not be 'started' directly here.
+        - name: ctlabs_vault.tasks.timer.enable
+          service:
+            name    : "{{ ctlabs_vault.defaults.service.backup.timer }}"
+            enabled : true
+            state   : started

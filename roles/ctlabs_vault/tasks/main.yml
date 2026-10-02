@@ -28,6 +28,11 @@
     - ctlabs_vault
     - ctlabs_vault.service
 
+- import_tasks: timer.yml
+  tags:
+    - ctlabs_vault
+    - ctlabs_vault.timer
+
 - import_tasks: init.yml
   tags:
     - ctlabs_vault

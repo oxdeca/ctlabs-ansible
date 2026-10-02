@@ -1,0 +1,23 @@
+[Unit]
+  Description= Vault sealed backup ({{ ctlabs_vault.defaults.config.backup.command }})
+  Documentation=file:/usr/share/doc/vault/README.md
+  After=network-online.target vault.service
+
+  # NOTE: deliberately After= but NOT Requires=vault.service.
+  # vault-backup.py stops the vault to take a consistent storage snapshot and
+  # restarts it in a finally block. A `Requires=` would make that explicit stop
+  # propagate here and systemd would kill this job mid-backup, leaving the
+  # archive unwritten.
+
+[Service]
+  Type=oneshot
+  User=root
+  Group=root
+  ExecStart={{ ctlabs_vault.defaults.files.backup.dst }} {{ ctlabs_vault.defaults.config.backup.command }} --passphrase-file {{ ctlabs_vault.defaults.config.backup.passphrase_file }} --out-dir {{ ctlabs_vault.defaults.config.backup.out_dir }} --log-file {{ ctlabs_vault.defaults.config.backup.log_file }}
+  # The passphrase is read from a 0400/0600 file, never from the unit or argv.
+  Nice=10
+  IOSchedulingClass=idle
+  TimeoutStartSec=3600
+
+[Install]
+  WantedBy=multi-user.target

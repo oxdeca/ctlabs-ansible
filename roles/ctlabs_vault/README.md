@@ -104,7 +104,7 @@ It contains `vault_root_token` and `vault_unseal_keys_b64`. **Treat this file as
 - **Vault sealed:** not recoverable.
 - **Rekey does NOT help:** a rekey requires a **quorum of the existing unseal  keys** to authorize (HashiCorp `operator rekey` docs). With `secret_shares = 1`,  that means the one lost key is still required. Key loss is unrecoverable by  design.
 
-The only hard protection is redundancy: keep a second copy of the init output file off-host, use a sealed `vault-backup.py` archive (below — it embeds the keys, encrypted), or increase `secret_shares`/`secret_threshold` at init so losing one share doesn't lock the vault.
+The only hard protection is redundancy: keep a second copy of the init output file off-host, use a sealed `vault-backup.py` archive (below — it embeds the keys, encrypted, and `restore-*` writes the recovered keys back to a keyring on the host so the next backup needs no key flags), or increase `secret_shares`/`secret_threshold` at init so losing one share doesn't lock the vault.
 
 ### Seal-key rotation (compromise, routine rotation)
 
@@ -178,9 +178,26 @@ vault-export.py --addr https://ansible.ctlabs.internal:8200 --token "$(cat .ctla
 
 Flags: `--addr` (or `VAULT_ADDR`), `--token` (or `VAULT_TOKEN`), `--out` (default stdout; mode `0600`), `--insecure` (self-signed lab CA), `--ca-cert <ca.crt>`.
 
-Exports: engines + auth methods (token/ system/ identity/ skipped), ACL policies (inline HCL, default/root skipped), userpass users (name + policies only), approle roles (incl. `secret_id_ttl` / `secret_id_bound_cidrs` / `token_ttl` / `secret_id_num_uses`), jwt/oidc mount config + roles.
+Exports: engines + auth methods (token/ system/ identity/ skipped), ACL policies (inline HCL, default/root skipped), userpass users (name + policies only), approle roles (incl. `secret_id_ttl` / `secret_id_bound_cidrs` / `token_ttl` / `secret_id_num_uses`), jwt/oidc mount config + roles, and an `identity_oidc` inventory marker (see below).
 
 **Tradeoff (documented):** this is *config-restore, not storage-restore*. userpass passwords and KV/secret data are NOT restored by it (Vault cannot read passwords back; KV data lives in storage). For full data-level restore use `vault-backup.py` sealed archives (below). The exported user entries carry no `password` — add them to the fact file before bootstrap on the new host.
+
+#### `identity/oidc/*` (GCP Workload Identity Federation) is deliberately NOT restored by config-restore
+
+This is the one piece of Vault configuration that **cannot** be reproduced from the API, so the exporter emits an inventory marker plus a loud `WARNING` instead of a lossy "reproduction" that would look complete. Verified against a live Vault (2.1.1, RS256):
+
+1. **An OIDC signing key's private half is write-only.** `identity/oidc/key/<name>` read-back returns only `algorithm` / `rotation_period` / `verification_ttl` / `allowed_client_ids` — no key material — and the JWKS endpoint exposes only `n` + `e`. A bootstrapped vault would sign with a **different key** than GCP was configured to trust, breaking a working WIF setup.
+2. **`identity/oidc/role/<name>` read-back is filtered** to `client_id`, `key`, `template`, `ttl`. `token_policies`, `bound_claims`, `user_claim` and `allowed_redirect_uris` are accepted on write but never returned, so they cannot be carried across.
+3. **The key's client-ID/role restriction is enforced but invisible on read** (token minting is refused for a role the key does not permit), so re-creating the key could silently widen or narrow it.
+
+Consequences:
+
+| Path | `identity/oidc/*` | OIDC signing key |
+| --- | --- | --- |
+| `vault-backup.py` storage archive | **restored** (whole `file` storage tree is archived) | **preserved byte-for-byte** |
+| `vault-export.py` + `bootstrap.yml` | not restored (marker + warning only) | cannot be reproduced — new key |
+
+So: restore WIF from a `vault-backup.py` archive, or re-run `ctlabs-terraform/scripts/vault_oidc_setup.py` against the target Vault. That script is the owner of this content and is idempotent for the same key/role names. `bootstrap.yml` prints a `NOTICE` when a Vault has no OIDC issuer, so a WIF-less lab is never silently mistaken for a configured one.
 
 ## Backup & Restore — sealed `.vback` archives (`vault-backup.py`)
 
@@ -194,27 +211,81 @@ vault-(snap|full)-<ts>.vback
 - **Fernet** (AES-128-CBC + HMAC-SHA256, authenticated) keyed by **PBKDF2-HMAC-SHA256** (300k iterations, random salt). Needs `python3-cryptography`.
 - **Passphrase is never stored**: provide it via `VAULT_BACKUP_PASSPHRASE`, `--passphrase-file <mode-0600-file>`, or an interactive prompt — **never** on the command line. Keep it out-of-band (password manager / custodian). Without it an archive yields nothing (confidentiality) and any tampering is detected (authenticity).
 - The controller keyring (`/root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
+- `restore-*` **persists the recovered keys** to a keyring (below), and `backup-*` auto-discovers it — so a restored vault can be backed up again with no key flags.
+
+### Recovered-key keyring
+
+A restore replaces the storage, so the **only** keys that can ever unlock that vault afterwards are the ones inside the archive. If nothing on disk holds them, the archive becomes a single point of failure — and `RETENTION_DAYS` prunes old archives. `restore-*` therefore writes the recovered keyring out: a `0700` dir holding a random 32-char passphrase (`0600`) plus the symmetric-gpg ciphertext of the keyring (`0600`).
+
+| Path | Mode | Contents |
+|------|------|----------|
+| `/etc/vault-backup/` | `0700` | dir |
+| `/etc/vault-backup/passphrase` | `0600` | random 32-char gpg passphrase |
+| `/etc/vault-backup/keys.gpg` | `0600` | gpg-symmetric ciphertext of the keyring |
+
+**The mechanism is ctlabs-tools' (`ctlabs_tools/vault/vault_login.py`); the namespace deliberately is not.** That tool treats `~/.ctlabs_vault/` as a *disposable session cache* — `vault-login clear` deletes `.vault_key`, and `vault-login user|oidc|approle` overwrites it with a fresh random value on every login. Storing the unseal key + root token there would mean a routine logout destroys the only copy of the keys and silently bricks the vault on its next seal. Keep the two lifecycles apart. `test_backup_keyring_never_shares_ctlabs_tools_session_cache` pins this.
+
+| Target path | Codec |
+|------|-------|
+| any `.gpg` path (default `/etc/vault-backup/keys.gpg`) | gpg-symmetric; passphrase in `<dir>/passphrase` |
+| any other path (e.g. the controller init-output file) | plaintext `0400`, init-output YAML shape |
+
+- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
+- The passphrase goes to gpg via `--passphrase-file`, **never argv** (`ps` is world-readable). Unlike the ctlabs-tools implementation, which passes `--passphrase <pw>` on both sides.
+- This protects the keys from casual disclosure (`cat`/`grep`/diff/plaintext backup of a config dir) — **not** from root on the host, which can read the passphrase file.
+- The keyring passphrase is **independent** of the archive's Fernet passphrase; neither is derived from the other.
+- Writing the keyring happens **after** the restore is proven unsealed with a valid root token, so a failed restore never leaves a keyring that doesn't match the running vault. An existing keyring that differs is copied to `<path>.pre-<ts>` first — never silently clobbered, since it may be the only working keyring for a vault you did not mean to replace.
+- `gnupg` (`gnupg2` on RedHat) is installed by the role for this. A `.gpg` target with no gpg binary is a hard error, not a silent plaintext fallback — use a non-`.gpg` `--keyring-out` if you want plaintext.
+- Rekey after a restore invalidates the on-disk keyring; the next `backup-*` fails loudly at the root-token verification and names the stale key source.
 
 ### Usage
 
 ```sh
 # on the vault host
 vault-backup.py backup-full \
-  --keys-file /path/to/.ctlabs_vault_init_output_<node>.yml \
   --passphrase-file /etc/vault-backup.pw          # or VAULT_BACKUP_PASSPHRASE
+# keys are auto-discovered from /etc/vault-backup/keys.gpg (or --keys-file)
 # -> /var/backups/vault/vault-full-<ts>.vback (mode 0600)
 
 vault-backup.py restore-full /var/backups/vault/vault-full-<ts>.vback \
   --passphrase-file /etc/vault-backup.pw          # prompts YES confirmation
+# -> storage replaced, unsealed, root token verified, keyring written
+#    -> the next backup-full needs no key flags at all
+
+# co-located controller+vault: also refresh the file bootstrap.yml reads
+vault-backup.py restore-full <archive> \
+  --keyring-out /etc/vault-backup/keys.gpg \
+  --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
+  --passphrase-file /etc/vault-backup.pw
 ```
 
-Subcommands: `backup-snap` / `backup-full` (data / data+config), `restore-snap` / `restore-full`. Common flags: `--keys-file`, `--passphrase-file`, `--addr` (default `api_addr` from `vault.hcl`), `--ca-cert`, `--data-dir`, `--config-dir`, `--out-dir`, `--service`; backup also `--force` / `--no-unseal`; restore also `--yes`.
+
+Subcommands: `backup-snap` / `backup-full` (data / data+config), `restore-snap` / `restore-full`. Common flags: `--keys-file`, `--passphrase-file`, `--addr` (default `api_addr` from `vault.hcl`), `--ca-cert`, `--data-dir`, `--config-dir`, `--out-dir`, `--service`; backup also `--keyring` (keyring to read, first existing wins) / `--force` / `--no-unseal`; restore also `--keyring-out` (repeatable) / `--no-keyring` / `--yes`.
+
+### Scheduled backups (`vault-backup.timer`)
+
+`tasks/timer.yml` installs `vault-backup.service` + `vault-backup.timer`, so backups run unattended daily at **03:17** (±15 min random delay) instead of depending on a human remembering. `Persistent=true`, so if the box was off at 03:17 the backup runs at the next boot rather than being silently skipped for the day.
+
+```sh
+systemctl list-timers vault-backup.timer     # when it next fires
+systemctl start vault-backup.service          # run one now, same code path
+tail -f /var/log/vault-backup.log
+```
+
+Defaults live under `ctlabs_vault.defaults.config.backup` (`on_calendar`, `command`, `out_dir`, `persistent`, …). `command: backup-full` (not `backup-snap`) so each archive also carries the config dir — a `snap` restore comes back with no TLS cert.
+
+**The archive passphrase is required and is never generated by this role.** Supply it as `ctlabs_vault.defaults.config.backup.passphrase` (written to `/etc/vault-backup.pw`, mode `0400`, `no_log` so it never hits the Ansible log) or create that file yourself. If it is absent the role prints a `NOTICE` and **skips** installing the timer rather than failing — same skip idiom as `bootstrap.yml`. Rationale: a passphrase invented here and never handed to anyone makes every archive permanently unreadable. That is the same single-owner-secret trap as the keyring above, so the role refuses to walk into it. The passphrase is *not* the keyring passphrase (`/etc/vault-backup/passphrase`) — two different secrets for two different jobs.
+
+**Escrow it off-host together with the archives.** An archive plus its passphrase stored in the same place is the same place.
+
+> **Do not add `Requires=vault.service` to the backup unit.** `vault-backup.py` stops Vault to take a consistent storage snapshot, so a hard dependency makes that explicit stop propagate and systemd cancels the job. Verified on this lab: the unit dies with `Result: signal` / `signal=TERM`, **no archive is written**, and Vault is left `deactivating` (i.e. down and sealed, needing a manual unseal). `After=` is the correct and sufficient ordering. Pinned by `test_backup_service_does_not_require_vault_service`.
 
 ### Safety properties
 
 - **Refuses to stop the vault when it can't unseal it afterwards** (e.g. running but no key available) unless `--force` — this removes the "service restart with lost key = permanently sealed" trap.
 - After every stop/start it **auto-unseals** with the embedded key and **verifies the root token** (`auth/token/lookup-self`) — proving on every run that the keyring still matches the vault (catches post-rekey staleness).
-- **Restore verifies the archive (magic + auth) before touching anything**, moves the existing data dir aside (`.pre-<ts>`, newest kept) instead of deleting, extracts into a staging dir, swaps, starts, and unseals. Bad passphrase or tampering aborts with a clean error — nothing is touched.
+- **Key source precedence**: `--keys-file` → `VAULT_BACKUP_UNSEAL_KEYS`/`VAULT_BACKUP_ROOT_TOKEN` → first existing path in `--keyring` (default `~/.ctlabs_vault/.vault_keys.gpg`). With none of them it refuses rather than sealing the vault.
+- **Restore verifies the archive (magic + auth) before touching anything**, moves the existing data dir aside (`.pre-<ts>`, newest kept) instead of deleting, extracts into a staging dir, swaps, starts, unseals, verifies — and only then writes the recovered keyring. Bad passphrase or tampering aborts with a clean error — nothing is touched.
 - Archives are world-unreadable (mode 0600). Old archives are pruned after `RETENTION_DAYS`.
 
 ### Migration note
@@ -225,4 +296,4 @@ Legacy backups from the old script are plaintext `.tar.gz` (e.g. `vault-snap-*.t
 
 1. Install/run the role so `/usr/sbin/vault-backup.py` exists (fresh hosts re-init or restore directly).
 2. Copy the `.vback` **and** the passphrase (separately) to the host; `systemctl stop vault` is handled by the script.
-3. `vault-backup.py restore-full <archive> ...` — the script replaces the storage, restarts the service and unseals; verify with the embedded root token.
+3. `vault-backup.py restore-full <archive> ...` — the script replaces the storage, restarts the service, unseals, verifies the root token and writes the recovered keyring. **Back that keyring up off-host**: it plus the passphrase is the only way back in.

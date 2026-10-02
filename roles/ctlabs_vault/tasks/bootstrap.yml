@@ -51,6 +51,42 @@
     ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
   block:
     #
+    # identity/oidc (GCP WIF) -- coverage check, see the WARNING tasks below
+    #
+    - name: ctlabs_vault.tasks.bootstrap.identity_oidc.read
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/identity/oidc/config"
+        validate_certs: false
+        status_code  : [200, 404, 400]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      register: vault_bootstrap_identity_oidc
+
+    # This role deliberately does NOT create identity/oidc/* content: Vault never
+    # returns an OIDC signing key's private material, so bootstrap cannot
+    # reproduce a working WIF provider (see files/vault-export.py). Warn rather
+    # than fail, but never let a WIF-less vault look like a configured one.
+    # `default('', true)` (boolean) is required: the plain form only replaces an
+    # *undefined* variable, so a null/missing issuer stayed None and `| length`
+    # raised TypeError, taking the whole play down.
+    - name: ctlabs_vault.tasks.bootstrap.identity_oidc.issuer
+      set_fact:
+        ctlabs_vault_bootstrap_oidc_issuer: >-
+          {{ ((vault_bootstrap_identity_oidc.json | default({})).get('data') or {}).get('issuer') | default('', true) }}
+
+    - name: ctlabs_vault.tasks.bootstrap.identity_oidc.missing_issuer
+      when: (ctlabs_vault_bootstrap_oidc_issuer | trim | length) == 0
+      debug:
+        msg: >-
+          NOTICE: identity/oidc/config has no issuer -- this Vault has NO OIDC
+          provider, so GCP Workload Identity Federation is NOT usable. The
+          declarative bootstrap does not create identity/oidc/* (Vault cannot
+          return an OIDC signing key's private material, so it cannot be
+          reproduced). To enable WIF, run
+          ctlabs-terraform/scripts/vault_oidc_setup.py against this Vault, or
+          restore identity/oidc/* from a vault-backup.py storage archive.
+
+    #
     # Secrets Engines
     #
     - name: ctlabs_vault.tasks.bootstrap.engine.read

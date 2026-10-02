@@ -4,7 +4,9 @@
 # ------------------------------------------------------------------------------
 
 import ast
+import json
 import os
+import shutil
 import subprocess
 
 import pytest
@@ -164,6 +166,151 @@ def _load_backup_module():
     return mod
 
 
+def _load_export_module():
+    import importlib.util
+    here = os.path.dirname(__file__)
+    script = os.path.join(here, "..", "files", "vault-export.py")
+    spec = importlib.util.spec_from_file_location("ctlabs_vault_export", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class _FakeVault:
+    def __init__(self, routes):
+        self.routes = routes
+        self.calls = []
+
+    def __call__(self, addr, token, path, method="GET", body=None, ctx=None):
+        self.calls.append(path)
+        if path in self.routes:
+            return self.routes[path]
+        return None
+
+
+def _export_identity_oidc(routes):
+    """Run export_identity_oidc against canned API responses."""
+    mod = _load_export_module()
+    vault = _FakeVault(routes)
+    mod.api = vault
+    return mod.export_identity_oidc("https://v:8200", "tok", None), vault
+
+
+def test_export_inventory_records_identity_oidc_without_reproducing_it(role_dir):
+    got, _ = _export_identity_oidc(
+        {
+            "/v1/identity/oidc/config": {"data": {"issuer": "https://v:8200/"}},
+            "/v1/identity/oidc/key?list=true": {"data": {"keys": ["default", "gcp-wif-key"]}},
+            "/v1/identity/oidc/role?list=true": {"data": {"keys": ["gcp-wif"]}},
+        }
+    )
+    assert got["covered"] is False
+    assert got["issuer"] == "https://v:8200"
+    assert got["signing_keys"] == ["gcp-wif-key"]
+    assert got["roles"] == ["gcp-wif"]
+
+
+def test_export_inventory_omits_builtin_default_signing_key(role_dir):
+    got, _ = _export_identity_oidc(
+        {"/v1/identity/oidc/key?list=true": {"data": {"keys": ["default"]}}}
+    )
+    assert got is None, "a vault with only the builtin default key is not a WIF setup"
+
+
+def test_export_inventory_never_carries_key_or_role_config(role_dir):
+    """The marker must stay an inventory: a faithful reproduction is impossible
+    (write-only signing key, filtered role read-back). If someone later adds
+    real key/role config here it would silently produce a broken WIF."""
+    got, _ = _export_identity_oidc(
+        {
+            "/v1/identity/oidc/config": {"data": {"issuer": "https://v:8200"}},
+            "/v1/identity/oidc/key?list=true": {"data": {"keys": ["gcp-wif-key"]}},
+            "/v1/identity/oidc/role?list=true": {"data": {"keys": ["gcp-wif"]}},
+        }
+    )
+    blob = json.dumps(got)
+    for forbidden in ("bundle", "private_key", "token_policies", "bound_claims"):
+        assert forbidden not in blob, "identity_oidc marker must not carry config: " + forbidden
+
+
+def test_export_never_reads_signing_key_material(role_dir):
+    """Pins the write-only assumption: the exporter must never issue a read that
+    could pick up key material, and must rely on list endpoints instead."""
+    _, vault = _export_identity_oidc(
+        {
+            "/v1/identity/oidc/config": {"data": {"issuer": "https://v:8200"}},
+            "/v1/identity/oidc/key?list=true": {"data": {"keys": ["gcp-wif-key"]}},
+        }
+    )
+    assert vault.calls == [
+        "/v1/identity/oidc/config",
+        "/v1/identity/oidc/key?list=true",
+        "/v1/identity/oidc/role?list=true",
+    ]
+    for call in vault.calls:
+        assert "?list=true" in call or call.endswith("/config")
+
+
+def test_export_script_warns_that_identity_oidc_is_not_covered(role_dir):
+    script = os.path.join(role_dir, "files", "vault-export.py")
+    with open(script) as f:
+        text = f.read()
+    assert "identity/oidc/* is NOT covered" in text
+    assert "vault_oidc_setup.py" in text
+    assert "signing_keys" in text
+
+
+def test_bootstrap_warns_when_vault_has_no_oidc_issuer(role_dir):
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        text = f.read()
+    assert "/identity/oidc/config" in text, "bootstrap must inspect the OIDC issuer"
+    assert "identity_oidc.missing_issuer" in text
+    assert "vault_oidc_setup.py" in text, "the notice must name the owning script"
+
+
+def test_bootstrap_oidc_issuer_when_survives_missing_and_null_issuer(role_dir):
+    """`| default('')` only replaces *undefined*, not None -- so a 200 response
+    with no issuer key (or a null issuer) made `| length` raise TypeError and
+    took the whole play down. The boolean-default form must handle both."""
+    jinja2 = pytest.importorskip("jinja2")
+    env = jinja2.Environment(undefined=jinja2.StrictUndefined)
+
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        text = f.read()
+    extract = [
+        ln
+        for ln in text.splitlines()
+        if "{{" in ln and ".get('issuer')" in ln
+    ]
+    assert extract, "could not find the issuer set_fact expression"
+    got = env.compile_expression(
+        extract[0].split("{{", 1)[1].split("}}", 1)[0].strip()
+    )
+    assert got(vault_bootstrap_identity_oidc={"json": {"data": {"issuer": ""}}}) == ""
+    assert got(vault_bootstrap_identity_oidc={"json": {"data": {}}}) == ""
+    assert got(vault_bootstrap_identity_oidc={"json": {"data": {"issuer": None}}}) == ""
+    assert got(vault_bootstrap_identity_oidc={"json": {"errors": ["x"]}}) == ""
+    assert got(vault_bootstrap_identity_oidc={}) == ""
+    assert (
+        got(vault_bootstrap_identity_oidc={"json": {"data": {"issuer": "https://v:8200"}}})
+        == "https://v:8200"
+    )
+
+
+def test_bootstrap_when_expressions_are_balanced_and_parse(role_dir):
+    """An unbalanced paren inside a quoted `when:` scalar made the WHOLE task
+    file fail to parse, which silently killed every other bootstrap task too."""
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        text = f.read()
+    assert yaml.safe_load(text) is not None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("when:"):
+            continue
+        expr = stripped[len("when:") :].strip().strip('"').strip("'")
+        assert expr.count("(") == expr.count(")"), "unbalanced parens in: " + stripped
+
+
 def test_backup_script_present_and_valid(role_dir):
     script = os.path.join(role_dir, "files", "vault-backup.py")
     assert os.path.isfile(script)
@@ -251,12 +398,316 @@ def test_backup_keys_file_parse(role_dir, tmp_path):
     assert keys == ["SGVsbG8xMjNIMDA9==X"]
 
 
-def test_backup_requires_keys_unless_force(role_dir):
+def test_backup_requires_keys_unless_force(role_dir, tmp_path):
     mod = _load_backup_module()
     old_env = os.environ.get("VAULT_BACKUP_UNSEAL_KEYS")
     for var in ("VAULT_BACKUP_UNSEAL_KEYS", "VAULT_BACKUP_ROOT_TOKEN"):
         os.environ.pop(var, None)
-    args = type("Args", (), {"keys_file": None, "force": False})()
-    assert mod.load_keys(args) == ([], None)
+    real_default = mod.KEYRING_FILE
+    mod.KEYRING_FILE = str(tmp_path / "absent.gpg")
+    try:
+        args = type("Args", (), {"keys_file": None, "keyring": None, "force": False})()
+        assert mod.load_keys(args) == ([], None, None)
+    finally:
+        mod.KEYRING_FILE = real_default
     if old_env is not None:
         os.environ["VAULT_BACKUP_UNSEAL_KEYS"] = old_env
+
+
+@pytest.mark.skipif(shutil.which("gpg") is None, reason="gpg not installed")
+def test_backup_autodiscovers_default_keyring(role_dir, tmp_path):
+    """With no --keyring and no --keys-file, backup must find the keyring that
+    restore wrote to the DEFAULT path — the flag default is None, so the
+    fallback has to live in load_keys, not in argparse."""
+    mod = _load_backup_module()
+    real_default = mod.KEYRING_FILE
+    default_path = str(tmp_path / "vault-backup" / "keys.gpg")
+    mod.KEYRING_FILE = default_path
+    try:
+        mod.write_keyrings([default_path], ["dk1"], "hvs.default")
+        for var in ("VAULT_BACKUP_UNSEAL_KEYS", "VAULT_BACKUP_ROOT_TOKEN"):
+            os.environ.pop(var, None)
+        args = type("Args", (), {"keys_file": None, "keyring": None, "force": False})()
+        assert mod.load_keys(args) == (["dk1"], "hvs.default", default_path)
+    finally:
+        mod.KEYRING_FILE = real_default
+
+
+def test_backup_keyring_codec_inferred_from_suffix(role_dir):
+    """A .gpg path is the gpg keyring, anything else a plaintext 0400 file."""
+    mod = _load_backup_module()
+    assert mod._is_gpg_keyring("/etc/vault-backup/keys.gpg")
+    assert not mod._is_gpg_keyring("/root/ctlabs-ansible/.ctlabs_vault_init_output_vdb1.yml")
+    assert mod._key_file_for("/etc/vault-backup/keys.gpg") == \
+        "/etc/vault-backup/passphrase"
+
+
+def test_backup_keyring_never_shares_ctlabs_tools_session_cache(role_dir):
+    """The unseal key + root token must NOT live in ctlabs-tools' session-cache
+    dir: 'vault-login clear' deletes that passphrase file and 'vault-login user'
+    overwrites it, either of which would destroy the only copy of the keys."""
+    mod = _load_backup_module()
+    tools_dir = os.path.expanduser("~/.ctlabs_vault")
+    for path in (mod.KEYRING_DIR, mod.KEYRING_FILE, mod.KEYRING_KEY_FILE,
+                 os.path.dirname(mod._key_file_for(mod.KEYRING_FILE))):
+        assert os.path.abspath(path) != os.path.abspath(tools_dir)
+        assert not os.path.abspath(path).startswith(os.path.abspath(tools_dir) + os.sep), \
+            f"{path} is inside the ctlabs-tools session cache dir ({tools_dir})"
+    assert os.path.basename(mod.KEYRING_KEY_FILE) != ".vault_key"
+    assert os.path.basename(mod.KEYRING_FILE) != ".env.gpg"
+
+
+@pytest.mark.skipif(shutil.which("gpg") is None, reason="gpg not installed")
+def test_backup_keyring_gpg_roundtrip(role_dir, tmp_path):
+    """Restore's persisted keyring must be readable by a later backup: no
+    plaintext token on disk, and the passphrase stays out of argv."""
+    mod = _load_backup_module()
+    path = str(tmp_path / "keys.gpg")
+    keys = ["dG9rZW4xMjNIMDAwMTIzNA=="]
+    root = "hvs.rootToken"
+    mod.write_keyrings([path], keys, root)
+
+    assert open(path, "rb").read().find(root.encode()) == -1, "token must not be plaintext"
+    key_file = mod._key_file_for(path)
+    assert oct(os.stat(key_file).st_mode & 0o777) == "0o600"
+
+    args = type("Args", (), {"keys_file": None, "keyring": [path], "force": False})()
+    for var in ("VAULT_BACKUP_UNSEAL_KEYS", "VAULT_BACKUP_ROOT_TOKEN"):
+        os.environ.pop(var, None)
+    assert mod.load_keys(args) == (keys, root, path)
+
+
+@pytest.mark.skipif(shutil.which("gpg") is None, reason="gpg not installed")
+def test_backup_keyring_passphrase_not_on_argv(role_dir, tmp_path):
+    """The passphrase must reach gpg via --passphrase-file, never argv: argv is
+    world-readable through ps for the life of the process."""
+    mod = _load_backup_module()
+    seen = []
+    real = subprocess.run
+
+    def spy(argv, **kw):
+        seen.append(argv)
+        return real(argv, **kw)
+
+    mod.subprocess.run = spy
+    try:
+        mod.seal_keyring(str(tmp_path / "keys.gpg"), ["k1"], "hvs.tok")
+    finally:
+        mod.subprocess.run = real
+    assert seen, "gpg was never invoked"
+    for argv in seen:
+        assert "--passphrase-file" in argv
+        assert "hvs.tok" not in " ".join(argv)
+
+
+def test_backup_keyring_plain_codec_matches_init_output_format(role_dir, tmp_path):
+    """The plaintext codec writes the init-output shape so bootstrap.yml
+    (from_yaml) and --keys-file can consume the same file."""
+    mod = _load_backup_module()
+    path = str(tmp_path / "init-output.yml")
+    keys = ["aaa", "bbb"]
+    mod.write_keyrings([path], keys, "hvs.tok")
+    assert oct(os.stat(path).st_mode & 0o777) == "0o400"
+    assert mod.open_keyring(path) == (keys, "hvs.tok")
+    assert mod._load_keys_from_file(path) == (keys, "hvs.tok")
+
+
+def test_backup_keyring_write_is_idempotent_and_preserves_old(role_dir, tmp_path):
+    """Re-running restore with the same keys must not churn the file; different
+    keys must keep a copy of the previous keyring (it may be the only working
+    one for a vault the operator did not mean to replace)."""
+    mod = _load_backup_module()
+    path = str(tmp_path / "keys.gpg")
+    mod.write_keyrings([path], ["k1"], "hvs.a")
+    first = open(path, "rb").read()
+    mod.write_keyrings([path], ["k1"], "hvs.a")
+    assert open(path, "rb").read() == first
+    assert not [p for p in os.listdir(tmp_path) if ".pre-" in p]
+
+    mod.write_keyrings([path], ["k2"], "hvs.b")
+    assert mod.open_keyring(path) == (["k2"], "hvs.b")
+    kept = [p for p in os.listdir(tmp_path) if ".pre-" in p]
+    assert len(kept) == 1, "the replaced keyring must be kept"
+    assert oct(os.stat(os.path.join(tmp_path, kept[0])).st_mode & 0o777) == "0o600"
+
+
+def test_backup_restore_writes_keyring_then_backup_needs_no_flags(role_dir, tmp_path):
+    """The reported bug end-to-end at the unit level: the keys that come out of
+    an archive are the only ones that can unlock the restored vault, so restore
+    must persist them and backup must find them without --keys-file."""
+    mod = _load_backup_module()
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "core").write_text("vault core")
+    keys, root = ["SGVsbG8xMjNIMDA9=="], "hvs.restoredRoot"
+    payload = mod.build_payload({"kind": "full", "node": "t",
+                                 "vault_unseal_keys_b64": keys,
+                                 "vault_root_token": root}, str(data))
+
+    keyring = str(tmp_path / "keys.gpg")
+    meta = mod.read_payload_meta(payload)
+    mod.write_keyrings([keyring], meta["vault_unseal_keys_b64"], meta["vault_root_token"])
+
+    for var in ("VAULT_BACKUP_UNSEAL_KEYS", "VAULT_BACKUP_ROOT_TOKEN"):
+        os.environ.pop(var, None)
+    args = type("Args", (), {"keys_file": None, "keyring": [keyring], "force": False})()
+    assert mod.load_keys(args) == (keys, root, keyring)
+
+    archived = mod.build_payload({"kind": "full", "node": "t",
+                                  "vault_unseal_keys_b64": keys,
+                                  "vault_root_token": root}, str(data))
+    assert mod.read_payload_meta(archived)["vault_unseal_keys_b64"] == keys
+
+
+def test_backup_keyring_write_survives_corrupt_existing(role_dir, tmp_path):
+    """A corrupt pre-existing keyring must not abort the restore's last step:
+    it is preserved and overwritten, not fatal."""
+    mod = _load_backup_module()
+    path = str(tmp_path / "keys.gpg")
+    with open(path, "wb") as f:
+        f.write(b"not a gpg message at all")
+    mod.write_keyrings([path], ["k9"], "hvs.t9")
+    assert mod.open_keyring(path) == (["k9"], "hvs.t9")
+    assert [p for p in os.listdir(tmp_path) if ".pre-" in p]
+
+
+def test_backup_keyring_no_keyring_flag_skips_write(role_dir):
+    mod = _load_backup_module()
+    assert mod.write_keyrings([], ["k"], "hvs.t") == []
+
+
+def jinja2_env():
+    jinja2 = pytest.importorskip("jinja2")
+    return jinja2.Environment(undefined=jinja2.StrictUndefined)
+
+
+def _render_timer(role_dir, name, **overrides):
+    env = jinja2_env()
+    ctx = {
+        "ctlabs_vault": {
+            "defaults": {
+                "files": {
+                    "backup": {
+                        "script": "vault-backup.py",
+                        "dst": "/usr/sbin/vault-backup.py",
+                    }
+                },
+                "config": {
+                    "backup": dict(
+                        {
+                            "passphrase": "",
+                            "passphrase_file": "/etc/vault-backup.pw",
+                            "command": "backup-full",
+                            "on_calendar": "*-*-* 03:17:00",
+                            "random_delay": "15m",
+                            "persistent": True,
+                            "out_dir": "/var/backups/vault",
+                            "log_file": "/var/log/vault-backup.log",
+                        },
+                        **overrides
+                    )
+                },
+                "service": {
+                    "backup": {
+                        "service": "vault-backup.service",
+                        "timer": "vault-backup.timer",
+                    }
+                },
+            }
+        }
+    }
+    with open(os.path.join(role_dir, "templates", name)) as f:
+        return env.from_string(f.read()).render(**ctx)
+
+
+def test_backup_timer_renders_onschedule_and_unit(role_dir):
+    out = _render_timer(role_dir, "vault-backup.timer.j2")
+    assert "OnCalendar=*-*-* 03:17:00" in out
+    assert "RandomizedDelaySec=15m" in out
+    assert "Unit=vault-backup.service" in out
+    assert "WantedBy=timers.target" in out
+
+
+def test_backup_timer_catches_up_after_downtime(role_dir):
+    """Persistent=true is what makes a backup happen at all if the box was off
+    at 03:17 -- a backup that silently skips a day is worse than a late one."""
+    assert "Persistent=true" in _render_timer(role_dir, "vault-backup.timer.j2")
+
+
+def test_backup_timer_persistent_is_optional(role_dir):
+    out = _render_timer(role_dir, "vault-backup.timer.j2", persistent=False)
+    assert "Persistent" not in out
+
+
+def test_backup_service_runs_backup_full_with_passphrase_file(role_dir):
+    out = _render_timer(role_dir, "vault-backup.service.j2")
+    assert "/usr/sbin/vault-backup.py backup-full" in out
+    assert "--passphrase-file /etc/vault-backup.pw" in out
+    assert "Type=oneshot" in out
+
+
+def test_backup_service_never_contains_the_passphrase(role_dir):
+    """The unit passes a FILE PATH; the secret itself must never reach argv
+    (it would be world-readable in `ps`) or the unit file (0644)."""
+    out = _render_timer(role_dir, "vault-backup.service.j2", passphrase="s3cr3t-passphrase")
+    assert "s3cr3t-passphrase" not in out
+
+
+def test_backup_service_does_not_require_vault_service(role_dir):
+    """vault-backup.py stops the vault mid-run. A `Requires=vault.service` would
+    make that explicit stop propagate and systemd would kill the job before the
+    archive is written, so only After= is correct."""
+    out = _render_timer(role_dir, "vault-backup.service.j2")
+    # real directives only -- the unit carries a comment explaining this very trap
+    directives = [
+        ln.strip()
+        for ln in out.splitlines()
+        if ln.strip() and not ln.strip().startswith("#")
+    ]
+    unit = directives[: directives.index("[Service]")]
+    assert any(d.startswith("After=") for d in unit), "want After="
+    assert not any(
+        d.startswith(("Requires=", "BindsTo=", "PartOf=")) for d in unit
+    ), "no hard dependency on vault.service, or the mid-run stop kills this job"
+
+
+def test_backup_timer_is_skipped_not_failed_without_passphrase(role_dir):
+    with open(os.path.join(role_dir, "tasks", "timer.yml")) as f:
+        text = f.read()
+    assert "timer.skip.no_passphrase" in text
+    assert "passphrase | default('') | length) > 0" in text
+    assert "no_log" in text, "writing the passphrase must not echo it into the log"
+
+
+def test_backup_timer_asserts_passphrase_mode(role_dir):
+    with open(os.path.join(role_dir, "tasks", "timer.yml")) as f:
+        text = f.read()
+    assert "0o600" in text and "0o400" in text
+    assert "passphrase.mode_ok" in text
+
+
+def test_backup_timer_only_enables_the_timer_not_the_service(role_dir):
+    """Type=oneshot service must be left to the timer, not 'started' by the role."""
+    tasks = _load_tasks(role_dir, "timer.yml")
+
+    def names(block):
+        return [t.get("name", "") for t in _all_tasks(block)]
+
+    started = [n for n in names(tasks) if "timer.enable" in n]
+    assert started, "expected an enable task for the timer"
+    svc_tasks = [
+        t
+        for t in _all_tasks(tasks)
+        if t.get("service", {}).get("enabled") is True
+    ]
+    assert len(svc_tasks) == 1, "only the timer should be enabled/started"
+    name = svc_tasks[0]["service"]["name"]
+    assert "service.backup.timer" in name
+    assert "service.backup.service" not in name
+
+
+def test_main_imports_timer(role_dir):
+    with open(os.path.join(role_dir, "tasks", "main.yml")) as f:
+        text = f.read()
+    assert "import_tasks: timer.yml" in text
+    assert "ctlabs_vault.timer" in text

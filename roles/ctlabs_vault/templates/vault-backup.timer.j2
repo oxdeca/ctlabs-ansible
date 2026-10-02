@@ -1,0 +1,14 @@
+[Unit]
+  Description= Scheduled Vault sealed backup ({{ ctlabs_vault.defaults.config.backup.command }})
+
+[Timer]
+  OnCalendar={{ ctlabs_vault.defaults.config.backup.on_calendar }}
+  RandomizedDelaySec={{ ctlabs_vault.defaults.config.backup.random_delay }}
+  {%- if ctlabs_vault.defaults.config.backup.persistent %}
+  Persistent=true
+  {%- endif %}
+  Unit={{ ctlabs_vault.defaults.service.backup.service }}
+  AccuracySec=1m
+
+[Install]
+  WantedBy=timers.target

@@ -25,6 +25,21 @@ Threat model / custody:
     - The controller keyring (/root/ctlabs-ansible/.ctlabs_vault_init_output_*.yml,
       mode 0400) stays as the offline fallback copy of the keys.
 
+Recovered keys (why restore writes a keyring):
+    A restore replaces the storage, so the ONLY keys that can ever unlock the
+    vault afterwards are the ones embedded in the archive. If nothing on disk
+    holds them, the archive itself becomes the single point of failure — and
+    RETENTION_DAYS prunes old archives. So restore persists the recovered
+    keyring (see write_keyrings) and backup auto-discovers it, which makes
+    restore -> new-backup work with no manual key handling. The keyring is
+    gpg-symmetric under a locally generated passphrase — the same mechanism
+    ctlabs-tools uses for its vault session cache, deliberately in its own
+    directory so the two lifecycles cannot destroy each other (see KEYRING_DIR).
+    That protects the keys from casual disclosure (cat/grep/diff/backup of a
+    plain file) — not from root on the host, which can read the passphrase.
+    It is deliberately NOT the archive's Fernet passphrase; the two are
+    independent and neither is derived from the other.
+
 Safety (updated danger model):
     - The backup refuses to stop the Vault when it would be left permanently
       sealed (running+unsealed but no unseal key available, or already sealed
@@ -78,6 +93,23 @@ VAULT_USER       = "vault"
 VAULT_GROUP      = "vault"
 RETENTION_DAYS   = 30
 LOG_FILE         = "/var/log/vault-backup.log"
+
+# Recovered-key custody: a 0700 dir holding a random passphrase (0600) plus the
+# symmetric-gpg ciphertext of the keyring (0600).
+#
+# The MECHANISM is the one ctlabs-tools uses for its local vault session cache
+# (ctlabs_tools/vault/vault_login.py). The NAMESPACE deliberately is not: that
+# tool treats its dir as a disposable session cache — 'vault-login clear'
+# deletes the passphrase file and 'vault-login <anything>' overwrites it with a
+# fresh random value. Parking the unseal key + root token in there would mean a
+# routine logout destroys the only copy of the keys and silently bricks the vault
+# on its next seal. Separate dir, separate lifecycle.
+KEYRING_DIR      = "/etc/vault-backup"
+KEYRING_FILE     = os.path.join(KEYRING_DIR, "keys.gpg")
+KEYRING_KEY_FILE = os.path.join(KEYRING_DIR, "passphrase")
+KEYRING_ALPHABET = ("abcdefghijklmnopqrstuvwxyz"
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    "0123456789!$%()-_+{}[]")
 
 # ==========================================
 # LOGGING / TOOLS
@@ -226,10 +258,10 @@ def safe_extract(payload, data_dest, config_dest=None):
 # ==========================================
 # KEYS + PASSPHRASE
 # ==========================================
-def _load_keys_from_file(path):
-    if not os.path.isfile(path):
-        die(f"keys file not found: {path}")
-    content = open(path, "r").read()
+def _parse_keys_text(content):
+    """Parse vault_root_token + unseal keys out of an init-output/keyring
+    document (YAML-ish). Shared by the plaintext and gpg keyring paths so both
+    codecs are read by exactly one parser."""
     found = {}
     for key in ("vault_root_token", "vault_unseal_keys_b64", "vault_unseal_keys"):
         m = re.search(r'^\s*%s\s*:\s*["\']?([^"\'\n]+)["\']?\s*$' % re.escape(key),
@@ -248,19 +280,164 @@ def _load_keys_from_file(path):
                 if key in d:
                     found[key] = d[key]
     unseal = found.get("vault_unseal_keys_b64", found.get("vault_unseal_keys"))
-    if not unseal:
-        die(f"no unseal keys found in {path} (looked for vault_unseal_keys_b64 / vault_unseal_keys)")
-    if isinstance(unseal, str):
-        unseal = [k.strip() for k in unseal.split(",") if k.strip()]
     root = found.get("vault_root_token")
-    if not root:
-        die(f"no vault_root_token found in {path}")
     return unseal, root
 
+def _normalise_keys(unseal, root, source):
+    if isinstance(unseal, str):
+        unseal = [k.strip() for k in unseal.split(",") if k.strip()]
+    if not unseal:
+        die(f"no unseal keys found in {source} (looked for vault_unseal_keys_b64 / "
+            "vault_unseal_keys)")
+    if not root:
+        die(f"no vault_root_token found in {source}")
+    return unseal, root
+
+def _load_keys_from_file(path):
+    if not os.path.isfile(path):
+        die(f"keys file not found: {path}")
+    unseal, root = _parse_keys_text(open(path, "r").read())
+    return _normalise_keys(unseal, root, path)
+
+# ---- recovered-key keyring (gpg-symmetric by default, see write_keyrings) ----
+
+def _is_gpg_keyring(path):
+    """A .gpg suffix selects the symmetric-gpg codec; anything else is a
+    plaintext 0400 file in the init-output format."""
+    return str(path).endswith(".gpg")
+
+def _key_file_for(path):
+    """Passphrase location for a .gpg keyring: <dir>/passphrase, in the same
+    dedicated dir as the ciphertext."""
+    return os.path.join(os.path.dirname(os.path.abspath(path)), "passphrase")
+
+def _gpg_bin():
+    return shutil.which("gpg") or shutil.which("gpg2")
+
+def _run_gpg(argv, stdin_bytes=None):
+    try:
+        res = subprocess.run(argv, input=stdin_bytes, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+    except OSError as e:
+        die(f"failed to run gpg: {e}")
+    return res.returncode, res.stdout, res.stderr
+
+def _ensure_key_file(path):
+    """Read the keyring passphrase, generating (0600) it on first use."""
+    if os.path.isfile(path):
+        pw = open(path, "r").read().split("\n")[0]
+        if pw:
+            return pw
+    import secrets as _secrets
+    pw = "".join(_secrets.choice(KEYRING_ALPHABET) for _ in range(32))
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(pw)
+    logging.info("generated new keyring passphrase: %s (mode 0600)", path)
+    return pw
+
+def _keyring_document(keys, root):
+    """init-output YAML shape — readable by _parse_keys_text, by bootstrap.yml
+    (from_yaml) and by --keys-file, so one file serves every consumer."""
+    return ('vault_root_token        : "%s"\n'
+            'vault_unseal_keys_b64   : "%s"\n'
+            'ctlabs_vault_initialized: true\n'
+            % (root, ",".join(keys)))
+
+def seal_keyring(path, keys, root):
+    """Write the keyring to `path`; codec inferred from the suffix."""
+    doc = _keyring_document(keys, root).encode("utf-8")
+    if not _is_gpg_keyring(path):
+        if os.path.isfile(path):
+            os.chmod(path, 0o600)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o400)
+        with os.fdopen(fd, "wb") as f:
+            f.write(doc)
+        return
+    gpg = _gpg_bin()
+    if not gpg:
+        die(f"cannot write the gpg keyring {path}: no gpg binary found. Install "
+            "gnupg, or point --keyring-out at a non-.gpg path to write a "
+            "plaintext 0400 keyring instead.")
+    d = os.path.dirname(os.path.abspath(path))
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    key_file = _key_file_for(path)
+    _ensure_key_file(key_file)
+    tmp = path + ".tmp"
+    rc, _, err = _run_gpg([gpg, "--symmetric", "--batch", "--yes", "--quiet",
+                           "--passphrase-file", key_file, "--output", tmp], doc)
+    if rc != 0:
+        die(f"gpg failed to seal the keyring {path}: {err.decode(errors='replace').strip()}")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+def open_keyring(path):
+    """Read a keyring written by seal_keyring. Returns (unseal_keys, root_token)."""
+    if not os.path.isfile(path):
+        die(f"keyring not found: {path}")
+    if _is_gpg_keyring(path):
+        gpg = _gpg_bin()
+        if not gpg:
+            die(f"cannot read the gpg keyring {path}: no gpg binary found")
+        key_file = _key_file_for(path)
+        if not os.path.isfile(key_file):
+            die(f"cannot read the gpg keyring {path}: passphrase file {key_file} "
+                "is missing (the keys cannot be recovered without it)")
+        rc, out, err = _run_gpg([gpg, "--decrypt", "--batch", "--quiet",
+                                 "--passphrase-file", key_file, path])
+        if rc != 0:
+            die(f"cannot decrypt keyring {path}: "
+                f"{err.decode(errors='replace').strip()}")
+        content = out.decode("utf-8", errors="replace")
+    else:
+        content = open(path, "r").read()
+    unseal, root = _parse_keys_text(content)
+    return _normalise_keys(unseal, root, path)
+
+def _try_open_keyring(path):
+    """Non-fatal keyring read for the write path: a corrupt/unreadable existing
+    keyring must not abort a restore that is already otherwise complete."""
+    try:
+        return open_keyring(path)
+    except BaseException:
+        return None
+
+def write_keyrings(paths, keys, root):
+    """Persist recovered keys to every path. An existing keyring that differs is
+    moved aside (never silently clobbered — it may be the only working keyring
+    for a vault the operator did NOT mean to replace)."""
+    if not paths:
+        return []
+    written = []
+    for path in paths:
+        if os.path.isfile(path):
+            current = _try_open_keyring(path)
+            if current == (keys, root):
+                logging.info("keyring already current: %s", path)
+                written.append(path)
+                continue
+            if current is None:
+                logging.warning("existing keyring %s is unreadable — preserving it "
+                                "and overwriting with the restored vault's keys", path)
+            else:
+                logging.warning("existing keyring differs from the restored vault")
+            aside = "%s.pre-%s" % (path, datetime.now().strftime("%Y%m%d-%H%M%S"))
+            shutil.copy2(path, aside)
+            os.chmod(aside, 0o600)
+            logging.warning("kept a copy of the previous keyring at %s", aside)
+        seal_keyring(path, keys, root)
+        written.append(path)
+        logging.warning("🔑 recovered keys written to %s — this is the only copy "
+                        "outside the archive; back it up off-host.", path)
+    return written
+
 def load_keys(args):
-    """Returns (unseal_key_list, root_token) from --keys-file or env."""
+    """Returns (unseal_key_list, root_token, source) from --keys-file, the env
+    vars, or the first existing keyring in --keyring (default: KEYRING_FILE,
+    which 'restore-*' writes)."""
     if getattr(args, "keys_file", None):
-        return _load_keys_from_file(args.keys_file)
+        keys, root = _load_keys_from_file(args.keys_file)
+        return keys, root, args.keys_file
     env_keys = os.environ.get("VAULT_BACKUP_UNSEAL_KEYS")
     env_root = os.environ.get("VAULT_BACKUP_ROOT_TOKEN")
     if env_keys and env_root:
@@ -268,8 +445,13 @@ def load_keys(args):
             keys = json.loads(env_keys)
         except json.JSONDecodeError:
             keys = [k.strip() for k in env_keys.split(",") if k.strip()]
-        return keys, env_root
-    return [], None
+        return keys, env_root, "env"
+    for path in (getattr(args, "keyring", None) or [KEYRING_FILE]):
+        if os.path.isfile(path):
+            keys, root = open_keyring(path)
+            logging.info("using recovered-key keyring: %s", path)
+            return keys, root, path
+    return [], None, None
 
 def load_passphrase(args):
     pf = getattr(args, "passphrase_file", None)
@@ -394,15 +576,16 @@ def preflight(args, keys):
                                               else "initialized")
 
 def cmd_backup(args, full):
-    keys, root = load_keys(args)
+    keys, root, key_source = load_keys(args)
     addr, currently_sealed, init_state = preflight(args, keys)
 
     if not keys:
         if not getattr(args, "force", False):
-            die("no unseal keys available (use --keys-file <init-output.yml> or the "
-                "VAULT_BACKUP_UNSEAL_KEYS/VAULT_BACKUP_ROOT_TOKEN env vars). Refusing to "
-                "restart the vault, which would leave it permanently sealed and unlock "
-                "the storage. Re-run with --force if you really want a key-less archive.")
+            die("no unseal keys available (use --keys-file <init-output.yml>, a "
+                "keyring listed in --keyring, or the VAULT_BACKUP_UNSEAL_KEYS/"
+                "VAULT_BACKUP_ROOT_TOKEN env vars). Refusing to restart the vault, "
+                "which would leave it permanently sealed and unlock the storage. "
+                "Re-run with --force if you really want a key-less archive.")
         logging.warning("no unseal keys -> archive will NOT include keys and the vault "
                         "will be left SEALED after restart (--force given)")
     elif currently_sealed and init_state != "uninitialized":
@@ -430,7 +613,7 @@ def cmd_backup(args, full):
             die("could not re-unseal the vault after backup — unseal manually!", code=2)
         if root and not verify_root_token(addr, root, getattr(args, "ca_cert", None)):
             die("vault unsealed but the embedded root token is NOT valid (keyring "
-                "stale? rekeyed?) — refresh the keys file!", code=2)
+                f"stale? rekeyed?) — refresh the key source [{key_source}]!", code=2)
         logging.info("backup complete, vault unsealed + root token verified: %s", out)
     else:
         logging.warning("vault left SEALED after backup — unseal it manually: %s", out)
@@ -548,6 +731,17 @@ def cmd_restore(args, full):
     else:
         logging.warning("restore complete; vault left SEALED — unseal manually.")
 
+    # Persist the recovered keys. Done LAST, and only once the storage they belong
+    # to is live and proven unsealable, so a failed restore never leaves a keyring
+    # on disk that does not match the running vault.
+    if not getattr(args, "no_keyring", False):
+        written = write_keyrings(
+            args.keyring_out if args.keyring_out is not None else [KEYRING_FILE],
+            keys, root)
+        if written:
+            logging.warning("next backup needs no key flags: it auto-discovers %s",
+                            written[0])
+
 # ==========================================
 # MAIN
 # ==========================================
@@ -583,6 +777,11 @@ def main(argv=None):
                         help="init-output keyring YAML (vault_unseal_keys_b64 + "
                              "vault_root_token); env VAULT_BACKUP_UNSEAL_KEYS + "
                              "VAULT_BACKUP_ROOT_TOKEN also work")
+        sp.add_argument("--keyring", metavar="FILE", action="append", default=None,
+                        help="keyring to read the keys from; the first path that "
+                             f"exists wins (default: {KEYRING_FILE}). Written by "
+                             "'restore-*', so a restored vault can be backed up again "
+                             "with no key flags")
         sp.add_argument("--no-unseal", action="store_true",
                         help="do not re-unseal the vault after the restart")
         sp.add_argument("--force", action="store_true",
@@ -598,6 +797,15 @@ def main(argv=None):
                         help="skip the destructive confirmation prompt")
         sp.add_argument("--no-unseal", action="store_true",
                         help="do not unseal the vault after restore")
+        sp.add_argument("--keyring-out", metavar="FILE", action="append", default=None,
+                        help="write the recovered unseal key(s) + root token here; "
+                             "repeatable. A .gpg suffix selects the symmetric-gpg "
+                             "keyring (passphrase in <dir>/.vault_key, ctlabs-tools "
+                             "style), anything else is a plaintext 0400 init-output "
+                             f"file (default: {KEYRING_FILE})")
+        sp.add_argument("--no-keyring", action="store_true",
+                        help="do not persist the recovered keys (the next backup "
+                             "then needs --keys-file again — DANGEROUS)")
 
     args = parser.parse_args(argv)
     setup_logging(getattr(args, "log_file", LOG_FILE))

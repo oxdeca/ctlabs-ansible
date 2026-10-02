@@ -13,6 +13,12 @@ By design it does NOT export KV/secret data, and userpass passwords cannot
 be read back by Vault at all, so user entries are exported WITHOUT
 passwords -- add them to the fact file manually.
 
+identity/oidc/* (the OIDC provider used by GCP Workload Identity Federation)
+is ALSO deliberately not reproduced, because Vault makes it impossible to do
+so faithfully -- see export_identity_oidc() and the WARNING it prints. Use
+vault-backup.py (a storage archive) if you need that content to survive a
+restore; do NOT rely on this file for WIF.
+
 Output is the local-fact JSON expected at
 /etc/ansible/facts.d/ctlabs_vault_setup.fact (-> ctg_facts.ctlabs_vault_setup).
 """
@@ -56,6 +62,59 @@ def api(addr, token, path, method="GET", body=None, ctx=None):
         except Exception:
             detail = ""
         raise SystemExit("Vault API error {0} on {1} {2}: {3}".format(e.code, method, path, detail))
+
+
+def export_identity_oidc(addr, token, ctx):
+    """Record WHAT identity/oidc content exists -- deliberately not its config.
+
+    This returns an inventory/marker only ('covered': False). A faithful
+    config-restore of identity/oidc/* is impossible, for three reasons that
+    were verified against a live Vault (v2.1.1, RS256):
+
+      1. An OIDC signing key's private half is WRITE-ONLY. Read-back of
+         identity/oidc/key/<name> returns only algorithm / rotation_period /
+         verification_ttl / allowed_client_ids -- no 'bundle', no key
+         material. The JWKS endpoint likewise exposes just 'n' and 'e'. A
+         rebuilt vault would therefore sign with a DIFFERENT key than any
+         provider (GCP) was configured to trust, i.e. a working WIF setup
+         would break.
+      2. identity/oidc/role/<name> read-back is FILTERED to client_id, key,
+         template and ttl. token_policies, bound_claims, user_claim and
+         allowed_redirect_uris are accepted on write but never returned, so
+         they cannot be carried across.
+      3. The key's client-ID/role restriction is ENFORCED (token minting is
+         refused for a role the key does not permit) yet the effective value
+         is not visible on read, so re-creating the key could silently widen
+         or narrow that restriction.
+
+    Rather than emit a lossy 'reproduction' that looks complete, emit a
+    'covered': False marker plus the inventory, and warn loudly. Restoring
+    this content requires a storage archive (vault-backup.py), or re-running
+    ctlabs-terraform/scripts/vault_oidc_setup.py on the target vault.
+    """
+    cfg = api(addr, token, "/v1/identity/oidc/config", ctx=ctx) or {}
+    issuer = (((cfg.get("data") or {}).get("issuer")) or "").rstrip("/")
+    kl = api(addr, token, "/v1/identity/oidc/key?list=true", ctx=ctx) or {}
+    rl = api(addr, token, "/v1/identity/oidc/role?list=true", ctx=ctx) or {}
+    keys = sorted((kl.get("data") or {}).get("keys") or [])
+    roles = sorted((rl.get("data") or {}).get("keys") or [])
+    # 'default' is Vault's built-in signing key and always present; it is not
+    # part of an operator's WIF setup, so exclude it from the inventory.
+    named = [k for k in keys if k != "default"]
+    if not (issuer or named or roles):
+        return None
+    return {
+        "covered": False,
+        "issuer": issuer,
+        "signing_keys": named,
+        "roles": roles,
+        "note": (
+            "identity/oidc/* is NOT restored by this fact file. Vault never "
+            "returns an OIDC signing key's private material, so the key "
+            "cannot be reproduced. Restore from a vault-backup.py storage "
+            "archive, or re-run scripts/vault_oidc_setup.py."
+        ),
+    }
 
 
 def export(addr, token, ctx):
@@ -185,6 +244,13 @@ def export(addr, token, ctx):
             j["roles"] = jwt_roles
         out["jwt"] = j
 
+    #
+    # Identity / OIDC (GCP WIF) -- inventory marker only, see docstring
+    #
+    identity_oidc = export_identity_oidc(addr, token, ctx)
+    if identity_oidc:
+        out["identity_oidc"] = identity_oidc
+
     return out
 
 
@@ -217,6 +283,26 @@ def main():
         sys.stderr.write(
             "NOTE: userpass passwords cannot be read back by Vault; the exported "
             "users have no 'password' field -- add passwords to the fact file\n"
+        )
+
+    if data.get("identity_oidc"):
+        io_ = data["identity_oidc"]
+        sys.stderr.write(
+            "\n"
+            "WARNING: identity/oidc/* is NOT covered by this config export.\n"
+            "  issuer      : {0}\n"
+            "  signing keys: {1}\n"
+            "  oidc roles  : {2}\n"
+            "Vault never returns an OIDC signing key's private material, so a\n"
+            "bootstrapped vault signs with a DIFFERENT key than GCP trusts and\n"
+            "the WIF setup above will NOT work until it is re-created. Restore\n"
+            "it from a vault-backup.py storage archive (that path is verified\n"
+            "to capture identity/oidc/*, key included), or re-run\n"
+            "ctlabs-terraform/scripts/vault_oidc_setup.py on the target vault.\n".format(
+                io_.get("issuer") or "(unset)",
+                ", ".join(io_.get("signing_keys") or []) or "(none)",
+                ", ".join(io_.get("roles") or []) or "(none)",
+            )
         )
 
 
