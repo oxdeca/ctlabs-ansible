@@ -1,0 +1,41 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude.tasks.precheck
+  block:
+    - name: ctlabs_claude.tasks.precheck.supported_os
+      assert:
+        that: ctg_os is in ctlabs_claude.os
+        fail_msg: "OS [{{ ctg_os }}] is not supported!"
+  rescue:
+    - name: ctlabs_claude.tasks.precheck.skip.unsupported
+      meta: end_host
+
+- name: ctlabs_claude.tasks.precheck.provider
+  set_fact:
+    ctlabs_claude_provider: "{{ ctlabs_claude.defaults.config.provider | combine(ctg_facts.ctlabs_claude.provider | default({}), recursive=true) }}"
+
+- name: ctlabs_claude.tasks.precheck.provider.assert
+  assert:
+    that: ctlabs_claude_provider.active in ['anthropic', 'openrouter', 'vertexai']
+    fail_msg: "Unknown provider: {{ ctlabs_claude_provider.active }}"
+
+- name: ctlabs_claude.tasks.precheck.otlp
+  set_fact:
+    ctlabs_claude_otlp: "{{ ctlabs_claude.defaults.config.otlp | combine(ctg_facts.ctlabs_claude.otlp | default({}), recursive=true) }}"
+
+- name: ctlabs_claude.tasks.precheck.settings
+  set_fact:
+    ctlabs_claude_settings: "{{ ctlabs_claude.defaults.config.preferences | combine(ctg_facts.ctlabs_claude.preferences | default({}), recursive=true) }}"
+
+- name: ctlabs_claude.tasks.precheck.commands
+  set_fact:
+    ctlabs_claude_commands: "{{ ctlabs_claude.defaults.config.commands | combine(ctg_facts.ctlabs_claude.commands | default({}), recursive=true) }}"
+
+- name: ctlabs_claude.tasks.precheck.dnsmasq.records
+  set_fact:
+    ctlabs_claude_dnsmasq_records: "{{ ctg_facts.ctlabs_claude.dnsmasq.records | default(ctlabs_claude.defaults.config.dnsmasq.records) }}"

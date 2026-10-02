@@ -1,0 +1,7 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_claude/templates/dnsmasq-claude.conf.j2
+ # Description : dnsmasq static host-record entries for ctlabs_claude
+#}
+{% for _record in ctlabs_claude_dnsmasq_records %}
+host-record={{ _record.name }},{{ _record.ip }}
+{% endfor %}

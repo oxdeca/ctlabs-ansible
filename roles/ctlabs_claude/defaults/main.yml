@@ -1,14 +1,14 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_claude_code/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_claude/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
 versions:
   nodejs: node_22.x
 
-ctlabs_claude_code:
+ctlabs_claude:
   defaults:
     repos:
       debian:
@@ -74,6 +74,10 @@ ctlabs_claude_code:
         fast_mode      : false
         fallback_model : ["haiku"]
         gce_metadata_host: ""
+      dnsmasq:
+        dir    : /etc/dnsmasq.d
+        file   : claude.conf
+        records: []
     certs:
       dir: /etc/ca-ctlabs
       crt: "{{ ansible_nodename }}.crt"

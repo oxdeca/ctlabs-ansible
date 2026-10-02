@@ -1,0 +1,21 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude/handlers/main.yml
+# Description : handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude.handlers.claude.service.restarted
+  systemd_service:
+    name          : "{{ ctlabs_claude.defaults.service.name }}"
+    state         : restarted
+    daemon_reload : true
+
+- name: ctlabs_claude.handlers.apt.update_cache
+  apt:
+    update_cache: true
+
+- name: ctlabs_claude.handlers.dnsmasq.restarted
+  systemd_service:
+    name : dnsmasq
+    state: restarted

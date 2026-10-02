@@ -1,0 +1,71 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude.tasks.package.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_claude.tasks.package.redhat.repos.file
+      yum_repository:
+        name           : "{{ item.name }}"
+        description    : "{{ item.desc }}"
+        baseurl        : "{{ item.url  }}"
+        gpgkey         : "{{ item.key  }}"
+        gpgcheck       : true
+        module_hotfixes: true
+      loop: "{{ ctlabs_claude.defaults.repos[ctg_os_family] }}"
+
+- name: ctlabs_claude.tasks.package.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_claude.tasks.package.debian.keydir
+      file:
+        path : "{{ ctlabs_claude.defaults.config.keydir }}"
+        state: directory
+        mode : '0755'
+    
+    - name: ctlabs_claude.tasks.package.debian.repos.key
+      get_url:
+        url : "{{ item.key }}"
+        dest: "{{ ctlabs_claude.defaults.config.keydir }}/{{ item.name }}.asc"
+        mode: '0644'
+      loop: "{{ ctlabs_claude.defaults.repos[ctg_os_family] }}"
+    
+    - name: ctlabs_claude.tasks.package.debian.repos.file
+      apt_repository:
+        repo: "deb [signed-by={{ ctlabs_claude.defaults.config.keydir }}/{{ item.name }}.asc] {{ item.url }} nodistro main"
+        update_cache: true
+      loop: "{{ ctlabs_claude.defaults.repos[ctg_os_family] }}"
+
+    - name: ctlabs_claude.tasks.package.debian.nodejs.pin
+      template:
+        src : nodejs.pref.j2
+        dest: "{{ ctlabs_claude.defaults.config.prefdir }}/{{ item.name }}.pref"
+        mode: '0644'
+        owner: root
+        group: root
+      loop: "{{ ctlabs_claude.defaults.repos[ctg_os_family] }}"
+      notify: ctlabs_claude.handlers.apt.update_cache
+
+    - name: ctlabs_claude.tasks.package.debian.update.cache
+      apt:
+        update_cache: true
+    
+- name: ctlabs_claude.tasks.package.pkgs.installed
+  when: item.when is not defined or item.when
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_claude.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+    
+- name: ctlabs_claude.tasks.package.claude-code.installed
+  npm: 
+    name  : "{{ item.name }}"
+    state : latest
+    global: true
+  loop: "{{ ctlabs_claude.defaults.pkgs.npm }}"

@@ -1,12 +1,13 @@
 {#
- # File        : ctlabs-ansible/roles/ctlabs_claude_code/templates/facts.json.j2
- # Description : ctlabs_claude_code local facts template
+ # File        : ctlabs-ansible/roles/ctlabs_claude/templates/facts.json.j2
+ # Description : ctlabs_claude local facts template
 #}
-{% set _defaults = ctlabs_claude_code.defaults.config %}
+{% set _defaults = ctlabs_claude.defaults.config %}
 {% set _facts    = ctlabs_role_facts      | default({}) %}
 {% set _provider = (_defaults.provider    | combine(_facts.provider    | default({}), recursive=true)) %}
 {% set _otlp     = (_defaults.otlp        | combine(_facts.otlp        | default({}), recursive=true)) %}
 {% set _prefs    = (_defaults.preferences | combine(_facts.preferences | default({}), recursive=true)) %}
+{% set _dnsmasq  = (_defaults.dnsmasq     | combine(_facts.dnsmasq     | default({}), recursive=true)) %}
 {
   "provider" : {
     "active" : "{{ _provider.active }}",
@@ -38,5 +39,8 @@
     "fast_mode"         : {{ _prefs.fast_mode        | lower }},
     "fallback_model"    : {{ _prefs.fallback_model   | to_json }},
     "gce_metadata_host" : "{{ _prefs.gce_metadata_host | default('') }}"
+  },
+  "dnsmasq" : {
+    "records" : {{ _dnsmasq.records | to_json }}
   }
 }

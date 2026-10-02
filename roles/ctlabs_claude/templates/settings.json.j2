@@ -1,0 +1,58 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_claude/templates/settings.json.j2
+ # Description : ~/.claude/settings.json template
+#}
+{
+  "env": {
+{% if ctlabs_claude_provider.active == 'anthropic' %}
+    "ANTHROPIC_API_KEY"                                  : "{{ ctlabs_claude_provider.anthropic.api_key }}"
+{%-  if ctlabs_claude_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_otlp.resource_attrs }}"
+{%   endif %}
+{% elif ctlabs_claude_provider.active == 'openrouter' %}
+    "ANTHROPIC_BASE_URL"                                 : "{{ ctlabs_claude_provider.openrouter.base_url }}",
+    "ANTHROPIC_AUTH_TOKEN"                               : "{{ ctlabs_claude_provider.openrouter.api_key }}",
+    "ANTHROPIC_API_KEY"                                  : "",
+    "ANTHROPIC_MODEL"                                    : "openrouter/free",
+    "CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK"               : "1"
+{%-  if ctlabs_claude_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_otlp.resource_attrs }}"
+{%   endif %}
+{% elif ctlabs_claude_provider.active == 'vertexai' %}
+    "ANTHROPIC_API_KEY"                                  : "",
+    "CLAUDE_CODE_USE_VERTEX"                             : "1",
+    "ANTHROPIC_VERTEX_PROJECT_ID"                        : "{{ ctlabs_claude_provider.vertexai.project_id }}",
+    "CLOUD_ML_REGION"                                    : "{{ ctlabs_claude_provider.vertexai.region }}"
+{%-  if ctlabs_claude_settings.gce_metadata_host | default('') %},
+    "GCE_METADATA_HOST"                                  : "{{ ctlabs_claude_settings.gce_metadata_host }}"
+{%-  endif %}
+{%-  if ctlabs_claude_otlp.enabled %},
+    "CLAUDE_CODE_ENABLE_TELEMETRY"                       : "1",
+    "OTEL_METRICS_EXPORTER"                              : "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL"                        : "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT"                        : "{{ ctlabs_claude_otlp.endpoint }}",
+    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"  : "delta",
+    "OTEL_METRIC_EXPORT_INTERVAL"                        : "15000",
+    "OTEL_RESOURCE_ATTRIBUTES"                           : "{{ ctlabs_claude_otlp.resource_attrs }}"
+{%   endif %}
+{% endif %}
+  },
+  "model"                 : "{{ ctlabs_claude_settings.model }}",
+  "alwaysThinkingEnabled" : {{ ctlabs_claude_settings.always_thinking | lower }},
+  "fastMode"              : {{ ctlabs_claude_settings.fast_mode       | lower }},
+  "fallbackModel"         : {{ ctlabs_claude_settings.fallback_model  | to_json }},
+  "theme"                 : "{{ ctlabs_claude_settings.theme }}",
+  "tui"                   : "fullscreen"
+}

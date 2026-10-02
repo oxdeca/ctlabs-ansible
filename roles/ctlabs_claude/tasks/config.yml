@@ -1,0 +1,65 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_claude.tasks.config.group
+  group:
+    name   : "{{ ctlabs_claude.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_claude.tasks.config.user
+  user:
+    name   : "{{ ctlabs_claude.defaults.config.user  }}"
+    group  : "{{ ctlabs_claude.defaults.config.group }}"
+    system : true
+
+- name: ctlabs_claude.tasks.config.group.certs.member
+  user:
+    name  : "{{ ctlabs_claude.defaults.config.user   }}"
+    group : "{{ ctlabs_claude.defaults.config.group  }}"
+    groups: "{{ ctlabs_claude.defaults.config.groups }}"
+    shell : /bin/bash
+
+- name: ctlabs_claude.tasks.config.claude.dir
+  file:
+    path : "{{ ctlabs_claude.defaults.config.dir }}"
+    state: directory
+    owner: "{{ ctlabs_claude.defaults.config.user  }}"
+    group: "{{ ctlabs_claude.defaults.config.group }}"
+    mode : '0750'
+
+- name: ctlabs_claude.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_claude.defaults.config.settings.dir }}"
+    state: directory
+    mode: '0755'
+
+- name: ctlabs_claude.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_claude.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_claude.defaults.config.settings.file     }}"
+
+- name: ctlabs_claude.tasks.config.commands.dir
+  file:
+    path : "{{ ctlabs_claude.defaults.config.commands_dir }}"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_claude.tasks.config.commands.files
+  template:
+    src : command.md.j2
+    dest: "{{ ctlabs_claude.defaults.config.commands_dir }}/{{ item.key }}.md"
+  loop: "{{ ctlabs_claude_commands | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: ctlabs_claude.tasks.config.dnsmasq
+  when: ctlabs_claude_dnsmasq_records | length > 0
+  template:
+    src : dnsmasq-claude.conf.j2
+    dest: "{{ ctlabs_claude.defaults.config.dnsmasq.dir }}/{{ ctlabs_claude.defaults.config.dnsmasq.file }}"
+    mode: '0644'
+  notify: ctlabs_claude.handlers.dnsmasq.restarted

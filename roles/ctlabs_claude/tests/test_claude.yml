@@ -1,11 +1,11 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_claude_code/tests/test_claude_code.yml
-# Description : test playbook for ctlabs_claude_code (syntax-check target)
+# File        : ctlabs-ansible/roles/ctlabs_claude/tests/test_claude.yml
+# Description : test playbook for ctlabs_claude (syntax-check target)
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_claude_code.test.run
+- name: ctlabs_claude.test.run
   hosts: localhost
   connection: local
   gather_facts: true
@@ -13,4 +13,4 @@
     ctg_os: debian12
     ctg_os_family: debian
   roles:
-    - role: ctlabs_claude_code
+    - role: ctlabs_claude

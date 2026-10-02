@@ -1,12 +1,12 @@
-# Ansible Role `ctlabs_claude_code`
+# Ansible Role `ctlabs_claude`
 
 ## Ansible Tags
 
-- `ctlabs_claude_code`
-- `ctlabs_claude_code.precheck`
-- `ctlabs_claude_code.package`
-- `ctlabs_claude_code.config`
-- `ctlabs_claude_code.service`
+- `ctlabs_claude`
+- `ctlabs_claude.precheck`
+- `ctlabs_claude.package`
+- `ctlabs_claude.config`
+- `ctlabs_claude.service`
 
 ## Prechecks
 
@@ -31,9 +31,9 @@ Claude Code supports multiple API providers. Select exactly one via `provider.ac
 
 | Provider | Env vars set | Local fact path |
 |---|---|---|
-| `anthropic` (default) | `ANTHROPIC_API_KEY` | `ctg_facts.ctlabs_claude_code.provider.anthropic.api_key` |
-| `openrouter` | `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1` | `ctg_facts.ctlabs_claude_code.provider.openrouter.{api_key,base_url}` |
-| `vertexai` | `ANTHROPIC_API_KEY=""`, `CLAUDE_CODE_USE_VERTEX=1`, `ANTHROPIC_VERTEX_PROJECT_ID`, `CLOUD_ML_REGION`, `GCE_METADATA_HOST` | `ctg_facts.ctlabs_claude_code.provider.vertexai.{project_id,region}` |
+| `anthropic` (default) | `ANTHROPIC_API_KEY` | `ctg_facts.ctlabs_claude.provider.anthropic.api_key` |
+| `openrouter` | `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1` | `ctg_facts.ctlabs_claude.provider.openrouter.{api_key,base_url}` |
+| `vertexai` | `ANTHROPIC_API_KEY=""`, `CLAUDE_CODE_USE_VERTEX=1`, `ANTHROPIC_VERTEX_PROJECT_ID`, `CLOUD_ML_REGION`, `GCE_METADATA_HOST` | `ctg_facts.ctlabs_claude.provider.vertexai.{project_id,region}` |
 
 The `vertexai` provider assumes Application Default Credentials (ADC) are already configured on the host (e.g. via `ctlabs_gcloud`).
 
@@ -41,7 +41,7 @@ The `vertexai` provider assumes Application Default Credentials (ADC) are alread
 
 Claude Code can emit OpenTelemetry metrics to a Prometheus OTLP receiver. **Opt-in** — disabled by default.
 
-Configured via `ctg_facts.ctlabs_claude_code.otlp` (merged over `ctlabs_claude_code.defaults.config.otlp`):
+Configured via `ctg_facts.ctlabs_claude.otlp` (merged over `ctlabs_claude.defaults.config.otlp`):
 
 | Key | Default | Description |
 |---|---|---|
@@ -51,7 +51,7 @@ Configured via `ctg_facts.ctlabs_claude_code.otlp` (merged over `ctlabs_claude_c
 
 ## Preferences
 
-Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude_code.preferences` (merged over `ctlabs_claude_code.defaults.config.preferences`):
+Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude.preferences` (merged over `ctlabs_claude.defaults.config.preferences`):
 
 | Key | Default | Description |
 |---|---|---|
@@ -64,10 +64,10 @@ Claude Code UI/model preferences are configured via `ctg_facts.ctlabs_claude_cod
 
 ## Custom Commands
 
-Slash commands are rendered as individual Markdown files in `~/.claude/commands/` via `ctg_facts.ctlabs_claude_code.commands` (merged over `ctlabs_claude_code.defaults.config.commands`, resolved in `precheck.yml` as `ctlabs_claude_code_commands`). Each key becomes `<name>.md`:
+Slash commands are rendered as individual Markdown files in `~/.claude/commands/` via `ctg_facts.ctlabs_claude.commands` (merged over `ctlabs_claude.defaults.config.commands`, resolved in `precheck.yml` as `ctlabs_claude_commands`). Each key becomes `<name>.md`:
 
 ```yaml
-ctlabs_claude_code:
+ctlabs_claude:
   defaults:
     config:
       commands:
@@ -78,7 +78,7 @@ ctlabs_claude_code:
 
 ## Local Facts Example
 
-`/etc/ansible/facts.d/ctlabs_claude_code.fact`:
+`/etc/ansible/facts.d/ctlabs_claude.fact`:
 
 ```json
 {
@@ -101,12 +101,30 @@ ctlabs_claude_code:
     "fast_mode": true,
     "fallback_model": ["haiku"],
     "gce_metadata_host": "127.0.0.1:1"
+  },
+  "dnsmasq": {
+    "records": [
+      { "name": "prometheus-otlp.k8s-dev-usc1.d.gcp.oanda.com", "ip": "10.184.36.9" }
+    ]
   }
 }
 ```
 
+## dnsmasq Host Records
+
+Some OTLP/provider endpoints (e.g. a corporate Prometheus OTLP receiver) resolve to a
+private/VPN-only IP that ctlabs' own DNS infrastructure has no reason to know about.
+`ctg_facts.ctlabs_claude.dnsmasq.records` renders one `host-record=<name>,<ip>` line per
+entry into `/etc/dnsmasq.d/claude.conf` (static, not derived from `otlp.endpoint` —
+set it to whatever hostname actually needs pinning) and restarts `dnsmasq` on change.
+Empty list (the default) is a complete no-op — nothing is written, nothing restarted.
+
+| Key | Default | Description |
+|---|---|---|
+| `dnsmasq.records` | `[]` | List of `{name, ip}` static host-record entries |
+
 ## Tests
 
 ```sh
-pytest -sv roles/ctlabs_claude_code/tests
+pytest -sv roles/ctlabs_claude/tests
 ```

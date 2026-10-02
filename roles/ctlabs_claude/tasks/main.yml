@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_claude/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_claude
+    - ctlabs_claude.precheck
+    - ctlabs_claude.package
+    - ctlabs_claude.config
+    - ctlabs_claude.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_claude
+    - ctlabs_claude.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_claude
+    - ctlabs_claude.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_claude
+    - ctlabs_claude.service

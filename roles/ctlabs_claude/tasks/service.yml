@@ -1,6 +1,6 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_claude_code/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_claude/tasks/service.yml
 # Description : services
 # ------------------------------------------------------------------------------
