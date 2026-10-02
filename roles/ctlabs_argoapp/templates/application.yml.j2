@@ -18,6 +18,16 @@
 {% if _finalizers | length > 0 %}
 {%   set _metadata = _metadata | combine({'finalizers': _finalizers}) %}
 {% endif %}
+{#
+ # Required for force:true (svc.replace(), a real PUT) to succeed against an
+ # object that already exists - see the comment in tasks/applications.yml.
+ # Absent entirely for a brand-new Application, which is exactly what lets
+ # svc.create() handle it instead.
+#}
+{% set _existing_version = ctlabs_argoapp_existing_app_versions | default({}) %}
+{% if app['name'] in _existing_version %}
+{%   set _metadata = _metadata | combine({'resourceVersion': _existing_version[app['name']]}) %}
+{% endif %}
 {% set _spec       = {
                         'project'    : app['project'] | default(ctlabs_argoapp_project, true),
                         'source'     : app['source'],

@@ -41,6 +41,16 @@
 {% set _meta = {'name'     : _repo['name'],
                 'namespace': ctlabs_argoapp_namespace,
                 'labels'   : {'argocd.argoproj.io/secret-type': _repo['secret_type'] | default('repository', true)}} %}
+{#
+ # Required for force:true (svc.replace(), a real PUT) to succeed against a
+ # Secret that already exists - see the comment in tasks/applications.yml.
+ # Absent entirely for a brand-new repository entry, which is exactly what
+ # lets svc.create() handle it instead.
+#}
+{% set _existing_version = ctlabs_argoapp_existing_repo_versions | default({}) %}
+{% if _repo['name'] in _existing_version %}
+{%   set _meta = _meta | combine({'resourceVersion': _existing_version[_repo['name']]}) %}
+{% endif %}
 ---
 apiVersion: v1
 kind: Secret

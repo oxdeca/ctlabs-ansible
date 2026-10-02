@@ -43,6 +43,28 @@
       # holds live credentials
       no_log         : true
 
+    #
+    # force: true -> svc.replace() (a genuine PUT) - see the detailed comment
+    # in applications.yml for why (plain PATCH leaves stale fields behind;
+    # server-side apply was tried first and rejected because it submits
+    # explicit nulls to prune, which some CRD/object schemas reject). Same
+    # staleness risk applies here: the Secret's stringData is built key-by-key
+    # from an allowlist, so dropping e.g. `username` from a repositories entry
+    # would otherwise leave the old value sitting in the live Secret forever.
+    #
+    # Same resourceVersion requirement as applications.yml - reuse the capture
+    # task above instead of a second lookup, it already fetched every
+    # repository-type Secret in this namespace.
+    #
+    - name: ctlabs_argoapp.tasks.repositories.existing.versions
+      set_fact:
+        ctlabs_argoapp_existing_repo_versions: >-
+          {{
+            ctlabs_argoapp_repo_before.resources | default([])
+              | map(attribute='metadata')
+              | items2dict(key_name='name', value_name='resourceVersion')
+          }}
+
     - name: ctlabs_argoapp.tasks.repositories.apply
       vars:
         ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
@@ -51,6 +73,7 @@
       kubernetes.core.k8s:
         state     : present
         definition: "{{ lookup('template', 'repository.yml.j2') | from_yaml }}"
+        force     : true
       loop: "{{ ctlabs_argoapp_repositories }}"
       loop_control:
         loop_var: repo

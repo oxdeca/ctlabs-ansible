@@ -36,6 +36,61 @@
       retries: 30
       delay  : 5
 
+    #
+    # force: true -> svc.replace() (a genuine PUT), not the module's default
+    # svc.update() path for state:present (always a merge-patch: strategic-merge
+    # then merge). A patch only adds/updates fields present in the new
+    # definition - it never removes a field that is simply ABSENT (e.g. dropping
+    # source.helm.values from setup_profiles.yml), so a stale field sticks
+    # around forever across reruns. A full replace overwrites the whole object,
+    # correctly dropping it - verified live on rke21 (2026-10-02).
+    #
+    # Server-side apply (apply: true) was tried first and is NOT viable here:
+    # SSA implements field removal by submitting an explicit `null` for the
+    # dropped field, and the Application CRD does not mark spec.source.helm
+    # (and likely its siblings - kustomize/directory/chart/plugin) as nullable,
+    # so the API server rejects the apply outright with
+    # "spec.source.helm: Invalid value: \"null\": ... must be of type object".
+    # That's strictly worse than the original bug: a hard failure on every
+    # removal instead of a silently stale field. Confirmed by reproducing it
+    # directly against the live Application with `kubectl apply --server-side`.
+    # force:true/replace has no such restriction - it never sends a null, it
+    # just omits the key from the PUT body, which the schema has no objection
+    # to since the object as a whole remains valid.
+    #
+    # A plain PUT also needs the CURRENT metadata.resourceVersion in the body -
+    # this module's replace() does NOT fetch it automatically the way
+    # `kubectl replace` does, so without it every replace fails immediately
+    # with "metadata.resourceVersion: ... must be specified for an update".
+    # That failure then burns the full until/retries budget for nothing before
+    # finally surfacing - confirmed live, it looks exactly like a hang. Fetch
+    # every existing Application in ONE un-looped k8s_info (the aggregate-
+    # register-in-a-loop trap documented elsewhere in this file applies here
+    # too) and thread each one's resourceVersion into its own definition;
+    # application.yml.j2 only sets it when found, so a brand-new Application
+    # (nothing to fetch) still goes through svc.create() untouched.
+    #
+    - name: ctlabs_argoapp.tasks.applications.existing
+      vars:
+        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+      environment:
+        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+      kubernetes.core.k8s_info:
+        api_version: argoproj.io/v1alpha1
+        kind       : Application
+        namespace  : "{{ ctlabs_argoapp_namespace }}"
+      register    : res_existing_apps
+      failed_when : false
+
+    - name: ctlabs_argoapp.tasks.applications.existing.versions
+      set_fact:
+        ctlabs_argoapp_existing_app_versions: >-
+          {{
+            res_existing_apps.resources | default([])
+              | map(attribute='metadata')
+              | items2dict(key_name='name', value_name='resourceVersion')
+          }}
+
     - name: ctlabs_argoapp.tasks.applications.apply
       vars:
         ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
@@ -44,6 +99,7 @@
       kubernetes.core.k8s:
         state     : present
         definition: "{{ lookup('template', 'application.yml.j2') | from_yaml }}"
+        force     : true
       loop: "{{ ctlabs_argoapp_applications }}"
       loop_control:
         loop_var: app
