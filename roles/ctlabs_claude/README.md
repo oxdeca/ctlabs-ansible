@@ -104,7 +104,7 @@ ctlabs_claude:
   },
   "dnsmasq": {
     "records": [
-      { "name": "prometheus-otlp.k8s-dev-usc1.d.gcp.oanda.com", "ip": "10.184.36.9" }
+      { "name": "prometheus.mon.ctlabs.internal", "ip": "10.9.32.14" }
     ]
   }
 }
