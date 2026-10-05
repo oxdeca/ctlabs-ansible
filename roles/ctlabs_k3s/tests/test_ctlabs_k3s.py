@@ -8,7 +8,7 @@ import subprocess
 
 from jinja2 import Environment, FileSystemLoader
 
-ROLE_TEMPLATES = "/root/ctlabs-ansible/roles/ctlabs_k3s/templates"
+ROLE_TEMPLATES = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_k3s/templates"
 
 K3S_PATH = "/usr/bin/k3s"
 

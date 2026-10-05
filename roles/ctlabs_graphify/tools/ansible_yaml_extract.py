@@ -14,7 +14,7 @@ except ImportError:
     print("ERROR: PyYAML is required. pip install pyyaml")
     sys.exit(1)
 
-REPO_ROOT = Path("/root/ctlabs-ansible")
+REPO_ROOT = Path(os.environ.get("CTLABS_ANSIBLE_REPO_DIR", "/srv/ctlabs/ctlabs-ansible"))
 GRAPH_FILE = REPO_ROOT / "graphify-out" / "graph.json"
 
 

@@ -20,9 +20,9 @@ Installs [Graphify](https://github.com/safishamsi/graphify) (knowledge graph too
 
 | Project | Directory | YAML Extraction |
 |---|---|---|
-| ctlabs-ansible | `/root/ctlabs-ansible` | Yes (via `ansible_yaml_extract.py`) |
-| ctlabs-terraform | `/root/ctlabs-terraform` | No |
-| ctlabs-tools | `/root/ctlabs-tools` | No |
+| ctlabs-ansible | `{{ ctlabs_ansible_repo_dir }}` | Yes (via `ansible_yaml_extract.py`) |
+| ctlabs-terraform | `{{ ctlabs_terraform_repo_dir }}` | No |
+| ctlabs-tools | `{{ ctlabs_tools_repo_dir }}` | No |
 
 On each run, `graphify-update-all`:
 1. Runs `graphify update --no-viz --update` on each project (skips heavy HTML viz, only processes changed files)
@@ -33,7 +33,7 @@ On each run, `graphify-update-all`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `ctlabs_graphify.defaults.projects` | `[{dir: /root/ctlabs-ansible, yaml_extract: true}, ...]` | Project directories to index |
+| `ctlabs_graphify.defaults.projects` | `[{dir: {{ ctlabs_ansible_repo_dir }}, yaml_extract: true}, ...]` | Project directories to index |
 
 ## Usage
 

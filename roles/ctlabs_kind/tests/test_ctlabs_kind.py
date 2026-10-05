@@ -9,7 +9,7 @@ import subprocess
 
 from jinja2 import Environment, FileSystemLoader
 
-ROLE_TEMPLATES = "/root/ctlabs-ansible/roles/ctlabs_kind/templates"
+ROLE_TEMPLATES = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_kind/templates"
 
 
 def _render_cluster_config(**overrides):

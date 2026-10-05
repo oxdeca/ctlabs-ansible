@@ -35,11 +35,11 @@ ctlabs_graphify:
       group : graphify
       dir   : /etc/graphify
     projects:
-      - dir : /root/ctlabs-ansible
+      - dir : {{ ctlabs_ansible_repo_dir }}
         yaml_extract: true
-      - dir : /root/ctlabs-terraform
+      - dir : {{ ctlabs_terraform_repo_dir }}
         yaml_extract: false
-      - dir : /root/ctlabs-tools
+      - dir : {{ ctlabs_tools_repo_dir }}
         yaml_extract: false
   os:
     - debian12

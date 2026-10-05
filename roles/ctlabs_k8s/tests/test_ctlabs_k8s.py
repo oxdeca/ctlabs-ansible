@@ -10,8 +10,8 @@ import yaml
 import json
 from jinja2 import Environment, FileSystemLoader
 
-ROLE_TEMPLATES = "/root/ctlabs-ansible/roles/ctlabs_k8s/templates"
-ROLE_TASKS = "/root/ctlabs-ansible/roles/ctlabs_k8s/tasks"
+ROLE_TEMPLATES = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_k8s/templates"
+ROLE_TASKS = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_k8s/tasks"
 
 
 class _Joiner:

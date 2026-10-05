@@ -8,7 +8,7 @@ import subprocess
 
 import yaml
 
-ROLE_TASKS = "/root/ctlabs-ansible/roles/ctlabs_helm/tasks"
+ROLE_TASKS = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_helm/tasks"
 
 
 def test_template_exists(role_dir):
