@@ -93,7 +93,7 @@ On first init of a `server` vault, the role writes the init result to the
 ansible repo root (delegated to localhost, mode `0400`, root-owned):
 
 ```
-{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
 ```
 
 It contains `vault_root_token` and `vault_unseal_keys_b64`. **Treat this file as our only copy of the unseal key (threshold 1) and the root token — never delete, move, or edit it.**
@@ -120,7 +120,7 @@ The final command outputs the **new** unseal key(s) and a rekey nonce — persis
 
 ## Declarative Setup (`bootstrap.yml`)
 
-After init, a `server` vault is bootstrapped from a declarative setup instead of the historical hard-coded `init.yml` steps (enable userpass, create the `ctlabs` user + policy). The role applies engines, auth methods, policies, userpass users, approle roles and jwt/oidc config idempotently — every write is preceded by a read.
+After init, a `server` vault is bootstrapped from a declarative setup instead of the historical hard-coded `init.yml` steps (enable userpass, create the `ctlabs` user + policy). The role applies engines, auth methods, policies, userpass users, approle roles, jwt/oidc config, and kubernetes auth (config + role bindings) idempotently — every write is preceded by a read.
 
 ### Source of truth (`ctlabs_vault_setup`)
 
@@ -154,7 +154,17 @@ Resolution order (same local-facts pattern as the rest of the role):
   "jwt": { "mount": "jwt", "discovery_url": "https://.../.well-known/openid-configuration",
            "default_role": "default",
            "roles": [ { "name": "default", "bound_audiences": ["..."], "user_claim": "...",
-                        "claim_mappings": {}, "token_policies": [] } ] }
+                        "claim_mappings": {}, "token_policies": [] } ] },
+  "kubernetes": [
+    { "mount": "kubernetes", "host": "https://<k8s-apiserver>:6443",
+      "ca_cert": "<cluster CA PEM>", "token_reviewer_jwt": "<reviewer SA token>",
+      "roles": [
+        { "name": "cert-vault-sync-dev", "bound_service_account_names": ["cert-vault-sync-dev"],
+          "bound_service_account_namespaces": ["security-tools"],
+          "token_policies": ["cert-vault-sync-dev"], "token_ttl": "1h" }
+      ]
+    }
+  ]
 }
 ```
 
@@ -162,7 +172,8 @@ Notes:
 
 - `policies.source` — `template` renders a role template (`template: ctlabs.hcl.j2`), `file` reads a static HCL file (path on the controller), `inline` uses `policy` verbatim.
 - `engines` use Vault's API-native form: kv-v2 = `"type": "kv"` + `"options": { "version": "2" }` (the CLI's `kv-v2` alias is expanded to this; the exporter emits this form). Duration-like params (`token_ttl`, `secret_id_ttl`, ...) accept Go duration strings (`1h`) or integer seconds (`3600`).
-- `auth_path` on users/roles defaults to `userpass` / `approle` when omitted. `engines`, `auth`, `policies`, `users`, `approle_roles`, `jwt` are all optional.
+- `auth_path` on users/roles defaults to `userpass` / `approle` when omitted. `engines`, `auth`, `policies`, `users`, `approle_roles`, `jwt`, `kubernetes` are all optional.
+- `kubernetes` is a **list** of mounts (unlike `jwt`, which is a single mapping), each with its own `roles` list — one Vault install can front more than one cluster. The auth method itself (`"path": "kubernetes", "type": "kubernetes"` in `auth`) is enabled by the generic Auth Methods section above; this key only configures the mount's connection (`auth/<mount>/config`) and its per-role service-account bindings (`auth/<mount>/role/<name>`). `token_reviewer_jwt` is **write-only** (never returned on read, same as a userpass password or an OIDC signing key) — bootstrap can detect a changed `host`/`ca_cert` and re-push, but a *rotated* reviewer JWT with unchanged host/CA is not detected as drift and must be re-applied by hand.
 - **Passwords are input-only**: creating a *new* user requires `password` (Vault can't read it back). Existing users get policies reconciled only — a changed `password` field has **no effect**. The bootstrap skips (with a message) creation of a new user that has no `password`.
 - **Secrets never leave the host**: the root token comes from `vault_root_token` in the init output file on the controller (never written to a `.fact` file), and passwords live in the fact file / role defaults only — nothing is written back to disk by the role.
 - `approle_roles` and `jwt.roles` are created when absent (404). Their parameters are set only for keys present in the fact (PUT is a full-set write, so an absent key is not clobbered). Changing parameters of an *existing* role is done via `vault-auth` / `vault write`, not by re-running bootstrap.
@@ -210,7 +221,7 @@ vault-(snap|full)-<ts>.vback
 
 - **Fernet** (AES-128-CBC + HMAC-SHA256, authenticated) keyed by **PBKDF2-HMAC-SHA256** (300k iterations, random salt). Needs `python3-cryptography`.
 - **Passphrase is never stored**: provide it via `VAULT_BACKUP_PASSPHRASE`, `--passphrase-file <mode-0600-file>`, or an interactive prompt — **never** on the command line. Keep it out-of-band (password manager / custodian). Without it an archive yields nothing (confidentiality) and any tampering is detected (authenticity).
-- The controller keyring (`{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
+- The controller keyring (`/root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
 - `restore-*` **persists the recovered keys** to a keyring (below), and `backup-*` auto-discovers it — so a restored vault can be backed up again with no key flags.
 
 ### Recovered-key keyring
@@ -230,7 +241,7 @@ A restore replaces the storage, so the **only** keys that can ever unlock that v
 | any `.gpg` path (default `/etc/vault-backup/keys.gpg`) | gpg-symmetric; passphrase in `<dir>/passphrase` |
 | any other path (e.g. the controller init-output file) | plaintext `0400`, init-output YAML shape |
 
-- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
+- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
 - The passphrase goes to gpg via `--passphrase-file`, **never argv** (`ps` is world-readable). Unlike the ctlabs-tools implementation, which passes `--passphrase <pw>` on both sides.
 - This protects the keys from casual disclosure (`cat`/`grep`/diff/plaintext backup of a config dir) — **not** from root on the host, which can read the passphrase file.
 - The keyring passphrase is **independent** of the archive's Fernet passphrase; neither is derived from the other.
@@ -255,7 +266,7 @@ vault-backup.py restore-full /var/backups/vault/vault-full-<ts>.vback \
 # co-located controller+vault: also refresh the file bootstrap.yml reads
 vault-backup.py restore-full <archive> \
   --keyring-out /etc/vault-backup/keys.gpg \
-  --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
+  --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
   --passphrase-file /etc/vault-backup.pw
 ```
 

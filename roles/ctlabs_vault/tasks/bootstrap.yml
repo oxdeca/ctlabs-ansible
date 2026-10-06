@@ -20,9 +20,13 @@
       set_fact:
         ctlabs_vault_jwt_items: "{{ [ctlabs_vault_setup_effective['jwt']] if ('jwt' in ctlabs_vault_setup_effective) else [] }}"
 
+    - name: ctlabs_vault.tasks.bootstrap.kubernetes.items
+      set_fact:
+        ctlabs_vault_kubernetes_items: "{{ ctlabs_vault_setup_effective['kubernetes'] | default([]) }}"
+
     - name: ctlabs_vault.tasks.bootstrap.root_token.slurp
       slurp:
-        src: "{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+        src: "/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
       delegate_to: localhost
       register: vault_bootstrap_init_slurp
       failed_when: false
@@ -42,7 +46,7 @@
       debug:
         msg: >-
           Skipping ctlabs_vault bootstrap: init output file
-          {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+          /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
           not present on the controller (vault_root_token required)
 
 - name: ctlabs_vault.tasks.bootstrap.apply
@@ -357,4 +361,90 @@
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_role_body }}"
       loop: "{{ vault_bootstrap_jwt_role.results }}"
+      when: item.status in [400, 404]
+
+    #
+    # Kubernetes Auth (the auth method itself is enabled generically by the
+    # Auth Methods section above, from a plain {path, type: kubernetes} entry
+    # in setup['auth'] -- this section only handles its connection config and
+    # per-role bindings, which are kubernetes-specific).
+    #
+    # no_log: true -- the loop item is the whole kubernetes[] entry, which
+    # carries token_reviewer_jwt. Every task below that loops over
+    # ctlabs_vault_kubernetes_items (or its subelements) needs the same,
+    # since the JWT rides along in `item` regardless of whether the task
+    # itself ever uses it -- a bare `-v` run would otherwise echo it in
+    # plaintext (hit this live: 2026-10-06, see git history for the incident).
+    - name: ctlabs_vault.tasks.bootstrap.kubernetes.config.read
+      no_log: true
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item['mount'] }}/config"
+        validate_certs: false
+        status_code  : [200, 404, 400]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_kubernetes_items }}"
+      register: vault_bootstrap_kubernetes_config
+
+    # token_reviewer_jwt is write-only (never returned on read, like an OIDC
+    # signing key or a userpass password) so it can't be compared for drift --
+    # only kubernetes_host/kubernetes_ca_cert can. no_log because the body
+    # carries the reviewer JWT.
+    - name: ctlabs_vault.tasks.bootstrap.kubernetes.config.write
+      no_log: true
+      vars:
+        vault_bootstrap_kubernetes_cfg_body: >-
+          {{ {'kubernetes_host': item.item['host'],
+              'kubernetes_ca_cert': item.item['ca_cert'],
+              'token_reviewer_jwt': item.item['token_reviewer_jwt']} | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['mount'] }}/config"
+        method       : POST
+        validate_certs: false
+        status_code  : [200, 204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_kubernetes_cfg_body }}"
+      loop: "{{ vault_bootstrap_kubernetes_config.results }}"
+      when: >-
+        (item.status in [400, 404]) or
+        (item.json['data']['kubernetes_host'] != item.item['host']) or
+        (item.json['data']['kubernetes_ca_cert'] != item.item['ca_cert'])
+
+    - name: ctlabs_vault.tasks.bootstrap.kubernetes.role.read
+      no_log: true
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item[0]['mount'] }}/role/{{ item[1]['name'] }}"
+        validate_certs: false
+        status_code  : [200, 404, 400]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+      loop  : "{{ ctlabs_vault_kubernetes_items | subelements('roles', skip_missing=True) }}"
+      register: vault_bootstrap_kubernetes_role
+
+    - name: ctlabs_vault.tasks.bootstrap.kubernetes.role.create
+      no_log: true
+      vars:
+        vault_bootstrap_kubernetes_role_body: >-
+          {{ {}
+               | combine({'bound_service_account_names': item.item[1]['bound_service_account_names']} if 'bound_service_account_names' in item.item[1] else {})
+               | combine({'bound_service_account_namespaces': item.item[1]['bound_service_account_namespaces']} if 'bound_service_account_namespaces' in item.item[1] else {})
+               | combine({'token_policies': item.item[1]['token_policies']} if 'token_policies' in item.item[1] else {})
+               | combine({'token_ttl': item.item[1]['token_ttl']} if 'token_ttl' in item.item[1] else {})
+               | combine({'token_max_ttl': item.item[1]['token_max_ttl']} if 'token_max_ttl' in item.item[1] else {})
+               | to_json }}
+      uri:
+        url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item[0]['mount'] }}/role/{{ item.item[1]['name'] }}"
+        method       : PUT
+        validate_certs: false
+        # Verified live against Vault 2.1.1: unlike approle/jwt role writes
+        # (204 No Content), auth/kubernetes/role/<name> PUT returns 200 with
+        # a body. Don't assume 204 for every auth-role endpoint.
+        status_code  : [200, 204]
+        headers      :
+          X-Vault-Token: "{{ ctlabs_vault_root_token }}"
+        body_format  : json
+        body         : "{{ vault_bootstrap_kubernetes_role_body }}"
+      loop: "{{ vault_bootstrap_kubernetes_role.results }}"
       when: item.status in [400, 404]

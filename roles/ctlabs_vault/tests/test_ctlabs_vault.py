@@ -133,6 +133,101 @@ def test_bootstrap_defaults_fallback(role_dir):
     assert policy["template"] == "ctlabs.hcl.j2"
 
 
+def test_bootstrap_kubernetes_items_default_to_empty(role_dir):
+    """Absence of a 'kubernetes' key in the setup fact must not raise -- same
+    contract as jwt.items, just via a plain | default([]) since kubernetes
+    (unlike jwt) is naturally a list, not a single mapping."""
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    root = next(t for t in bootstrap if t.get("name") == "ctlabs_vault.tasks.bootstrap")
+    items = next(t for t in _all_tasks([root]) if t.get("name") == "ctlabs_vault.tasks.bootstrap.kubernetes.items")
+    expr = items["set_fact"]["ctlabs_vault_kubernetes_items"]
+    assert "default([])" in expr
+
+
+def test_bootstrap_kubernetes_tasks_all_no_log_not_just_the_write(role_dir):
+    """The reviewer JWT rides along in `item` on EVERY task that loops over
+    ctlabs_vault_kubernetes_items or its subelements, not just the task that
+    uses it -- a plain `-v` run leaked it in plaintext via config.read's item
+    echo (live incident, 2026-10-06) because only config.write had no_log."""
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    apply_block = next(t for t in bootstrap if t.get("name") == "ctlabs_vault.tasks.bootstrap.apply")
+    kubernetes_tasks = [
+        t for t in _all_tasks([apply_block])
+        if str(t.get("name", "")).startswith("ctlabs_vault.tasks.bootstrap.kubernetes.")
+    ]
+    assert len(kubernetes_tasks) == 4, "expected config.read/write + role.read/create"
+    for t in kubernetes_tasks:
+        assert t.get("no_log") is True, f"{t['name']} loops over kubernetes items (carries the reviewer JWT) but has no no_log"
+
+
+def test_bootstrap_kubernetes_config_write_never_logs_reviewer_jwt(role_dir):
+    """The config write body carries token_reviewer_jwt -- a credential as
+    sensitive as a userpass password or an OIDC signing key -- so the task
+    must be no_log, same reasoning as the backup passphrase task."""
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    apply_block = next(t for t in bootstrap if t.get("name") == "ctlabs_vault.tasks.bootstrap.apply")
+    write = next(
+        t for t in _all_tasks([apply_block])
+        if t.get("name") == "ctlabs_vault.tasks.bootstrap.kubernetes.config.write"
+    )
+    assert write.get("no_log") is True
+
+
+def test_bootstrap_kubernetes_config_gates_on_host_or_ca_mismatch(role_dir):
+    """token_reviewer_jwt is write-only (never returned on read, like an OIDC
+    signing key), so idempotency can only compare kubernetes_host/ca_cert --
+    this pins the when expression against both match and mismatch cases."""
+    jinja2 = pytest.importorskip("jinja2")
+    env = jinja2.Environment(undefined=jinja2.StrictUndefined)
+
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        lines = f.read().splitlines()
+    start = next(i for i, ln in enumerate(lines) if "ctlabs_vault.tasks.bootstrap.kubernetes.config.write" in ln)
+    when_start = next(i for i in range(start, len(lines)) if lines[i].strip().startswith("when:"))
+    assert lines[when_start].strip() == "when: >-"
+    expr_lines = []
+    for ln in lines[when_start + 1:]:
+        if not ln.startswith(" " * 8) or not ln.strip():
+            break
+        expr_lines.append(ln.strip())
+    expr = " ".join(expr_lines)
+    got = env.compile_expression(expr)
+
+    item_404 = {"status": 404, "item": {"host": "https://k8s:6443", "ca_cert": "CA"}}
+    item_match = {"status": 200, "item": {"host": "https://k8s:6443", "ca_cert": "CA"},
+                  "json": {"data": {"kubernetes_host": "https://k8s:6443", "kubernetes_ca_cert": "CA"}}}
+    item_host_changed = {"status": 200, "item": {"host": "https://new:6443", "ca_cert": "CA"},
+                          "json": {"data": {"kubernetes_host": "https://k8s:6443", "kubernetes_ca_cert": "CA"}}}
+    item_ca_changed = {"status": 200, "item": {"host": "https://k8s:6443", "ca_cert": "NEWCA"},
+                        "json": {"data": {"kubernetes_host": "https://k8s:6443", "kubernetes_ca_cert": "CA"}}}
+
+    assert got(item=item_404) is True
+    assert got(item=item_match) is False
+    assert got(item=item_host_changed) is True
+    assert got(item=item_ca_changed) is True
+
+
+def test_bootstrap_kubernetes_role_create_accepts_200(role_dir):
+    """Verified live against Vault 2.1.1: unlike approle/jwt role writes (204
+    No Content), PUT auth/kubernetes/role/<name> returns 200 with a body. A
+    204-only status_code makes a successful write look like a task failure."""
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    apply_block = next(t for t in bootstrap if t.get("name") == "ctlabs_vault.tasks.bootstrap.apply")
+    write = next(
+        t for t in _all_tasks([apply_block])
+        if t.get("name") == "ctlabs_vault.tasks.bootstrap.kubernetes.role.create"
+    )
+    assert write["uri"]["status_code"] == [200, 204]
+
+
+def test_bootstrap_kubernetes_role_supports_multiple_roles_per_mount(role_dir):
+    """Mirrors the jwt role pattern: one mount can have several roles (e.g. one
+    per environment), so the read loop must use subelements, not a flat list."""
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        text = f.read()
+    assert "ctlabs_vault_kubernetes_items | subelements('roles', skip_missing=True)" in text
+
+
 def test_init_has_no_hardcoded_bootstrap(role_dir):
     init = _load_tasks(role_dir, "init.yml")
     names = [t.get("name") for t in _all_tasks(init)]
@@ -437,7 +532,7 @@ def test_backup_keyring_codec_inferred_from_suffix(role_dir):
     """A .gpg path is the gpg keyring, anything else a plaintext 0400 file."""
     mod = _load_backup_module()
     assert mod._is_gpg_keyring("/etc/vault-backup/keys.gpg")
-    assert not mod._is_gpg_keyring("{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_vdb1.yml")
+    assert not mod._is_gpg_keyring("/root/ctlabs-ansible/.ctlabs_vault_init_output_vdb1.yml")
     assert mod._key_file_for("/etc/vault-backup/keys.gpg") == \
         "/etc/vault-backup/passphrase"
 
