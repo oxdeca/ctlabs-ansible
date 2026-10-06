@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_xrdp/tests/test_xrdp.yml
+# Description : test playbook for ctlabs_xrdp (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_xrdp.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_virtype: kvm
+    ctg_systemd_dir: /etc/systemd/system
+    ctg_facts: {}
+  roles:
+    - ctlabs_xrdp

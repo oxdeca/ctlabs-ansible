@@ -68,6 +68,18 @@ ctlabs_xrdp:
       startwm:
         template: startwm.sh.j2
         file    : /etc/xrdp/startwm.sh
+      # DisplayControl dynamic resizing deletes/recreates the RDP encoder and
+      # the X screen shared-memory segment while paint/frame traffic is still in
+      # flight. On xrdp 0.9.x that segfaults the xrdp process (upstream
+      # neutrinolabs/xrdp#3590, fixed only in 0.10.5) or drops the connection
+      # (xup: shmat() EINVAL on the new segment -> lib_data_in fails). Set this
+      # to "true" only once xrdp >= 0.10.5 / xorgxrdp 0.10.x is installed.
+      xrdp_ini:
+        file    : /etc/xrdp/xrdp.ini
+        settings:
+          - section : Xorg
+            option  : enable_dynamic_resizing
+            value   : "false"
       tmux:
         template: tmux.conf.j2
         file    : /etc/tmux.conf

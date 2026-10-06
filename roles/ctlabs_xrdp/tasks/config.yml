@@ -5,6 +5,15 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_xrdp.tasks.config.xrdp_ini
+  community.general.ini_file:
+    path   : "{{ ctlabs_xrdp.defaults.config.xrdp_ini.file }}"
+    section: "{{ item.section }}"
+    option : "{{ item.option }}"
+    value  : "{{ item.value }}"
+  loop  : "{{ ctlabs_xrdp.defaults.config.xrdp_ini.settings }}"
+  notify: ctlabs_xrdp.handlers.service.restart
+
 - name: ctlabs_xrdp.tasks.config.startwm
   template:
     src  : "{{ ctlabs_xrdp.defaults.config.startwm.template }}"
