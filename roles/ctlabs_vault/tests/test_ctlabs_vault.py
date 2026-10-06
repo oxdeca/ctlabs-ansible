@@ -228,6 +228,90 @@ def test_bootstrap_kubernetes_role_supports_multiple_roles_per_mount(role_dir):
     assert "ctlabs_vault_kubernetes_items | subelements('roles', skip_missing=True)" in text
 
 
+def test_bootstrap_reads_from_ctlabs_vault_fact(role_dir):
+    """The declarative setup now lives under ctlabs_vault.fact's 'bootstrap'
+    key (this role's own <role_name>.fact, same convention every other role
+    uses), not a separate ctlabs_vault_setup.fact -- that split was an
+    inherited inconsistency, not a technical necessity."""
+    with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
+        text = f.read()
+    assert "ctg_facts.ctlabs_vault.bootstrap" in text
+    assert "ctg_facts.ctlabs_vault_setup" not in text
+
+
+def test_facts_task_sets_secure_mode(role_dir):
+    """ctlabs_vault.fact can now carry bootstrap.users[].password -- it needs
+    the same 0600 the old standalone ctlabs_vault_setup.fact had, not the
+    template module's default mode."""
+    with open(os.path.join(role_dir, "tasks", "facts.yml")) as f:
+        text = f.read()
+    assert "0600" in text
+
+
+def _render_facts_json(role_dir, role_facts=None, ctg_os_version="9"):
+    env = jinja2_env()
+    with open(os.path.join(role_dir, "templates", "facts.json.j2")) as f:
+        template = f.read()
+    rendered = env.from_string(template).render(
+        ctlabs_role_facts=role_facts, CTLABS_HOST="vdb1.ctlabs.internal"
+    )
+    return json.loads(rendered)
+
+
+def test_facts_json_omits_bootstrap_when_absent(role_dir):
+    """Omitted, not {} or null -- a written-but-empty value would shadow
+    bootstrap.yml's own `| default(...)` fallback to the role default, same
+    reasoning as ctlabs_argoapp's facts.json.j2 for its own optional knobs."""
+    got = _render_facts_json(role_dir, role_facts={})
+    assert "bootstrap" not in got
+    assert got["install_type"] == "cli"
+
+
+def test_facts_json_includes_bootstrap_when_present(role_dir):
+    bootstrap = {
+        "auth": [{"path": "userpass", "type": "userpass"}],
+        "users": [{"username": "ctlabs", "password": "secret123!", "policies": ["ctlabs"]}],
+    }
+    got = _render_facts_json(role_dir, role_facts={"bootstrap": bootstrap})
+    assert got["bootstrap"] == bootstrap
+
+
+def test_export_write_bootstrap_creates_new_file(role_dir, tmp_path):
+    mod = _load_export_module()
+    path = str(tmp_path / "ctlabs_vault.fact")
+    data = {"auth": [{"path": "userpass", "type": "userpass"}]}
+    mod.write_bootstrap(path, data)
+    with open(path) as f:
+        written = json.load(f)
+    assert written == {"bootstrap": data}
+    assert oct(os.stat(path).st_mode & 0o777) == "0o600"
+
+
+def test_export_write_bootstrap_preserves_existing_keys(role_dir, tmp_path):
+    """Must merge, not overwrite -- address/install_type live in the same
+    file and have nothing to do with vault-export.py."""
+    mod = _load_export_module()
+    path = str(tmp_path / "ctlabs_vault.fact")
+    with open(path, "w") as f:
+        json.dump({"address": "https://vdb1:8200", "install_type": "server"}, f)
+    data = {"auth": [{"path": "userpass", "type": "userpass"}]}
+    mod.write_bootstrap(path, data)
+    with open(path) as f:
+        written = json.load(f)
+    assert written["address"] == "https://vdb1:8200"
+    assert written["install_type"] == "server"
+    assert written["bootstrap"] == data
+
+
+def test_export_write_bootstrap_refuses_invalid_existing_json(role_dir, tmp_path):
+    mod = _load_export_module()
+    path = str(tmp_path / "ctlabs_vault.fact")
+    with open(path, "w") as f:
+        f.write("not json at all")
+    with pytest.raises(SystemExit):
+        mod.write_bootstrap(path, {"auth": []})
+
+
 def test_init_has_no_hardcoded_bootstrap(role_dir):
     init = _load_tasks(role_dir, "init.yml")
     names = [t.get("name") for t in _all_tasks(init)]
@@ -532,7 +616,7 @@ def test_backup_keyring_codec_inferred_from_suffix(role_dir):
     """A .gpg path is the gpg keyring, anything else a plaintext 0400 file."""
     mod = _load_backup_module()
     assert mod._is_gpg_keyring("/etc/vault-backup/keys.gpg")
-    assert not mod._is_gpg_keyring("{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_vdb1.yml")
+    assert not mod._is_gpg_keyring("/root/ctlabs-ansible/.ctlabs_vault_init_output_vdb1.yml")
     assert mod._key_file_for("/etc/vault-backup/keys.gpg") == \
         "/etc/vault-backup/passphrase"
 

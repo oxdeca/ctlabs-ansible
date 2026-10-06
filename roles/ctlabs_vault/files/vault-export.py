@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Export Vault *configuration* to a ctlabs_vault_setup fact file.
+Export Vault *configuration* into the 'bootstrap' key of a ctlabs_vault fact file.
 
 Dumps secrets engines, auth methods, ACL policies, userpass users (names +
 current policies only), approle roles (incl. secret_id_ttl /
@@ -19,8 +19,9 @@ so faithfully -- see export_identity_oidc() and the WARNING it prints. Use
 vault-backup.py (a storage archive) if you need that content to survive a
 restore; do NOT rely on this file for WIF.
 
-Output is the local-fact JSON expected at
-/etc/ansible/facts.d/ctlabs_vault_setup.fact (-> ctg_facts.ctlabs_vault_setup).
+Output merges into the 'bootstrap' key of the local-fact JSON at
+/etc/ansible/facts.d/ctlabs_vault.fact (-> ctg_facts.ctlabs_vault.bootstrap),
+alongside that file's other keys (address, install_type).
 """
 
 import argparse
@@ -254,13 +255,37 @@ def export(addr, token, ctx):
     return out
 
 
+def write_bootstrap(path, data):
+    """Merge data into path's 'bootstrap' key, preserving any other keys
+    already in the file (e.g. ctlabs_vault.fact's address/install_type).
+    Raises SystemExit if existing content isn't valid JSON -- never silently
+    clobber a file this didn't write."""
+    existing = {}
+    if os.path.exists(path):
+        with open(path) as f:
+            raw = f.read().strip()
+        if raw:
+            try:
+                existing = json.loads(raw)
+            except ValueError:
+                sys.exit("refusing to overwrite {0}: existing content is not valid JSON".format(path))
+    existing["bootstrap"] = data
+    text = json.dumps(existing, indent=2, sort_keys=True) + "\n"
+    with open(path, "w") as f:
+        f.write(text)
+    # The merged file can carry real secrets (userpass passwords in
+    # bootstrap.users[]), same reasoning as the old standalone
+    # ctlabs_vault_setup.fact -- 0600 regardless of what else is in it.
+    os.chmod(path, 0o600)
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Export Vault configuration to a ctlabs_vault_setup fact file (config-restore, no secret data)"
+        description="Export Vault configuration into the 'bootstrap' key of a ctlabs_vault fact file (config-restore, no secret data)"
     )
     parser.add_argument("--addr", default=os.environ.get("VAULT_ADDR", "https://127.0.0.1:8200"), help="Vault address (default VAULT_ADDR env or https://127.0.0.1:8200)")
     parser.add_argument("--token", default=os.environ.get("VAULT_TOKEN"), help="privileged Vault token (default VAULT_TOKEN env)")
-    parser.add_argument("--out", help="write the fact JSON to this file (default: stdout; e.g. /etc/ansible/facts.d/ctlabs_vault_setup.fact)")
+    parser.add_argument("--out", help="write into this fact file's 'bootstrap' key, merging with whatever else is already there (default: stdout; e.g. /etc/ansible/facts.d/ctlabs_vault.fact)")
     parser.add_argument("--insecure", action="store_true", help="skip TLS certificate verification (self-signed lab CA)")
     parser.add_argument("--ca-cert", help="CA bundle to verify the Vault TLS cert (e.g. /etc/ca-ctlabs/ca.crt)")
     args = parser.parse_args()
@@ -269,15 +294,12 @@ def main():
         parser.error("missing token (pass --token or set VAULT_TOKEN)")
 
     data = export(args.addr, args.token, build_context(args))
-    text = json.dumps(data, indent=2, sort_keys=True) + "\n"
 
     if args.out:
-        with open(args.out, "w") as f:
-            f.write(text)
-        os.chmod(args.out, 0o600)
-        sys.stderr.write("Wrote vault setup fact to {0}\n".format(args.out))
+        write_bootstrap(args.out, data)
+        sys.stderr.write("Wrote vault bootstrap config into {0}'s 'bootstrap' key\n".format(args.out))
     else:
-        sys.stdout.write(text)
+        sys.stdout.write(json.dumps({"bootstrap": data}, indent=2, sort_keys=True) + "\n")
 
     if data.get("users"):
         sys.stderr.write(

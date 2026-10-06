@@ -66,6 +66,7 @@ Fact file: `/etc/ansible/facts.d/ctlabs_vault.fact` (written by `tasks/facts.yml
 
 - `address` — vault server address for agent/proxy connect
 - `install_type` — `cli`, `server`, `agent`, or `proxy`; resolved via `ctg_facts.ctlabs_vault.install_type` in precheck
+- `bootstrap` — optional, `install_type: server` only: the declarative setup `bootstrap.yml` applies (engines/auth/policies/users/approle/jwt/kubernetes). See [Declarative Setup](#declarative-setup-bootstrapyml) below for its schema. File mode is `0600`, not the default, once this key is in use — it can carry real userpass passwords.
 
 ### Agent
 ```json
@@ -93,7 +94,7 @@ On first init of a `server` vault, the role writes the init result to the
 ansible repo root (delegated to localhost, mode `0400`, root-owned):
 
 ```
-{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
 ```
 
 It contains `vault_root_token` and `vault_unseal_keys_b64`. **Treat this file as our only copy of the unseal key (threshold 1) and the root token — never delete, move, or edit it.**
@@ -126,8 +127,10 @@ After init, a `server` vault is bootstrapped from a declarative setup instead of
 
 Resolution order (same local-facts pattern as the rest of the role):
 
-1. Local fact `ctg_facts.ctlabs_vault_setup` (file `/etc/ansible/facts.d/ctlabs_vault_setup.fact`) — authoritative, per host
+1. Local fact `ctg_facts.ctlabs_vault.bootstrap` — the `bootstrap` key of this role's own `ctlabs_vault.fact` (`/etc/ansible/facts.d/ctlabs_vault.fact`), same file as `address`/`install_type`, same `<role_name>.fact` convention every other role uses. Authoritative, per host. **Not a separate `ctlabs_vault_setup.fact`** — an earlier version of this role used one; if you find a reference to that file elsewhere, it's stale.
 2. Role default `ctlabs_vault_setup` in `defaults/main.yml` — fallback that mirrors today's behavior (enable `userpass`, user `ctlabs` / policy `ctlabs` from `ctlabs.hcl.j2`)
+
+Omitted (not written as `{}` or `null`) when absent from the fact, same as `address`/`install_type` — a written-but-empty `bootstrap` key would shadow the role-default fallback above instead of falling through to it.
 
 ### Fact schema
 
@@ -180,14 +183,16 @@ Notes:
 
 ### Exporting an existing setup — `vault-export.py`
 
-`vault-export.py` (installed to `/usr/sbin/vault-export.py`) dumps the *configuration* of a live Vault into the fact file above, so a brand-new host can reproduce it after a fresh init — **without the seal keys**. It uses the Vault HTTP API directly (urlib/stdlib only, no `vault` binary, no third-party deps):
+`vault-export.py` (installed to `/usr/sbin/vault-export.py`) dumps the *configuration* of a live Vault into the `bootstrap` key of the fact file above, so a brand-new host can reproduce it after a fresh init — **without the seal keys**. It uses the Vault HTTP API directly (urlib/stdlib only, no `vault` binary, no third-party deps):
 
 ```sh
 vault-export.py --addr https://ansible.ctlabs.internal:8200 --token "$(cat .ctlabs_vault_init_output_*.yml ...)" \
-  --insecure --out /etc/ansible/facts.d/ctlabs_vault_setup.fact
+  --insecure --out /etc/ansible/facts.d/ctlabs_vault.fact
 ```
 
 Flags: `--addr` (or `VAULT_ADDR`), `--token` (or `VAULT_TOKEN`), `--out` (default stdout; mode `0600`), `--insecure` (self-signed lab CA), `--ca-cert <ca.crt>`.
+
+**`--out` merges into the `bootstrap` key, it does not overwrite the file** — any other keys already there (`address`, `install_type`) are preserved. Refuses to run (loud `SystemExit`, not a silent clobber) if `--out` already exists and isn't valid JSON.
 
 Exports: engines + auth methods (token/ system/ identity/ skipped), ACL policies (inline HCL, default/root skipped), userpass users (name + policies only), approle roles (incl. `secret_id_ttl` / `secret_id_bound_cidrs` / `token_ttl` / `secret_id_num_uses`), jwt/oidc mount config + roles, and an `identity_oidc` inventory marker (see below).
 
@@ -221,7 +226,7 @@ vault-(snap|full)-<ts>.vback
 
 - **Fernet** (AES-128-CBC + HMAC-SHA256, authenticated) keyed by **PBKDF2-HMAC-SHA256** (300k iterations, random salt). Needs `python3-cryptography`.
 - **Passphrase is never stored**: provide it via `VAULT_BACKUP_PASSPHRASE`, `--passphrase-file <mode-0600-file>`, or an interactive prompt — **never** on the command line. Keep it out-of-band (password manager / custodian). Without it an archive yields nothing (confidentiality) and any tampering is detected (authenticity).
-- The controller keyring (`{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
+- The controller keyring (`/root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
 - `restore-*` **persists the recovered keys** to a keyring (below), and `backup-*` auto-discovers it — so a restored vault can be backed up again with no key flags.
 
 ### Recovered-key keyring
@@ -241,7 +246,7 @@ A restore replaces the storage, so the **only** keys that can ever unlock that v
 | any `.gpg` path (default `/etc/vault-backup/keys.gpg`) | gpg-symmetric; passphrase in `<dir>/passphrase` |
 | any other path (e.g. the controller init-output file) | plaintext `0400`, init-output YAML shape |
 
-- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
+- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
 - The passphrase goes to gpg via `--passphrase-file`, **never argv** (`ps` is world-readable). Unlike the ctlabs-tools implementation, which passes `--passphrase <pw>` on both sides.
 - This protects the keys from casual disclosure (`cat`/`grep`/diff/plaintext backup of a config dir) — **not** from root on the host, which can read the passphrase file.
 - The keyring passphrase is **independent** of the archive's Fernet passphrase; neither is derived from the other.
@@ -266,7 +271,7 @@ vault-backup.py restore-full /var/backups/vault/vault-full-<ts>.vback \
 # co-located controller+vault: also refresh the file bootstrap.yml reads
 vault-backup.py restore-full <archive> \
   --keyring-out /etc/vault-backup/keys.gpg \
-  --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
+  --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
   --passphrase-file /etc/vault-backup.pw
 ```
 

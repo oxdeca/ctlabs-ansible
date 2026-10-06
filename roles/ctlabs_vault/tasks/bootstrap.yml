@@ -14,7 +14,7 @@
 
     - name: ctlabs_vault.tasks.bootstrap.setup.local_fact
       set_fact:
-        ctlabs_vault_setup_effective: "{{ ctg_facts.ctlabs_vault_setup | default(ctlabs_vault_setup_effective) }}"
+        ctlabs_vault_setup_effective: "{{ ctg_facts.ctlabs_vault.bootstrap | default(ctlabs_vault_setup_effective) }}"
 
     - name: ctlabs_vault.tasks.bootstrap.jwt.items
       set_fact:
@@ -26,7 +26,7 @@
 
     - name: ctlabs_vault.tasks.bootstrap.root_token.slurp
       slurp:
-        src: "{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+        src: "/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
       delegate_to: localhost
       register: vault_bootstrap_init_slurp
       failed_when: false
@@ -46,7 +46,7 @@
       debug:
         msg: >-
           Skipping ctlabs_vault bootstrap: init output file
-          {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+          /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
           not present on the controller (vault_root_token required)
 
 - name: ctlabs_vault.tasks.bootstrap.apply

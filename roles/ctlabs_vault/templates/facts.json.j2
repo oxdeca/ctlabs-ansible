@@ -2,8 +2,18 @@
  # File        : ctlabs-ansible/roles/ctlabs_vault/templates/facts.json.j2
  # Description : ctlabs_vault local facts template
 #}
+{#
+ # bootstrap is the declarative Vault setup config (tasks/bootstrap.yml) --
+ # omitted entirely when absent, not written as {} or null, so bootstrap.yml's
+ # own `| default(...)` fallback to the role default actually fires. Writing
+ # a default here would SHADOW that fallback the same way an empty string
+ # would shadow address/install_type's own defaults below.
+#}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
   "address"      : "{{ _facts.address       | default('https://' + CTLABS_HOST + ':8200') }}",
   "install_type" : "{{ _facts.install_type  | default('cli') }}"
+{%- if 'bootstrap' in _facts %},
+  "bootstrap": {{ _facts.bootstrap | tojson(indent=2) | indent(2) }}
+{%- endif %}
 }
