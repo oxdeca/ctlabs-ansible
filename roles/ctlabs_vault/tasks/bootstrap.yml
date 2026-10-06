@@ -26,7 +26,7 @@
 
     - name: ctlabs_vault.tasks.bootstrap.root_token.slurp
       slurp:
-        src: "/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+        src: "{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
       delegate_to: localhost
       register: vault_bootstrap_init_slurp
       failed_when: false
@@ -46,7 +46,7 @@
       debug:
         msg: >-
           Skipping ctlabs_vault bootstrap: init output file
-          /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+          {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
           not present on the controller (vault_root_token required)
 
 - name: ctlabs_vault.tasks.bootstrap.apply

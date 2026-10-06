@@ -94,7 +94,7 @@ On first init of a `server` vault, the role writes the init result to the
 ansible repo root (delegated to localhost, mode `0400`, root-owned):
 
 ```
-/root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
+{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
 ```
 
 It contains `vault_root_token` and `vault_unseal_keys_b64`. **Treat this file as our only copy of the unseal key (threshold 1) and the root token — never delete, move, or edit it.**
@@ -226,7 +226,7 @@ vault-(snap|full)-<ts>.vback
 
 - **Fernet** (AES-128-CBC + HMAC-SHA256, authenticated) keyed by **PBKDF2-HMAC-SHA256** (300k iterations, random salt). Needs `python3-cryptography`.
 - **Passphrase is never stored**: provide it via `VAULT_BACKUP_PASSPHRASE`, `--passphrase-file <mode-0600-file>`, or an interactive prompt — **never** on the command line. Keep it out-of-band (password manager / custodian). Without it an archive yields nothing (confidentiality) and any tampering is detected (authenticity).
-- The controller keyring (`/root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
+- The controller keyring (`{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`) is the offline fallback copy of the keys and feeds them into the backup via `--keys-file`.
 - `restore-*` **persists the recovered keys** to a keyring (below), and `backup-*` auto-discovers it — so a restored vault can be backed up again with no key flags.
 
 ### Recovered-key keyring
@@ -246,7 +246,7 @@ A restore replaces the storage, so the **only** keys that can ever unlock that v
 | any `.gpg` path (default `/etc/vault-backup/keys.gpg`) | gpg-symmetric; passphrase in `<dir>/passphrase` |
 | any other path (e.g. the controller init-output file) | plaintext `0400`, init-output YAML shape |
 
-- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
+- **The codec is inferred from the `.gpg` suffix**, so one run can write both: `--keyring-out /etc/vault-backup/keys.gpg --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_<node>.yml`. The plaintext form is the exact `init.yml` shape, so `bootstrap.yml` (`from_yaml`) and `--keys-file` read the same file.
 - The passphrase goes to gpg via `--passphrase-file`, **never argv** (`ps` is world-readable). Unlike the ctlabs-tools implementation, which passes `--passphrase <pw>` on both sides.
 - This protects the keys from casual disclosure (`cat`/`grep`/diff/plaintext backup of a config dir) — **not** from root on the host, which can read the passphrase file.
 - The keyring passphrase is **independent** of the archive's Fernet passphrase; neither is derived from the other.
@@ -271,7 +271,7 @@ vault-backup.py restore-full /var/backups/vault/vault-full-<ts>.vback \
 # co-located controller+vault: also refresh the file bootstrap.yml reads
 vault-backup.py restore-full <archive> \
   --keyring-out /etc/vault-backup/keys.gpg \
-  --keyring-out /root/ctlabs-ansible/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
+  --keyring-out {{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml \
   --passphrase-file /etc/vault-backup.pw
 ```
 
