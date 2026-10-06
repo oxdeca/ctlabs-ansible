@@ -1,0 +1,37 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/tasks/service.yml
+# Description : service
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_chartmuseum.tasks.service.create
+  template:
+    src  : "{{ ctlabs_chartmuseum.defaults.service.template }}"
+    dest : "{{ ctg_systemd_dir }}/{{ ctlabs_chartmuseum.defaults.service.name }}"
+    mode : '0644'
+  notify: ctlabs_chartmuseum.handlers.systemd.daemon_reload
+
+- name: ctlabs_chartmuseum.tasks.service.systemd.daemon_reload
+  meta: flush_handlers
+
+- name: ctlabs_chartmuseum.tasks.service.enabled
+  systemd:
+    name    : "{{ ctlabs_chartmuseum.defaults.service.name }}"
+    enabled : true
+    state   : started
+
+#
+# /health sits under contextpath and is never basic-auth guarded.
+# /metrics does NOT: it is always served on the root, so don't probe it here.
+#
+- name: ctlabs_chartmuseum.tasks.service.health
+  uri:
+    url          : "{{ ctlabs_chartmuseum_scheme }}://127.0.0.1:{{ ctlabs_chartmuseum_config.port }}{{ ctlabs_chartmuseum_basepath }}health"
+    return_content: true
+    status_code  : 200
+    validate_certs: false
+  register: cm_health
+  until  : cm_health is success
+  retries: 10
+  delay  : 3

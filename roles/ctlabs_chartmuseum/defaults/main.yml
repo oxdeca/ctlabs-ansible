@@ -1,0 +1,80 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+versions:
+  chartmuseum: 0.16.6
+
+ctlabs_chartmuseum:
+  defaults:
+    pkgs:
+      debian:
+        - name : tar
+      redhat:
+        - name : tar
+    download:
+      # published by the helm project, not on github releases
+      url     : "https://get.helm.sh/chartmuseum-v{{ versions.chartmuseum }}-linux-{{ ctlabs_chartmuseum_arch }}.tar.gz"
+      base    : "https://get.helm.sh/chartmuseum-v{{ versions.chartmuseum }}-linux-{{ ctlabs_chartmuseum_arch }}.tar.gz.sha256sum"
+      # sha256sum as published next to each tarball, verified 2026-10-05
+      sha256  :
+        amd64 : a750acc144a40ff2f149df28ad837c57fd4ddcd90a2ff06d100c01c0a02d834b
+        arm64 : 80a64d283b4f4f73d75fc7487e63bcbe59de0c689d4ce8d613287b99b90ff4eb
+        arm   : 29164380d73247a14633b81079b96cf575a6d630ad2f43a73ead6d6910e034c2
+      bindir : /opt/chartmuseum
+      bin    : /opt/chartmuseum/chartmuseum
+      tmpdir : /tmp
+      tmptar : /tmp/chartmuseum.tar.gz
+    config:
+      cfgdir   : /etc/chartmuseum
+      file     : config.yml
+      template : config.yml.j2
+      datadir  : /var/lib/chartmuseum
+      listen   : 0.0.0.0
+      port     : 8080
+      # empty = served at /, otherwise helm clients use <url><contextpath>
+      contextpath : ''
+      # absolute url for the .tgz entries in index.yaml.
+      # empty -> derived in precheck from nodename/port/contextpath
+      charturl : ''
+      cacheinterval   : 0s
+      depth           : 0
+      jsonindex       : false
+      allowoverwrite  : false
+      disable_delete  : false
+      disable_api     : false
+      enable_metrics  : true
+      index_limit     : 0
+      log_health      : false
+      log_json        : false
+      debug           : false
+      max_upload_size : 20971520
+      max_storage_objects : 0
+      cors_allow_origin  : ''
+      tls:
+        enabled : true
+        crt     : "/etc/ca-ctlabs/{{ ansible_nodename }}.crt"
+        key     : "/etc/ca-ctlabs/{{ ansible_nodename }}.prv"
+        # deliberately empty - chartmuseum switches the listener to mTLS
+        # (RequireAndVerifyClientCert) as soon as this is set, see README
+        cacert  : ''
+      auth:
+        enabled        : true
+        user           : ctlabs
+        pass           : secret123!
+        # pull action (GET index.yaml, GET charts) stays open when auth is on
+        anonymous_get  : true
+    service:
+      name     : chartmuseum.service
+      template : chartmuseum.service.j2
+      user     : chartmuseum
+      group    : chartmuseum
+      groups   : [certs]
+  os:
+    - redhat9
+    - centos9
+    - debian11
+    - debian12

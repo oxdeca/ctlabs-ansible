@@ -1,0 +1,14 @@
+[Unit]
+  Description=ChartMuseum
+  Documentation= https://chartmuseum.com/docs/getting-started/install/
+  After= network-online.target
+
+[Service]
+  User={{ ctlabs_chartmuseum.defaults.service.user }}
+  Group={{ ctlabs_chartmuseum.defaults.service.group }}
+  Restart=on-failure
+  ExecStart={{ ctlabs_chartmuseum.defaults.download.bin }} --config {{ ctlabs_chartmuseum_config.cfgdir }}/{{ ctlabs_chartmuseum_config.file }}
+  WorkingDirectory={{ ctlabs_chartmuseum_config.datadir }}
+
+[Install]
+  WantedBy=multi-user.target

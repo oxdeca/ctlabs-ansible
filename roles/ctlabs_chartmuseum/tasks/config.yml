@@ -1,0 +1,25 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_chartmuseum.tasks.config.dir
+  file:
+    path  : "{{ ctlabs_chartmuseum_config.cfgdir }}"
+    state : directory
+    mode  : '0755'
+
+#
+# contains the basic-auth password -> root:certs 0640, service reads it
+#
+- name: ctlabs_chartmuseum.tasks.config.installed
+  template:
+    src   : "{{ ctlabs_chartmuseum_config.template }}"
+    dest  : "{{ ctlabs_chartmuseum_config.cfgdir }}/{{ ctlabs_chartmuseum_config.file }}"
+    owner : root
+    group : "{{ ctlabs_chartmuseum.defaults.service.group }}"
+    mode  : '0640'
+  no_log: true
+  notify: ctlabs_chartmuseum.handlers.systemd.restart

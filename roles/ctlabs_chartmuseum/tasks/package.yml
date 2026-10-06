@@ -1,0 +1,73 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/tasks/package.yml
+# Description : packages
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_chartmuseum.tasks.package.pkgs.installed
+  when: item.when is not defined or item.when
+  package:
+    name  : "{{ item.name }}"
+    state : present
+  loop    : "{{ ctlabs_chartmuseum.defaults.pkgs[ctg_os_family] }}"
+  register: result
+  until   : result is success
+
+#
+# the tarball unpacks to linux-<arch>/chartmuseum, keep a stable path
+#
+- name: ctlabs_chartmuseum.tasks.package.bindir
+  file:
+    path  : "{{ ctlabs_chartmuseum.defaults.download.bindir }}"
+    state : directory
+    mode  : '0755'
+
+- name: ctlabs_chartmuseum.tasks.package.download
+  get_url:
+    url      : "{{ ctlabs_chartmuseum.defaults.download.url }}"
+    dest     : "{{ ctlabs_chartmuseum.defaults.download.tmptar }}"
+    checksum : "sha256:{{ ctlabs_chartmuseum.defaults.download.sha256[ctlabs_chartmuseum_arch] }}"
+    mode     : '0644'
+
+- name: ctlabs_chartmuseum.tasks.package.untar
+  unarchive:
+    src        : "{{ ctlabs_chartmuseum.defaults.download.tmptar }}"
+    dest       : "{{ ctlabs_chartmuseum.defaults.download.bindir }}"
+    remote_src : true
+    owner      : root
+    group      : root
+    mode       : '0755'
+
+- name: ctlabs_chartmuseum.tasks.package.install
+  file:
+    src   : "{{ ctlabs_chartmuseum.defaults.download.bindir }}/linux-{{ ctlabs_chartmuseum_arch }}/chartmuseum"
+    dest  : "{{ ctlabs_chartmuseum.defaults.download.bin }}"
+    state : link
+
+- name: ctlabs_chartmuseum.tasks.package.group
+  group:
+    name   : "{{ ctlabs_chartmuseum.defaults.service.group }}"
+    system : true
+
+- name: ctlabs_chartmuseum.tasks.package.user
+  user:
+    name    : "{{ ctlabs_chartmuseum.defaults.service.user }}"
+    group   : "{{ ctlabs_chartmuseum.defaults.service.group }}"
+    system  : true
+    home    : "{{ ctlabs_chartmuseum.defaults.download.bindir }}"
+    shell   : /usr/sbin/nologin
+
+- name: ctlabs_chartmuseum.tasks.package.group.certs.member
+  user:
+    name  : "{{ ctlabs_chartmuseum.defaults.service.user }}"
+    group : "{{ ctlabs_chartmuseum.defaults.service.group }}"
+    groups: "{{ ctlabs_chartmuseum.defaults.service.groups }}"
+
+- name: ctlabs_chartmuseum.tasks.package.datadir
+  file:
+    path  : "{{ ctlabs_chartmuseum_config.datadir }}"
+    state : directory
+    owner : "{{ ctlabs_chartmuseum.defaults.service.user }}"
+    group : "{{ ctlabs_chartmuseum.defaults.service.group }}"
+    mode  : '0750'

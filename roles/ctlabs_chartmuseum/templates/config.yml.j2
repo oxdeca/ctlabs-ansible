@@ -1,0 +1,57 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_chartmuseum/templates/config.yml.j2
+ # Description : chartmuseum configuration - viper flag names, not cli names
+ #}
+
+# key names below are chartmuseum's viper keys. they are NOT the cli flag
+# names: 'enablemetrics', not 'enable-metrics'; 'authanonymousget' must stay
+# flat at the top level - nesting it under 'auth:' is silently ignored.
+# the file suffix must be .yml/.yaml, chartmuseum refuses anything else.
+
+port     : {{ ctlabs_chartmuseum_config.port }}
+listen   :
+  host    : {{ ctlabs_chartmuseum_config.listen }}
+
+storage  :
+  backend : local
+  local   :
+    rootdir: {{ ctlabs_chartmuseum_config.datadir }}
+
+contextpath: {{ ctlabs_chartmuseum_config.contextpath if ctlabs_chartmuseum_config.contextpath else '/' }}
+charturl  : {{ ctlabs_chartmuseum_charturl }}
+
+cacheinterval        : {{ ctlabs_chartmuseum_config.cacheinterval }}
+depth                : {{ ctlabs_chartmuseum_config.depth }}
+json-index           : {{ ctlabs_chartmuseum_config.jsonindex | bool }}
+allowoverwrite       : {{ ctlabs_chartmuseum_config.allowoverwrite | bool }}
+disableforceoverwrite: {{ not ctlabs_chartmuseum_config.allowoverwrite | bool }}
+disabledelete        : {{ ctlabs_chartmuseum_config.disable_delete | bool }}
+disableapi           : {{ ctlabs_chartmuseum_config.disable_api | bool }}
+enablemetrics        : {{ ctlabs_chartmuseum_config.enable_metrics | bool }}
+indexlimit           : {{ ctlabs_chartmuseum_config.index_limit }}
+maxuploadsize        : {{ ctlabs_chartmuseum_config.max_upload_size }}
+maxstorageobjects    : {{ ctlabs_chartmuseum_config.max_storage_objects }}
+loghealth            : {{ ctlabs_chartmuseum_config.log_health | bool }}
+logjson              : {{ ctlabs_chartmuseum_config.log_json | bool }}
+debug                : {{ ctlabs_chartmuseum_config.debug | bool }}
+{% if ctlabs_chartmuseum_config.cors_allow_origin %}
+cors:
+  alloworigin: {{ ctlabs_chartmuseum_config.cors_allow_origin }}
+{% endif %}
+{% if ctlabs_chartmuseum_config.tls.enabled %}
+
+# ca-ctlabs leaves the .prv 0640 root:certs, the service user is in certs
+# cacert is intentionally not set - chartmuseum turns the listener into
+# RequireAndVerifyClientCert as soon as it is set, see README
+tls:
+  cert: {{ ctlabs_chartmuseum_config.tls.crt }}
+  key : {{ ctlabs_chartmuseum_config.tls.key }}
+{% endif %}
+{% if ctlabs_chartmuseum_config.auth.enabled %}
+
+# basicauth guards the push/api actions. GET stays open via authanonymousget.
+basicauth:
+  user: {{ ctlabs_chartmuseum_config.auth.user }}
+  pass: {{ ctlabs_chartmuseum_config.auth.pass }}
+authanonymousget: {{ ctlabs_chartmuseum_config.auth.anonymous_get | bool }}
+{% endif %}

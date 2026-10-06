@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/handlers/main.yml
+# Description : description
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_chartmuseum.handlers.systemd.restart
+  systemd:
+    name    : "{{ ctlabs_chartmuseum.defaults.service.name }}"
+    enabled : true
+    state   : restarted
+
+- name: ctlabs_chartmuseum.handlers.systemd.daemon_reload
+  systemd:
+    daemon_reload: true

@@ -1,0 +1,18 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/tests/test_chartmuseum.yml
+# Description : test playbook for ctlabs_chartmuseum (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_chartmuseum.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_systemd_dir: /etc/systemd/system
+    CTLABS_DOMAIN: ctlabs.internal
+  roles:
+    - ctlabs_chartmuseum

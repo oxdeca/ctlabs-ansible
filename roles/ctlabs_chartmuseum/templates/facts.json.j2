@@ -1,0 +1,27 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_chartmuseum/templates/facts.json.j2
+ # Description : ctlabs_chartmuseum local facts template
+ #
+ # This file is written as ctlabs_chartmuseum.fact, so its top-level keys land
+ # on ctg_facts.ctlabs_chartmuseum - the fact dict IS the config overlay that
+ # precheck merges recursively over the role defaults.
+ #
+ # Forwarded knobs are set-only: an absent key stays absent so the role default
+ # survives. Writing a default here (e.g. "" for charturl) would SHADOW it.
+ #
+ # 'auth' is deliberately NOT forwarded. This fact file is world-readable
+ # (0644 in /etc/ansible/facts.d) and the basic-auth password would leak into
+ # it. The role re-reads ctg_facts at config-render time, where the rendered
+ # file is 0640 and the template task runs no_log.
+ #
+ # Assembled as one expression rather than a {% for %}: ansible's templar does
+ # not carry `set` out of a loop body, which silently drops every forwarded key.
+#}
+{% set _facts = ctlabs_role_facts | default({}) %}
+{% set _knobs = ['port', 'listen', 'contextpath', 'datadir', 'cfgdir', 'charturl', 'tls'] %}
+{% set _host = ctg_host | default(ansible_nodename) | default(inventory_hostname) %}
+{% set _tls = _facts.tls | default({}, true) %}
+{% set _scheme = 'http' if _tls.enabled | default(true, true) == false else 'https' %}
+{{ _facts | dict2items | selectattr('key', 'in', _knobs) | items2dict
+   | combine({'url': _scheme ~ '://' ~ _host ~ ':' ~ (_facts.port | default({}, true) | default(8080, true))})
+   | to_nice_json(indent = 2) }}

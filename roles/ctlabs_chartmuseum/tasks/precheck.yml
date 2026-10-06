@@ -1,0 +1,89 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chartmuseum/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+#
+# MUST come first: touching any ctlabs_chartmuseum.* key resolves the whole
+# defaults dict, including defaults.download.url, which templates
+# ctlabs_chartmuseum_arch. Asserting the OS list before this is set fails with
+# "'ctlabs_chartmuseum_arch' is undefined".
+#
+# the helm project only publishes these three architectures
+#
+- name: ctlabs_chartmuseum.tasks.precheck.arch
+  set_fact:
+    ctlabs_chartmuseum_arch: >-
+      {{ 'amd64'  if ansible_architecture in ['x86_64', 'amd64']
+         else 'arm64' if ansible_architecture in ['aarch64', 'arm64']
+         else 'arm'   if ansible_architecture in ['armv7l', 'armv6l', 'arm']
+         else ansible_architecture }}
+
+- name: ctlabs_chartmuseum.tasks.precheck
+  block:
+    - name: ctlabs_chartmuseum.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_chartmuseum.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+    - name: ctlabs_chartmuseum.tasks.precheck.arch.supported
+      assert:
+        that     : ctlabs_chartmuseum_arch in ctlabs_chartmuseum.defaults.download.sha256
+        fail_msg : >
+          architecture [{{ ansible_architecture }}] maps to [{{ ctlabs_chartmuseum_arch }}],
+          which chartmuseum does not publish a binary for. known: {{
+          ctlabs_chartmuseum.defaults.download.sha256.keys() | list }}"
+  rescue:
+    - name: ctlabs_chartmuseum.tasks.precheck.skip.unsupported
+      meta: end_host
+
+#
+# the local fact file is named ctlabs_chartmuseum.fact, so its top-level keys
+# land on ctg_facts.ctlabs_chartmuseum - the fact dict IS the config overlay.
+# 'url' is written by facts.json.j2 for other roles to consume; it is inert
+# here (no config key of that name) and simply rides along in the merged dict.
+#
+# local facts win over the role defaults, recursively - a fact that only sets
+# auth.user keeps every other default under config.auth
+#
+- name: ctlabs_chartmuseum.tasks.precheck.fact
+  set_fact:
+    ctlabs_chartmuseum_fact: "{{ (ctg_facts | default({}, true)).ctlabs_chartmuseum | default({}, true) }}"
+
+- name: ctlabs_chartmuseum.tasks.precheck.config
+  set_fact:
+    ctlabs_chartmuseum_config: >-
+      {{ ctlabs_chartmuseum.defaults.config
+         | combine(ctlabs_chartmuseum_fact, recursive = true) }}
+
+#
+# absolute url advertised for the .tgz entries in index.yaml.
+# chartmuseum serves index.yaml without a host, so a relative/empty charturl
+# produces an index.yaml that helm cannot download from.
+#
+# the contextpath is deliberately NOT appended: chartmuseum already treats the
+# contextpath as the repo segment and builds "<charturl>/<contextpath>/charts/
+# <name>-<version>.tgz". including it here yields a doubled path
+# ("/charts/charts/charts/demo-0.1.0.tgz") that 404s.
+#
+- name: ctlabs_chartmuseum.tasks.precheck.charturl
+  set_fact:
+    ctlabs_chartmuseum_charturl: >-
+      {{ ctlabs_chartmuseum_config.charturl
+         | default('', true)
+         or (('https' if ctlabs_chartmuseum_config.tls.enabled else 'http')
+             ~ '://' ~ ansible_nodename ~ ':' ~ ctlabs_chartmuseum_config.port) }}
+
+#
+# contextpath is normalised to a leading-slash form here: '' and '/' both serve
+# from the root, '/charts' moves every route under /charts - including /health.
+#
+- name: ctlabs_chartmuseum.tasks.precheck.urls
+  set_fact:
+    ctlabs_chartmuseum_scheme   : "{{ 'https' if ctlabs_chartmuseum_config.tls.enabled else 'http' }}"
+    # normalised to a trailing-slash form: '' and '/' -> '/', '/charts' -> '/charts/'
+    ctlabs_chartmuseum_basepath : >-
+      {{ ('/' ~ ctlabs_chartmuseum_config.contextpath | trim('/') ~ '/')
+         if ctlabs_chartmuseum_config.contextpath | trim('/')
+         else '/' }}
