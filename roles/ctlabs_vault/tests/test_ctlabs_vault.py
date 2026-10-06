@@ -532,7 +532,7 @@ def test_backup_keyring_codec_inferred_from_suffix(role_dir):
     """A .gpg path is the gpg keyring, anything else a plaintext 0400 file."""
     mod = _load_backup_module()
     assert mod._is_gpg_keyring("/etc/vault-backup/keys.gpg")
-    assert not mod._is_gpg_keyring("/root/ctlabs-ansible/.ctlabs_vault_init_output_vdb1.yml")
+    assert not mod._is_gpg_keyring("{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_vdb1.yml")
     assert mod._key_file_for("/etc/vault-backup/keys.gpg") == \
         "/etc/vault-backup/passphrase"
 
