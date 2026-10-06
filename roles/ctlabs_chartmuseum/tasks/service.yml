@@ -26,6 +26,8 @@
 # /metrics does NOT: it is always served on the root, so don't probe it here.
 #
 - name: ctlabs_chartmuseum.tasks.service.health
+  vars:
+    ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
   uri:
     url          : "{{ ctlabs_chartmuseum_scheme }}://127.0.0.1:{{ ctlabs_chartmuseum_config.port }}{{ ctlabs_chartmuseum_basepath }}health"
     return_content: true
