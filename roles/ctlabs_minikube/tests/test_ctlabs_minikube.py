@@ -10,7 +10,7 @@ import subprocess
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-ROLE_TEMPLATES = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_minikube/templates"
+ROLE_TEMPLATES = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "templates"))
 
 
 def _iter_tasks(data):

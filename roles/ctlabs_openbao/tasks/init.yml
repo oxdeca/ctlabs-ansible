@@ -49,7 +49,7 @@
           openbao_root_token        : "{{ openbao_init_result.json['root_token']     }}"
           openbao_unseal_keys_b64   : "{{ openbao_init_result.json['keys_base64'][0] }}"
           ctlabs_openbao_initialized: true
-        dest: "{{ ctlabs_ansible_repo_dir }}/.ctlabs_openbao_init_output_{{ ansible_nodename }}.yml"
+        dest: "{{ ctg_ansible_repo_dir }}/.ctlabs_openbao_init_output_{{ ansible_nodename }}.yml"
       delegate_to: localhost
 
     - name: ctlabs_openbao.tasks.init.seal_status

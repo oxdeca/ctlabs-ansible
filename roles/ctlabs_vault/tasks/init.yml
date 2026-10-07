@@ -53,7 +53,7 @@
           vault_root_token        : "{{ vault_init_result.json['root_token']     }}"
           vault_unseal_keys_b64   : "{{ vault_init_result.json['keys_base64'][0] }}"
           ctlabs_vault_initialized: true
-        dest: "{{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+        dest: "{{ ctg_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
       delegate_to: localhost
 
     - name: ctlabs_vault.tasks.init.seal_status

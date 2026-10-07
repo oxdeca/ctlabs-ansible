@@ -22,7 +22,7 @@ Threat model / custody:
       interactive prompt. Keep it out-of-band (password manager / custodian).
     - Attacker with the archive + no passphrase: nothing (confidentiality).
     - Any tampering or bit-rot in the archive: detected on open (authenticity).
-    - The controller keyring ({{ ctlabs_ansible_repo_dir }}/.ctlabs_vault_init_output_*.yml,
+    - The controller keyring ({{ ctg_ansible_repo_dir }}/.ctlabs_vault_init_output_*.yml,
       mode 0400) stays as the offline fallback copy of the keys.
 
 Recovered keys (why restore writes a keyring):

@@ -10,8 +10,8 @@ import yaml
 import json
 from jinja2 import Environment, FileSystemLoader
 
-ROLE_TEMPLATES = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_k8s/templates"
-ROLE_TASKS = "{{ ctlabs_ansible_repo_dir }}/roles/ctlabs_k8s/tasks"
+ROLE_TEMPLATES = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "templates"))
+ROLE_TASKS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "tasks"))
 
 
 class _Joiner:
