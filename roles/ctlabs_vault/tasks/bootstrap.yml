@@ -656,7 +656,7 @@
         status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
-      loop  : "{{ ctlabs_vault_jwt_items | subelements('roles', skip_missing=True) }}"
+      loop  : "{{ ctlabs_vault_jwt_items | default([]) | subelements('roles', skip_missing=True) }}"
       register: vault_bootstrap_jwt_role
 
     - name: ctlabs_vault.tasks.bootstrap.jwt.role.create
@@ -742,7 +742,7 @@
         status_code  : [200, 404, 400]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
-      loop  : "{{ ctlabs_vault_kubernetes_items | subelements('roles', skip_missing=True) }}"
+      loop  : "{{ ctlabs_vault_kubernetes_items | default([]) | subelements('roles', skip_missing=True) }}"
       register: vault_bootstrap_kubernetes_role
 
     - name: ctlabs_vault.tasks.bootstrap.kubernetes.role.create
