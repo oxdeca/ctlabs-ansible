@@ -170,6 +170,35 @@ ctlabs_argoapp:
     # An empty list is a complete no-op, exactly like applications.
     #
     repositories: []
+
+    #
+    # Vault's own TLS CA, published as a ConfigMap for cert-vault-sync's
+    # ClusterSecretStores (secretStores.vault.ca.configMapName -> caProvider),
+    # so the chart references it instead of inlining a base64 caBundle that has
+    # to be re-rendered for every lab. Source file: /etc/ca-ctlabs/ca-ctlabs.crt
+    # on the node running this role (root:certs, so the read needs become).
+    #
+    #   enabled    : opt-in, like applications/repositories -- [] / false is a
+    #                complete no-op and never touches the cluster
+    #   name       : ConfigMap name the chart's caProvider points at
+    #   namespace  : created here if absent (this runs before the applications
+    #                that would otherwise CreateNamespace it)
+    #   key        : key inside the ConfigMap the caProvider reads
+    #   file       : CA PEM on this node; a missing file is a hard failure --
+    #                an empty CA makes every store fail TLS validation anyway,
+    #                and saying so here beats a mystery handshake error later
+    #
+    # Deliberately out of band: not in any Application manifest, so ArgoCD does
+    # not track or prune it (while the chart still rendered it, the first
+    # phase-2 sync pruned the hand-recreated copy -- see tasks/vault_ca.yml).
+    #
+    vault_ca:
+      enabled  : false
+      name     : cert-vault-sync-vault-ca
+      namespace: security-tools
+      key      : ca.crt
+      file     : /etc/ca-ctlabs/ca-ctlabs.crt
+
     #
     # The applications to declare. Per-cluster inventory - normally supplied
     # per host as the ctlabs_argoapp local fact, not edited here.

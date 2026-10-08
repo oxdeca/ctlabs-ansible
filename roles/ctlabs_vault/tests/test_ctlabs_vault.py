@@ -107,6 +107,10 @@ def test_bootstrap_reads_accept_vault_400_missing(role_dir):
         uri = t.get("uri") or {}
         if not uri or uri.get("method") in ("POST", "PUT"):
             continue
+        # only Vault reads answer 400 for a missing path -- the jwt JWKS fetch
+        # talks to the kubernetes apiserver, where 400/404 are not signals
+        if "ctlabs_vault.defaults.config.init.url" not in str(uri.get("url", "")):
+            continue
         read_tasks += 1
         assert 400 in uri["status_code"], f"read '{t.get('name')}' must accept 400"
         assert 404 in uri["status_code"], f"read '{t.get('name')}' must accept 404"
@@ -890,3 +894,205 @@ def test_main_imports_timer(role_dir):
         text = f.read()
     assert "import_tasks: timer.yml" in text
     assert "ctlabs_vault.timer" in text
+
+
+# ------------------------------------------------------------------------------
+# jwt auth: JWKS fetch -> config write -> role create (2026-10-08, replaces the
+# kubernetes auth for cert-vault-sync)
+# ------------------------------------------------------------------------------
+
+
+def _jwt_task(role_dir, name):
+    bootstrap = _load_tasks(role_dir, "bootstrap.yml")
+    return next(t for t in _all_tasks(bootstrap) if t.get("name") == name)
+
+
+def test_bootstrap_jwt_config_write_has_exactly_one_validation_source(role_dir):
+    """OpenBao rejects a config write that sets none of jwt_validation_pubkeys /
+    jwks_url / jwks_pairs / oidc_discovery_url ("exactly one of ... must be
+    set"), and a config write is a FULL replace -- so the body picks ONE source
+    (fetched keys if this run has them, else the profile's discovery_url) and
+    the task is gated off entirely when the run has neither. `audience` does
+    not exist on auth/jwt/config: a write carrying it answers 204 and silently
+    drops it, which would only manufacture drift."""
+    write = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.config.write")
+    body = write["vars"]["vault_bootstrap_jwt_cfg_body"]
+    assert "'jwt_validation_pubkeys'" in body
+    assert "'oidc_discovery_url'" in body
+    assert "if (vault_bootstrap_jwt_pubkeys | length) > 0" in body, "exactly one source, chosen not combined"
+    assert "audience" not in body, "auth/jwt/config has no audience parameter"
+    # the 204 OpenBao actually returns must not look like a failure
+    assert 204 in write["uri"]["status_code"] and 200 in write["uri"]["status_code"]
+    # clause 1 of the gate: no source this run -> nothing may be written
+    src = write["when"][0]
+    assert "ctlabs_vault_jwt_validation_pubkeys | default([]) | length) > 0" in src
+    assert "discovery_url" in src
+
+
+def test_bootstrap_jwt_config_write_drift_pins(role_dir):
+    """The read is taken BEFORE the write, so drift can only ever be detected,
+    never confirmed -- pin the comparison against missing/equal/different cases
+    for both sources (and against a null data block, which `| default(x)` alone
+    does not cover)."""
+    jinja2 = pytest.importorskip("jinja2")
+    env = jinja2.Environment(undefined=jinja2.StrictUndefined)
+    write = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.config.write")
+    when_src = write["when"][0]
+    got_src = env.compile_expression(when_src)
+    got_drift = env.compile_expression(write["when"][1])
+
+    def res(status, data, item=None):
+        return {"status": status, "json": {"data": data},
+                "item": item or {"mount": "jwt"}}
+
+    # gate 1: only a run that holds a source may write at all
+    assert got_src(ctlabs_vault_jwt_validation_pubkeys=["PEM"], item=res(404, {})) is True
+    assert got_src(ctlabs_vault_jwt_validation_pubkeys=[],
+                   item=res(404, {}, {"mount": "jwt", "discovery_url": "https://id"})) is True
+    assert got_src(ctlabs_vault_jwt_validation_pubkeys=[],
+                   item=res(404, {}, {"mount": "jwt"})) is False
+
+    # gate 2, pubkey mode
+    keys = ["PEM-A", "PEM-B"]
+    assert got_drift(item=res(404, {}), ctlabs_vault_jwt_validation_pubkeys=keys) is True
+    assert got_drift(item=res(200, {"jwt_validation_pubkeys": ["PEM-B", "PEM-A"]}),
+                     ctlabs_vault_jwt_validation_pubkeys=keys) is False, "order must not churn the config"
+    assert got_drift(item=res(200, {"jwt_validation_pubkeys": ["OLD"]}),
+                     ctlabs_vault_jwt_validation_pubkeys=keys) is True
+    assert got_drift(item=res(200, {}), ctlabs_vault_jwt_validation_pubkeys=keys) is True
+    assert got_drift(item=res(200, {"jwt_validation_pubkeys": None}),
+                     ctlabs_vault_jwt_validation_pubkeys=keys) is True
+
+    # gate 2, discovery_url mode (no keys fetched this run)
+    disc = {"mount": "jwt", "discovery_url": "https://id/.well-known/openid-configuration"}
+    empty = []
+    assert got_drift(item=res(200, {"oidc_discovery_url": ""}, disc),
+                     ctlabs_vault_jwt_validation_pubkeys=empty) is True
+    assert got_drift(item=res(200, {"oidc_discovery_url": disc["discovery_url"]}, disc),
+                     ctlabs_vault_jwt_validation_pubkeys=empty) is False
+    assert got_drift(item=res(200, {"oidc_discovery_url": None}, disc),
+                     ctlabs_vault_jwt_validation_pubkeys=empty) is True
+    # keys fetched wins over a leftover discovery_url config (full replace clears it)
+    assert got_drift(item=res(200, {"oidc_discovery_url": "https://id"}, disc),
+                     ctlabs_vault_jwt_validation_pubkeys=keys) is True
+
+
+def test_bootstrap_jwt_config_ready_holds_for_keys_discovery_or_existing(role_dir):
+    """Roles are gated on this fact: with no validation source a role carrying
+    bound_audiences could never authenticate, so a fresh lab pre-cluster skips
+    both config and roles and says so instead of failing."""
+    jinja2 = pytest.importorskip("jinja2")
+    env = jinja2.Environment(undefined=jinja2.StrictUndefined)
+    ready = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.config.ready")
+    tmpl = env.from_string(ready["vars"]["_expr"])
+
+    def run(pub, disc, results):
+        out = tmpl.render(_pub=pub, _disc=disc,
+                          vault_bootstrap_jwt_config={"results": results})
+        return out.strip() == "True"
+
+    assert run(["PEM"], "", []) is True
+    assert run([], "https://id", []) is True
+    assert run([], "", [{"status": 200, "json": {"data": {"jwt_validation_pubkeys": ["PEM"]}}}]) is True
+    assert run([], "", [{"status": 200, "json": {"data": {"oidc_discovery_url": "https://id"}}}]) is True
+    # robustness: null data / missing keys must not raise (the `| default(x)`
+    # form only replaces undefined -- None needs the boolean form)
+    assert run([], "", [{"status": 200, "json": {"data": None}}]) is False
+    assert run([], "", [{"status": 200, "json": {}}]) is False
+    assert run([], "", [{"status": 404, "json": {"errors": []}}]) is False
+    assert run([], "", []) is False
+
+
+def test_bootstrap_jwt_skipped_notice_when_no_validation_source(role_dir):
+    """The unconfigured-mount case is a NOTICE, never a failure: on a fresh lab
+    the cluster does not exist yet when the `vault` pass runs."""
+    task = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.config.skipped")
+    assert task.get("debug") is not None
+    assert "vault_rke2" in task["debug"]["msg"], "the notice must name the pass that fixes it"
+    when = str(task["when"])
+    assert "ctlabs_vault_jwt_config_ready" in when
+
+
+def test_bootstrap_jwt_role_create_carries_bound_subject_and_token_ttl(role_dir):
+    """cert-vault-sync binds each role to one ServiceAccount subject and a
+    1h token; both are role-level parameters the old body omitted."""
+    write = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.role.create")
+    body = write["vars"]["vault_bootstrap_jwt_role_body"]
+    assert "'bound_subject'" in body
+    assert "'token_ttl'" in body
+    assert "'bound_audiences'" in body
+    assert write["uri"]["status_code"] == [204], "jwt role PUT answers 204 (kubernetes answers 200)"
+
+
+def test_bootstrap_jwt_role_create_gated_on_config_ready(role_dir):
+    """config-before-roles ordering discipline: a role is only created while
+    the mount actually holds a validation source, and only when absent."""
+    write = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.role.create")
+    when = [str(c) for c in write["when"]]
+    assert any("item.status in [400, 404]" in c for c in when)
+    assert any("ctlabs_vault_jwt_config_ready" in c for c in when), "roles must not be created on an unconfigured mount"
+
+
+def test_bootstrap_jwt_fetch_is_not_a_vault_read(role_dir):
+    """The JWKS GET hits the kubernetes apiserver through a delegated, root-only
+    material staging dir -- it must not fail the play on a non-200 (the pem task
+    keys off status == 200 instead) and must not use command/shell."""
+    fetch = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.jwks.fetch")
+    assert fetch["uri"]["status_code"] == [200]
+    assert fetch.get("failed_when") is False
+    assert fetch.get("delegate_to") == "{{ ctlabs_vault_jwt_host }}"
+    assert fetch.get("become") is True
+    pem = _jwt_task(role_dir, "ctlabs_vault.tasks.bootstrap.jwt.jwks.pem")
+    assert "jwks_to_pems" in str(pem["set_fact"])
+
+
+def test_jwks_filter_converts_rsa_signature_jwk(role_dir):
+    """jwt_validation_pubkeys takes PEM SPKI blocks, the apiserver only serves
+    JWK (base64url n+e) -- the conversion has to survive the round trip and
+    ignore non-signature keys (Vault would accept them and never match)."""
+    import base64 as _b64
+    import importlib.util
+
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    spec = importlib.util.spec_from_file_location(
+        "ctlabs_vault_jwt_filter", os.path.join(role_dir, "filter_plugins", "jwt.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048).public_key()
+    nums = key.public_numbers()
+
+    def enc(value):
+        raw = value.to_bytes((value.bit_length() + 7) // 8 or 1, "big")
+        return _b64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
+
+    jwks = {"keys": [
+        {"kty": "RSA", "use": "sig", "kid": "sa-key", "n": enc(nums.n), "e": enc(nums.e)},
+        {"kty": "oct", "k": "not-a-signature-key"},
+        {"kty": "RSA", "use": "enc", "n": enc(nums.n), "e": enc(nums.e)},
+        "not-a-dict",
+    ]}
+    pems = mod.jwks_to_pems(jwks)
+    assert len(pems) == 1, "exactly the RSA signature keys"
+    loaded = serialization.load_pem_public_key(pems[0].encode("ascii"))
+    assert loaded.public_numbers() == nums
+    assert mod.jwks_to_pems("junk") == [] and mod.jwks_to_pems(None) == []
+    assert mod.FilterModule().filters()["jwks_to_pems"] is mod.jwks_to_pems
+
+
+def test_jwks_filter_b64url_handles_unpadded_members(role_dir):
+    """JWK members are base64url WITHOUT padding and len % 4 is routinely 2 or 3
+    -- urlsafe_b64decode rejects those unless the pad is restored."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "ctlabs_vault_jwt_filter", os.path.join(role_dir, "filter_plugins", "jwt.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod._b64url_decode("AQAB") == b"\x01\x00\x01"
+    assert mod._b64url_decode("YQ") == b"a"
+    assert mod._b64url_decode("YWFh") == b"aaa"

@@ -278,6 +278,256 @@
     #
     # JWT / OIDC
     #
+    # The auth method itself is enabled generically by the Auth Methods section
+    # above (a plain {path, type: jwt} entry in setup['auth']); this section
+    # writes the mount's config and its per-role bindings.
+    #
+    # What the profile supplies (jwt.roles) is stable across labs -- the service
+    # account signing key is not: it is minted fresh on every lab-up, so it is
+    # fetched at run time below and injected as jwt_validation_pubkeys. The
+    # profile therefore carries no key material at all.
+    #
+    # Verified against this Vault (OpenBao 2.1, `vault path-help` plus a
+    # throwaway auth mount probe, 2026-10-08):
+    #   * auth/jwt/config has NO `audience` parameter. Audience checking is
+    #     role-level (bound_audiences); a config write carrying `audience`
+    #     answers 204 and silently drops it, so writing it would only create a
+    #     perpetual drift.
+    #   * a config write must set EXACTLY ONE of jwt_validation_pubkeys /
+    #     jwks_url / jwks_pairs / oidc_discovery_url. A write without a fetched
+    #     key fails 400 ("exactly one of ... must be set") -- hence the skip
+    #     below rather than an empty-pubkeys write, which would also be a full
+    #     replace clearing whatever was there.
+    #   * config-before-roles is kept as ordering discipline even though a role
+    #     write with bound_audiences succeeded against a bare mount (204).
+    #
+    - name: ctlabs_vault.tasks.bootstrap.jwt.jwks
+      when: ctlabs_vault_jwt_items | length > 0
+      block:
+        #
+        # jwt.validation.{host,kubeconfig,context} are the only per-lab knobs;
+        # everything else is derived on the API node. Empty host = auto-detect.
+        #
+        - name: ctlabs_vault.tasks.bootstrap.jwt.spec
+          vars:
+            _jv: "{{ ((ctlabs_vault_jwt_items[0] if ctlabs_vault_jwt_items else {}).get('validation', {}) or {}) }}"
+          set_fact:
+            ctlabs_vault_jwt_host      : "{{ _jv.get('host', '') }}"
+            ctlabs_vault_jwt_kubeconfig: "{{ _jv.get('kubeconfig', '') }}"
+            ctlabs_vault_jwt_context   : "{{ _jv.get('context', '') }}"
+            ctlabs_vault_jwt_validation_pubkeys: []
+
+        #
+        # Which host runs the apiserver whose key signs the SA tokens. Explicit
+        # jwt.validation.host wins; otherwise the first local-fact role in
+        # ctlabs_vault_jwks['roles'] decides: server_node/master_node when that
+        # fact names one, else the host holding the fact itself (kind/minikube
+        # run their cluster where the fact was written).
+        #
+        - name: ctlabs_vault.tasks.bootstrap.jwt.validation.host.auto
+          when: (ctlabs_vault_jwt_host | length) == 0
+          vars:
+            _roles: "{{ ctlabs_vault_jwks['roles'] }}"
+            _scan : |
+              {%- set ns = namespace(host = '') -%}
+              {%- for h in groups['all'] -%}
+                {%- set al = hostvars[h].ansible_local | default({}) -%}
+                {%- if al is mapping -%}
+                  {%- for r in _roles -%}
+                    {%- if ns.host == '' and r in al and al[r] is mapping -%}
+                      {%- if al[r].get('server_node') -%}
+                        {%- set ns.host = al[r]['server_node'] -%}
+                      {%- elif al[r].get('master_node') -%}
+                        {%- set ns.host = al[r]['master_node'] -%}
+                      {%- else -%}
+                        {%- set ns.host = h -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              {%- endfor -%}
+              {{ ns.host }}
+          set_fact:
+            ctlabs_vault_jwt_host: "{{ _scan | trim }}"
+
+        #
+        # The kubeconfig is the one distro-specific input, and it carries both
+        # halves of the problem: the API base URL (loopback for rke2/k3s, a
+        # published port for kind/minikube) and a client certificate -- the
+        # discovery endpoint answers 401 to anonymous requests, so a plain GET
+        # is not enough.
+        #
+        - name: ctlabs_vault.tasks.bootstrap.jwt.kubeconfig.stat
+          when: (ctlabs_vault_jwt_host | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          failed_when: false
+          changed_when: false
+          stat:
+            path: "{{ item }}"
+          loop: >-
+            {{ [ctlabs_vault_jwt_kubeconfig] if ctlabs_vault_jwt_kubeconfig
+               else ctlabs_vault_jwks['kubeconfigs'] }}
+          register: res_jwt_kubeconfig
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.kubeconfig.path
+          when: res_jwt_kubeconfig['results'] is defined
+          vars:
+            _found: >-
+              {{ res_jwt_kubeconfig['results']
+                 | selectattr('stat', 'defined')
+                 | selectattr('stat.exists')
+                 | map(attribute='stat.path') | list }}
+          set_fact:
+            ctlabs_vault_jwt_kubeconfig_path: "{{ _found[0] if _found else '' }}"
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.kubeconfig.slurp
+          when: (ctlabs_vault_jwt_kubeconfig_path | default('') | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          failed_when: false
+          slurp:
+            src: "{{ ctlabs_vault_jwt_kubeconfig_path }}"
+          register: res_jwt_kubeconfig_content
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.kubeconfig.doc
+          when: res_jwt_kubeconfig_content['content'] is defined
+          set_fact:
+            ctlabs_vault_jwt_kc: "{{ res_jwt_kubeconfig_content['content'] | b64decode | from_yaml }}"
+
+        #
+        # current-context -> cluster/user (a merged ~/.kube/config holds several,
+        # so index 0 is not a safe guess), then the API url + client material.
+        # Fall back to the first cluster/user when no context matches at all.
+        #
+        - name: ctlabs_vault.tasks.bootstrap.jwt.kubeconfig.resolve
+          when: ctlabs_vault_jwt_kc | default({}) is mapping
+          vars:
+            _ctxname : "{{ ctlabs_vault_jwt_context or ctlabs_vault_jwt_kc.get('current-context', '') }}"
+            _ctxs    : "{{ ctlabs_vault_jwt_kc.get('contexts', []) | selectattr('name', 'equalto', _ctxname) | list }}"
+            _ctx     : "{{ (_ctxs[0].get('context', {}) if _ctxs else {}) if _ctxname else {} }}"
+            _cl_all  : "{{ ctlabs_vault_jwt_kc.get('clusters', []) }}"
+            _cl_sel  : "{{ _cl_all | selectattr('name', 'equalto', _ctx.get('cluster', '')) | list }}"
+            _cl      : "{{ _cl_sel[0] if _cl_sel else (_cl_all[0] if _cl_all else {}) }}"
+            _u_all   : "{{ ctlabs_vault_jwt_kc.get('users', []) }}"
+            _u_sel   : "{{ _u_all | selectattr('name', 'equalto', _ctx.get('user', '')) | list }}"
+            _u       : "{{ _u_sel[0] if _u_sel else (_u_all[0] if _u_all else {}) }}"
+          set_fact:
+            ctlabs_vault_jwt_api      : "{{ _cl.get('cluster', {}).get('server', '') }}"
+            ctlabs_vault_jwt_ca_data  : "{{ _cl.get('cluster', {}).get('certificate-authority-data', '') }}"
+            ctlabs_vault_jwt_ca_file  : "{{ _cl.get('cluster', {}).get('certificate-authority', '') }}"
+            ctlabs_vault_jwt_cert_data: "{{ _u.get('user', {}).get('client-certificate-data', '') }}"
+            ctlabs_vault_jwt_cert_file: "{{ _u.get('user', {}).get('client-certificate', '') }}"
+            ctlabs_vault_jwt_key_data : "{{ _u.get('user', {}).get('client-key-data', '') }}"
+            ctlabs_vault_jwt_key_file : "{{ _u.get('user', {}).get('client-key', '') }}"
+
+        #
+        # `uri` takes paths, not PEM blobs, so inline kubeconfig material is
+        # staged in a root-only dir and removed right after the fetch. Path-form
+        # material is used where it is, nothing is staged.
+        #
+        - name: ctlabs_vault.tasks.bootstrap.jwt.material.plan
+          when: (ctlabs_vault_jwt_api | default('') | length) > 0
+          vars:
+            _d: /run/ctlabs-jwks
+            _files: >-
+              {{ ([{'path': _d + '/ca.crt', 'content': ctlabs_vault_jwt_ca_data | b64decode}]
+                  if ctlabs_vault_jwt_ca_data else [])
+                 + ([{'path': _d + '/client.crt', 'content': ctlabs_vault_jwt_cert_data | b64decode}]
+                  if ctlabs_vault_jwt_cert_data else [])
+                 + ([{'path': _d + '/client.key', 'content': ctlabs_vault_jwt_key_data | b64decode}]
+                  if ctlabs_vault_jwt_key_data else []) }}
+          set_fact:
+            ctlabs_vault_jwt_material     : "{{ _files }}"
+            ctlabs_vault_jwt_material_dir : "{{ _d }}"
+            ctlabs_vault_jwt_client_cert  : "{{ (_d + '/client.crt') if ctlabs_vault_jwt_cert_data else ctlabs_vault_jwt_cert_file }}"
+            ctlabs_vault_jwt_client_key   : "{{ (_d + '/client.key') if ctlabs_vault_jwt_key_data else ctlabs_vault_jwt_key_file }}"
+            ctlabs_vault_jwt_ca           : "{{ (_d + '/ca.crt') if ctlabs_vault_jwt_ca_data else ctlabs_vault_jwt_ca_file }}"
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.material.dir
+          when: (ctlabs_vault_jwt_material | default([]) | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          file:
+            path : "{{ ctlabs_vault_jwt_material_dir }}"
+            state: directory
+            mode : '0700'
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.material.write
+          when: (ctlabs_vault_jwt_material | default([]) | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          copy:
+            content: "{{ item['content'] }}"
+            dest   : "{{ item['path'] }}"
+            mode   : '0600'
+          loop: "{{ ctlabs_vault_jwt_material }}"
+          loop_control:
+            label: "{{ item['path'] }}"
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.jwks.fetch
+          when:
+            - (ctlabs_vault_jwt_api | default('') | length) > 0
+            - (ctlabs_vault_jwt_client_cert | default('') | length) > 0
+            - (ctlabs_vault_jwt_client_key | default('') | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          uri:
+            url           : "{{ ctlabs_vault_jwt_api | regex_replace('/+$', '') }}/openid/v1/jwks"
+            client_cert   : "{{ ctlabs_vault_jwt_client_cert }}"
+            client_key    : "{{ ctlabs_vault_jwt_client_key }}"
+            ca_path       : "{{ ctlabs_vault_jwt_ca if ctlabs_vault_jwt_ca else omit }}"
+            # without a CA from the kubeconfig this stays unverified: the url
+            # came from a kubeconfig we just read as root and we authenticate
+            # with a client certificate, which is what the 401 is about
+            validate_certs: "{{ (ctlabs_vault_jwt_ca | default('') | length) > 0 }}"
+            status_code   : [200]
+            timeout       : "{{ ctlabs_vault_jwks['timeout'] | int }}"
+          register: res_jwt_jwks
+          # the post-rke2 pass lands right after the cluster is declared up:
+          # give an apiserver still finishing TLS bootstrapping a few minutes
+          # rather than declaring the whole mount unconfigured on first miss.
+          # failed_when: false keeps an exhausted wait a NOTICE (via
+          # config.skipped), never a red run.
+          until: (res_jwt_jwks.status | default(0) | int) == 200
+          retries: 6
+          delay: 10
+          failed_when: false
+          changed_when: false
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.material.clean
+          when: (ctlabs_vault_jwt_material | default([]) | length) > 0
+          vars:
+            ansible_python_interpreter: "{{ ctlabs_vault_jwks['interpreter'] }}"
+          delegate_to: "{{ ctlabs_vault_jwt_host }}"
+          become: true
+          ignore_unreachable: true
+          failed_when: false
+          file:
+            path : "{{ ctlabs_vault_jwt_material_dir }}"
+            state: absent
+
+        - name: ctlabs_vault.tasks.bootstrap.jwt.jwks.pem
+          when: (res_jwt_jwks['status'] | default(0)) == 200
+          set_fact:
+            ctlabs_vault_jwt_validation_pubkeys: >-
+              {{ (res_jwt_jwks['json']['keys'] | default([])) | jwks_to_pems }}
+
     - name: ctlabs_vault.tasks.bootstrap.jwt.mount.read
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/sys/auth/{{ item['mount'] }}"
@@ -314,23 +564,90 @@
       loop  : "{{ ctlabs_vault_jwt_items }}"
       register: vault_bootstrap_jwt_config
 
+    #
+    # A config write is a FULL replace and must set EXACTLY ONE validation
+    # source: the keys this run fetched, or the profile's oidc_discovery_url.
+    # With neither there is nothing this run may write (a sourceless write is
+    # rejected 400, and a source-less replace would clear a working config), so
+    # the task is skipped and the NOTICE after config.ready explains it.
+    # audience is deliberately absent: auth/jwt/config has no such parameter
+    # (a 204 that silently drops it) -- audience checking is role-level.
+    #
     - name: ctlabs_vault.tasks.bootstrap.jwt.config.write
       vars:
+        vault_bootstrap_jwt_pubkeys: "{{ ctlabs_vault_jwt_validation_pubkeys | default([]) }}"
+        vault_bootstrap_jwt_disc    : "{{ item.item.get('discovery_url') or '' }}"
         vault_bootstrap_jwt_cfg_body: >-
-          {{ {'oidc_discovery_url': item.item['discovery_url']}
+          {{ ({'jwt_validation_pubkeys': vault_bootstrap_jwt_pubkeys}
+               if (vault_bootstrap_jwt_pubkeys | length) > 0
+               else {'oidc_discovery_url': vault_bootstrap_jwt_disc})
                | combine({'default_role': item.item['default_role']} if 'default_role' in item.item else {})
                | to_json }}
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item['mount'] }}/config"
         method       : POST
         validate_certs: false
-        status_code  : [200]
+        status_code  : [200, 204]
         headers      :
           X-Vault-Token: "{{ ctlabs_vault_root_token }}"
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_cfg_body }}"
       loop: "{{ vault_bootstrap_jwt_config.results }}"
-      when: (item.status in [400, 404]) or (item.json['data']['oidc_discovery_url'] != item.item['discovery_url'])
+      when:
+        # this run has a validation source to put on the mount
+        - ((ctlabs_vault_jwt_validation_pubkeys | default([]) | length) > 0)
+          or (((item.item.get('discovery_url') or '') | length) > 0)
+        # ... and the mount does not already hold it (the read above is
+        # pre-write, so a successful write is never seen as "already there")
+        - >-
+          (item.status in [400, 404]) or
+          (((ctlabs_vault_jwt_validation_pubkeys | default([]) | length) > 0) and
+           (((item.get('json') or {}).get('data') or {}).get('jwt_validation_pubkeys')
+              | default([], true) | sort) !=
+           ((ctlabs_vault_jwt_validation_pubkeys | default([])) | sort)) or
+          (((ctlabs_vault_jwt_validation_pubkeys | default([]) | length) == 0) and
+           (item.status == 200) and
+           (((item.get('json') or {}).get('data') or {}).get('oidc_discovery_url')
+              | default('', true)) != (item.item.get('discovery_url') or ''))
+
+    #
+    # Roles may only exist while the mount has SOME validation source: what
+    # this run wrote (fetched keys or the profile's discovery_url), or whatever
+    # an earlier run already left configured. Without one, a role with
+    # bound_audiences can never authenticate -- skip the create and say so.
+    #
+    - name: ctlabs_vault.tasks.bootstrap.jwt.config.ready
+      vars:
+        _pub : "{{ ctlabs_vault_jwt_validation_pubkeys | default([]) }}"
+        _disc: "{{ (ctlabs_vault_jwt_items[0].get('discovery_url') or '') if ctlabs_vault_jwt_items else '' }}"
+        _expr: |
+          {%- set ns = namespace(ok = (_pub | length > 0) or (_disc | length > 0)) -%}
+          {%- for r in (vault_bootstrap_jwt_config.results | default([])) -%}
+            {%- set d = ((r.get('json') or {}).get('data') or {}) -%}
+            {%- if not ns.ok and (r.get('status') == 200) and
+                   ((d.get('jwt_validation_pubkeys') | default([], true)) or
+                    (d.get('oidc_discovery_url') | default('', true))) -%}
+              {%- set ns.ok = true -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.ok }}
+      set_fact:
+        ctlabs_vault_jwt_config_ready: "{{ _expr | trim | bool }}"
+      when: ctlabs_vault_jwt_items | length > 0
+
+    - name: ctlabs_vault.tasks.bootstrap.jwt.config.skipped
+      vars:
+        _mount: "{{ ctlabs_vault_jwt_items[0]['mount'] if ctlabs_vault_jwt_items else 'jwt' }}"
+      when:
+        - ctlabs_vault_jwt_items | length > 0
+        - not (ctlabs_vault_jwt_config_ready | default(false) | bool)
+      debug:
+        msg: >-
+          NOTICE: auth/{{ _mount }} has no validation source on this run (no API
+          node/kubeconfig reachable from here, and the fact declares no
+          discovery_url) -- the jwt config and role writes are skipped, so the
+          mount stays enabled but unconfigured. Re-run once the cluster is up
+          (tag vault_rke2 runs after rke2).
 
     - name: ctlabs_vault.tasks.bootstrap.jwt.role.read
       uri:
@@ -348,8 +665,10 @@
           {{ {'role_type': 'jwt'}
                | combine({'bound_audiences': item.item[1]['bound_audiences']} if 'bound_audiences' in item.item[1] else {})
                | combine({'user_claim': item.item[1]['user_claim']} if 'user_claim' in item.item[1] else {})
+               | combine({'bound_subject': item.item[1]['bound_subject']} if 'bound_subject' in item.item[1] else {})
                | combine({'claim_mappings': item.item[1]['claim_mappings']} if 'claim_mappings' in item.item[1] else {})
                | combine({'token_policies': item.item[1]['token_policies']} if 'token_policies' in item.item[1] else {})
+               | combine({'token_ttl': item.item[1]['token_ttl']} if 'token_ttl' in item.item[1] else {})
                | to_json }}
       uri:
         url          : "{{ ctlabs_vault.defaults.config.init.url }}/auth/{{ item.item[0]['mount'] }}/role/{{ item.item[1]['name'] }}"
@@ -361,7 +680,10 @@
         body_format  : json
         body         : "{{ vault_bootstrap_jwt_role_body }}"
       loop: "{{ vault_bootstrap_jwt_role.results }}"
-      when: item.status in [400, 404]
+      when:
+        - item.status in [400, 404]
+        - ctlabs_vault_jwt_config_ready | default(false) | bool
+
 
     #
     # Kubernetes Auth (the auth method itself is enabled generically by the

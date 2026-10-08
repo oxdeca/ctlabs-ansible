@@ -18,6 +18,7 @@ list on every cluster lab.
 | `ctlabs_argoapp.precheck`     | prechecks only                   |
 | `ctlabs_argoapp.applications` | CRD wait + apply + health wait   |
 | `ctlabs_argoapp.repositories` | repository credential Secrets    |
+| `ctlabs_argoapp.vault_ca`     | Vault CA ConfigMap (opt-in)      |
 | `ctlabs_argoapp.facts`        | local facts write (setup play)   |
 
 ## Prechecks
@@ -72,6 +73,7 @@ list on every cluster lab.
 | `ctlabs_argoapp.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
 | `ctlabs_argoapp.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
 | `ctlabs_argoapp.defaults.repositories`   | `[]`                                                | git/helm repositories ArgoCD may fetch, with credentials (see below)                        |
+| `ctlabs_argoapp.defaults.vault_ca`       | `{ enabled: false, name: cert-vault-sync-vault-ca, namespace: security-tools, key: ca.crt, file: /etc/ca-ctlabs/ca-ctlabs.crt }` | publish the lab CA as a ConfigMap (see [Vault CA ConfigMap](#vault-ca-configmap)) |
 
 ### Application fields
 
@@ -341,6 +343,39 @@ its own. Acceptable for a lab; anything shared or long-lived should come from
 `ctlabs_vault` instead. A vault-backed variant (read the password at apply time
 so it never lands in a fact file) is a deliberate non-goal for now.
 
+## Vault CA ConfigMap
+
+`cert-vault-sync` needs the lab CA (`/etc/ca-ctlabs/ca-ctlabs.crt`, written by
+`ctlabs_ca` on every host) inside the cluster as a ConfigMap — historically a
+manual `kubectl create configmap` step at lab-up. The role can publish it:
+
+```yaml
+vault_ca:
+  enabled: true
+```
+
+| Field       | Default                      | Purpose                                          |
+|-------------|------------------------------|--------------------------------------------------|
+| `enabled`   | `false`                      | gate; `false` = whole block skipped (no file read, no cluster contact) |
+| `namespace` | `security-tools`             | target namespace, created if absent              |
+| `name`      | `cert-vault-sync-vault-ca`   | ConfigMap name                                   |
+| `key`       | `ca.crt`                     | data key holding the PEM                         |
+| `file`      | `/etc/ca-ctlabs/ca-ctlabs.crt` | source file **on the target host** (slurped with `become: true`) |
+
+Notes:
+
+- **Opt-in via profile**, like everything else: the default is `enabled: false`,
+  and a partial mapping (`vault_ca: { enabled: true }`) keeps every documented
+  default. Set it on the `argoapp_certs` host entry in `setup_profiles.yml`.
+- **One guarded block**: `slurp` (changed_when: false) → `Namespace` present →
+  `ConfigMap` present. No `force` — the module applies declaratively from the
+  desired body, and `force` would need a resourceVersion this role never reads.
+- **Runs after `repositories`, before `applications`** (see `tasks/main.yml`),
+  so an application that mounts the ConfigMap never races its existence.
+- Tagged `ctlabs_argoapp.vault_ca`, and included in `ctlabs_argoapp` and
+  `ctlabs_argoapp.applications` — a `-t ctlabs_argoapp.applications` run still
+  gets the CA in place first.
+
 ## Failing fast on bad credentials
 
 A wrong credential is the failure mode this role is most likely to cause, and
@@ -480,7 +515,7 @@ Written to `/etc/ansible/facts.d/ctlabs_argoapp.fact`:
 }
 ```
 
-Per-host resolution via `ctg_facts.ctlabs_argoapp.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default.
+Per-host resolution via `ctg_facts.ctlabs_argoapp.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default. The forward list is `_knobs` in `templates/facts.json.j2` (`namespace`, `kubeconfig`, `interpreter`, `project`, `server`, `wait`, `wait_timeout`, `crd_wait`, `sync_policy`, `finalizers`, `repositories`, `transient_errors`, `vault_ca`) plus `applications`.
 
 ## ctlabs play.setup (install cert-manager and external-secrets)
 ```yml

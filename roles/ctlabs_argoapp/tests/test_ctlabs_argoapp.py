@@ -663,3 +663,99 @@ def test_default_namespace_is_the_chart_release_namespace(role_dir):
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)
     assert defaults["ctlabs_argoapp"]["defaults"]["namespace"] == "argo"
+
+
+def test_vault_ca_is_opt_in_and_ordered_before_applications(role_dir):
+    # cert-vault-sync's ClusterSecretStores read Vault's TLS CA from a
+    # ConfigMap the chart no longer creates (a PEM baked into the chart is in
+    # sync with a lab only until the next rebuild). The role supplies it from
+    # the node's /etc/ca-ctlabs/ca-ctlabs.crt -- but only when asked: like
+    # applications/repositories, a host that declares nothing is a no-op that
+    # never touches the cluster.
+    with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]["vault_ca"]
+    assert defaults["enabled"] is False, "opt-in, or every lab gains a namespace nobody asked for"
+    assert defaults["name"] == "cert-vault-sync-vault-ca"
+    assert defaults["namespace"] == "security-tools"
+    assert defaults["key"] == "ca.crt"
+    assert defaults["file"] == "/etc/ca-ctlabs/ca-ctlabs.crt"
+
+    with open(os.path.join(role_dir, "tasks", "vault_ca.yml")) as f:
+        tasks = yaml.safe_load(f)
+    assert len(tasks) == 1, "vault_ca.yml should be a single guarded block"
+    assert tasks[0]["when"] == "ctlabs_argoapp_vault_ca['enabled'] | bool"
+    assert len(tasks[0]["block"]) == 3, "read + namespace + configmap"
+
+    # before the applications that consume it, and carried by the applications
+    # tag so a -t ctlabs_argoapp.applications run still creates the CA
+    with open(os.path.join(role_dir, "tasks", "main.yml")) as f:
+        main = yaml.safe_load(f)
+    imports = [t["import_tasks"] for t in main if "import_tasks" in t]
+    assert imports.index("vault_ca.yml") < imports.index("applications.yml"), imports
+    vault_ca = next(t for t in main if t.get("import_tasks") == "vault_ca.yml")
+    assert "ctlabs_argoapp.applications" in vault_ca["tags"]
+    assert "ctlabs_argoapp.vault_ca" in vault_ca["tags"]
+
+
+def test_vault_ca_partial_profile_keeps_the_documented_defaults(role_dir):
+    # The knob is a mapping, so a profile that only flips `enabled` must not
+    # lose name/namespace/key/file to an implicit {} -- hence combine in
+    # precheck rather than the plain `| default(...)` the scalar knobs use.
+    with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.resolve")
+    expr = resolve["set_fact"]["ctlabs_argoapp_vault_ca"]
+    assert "ctlabs_argoapp.defaults.vault_ca | combine" in expr
+    assert "ctlabs_argoapp_fact['vault_ca']" in expr
+
+    # and the fact file must forward the mapping only when the profile set it
+    jinja2 = pytest.importorskip("jinja2")
+    env = jinja2.Environment(undefined=jinja2.StrictUndefined)
+    # these four are ansible's, not jinja's -- plain-json/stdlib stand-ins are
+    # enough here, the real render path is test_facts.yml
+    env.filters["dict2items"] = lambda d, **kw: [{"key": k, "value": v} for k, v in d.items()]
+    env.filters["items2dict"] = lambda lst, **kw: {i["key"]: i["value"] for i in lst}
+    env.filters["combine"] = lambda a, b, **kw: {**a, **b}
+    env.filters["to_nice_json"] = lambda v, indent=2, **kw: json.dumps(v, indent=indent)
+    with open(os.path.join(role_dir, "templates", "facts.json.j2")) as f:
+        tmpl = env.from_string(f.read())
+    opted_in = json.loads(tmpl.render(ctlabs_role_facts={"vault_ca": {"enabled": True}}))
+    assert opted_in["vault_ca"] == {"enabled": True}
+    silent = json.loads(tmpl.render(ctlabs_role_facts={}))
+    assert "vault_ca" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_vault_ca_applies_declaratively_from_the_node(role_dir):
+    # declarative modules only (no kubectl/command -- this role's standing
+    # rule), the PEM is read on the NODE running the role (root:certs, needs
+    # become), and no `force: true`: that means svc.replace(), which needs a
+    # resourceVersion this task never fetches. One key in data, so a patch is
+    # enough and a CA regeneration lands as a plain value update.
+    with open(os.path.join(role_dir, "tasks", "vault_ca.yml")) as f:
+        block = yaml.safe_load(f)[0]["block"]
+    read, namespace, apply = block
+
+    assert read["slurp"]["src"] == "{{ ctlabs_argoapp_vault_ca['file'] }}"
+    assert read["become"] is True
+    assert read["changed_when"] is False
+
+    for task in (namespace, apply):
+        k8s = task["kubernetes.core.k8s"]
+        assert k8s["state"] == "present"
+        assert "force" not in k8s, "force=true needs a resourceVersion this task never reads"
+
+    assert namespace["kubernetes.core.k8s"]["definition"]["kind"] == "Namespace"
+    assert namespace["kubernetes.core.k8s"]["definition"]["metadata"]["name"] == \
+        "{{ ctlabs_argoapp_vault_ca['namespace'] }}"
+
+    definition = apply["kubernetes.core.k8s"]["definition"]
+    assert definition["kind"] == "ConfigMap"
+    assert definition["metadata"]["name"] == "{{ ctlabs_argoapp_vault_ca['name'] }}"
+    assert definition["metadata"]["namespace"] == "{{ ctlabs_argoapp_vault_ca['namespace'] }}"
+    # dynamic key: the chart reads ca.crt, but the knob decides
+    assert '"{{ ctlabs_argoapp_vault_ca[\'key\'] }}"' in yaml.dump(definition["data"]) or \
+        "ctlabs_argoapp_vault_ca['key']" in str(definition["data"])
+    assert "b64decode" in str(definition["data"]), "slurp hands back base64"
+    for task in block:
+        for key in ("command", "shell"):
+            assert key not in task

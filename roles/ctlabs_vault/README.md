@@ -156,8 +156,10 @@ Omitted (not written as `{}` or `null`) when absent from the fact, same as `addr
   ],
   "jwt": { "mount": "jwt", "discovery_url": "https://.../.well-known/openid-configuration",
            "default_role": "default",
-           "roles": [ { "name": "default", "bound_audiences": ["..."], "user_claim": "...",
-                        "claim_mappings": {}, "token_policies": [] } ] },
+           "validation": { "host": "", "kubeconfig": "", "context": "" },
+           "roles": [ { "name": "cert-vault-sync-dev", "bound_audiences": ["vault"], "user_claim": "sub",
+                        "bound_subject": "system:serviceaccount:security-tools:cert-vault-sync-dev",
+                        "claim_mappings": {}, "token_policies": ["cert-vault-sync-dev"], "token_ttl": 3600 } ] },
   "kubernetes": [
     { "mount": "kubernetes", "host": "https://<k8s-apiserver>:6443",
       "ca_cert": "<cluster CA PEM>", "token_reviewer_jwt": "<reviewer SA token>",
@@ -180,6 +182,22 @@ Notes:
 - **Passwords are input-only**: creating a *new* user requires `password` (Vault can't read it back). Existing users get policies reconciled only — a changed `password` field has **no effect**. The bootstrap skips (with a message) creation of a new user that has no `password`.
 - **Secrets never leave the host**: the root token comes from `vault_root_token` in the init output file on the controller (never written to a `.fact` file), and passwords live in the fact file / role defaults only — nothing is written back to disk by the role.
 - `approle_roles` and `jwt.roles` are created when absent (404). Their parameters are set only for keys present in the fact (PUT is a full-set write, so an absent key is not clobbered). Changing parameters of an *existing* role is done via `vault-auth` / `vault write`, not by re-running bootstrap.
+- `jwt.roles[].bound_subject` and `token_ttl` are written together with the rest of the role body (a role with `bound_subject` accepts *only* that subject, so it can only be created once the mount itself has a validation source — see the gate below).
+
+### JWT: where the public keys come from
+
+`auth/<mount>/config` accepts **exactly one** of `jwt_validation_pubkeys` / `jwks_url` / `jwks_pairs` / `oidc_discovery_url`, and any config write is a full replace (unknown keys are silently dropped — `audience` is one of them: OpenBao 2.x has no `audience` on this endpoint, audiences belong on the *role* as `bound_audiences`).
+
+In this lab the apiserver is not a usable discovery source: `192.168.99.30:6443` is refused from the Vault host, and the data-plane IP answers `401` to anonymous `/.well-known/...`. So bootstrap fetches the JWKS **from the API node at run time** and injects it as `jwt_validation_pubkeys`:
+
+1. **Spec** — `jwt.validation.host` / `jwt.validation.kubeconfig` / `jwt.validation.context` in the profile, if set, win outright (empty/absent = auto).
+2. **Auto-detect** — scan hostvars for a node that owns a cluster: `ctlabs_rke2.server_node` (preferred), `ctlabs_k8s.master_node`, `ctlabs_kind`, `ctlabs_minikube`, `ctlabs_k3s` — so rke2/k8s/kind/k3s/minikube all work without touching the profile.
+3. **Kubeconfig** — probe `ctlabs_vault_jwks['kubeconfigs']` (`/etc/rancher/rke2/rke2.yaml`, `/etc/rancher/k3s/k3s.yaml`, `/root/.kube/config`, ...) on that node; `current-context` gives the server URL plus client certificate/key.
+4. **Fetch** — stage the material inline into a root-only `/run/ctlabs-jwks` dir (deleted in the next task, even on failure), `GET <server>/openid/v1/jwks`, decode `keys[*].n` (b64url, unpadded) into SPKI PEMs via the `jwks_to_pems` filter (RSA signing keys only; EdDSA/EC JWKs are skipped with a message). Reachability is delegated to the detected node — the controller never talks to the apiserver.
+5. **Write** — `jwt.config.write` pushes `jwt_validation_pubkeys` when the fetch returned keys, else `oidc_discovery_url` from `jwt.discovery_url`, but **only when something actually differs** from the running config (400/404, changed key set, changed discovery URL). It never writes `audience`.
+6. **Gate** — `jwt.config.ready` records whether the mount now has a validation source (fetched keys / profile discovery / read-back config). `jwt.role.create` requires it; if the cluster isn't up yet the run logs one `NOTICE` (`jwt.config.skipped`, re-run with tag `vault_rke2`) and stops — config and roles are never written half-configured.
+
+The `until`-retried fetch (6 × 10s) tolerates an apiserver still finishing TLS bootstrapping; an exhausted wait degrades to that same NOTICE instead of a red run.
 
 ### Exporting an existing setup — `vault-export.py`
 

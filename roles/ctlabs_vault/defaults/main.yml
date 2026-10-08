@@ -33,6 +33,46 @@ ctlabs_vault_setup:
       password : "secret123!"
       policies : ["default", "ctlabs"]
 
+# Runtime discovery of the cluster's service-account signing key (jwt auth).
+#
+# This Vault cannot use oidc_discovery_url/jwks_url for it: the issuer is the
+# cluster apiserver, which is not reachable from the vault host (mgmt/data VRF
+# split -- the mgmt address refuses, only the data address listens) and answers
+# HTTP 401 to anonymous /openid/v1/jwks. So bootstrap fetches the JWKS on the
+# API node itself and injects it as jwt_validation_pubkeys (tasks/bootstrap.yml,
+# jwt.jwks.*). The key is minted fresh every lab-up, which is why it is derived
+# here instead of being declared in the profile.
+#
+# Per-profile override: jwt.validation.{host,kubeconfig,context} inside the
+# bootstrap fact. The block below is only what falls back when those are absent.
+ctlabs_vault_jwks:
+  # kubeconfig candidates probed on the API node, first existing wins. The
+  # kubeconfig is the only distro-specific input: it carries both the API base
+  # URL (loopback for rke2/k3s, a published port for kind/minikube) and a client
+  # certificate, which the 401 on the discovery endpoint requires.
+  kubeconfigs:
+    - /etc/rancher/rke2/rke2.yaml
+    - /etc/rancher/k3s/k3s.yaml
+    - /etc/kubernetes/admin.conf
+    - /root/.kube/config
+  # local-fact role names scanned for the API node when jwt.validation.host is
+  # absent. The first host whose ansible_local carries one of these contributes
+  # its server_node/master_node -- or itself, when that fact has no such key
+  # (kind and minikube run their cluster right on the node that holds the fact).
+  roles:
+    - ctlabs_rke2
+    - ctlabs_k3s
+    - ctlabs_k8s
+    - ctlabs_kind
+    - ctlabs_minikube
+  # interpreter for the delegated fetch. Deliberately NOT the block-level
+  # `ip vrf exec default` wrapper: that belongs to the vault host's own
+  # data-VRF calls, while the fetch talks to the API node's loopback from a
+  # plain shell (verified live: 127.0.0.1:6443 answers there, the mgmt
+  # address does not).
+  interpreter: /usr/bin/python3
+  timeout     : 30
+
 # role defaults
 ctlabs_vault:
   defaults:
