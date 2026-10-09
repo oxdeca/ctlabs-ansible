@@ -6,7 +6,6 @@
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_gitea.tasks.setup.users.create
-  ignore_errors: true
   command: |
     sudo -u{{ ctlabs_gitea.defaults.service.user }}                                                 \
          {{ ctlabs_gitea.defaults.pkgs.gitea.bindir + '/' + ctlabs_gitea.defaults.pkgs.gitea.bin }} \
@@ -17,6 +16,11 @@
          --password "{{ item.pass  }}"                                                              \
          --email    "{{ item.email }}"                                                              \
          "{{ '--admin' if item.admin == true else '' }}"
+  register: __ctlabs_gitea_users_create__
+  changed_when: __ctlabs_gitea_users_create__.rc == 0
+  failed_when: >-
+    __ctlabs_gitea_users_create__.rc != 0 and
+    'already exists' not in __ctlabs_gitea_users_create__.stderr
   loop:
     - { "user" : "atlantis", "pass" : "secret123!", "email" : "atlantis@ctlabs.internal", "admin" : false }
     - { "user" : "ctlabs",   "pass" : "secret123!", "email" : "ctlabs@ctlabs.internal",   "admin" : true  }
