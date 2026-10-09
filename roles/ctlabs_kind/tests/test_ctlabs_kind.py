@@ -180,6 +180,9 @@ def test_ca_configmap_task_is_declarative_and_ordered():
     assert namespace["kubernetes.core.k8s"]["definition"]["metadata"]["name"] == "{{ item['namespace'] }}"
     assert apply["kubernetes.core.k8s"]["definition"]["kind"] == "ConfigMap"
     assert "b64decode" in str(apply["kubernetes.core.k8s"]["definition"]["data"])
+    assert (
+        apply["kubernetes.core.k8s"]["definition"]["data"] == "{{ {item['key']: (_crt | b64decode)} }}"
+    ), "config key must be built via the dict-filter: a literal YAML mapping key \"{{ item['key'] }}\": keeps the braces (data[{{ item['key'] }}] 422)"
 
     with open(os.path.join(ROLE_TASKS, "main.yml")) as f:
         main = yaml.safe_load(f)

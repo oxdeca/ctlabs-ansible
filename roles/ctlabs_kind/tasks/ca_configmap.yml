@@ -53,6 +53,5 @@
           metadata  :
             name     : "{{ item['name'] }}"
             namespace: "{{ item['namespace'] }}"
-          data:
-            "{{ item['key'] }}": "{{ _crt | b64decode }}"
+          data: "{{ {item['key']: (_crt | b64decode)} }}"
       loop: "{{ ctlabs_kind_ca_configmaps }}"
