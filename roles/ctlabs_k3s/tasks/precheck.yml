@@ -50,7 +50,7 @@
 
 - name: ctlabs_k3s.tasks.precheck.ca_configmaps
   set_fact:
-    ctlabs_k3s_ca_configmaps: "{{ ctg_facts.ctlabs_k3s.ca_configmaps | default(ctlabs_k3s.defaults.config.ca_configmaps) }}"
+    ctlabs_k3s_ca_configmaps: "{{ ctg_facts.ctlabs_k3s.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_k3s.defaults.config.ca_configmaps)) }}"
 
 - name: ctlabs_k3s.tasks.precheck.debug.ingress
   debug:

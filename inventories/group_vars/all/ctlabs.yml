@@ -43,7 +43,21 @@ ctg_ipv4        : >-
 ctg_cmd_ip      : "{{ '/usr/sbin/ip' if ctg_os_family == 'redhat' else '/bin/ip' }}"
 ctg_hv          : "{{ (lookup('file', '/etc/hosts').splitlines() | select('match', '^\\S+\\s+host\\.containers\\.internal') | first | default('')).split()[0] }}"
 
+# Lab CA publication default.
+#
+# ctlabs_ca runs before any cluster role and stages /etc/ca-ctlabs/ca-ctlabs.crt
+# on every node, so the k8s cluster roles (rke2/k8s/k3s/kind/minikube) default
+# to publishing it as a ConfigMap for charts (cert-vault-sync caProvider).
+# This is the single system-wide default; a per-cluster lab overrides it per
+# profile with the role's `ca_configmaps` fact (that fact wins over this
+# global; the role default stays [] as the final fallback).
+ctg_ca_configmaps:
+  - name     : ca-ctlabs-crt
+    namespace: security-tools
+    key      : ca.crt
+    file     : /etc/ca-ctlabs/ca-ctlabs.crt
+
 # ctlabs repo paths (can be overridden via env or vars)
-ctg_ansible_repo_dir  : "{{ lookup('env', 'CTLABS_ANSIBLE_REPO_DIR')  | default('/srv/ctlabs/ctlabs-ansible') }}"
+ctg_ansible_repo_dir  : "{{ lookup('env', 'CTLABS_ANSIBLE_REPO_DIR')   | default('/srv/ctlabs/ctlabs-ansible') }}"
 ctg_terraform_repo_dir: "{{ lookup('env', 'CTLABS_TERRAFORM_REPO_DIR') | default('/srv/ctlabs/ctlabs-terraform') }}"
 ctg_tools_repo_dir    : "{{ lookup('env', 'CTLABS_TOOLS_REPO_DIR')     | default('/srv/ctlabs/ctlabs-tools') }}"

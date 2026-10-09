@@ -53,7 +53,7 @@
 
 - name: ctlabs_rke2.tasks.precheck.ca_configmaps
   set_fact:
-    ctlabs_rke2_ca_configmaps: "{{ ctg_facts.ctlabs_rke2.ca_configmaps | default(ctlabs_rke2.defaults.config.ca_configmaps) }}"
+    ctlabs_rke2_ca_configmaps: "{{ ctg_facts.ctlabs_rke2.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_rke2.defaults.config.ca_configmaps)) }}"
 
 - name: ctlabs_rke2.tasks.precheck.coredns_resources
   set_fact:

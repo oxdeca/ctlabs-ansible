@@ -113,7 +113,7 @@ def _facts_env():
 def test_ca_configmap_default_is_opt_out():
     with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)["ctlabs_k3s"]["defaults"]["config"]
-    assert defaults["ca_configmaps"] == [], "empty default: no lab gains a ConfigMap unless asked"
+    assert defaults["ca_configmaps"] == [], "role default is empty by design; the lab-wide default lives in group_vars/all/ctlabs.yml (ctg_ca_configmaps)"
 
 
 def test_ca_configmap_facts_forward_only_when_set():
@@ -135,6 +135,7 @@ def test_ca_configmap_precheck_resolves_fact():
     resolve = next(t for t in precheck if t.get("name") == "ctlabs_k3s.tasks.precheck.ca_configmaps")
     expr = resolve["set_fact"]["ctlabs_k3s_ca_configmaps"]
     assert "ctg_facts.ctlabs_k3s.ca_configmaps" in expr
+    assert "ctg_ca_configmaps" in expr
     assert "ctlabs_k3s.defaults.config.ca_configmaps" in expr
 
 

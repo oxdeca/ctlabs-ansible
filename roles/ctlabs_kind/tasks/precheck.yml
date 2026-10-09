@@ -54,7 +54,7 @@
 
 - name: ctlabs_kind.tasks.precheck.ca_configmaps
   set_fact:
-    ctlabs_kind_ca_configmaps: "{{ ctg_facts.ctlabs_kind.ca_configmaps | default(ctlabs_kind.defaults.config.ca_configmaps) }}"
+    ctlabs_kind_ca_configmaps: "{{ ctg_facts.ctlabs_kind.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_kind.defaults.config.ca_configmaps)) }}"
 
 - name: ctlabs_kind.tasks.precheck.ingress_class
   set_fact:

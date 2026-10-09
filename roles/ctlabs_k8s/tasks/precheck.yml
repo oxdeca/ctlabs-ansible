@@ -94,7 +94,7 @@
 
 - name: ctlabs_k8s.tasks.precheck.ca_configmaps
   set_fact:
-    ctlabs_k8s_ca_configmaps: "{{ ctg_facts.ctlabs_k8s.ca_configmaps | default(ctlabs_k8s.defaults.config.ca_configmaps) }}"
+    ctlabs_k8s_ca_configmaps: "{{ ctg_facts.ctlabs_k8s.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_k8s.defaults.config.ca_configmaps)) }}"
 
 #
 # services loadbalancer provider (cluster-wide; exactly ONE active at a time)
