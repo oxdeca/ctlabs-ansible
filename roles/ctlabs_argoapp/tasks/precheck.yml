@@ -34,10 +34,6 @@
   set_fact:
     ctlabs_argoapp_applications : "{{ ctlabs_argoapp_fact['applications'] | default(ctlabs_argoapp.defaults.applications) }}"
     ctlabs_argoapp_repositories: "{{ ctlabs_argoapp_fact['repositories'] | default(ctlabs_argoapp.defaults.repositories) }}"
-    # one-level combine, not a straight override: vault_ca is a mapping of
-    # independent knobs, so a profile that only flips `enabled` must keep the
-    # documented name/namespace/key/file rather than lose them to an implicit {}
-    ctlabs_argoapp_vault_ca : "{{ ctlabs_argoapp.defaults.vault_ca | combine(ctlabs_argoapp_fact['vault_ca'] | default({}, true)) }}"
     ctlabs_argoapp_kubeconfig   : "{{ ctlabs_argoapp_fact['kubeconfig']   | default(ctlabs_argoapp.defaults.kubeconfig) }}"
     ctlabs_argoapp_interpreter  : "{{ ctlabs_argoapp_fact['interpreter']  | default(ctlabs_argoapp.defaults.interpreter) }}"
     ctlabs_argoapp_namespace    : "{{ ctlabs_argoapp_fact['namespace']    | default(ctlabs_argoapp.defaults.namespace) }}"

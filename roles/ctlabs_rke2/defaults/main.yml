@@ -40,6 +40,11 @@ ctlabs_rke2:
       gateway_api:
         enabled : true
         provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
+      # CA cert bundle(s) to publish as ConfigMaps once the cluster is up, so
+      # charts (e.g. cert-vault-sync's ClusterSecretStores) can read Vault's
+      # TLS CA. Each entry: {name, namespace, key, file?} where `file` defaults
+      # to the CA staged per node by ctlabs_ca. Empty list = no-op.
+      ca_configmaps: []
       coredns:
         resources:
           requests:

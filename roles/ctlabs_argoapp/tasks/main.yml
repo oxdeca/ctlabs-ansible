@@ -23,16 +23,6 @@
     # must still create the credentials its git-backed apps need
     - ctlabs_argoapp.applications
 
-# before applications.yml: a fresh ClusterSecretStore validates against this
-# ConfigMap on the very first sync, and the namespace it lands in has to exist
-# by then too. Same 'applications' tag carry as repositories -- an -t
-# ctlabs_argoapp.applications run must not leave the stores without their CA.
-- import_tasks: vault_ca.yml
-  tags:
-    - ctlabs_argoapp
-    - ctlabs_argoapp.vault_ca
-    - ctlabs_argoapp.applications
-
 - import_tasks: applications.yml
   tags:
     - ctlabs_argoapp

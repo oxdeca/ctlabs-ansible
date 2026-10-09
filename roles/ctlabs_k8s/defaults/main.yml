@@ -71,6 +71,11 @@ ctlabs_k8s:
         file    : /usr/local/bin/k8s-all
     config:
       role       : master                  # one of: master (initial control plane), control (additional control plane), worker
+      # CA cert bundle(s) to publish as ConfigMaps once the cluster is up, so
+      # charts (e.g. cert-vault-sync's ClusterSecretStores) can read Vault's
+      # TLS CA. Each entry: {name, namespace, key, file?} where `file` defaults
+      # to the CA staged per node by ctlabs_ca. Empty list = no-op.
+      ca_configmaps: []
       profile:
         template: ctlabs_k8s.sh.j2
         file    : /etc/profile.d/ctlabs_k8s.sh

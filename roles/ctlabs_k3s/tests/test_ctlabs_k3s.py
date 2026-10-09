@@ -3,12 +3,15 @@
 # Description : pytest tests for ctlabs_k3s role
 # ------------------------------------------------------------------------------
 
+import json
 import os
 import subprocess
 
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 ROLE_TEMPLATES = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "templates"))
+ROLE_TASKS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "tasks"))
 
 K3S_PATH = "/usr/bin/k3s"
 
@@ -37,6 +40,7 @@ def test_template_exists(role_dir):
         "tasks/config.yml",
         "tasks/facts.yml",
         "tasks/service.yml",
+        "tasks/ca_configmap.yml",
         "defaults/main.yml",
         "handlers/main.yml",
         "templates/k3s-server.service.j2",
@@ -97,3 +101,69 @@ def test_server_unit_traefik_ingress_servicelb_off():
         ctlabs_k3s_servicelb_enabled=False,
     )
     assert cmd == f"{K3S_PATH} server --cluster-init --disable=servicelb"
+
+
+def _facts_env():
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    env.filters["to_json"] = json.dumps
+    env.filters["lower"] = str.lower
+    return env
+
+
+def test_ca_configmap_default_is_opt_out():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_k3s"]["defaults"]["config"]
+    assert defaults["ca_configmaps"] == [], "empty default: no lab gains a ConfigMap unless asked"
+
+
+def test_ca_configmap_facts_forward_only_when_set():
+    tpl = _facts_env().get_template("facts.json.j2")
+    opted_in = json.loads(
+        tpl.render(
+            ctlabs_role_facts={"ca_configmaps": [{"name": "ca-ctlabs-crt", "namespace": "security-tools", "key": "ca.crt"}]},
+            CTLABS_HOST="k3s1",
+        )
+    )
+    assert opted_in["ca_configmaps"][0]["namespace"] == "security-tools"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}, CTLABS_HOST="k3s1"))
+    assert "ca_configmaps" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_ca_configmap_precheck_resolves_fact():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_k3s.tasks.precheck.ca_configmaps")
+    expr = resolve["set_fact"]["ctlabs_k3s_ca_configmaps"]
+    assert "ctg_facts.ctlabs_k3s.ca_configmaps" in expr
+    assert "ctlabs_k3s.defaults.config.ca_configmaps" in expr
+
+
+def test_ca_configmap_task_is_declarative_and_ordered():
+    with open(os.path.join(ROLE_TASKS, "ca_configmap.yml")) as f:
+        block = yaml.safe_load(f)[0]
+    assert block["when"].startswith("ctlabs_k3s_ca_configmaps | length > 0")
+    read, namespace, apply = block["block"]
+
+    assert read["slurp"]["src"] == "{{ item['file'] | default('/etc/ca-ctlabs/ca-ctlabs.crt') }}"
+    assert read["become"] is True
+    assert read["changed_when"] is False
+
+    for task in (namespace, apply):
+        assert task["environment"]["KUBECONFIG"] == "/etc/rancher/k3s/k3s.yaml"
+        assert task["kubernetes.core.k8s"]["state"] == "present"
+        assert "force" not in task["kubernetes.core.k8s"], "force needs a resourceVersion this task never reads"
+        assert "command" not in task and "shell" not in task
+
+    assert namespace["kubernetes.core.k8s"]["definition"]["kind"] == "Namespace"
+    assert namespace["kubernetes.core.k8s"]["definition"]["metadata"]["name"] == "{{ item['namespace'] }}"
+    assert apply["kubernetes.core.k8s"]["definition"]["kind"] == "ConfigMap"
+    assert "b64decode" in str(apply["kubernetes.core.k8s"]["definition"]["data"])
+
+    with open(os.path.join(ROLE_TASKS, "main.yml")) as f:
+        main = yaml.safe_load(f)
+    imports = [t["import_tasks"] for t in main if "import_tasks" in t]
+    assert imports.index("ca_configmap.yml") > imports.index("service.yml"), "cluster must be up first"
+    imp = next(t for t in main if t.get("import_tasks") == "ca_configmap.yml")
+    assert imp["when"] == "ctlabs_k3s_role == 'server'"
+    assert "ctlabs_k3s.service" in imp["tags"]
+    assert "ctlabs_k3s.ca_configmap" in imp["tags"]

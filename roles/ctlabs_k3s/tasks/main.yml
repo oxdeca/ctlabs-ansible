@@ -27,3 +27,10 @@
   tags:
     - ctlabs_k3s
     - ctlabs_k3s.service
+
+- import_tasks: ca_configmap.yml
+  when: ctlabs_k3s_role == 'server'
+  tags:
+    - ctlabs_k3s
+    - ctlabs_k3s.service
+    - ctlabs_k3s.ca_configmap

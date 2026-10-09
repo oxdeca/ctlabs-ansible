@@ -31,6 +31,12 @@
     - ctlabs_kind
     - ctlabs_kind.service
 
+- import_tasks: ca_configmap.yml
+  tags:
+    - ctlabs_kind
+    - ctlabs_kind.service
+    - ctlabs_kind.ca_configmap
+
 - import_tasks: charts.yml
   tags:
     - ctlabs_kind

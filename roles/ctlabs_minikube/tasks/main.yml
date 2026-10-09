@@ -29,6 +29,12 @@
     - ctlabs_minikube
     - ctlabs_minikube.service
 
+- import_tasks: ca_configmap.yml
+  tags:
+    - ctlabs_minikube
+    - ctlabs_minikube.service
+    - ctlabs_minikube.ca_configmap
+
 - import_tasks: charts.yml
   tags:
     - ctlabs_minikube

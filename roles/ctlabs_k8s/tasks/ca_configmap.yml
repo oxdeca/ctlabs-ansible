@@ -1,0 +1,58 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k8s/tasks/ca_configmap.yml
+# Description : publish CA cert bundles as ConfigMaps for chart consumption
+# ------------------------------------------------------------------------------
+#
+# cert-vault-sync's ClusterSecretStores read Vault's TLS CA from a ConfigMap
+# the chart no longer creates (a PEM baked into the chart goes stale on the
+# next rebuild). This publishes the node's lab CA as ConfigMaps during cluster
+# setup - before any Argo apps sync - for every entry a profile lists in
+# `ca_configmaps`. Each entry: {name, namespace, key, file?} where `file`
+# defaults to the CA staged per node by ctlabs_ca. Empty list = no-op.
+#
+# Master node only: workers have no kubeconfig. Declarative modules only (no
+# kubectl/command), the PEM is read on the NODE (root:cert readability, needs
+# become), and no `force: true`: a CA regeneration must land as a plain value
+# update, which needs no resourceVersion.
+
+- name: ctlabs_k8s.tasks.ca_configmap
+  when: ctlabs_k8s_ca_configmaps | length > 0
+  block:
+    - name: ctlabs_k8s.tasks.ca_configmap.load
+      slurp:
+        src: "{{ item['file'] | default('/etc/ca-ctlabs/ca-ctlabs.crt') }}"
+      become: true
+      changed_when: false
+      loop: "{{ ctlabs_k8s_ca_configmaps }}"
+      register: ca_configmap_crt
+
+    - name: ctlabs_k8s.tasks.ca_configmap.namespace
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind      : Namespace
+          metadata  :
+            name: "{{ item['namespace'] }}"
+      loop: "{{ ctlabs_k8s_ca_configmaps }}"
+
+    - name: ctlabs_k8s.tasks.ca_configmap.apply
+      vars:
+        _crt: "{{ (ca_configmap_crt.results | selectattr('item', 'equalto', item) | first)['content'] }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind      : ConfigMap
+          metadata  :
+            name     : "{{ item['name'] }}"
+            namespace: "{{ item['namespace'] }}"
+          data:
+            "{{ item['key'] }}": "{{ _crt | b64decode }}"
+      loop: "{{ ctlabs_k8s_ca_configmaps }}"

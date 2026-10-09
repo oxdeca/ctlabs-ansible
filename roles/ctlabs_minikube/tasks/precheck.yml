@@ -27,3 +27,7 @@
 - name: ctlabs_minikube.tasks.precheck.charts
   set_fact:
     ctlabs_minikube_charts: "{{ ctg_facts.ctlabs_minikube.charts | default(ctlabs_minikube.defaults.charts, true) }}"
+
+- name: ctlabs_minikube.tasks.precheck.ca_configmaps
+  set_fact:
+    ctlabs_minikube_ca_configmaps: "{{ ctg_facts.ctlabs_minikube.ca_configmaps | default(ctlabs_minikube.defaults.config.ca_configmaps) }}"

@@ -11,6 +11,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 ROLE_TEMPLATES = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "templates"))
+ROLE_TASKS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "tasks"))
 
 
 def _iter_tasks(data):
@@ -55,6 +56,7 @@ def test_template_exists(role_dir):
         "tasks/config.yml",
         "tasks/facts.yml",
         "tasks/service.yml",
+        "tasks/ca_configmap.yml",
         "tasks/charts.yml",
         "tasks/prepull.yml",
         "defaults/main.yml",
@@ -129,3 +131,60 @@ def test_raw_kubectl_tasks_set_kubeconfig(role_dir):
             if not env or "KUBECONFIG" not in str(env):
                 offenders.append((tf, task.get("name")))
     assert not offenders, "Raw kubectl tasks missing KUBECONFIG: " + repr(offenders)
+
+
+def test_ca_configmap_default_is_opt_out():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_minikube"]["defaults"]["config"]
+    assert defaults["ca_configmaps"] == [], "empty default: no lab gains a ConfigMap unless asked"
+
+
+def test_ca_configmap_facts_forward_only_when_set():
+    tpl = _facts_env().get_template("facts.json.j2")
+    opted_in = json.loads(
+        tpl.render(ctlabs_role_facts={"ca_configmaps": [{"name": "ca-ctlabs-crt", "namespace": "security-tools", "key": "ca.crt"}]})
+    )
+    assert opted_in["ca_configmaps"][0]["namespace"] == "security-tools"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}))
+    assert "ca_configmaps" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_ca_configmap_precheck_resolves_fact():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_minikube.tasks.precheck.ca_configmaps")
+    expr = resolve["set_fact"]["ctlabs_minikube_ca_configmaps"]
+    assert "ctg_facts.ctlabs_minikube.ca_configmaps" in expr
+    assert "ctlabs_minikube.defaults.config.ca_configmaps" in expr
+
+
+def test_ca_configmap_task_is_declarative_and_ordered():
+    with open(os.path.join(ROLE_TASKS, "ca_configmap.yml")) as f:
+        block = yaml.safe_load(f)[0]
+    assert block["when"].startswith("ctlabs_minikube_ca_configmaps | length > 0")
+    read, namespace, apply = block["block"]
+
+    assert read["slurp"]["src"] == "{{ item['file'] | default('/etc/ca-ctlabs/ca-ctlabs.crt') }}"
+    assert read["become"] is True
+    assert read["changed_when"] is False
+
+    for task in (namespace, apply):
+        assert "KUBECONFIG" in str(task["environment"])
+        assert "ctlabs_minikube.defaults.proxy.kubeconfig" in task["environment"]["KUBECONFIG"]
+        assert task["kubernetes.core.k8s"]["state"] == "present"
+        assert "force" not in task["kubernetes.core.k8s"], "force needs a resourceVersion this task never reads"
+        assert "command" not in task and "shell" not in task
+
+    assert namespace["kubernetes.core.k8s"]["definition"]["kind"] == "Namespace"
+    assert namespace["kubernetes.core.k8s"]["definition"]["metadata"]["name"] == "{{ item['namespace'] }}"
+    assert apply["kubernetes.core.k8s"]["definition"]["kind"] == "ConfigMap"
+    assert "b64decode" in str(apply["kubernetes.core.k8s"]["definition"]["data"])
+
+    with open(os.path.join(ROLE_TASKS, "main.yml")) as f:
+        main = yaml.safe_load(f)
+    imports = [t["import_tasks"] for t in main if "import_tasks" in t]
+    assert imports.index("ca_configmap.yml") > imports.index("service.yml"), "cluster must be up first"
+    imp = next(t for t in main if t.get("import_tasks") == "ca_configmap.yml")
+    assert "when" not in imp, "single-node minikube: publish whenever the knob is non-empty"
+    assert "ctlabs_minikube.service" in imp["tags"]
+    assert "ctlabs_minikube.ca_configmap" in imp["tags"]

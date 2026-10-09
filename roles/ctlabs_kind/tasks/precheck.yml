@@ -52,6 +52,10 @@
   set_fact:
     ctlabs_kind_gateway_api_provider: "{{ ctg_facts.ctlabs_kind.gateway_api.provider | default(ctlabs_kind.defaults.config.gateway_api.provider) }}"
 
+- name: ctlabs_kind.tasks.precheck.ca_configmaps
+  set_fact:
+    ctlabs_kind_ca_configmaps: "{{ ctg_facts.ctlabs_kind.ca_configmaps | default(ctlabs_kind.defaults.config.ca_configmaps) }}"
+
 - name: ctlabs_kind.tasks.precheck.ingress_class
   set_fact:
     ctlabs_kind_ingress_class: "{{ ctlabs_kind_ingress_type if ctlabs_kind_ingress_enabled else ctlabs_kind_gateway_api_provider }}"

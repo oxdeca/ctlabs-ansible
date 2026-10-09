@@ -11,4 +11,7 @@
 {% if _facts.charts is defined %}{{ _comma() }}
   "charts" : {{ _facts.charts | to_json }}
 {% endif %}
+{% if _facts.ca_configmaps is defined %}{{ _comma() }}
+  "ca_configmaps" : {{ _facts.ca_configmaps | to_json }}
+{% endif %}
 }

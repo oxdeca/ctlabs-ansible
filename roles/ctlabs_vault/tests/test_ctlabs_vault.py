@@ -229,7 +229,7 @@ def test_bootstrap_kubernetes_role_supports_multiple_roles_per_mount(role_dir):
     per environment), so the read loop must use subelements, not a flat list."""
     with open(os.path.join(role_dir, "tasks", "bootstrap.yml")) as f:
         text = f.read()
-    assert "ctlabs_vault_kubernetes_items | subelements('roles', skip_missing=True)" in text
+    assert "ctlabs_vault_kubernetes_items | default([]) | subelements('roles', skip_missing=True)" in text
 
 
 def test_bootstrap_reads_from_ctlabs_vault_fact(role_dir):
