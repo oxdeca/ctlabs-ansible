@@ -160,8 +160,7 @@
             namespace  : "{{ ctlabs_argoapp_namespace }}"
           register    : res_settle
           until       : >-
-            {{
-              (((res_settle.resources | default([]))
+            (((res_settle.resources | default([]))
                   | selectattr('metadata.name', 'in', _declared)
                   | difference(
                       ((res_settle.resources | default([]))
@@ -176,7 +175,6 @@
                         | selectattr('status.sync.status', 'defined')
                         | selectattr('status.sync.status', 'equalto', 'Unknown') | list))
                   | list) | length) == 0
-            }}
           retries     : "{{ ctlabs_argoapp_settle_retries | int }}"
           delay       : "{{ ctlabs_argoapp_wait_delay | int }}"
           # exhausting the settle budget is NOT a failure: the app may simply be

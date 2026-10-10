@@ -56,6 +56,16 @@
 # ArgoCD itself for any application, so catching them here beats a cryptic
 # 'InvalidApplicationSpec' from the API server later.
 #
+- name: ctlabs_argoapp.tasks.precheck.waiting.reset
+  set_fact:
+    # Reset before rebuilding. `set_fact` facts persist for the whole run and
+    # this role is applied by more than one play (argoapp + argoapp_certs), so
+    # without the reset the second invocation appends to the first's list. The
+    # wait phase then compares `converged >= _declared | length`, which can
+    # never hold once duplicates inflate the length, and the run stalls for the
+    # full wait_timeout.
+    ctlabs_argoapp_waiting: []
+
 - name: ctlabs_argoapp.tasks.precheck.waiting
   vars:
     _c: "{{ ctlabs_argoapp_wait }}"
@@ -65,7 +75,7 @@
     # so cannot re-evaluate a per-item `when`. Without this the per-app
     # `wait: false` opt-out silently stops working - an un-waited app would be
     # waited on, and could fail the run.
-    ctlabs_argoapp_waiting: "{{ ctlabs_argoapp_waiting | default([]) + [ _a.name ] }}"
+    ctlabs_argoapp_waiting: "{{ ctlabs_argoapp_waiting + [ _a.name ] }}"
   loop: "{{ ctlabs_argoapp_applications }}"
   loop_control:
     loop_var: _a

@@ -15,8 +15,11 @@
 # The expressions are passed in as expr_* from the pytest wrapper, which lifts
 # them straight out of tasks/applications.yml. They are deliberately NOT copied
 # here: a hand-copied duplicate would keep passing while the role regressed.
-# Each task re-declares the same `_ours`/`_converged`/`_errored`/`_pending`
-# chain the role uses, because these expressions reference each other by name.
+# The settle classification now lives INLINE in the settle task's `until:`, so
+# that test feeds a `res_settle` register (shaped like the role's k8s_info
+# result) and asserts the boolean settle would act on; the wait phase still
+# references its report vars by name, and gives the wait `until:` a `res_wait`
+# register of its own.
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_argoapp.test.status
@@ -183,74 +186,64 @@
     #
     # --- settle phase: mixed payload ---------------------------------------
     #
-    # must not raise, AND must classify every entry correctly - surviving the
-    # evaluation is not the same as getting the right answer.
+    # must not raise, AND must classify correctly: surviving the evaluation is
+    # not the same as getting the right answer. The whole classification is
+    # inlined into the settle `until:`, so the test hands over a `res_settle`
+    # register and asserts the boolean settle would act on.
     #
     - name: ctlabs_argoapp.test.status.settle
       vars:
-        _ours    : "{{ payload }}"
-        _declared: "{{ payload_names }}"
-        _converged: "{{ expr_settle_converged }}"
-        _errored   : "{{ expr_settle_errored }}"
-        _pending   : "{{ expr_settle_pending }}"
+        res_settle : "{{ {'resources': payload} }}"
+        _declared  : "{{ payload_names }}"
+        # bare in the role's until:, wrapped here like expr_wait_until
+        _settle_ok : "{{ expr_settle_until }}"
       assert:
         that:
-          - _converged | map(attribute='metadata') | map(attribute='name') | list == ['platform-healthy']
-          - _errored   | map(attribute='metadata') | map(attribute='name') | list == ['platform-errored']
-          # an Application ArgoCD has not reported on yet is pending - NOT
-          # converged and NOT errored. It is still rolling out, and reporting it
-          # as anything else either stalls the run or calls it failed.
-          - _pending | map(attribute='metadata') | map(attribute='name') | list
-            == ['cert-manager', 'external-secrets-empty', 'platform-no-sync', 'platform-syncing']
+          # four of six are still pending (fresh/empty/no_sync/syncing) - an
+          # Application ArgoCD has not reported on yet is NOT converged and NOT
+          # errored: settle must keep going
+          - not (_settle_ok | bool)
 
     - name: ctlabs_argoapp.test.status.settle.all_converged
       vars:
-        _ours    : "{{ [app_healthy] }}"
-        _declared: ["platform-healthy"]
-        _converged: "{{ expr_settle_converged }}"
-        _errored   : "{{ expr_settle_errored }}"
-        _pending   : "{{ expr_settle_pending }}"
+        res_settle : "{{ {'resources': [app_healthy]} }}"
+        _declared  : ["platform-healthy"]
+        _settle_ok : "{{ expr_settle_until }}"
       assert:
         that:
-          - (_pending | length) == 0
-          - (_converged | length) == 1
+          - (_settle_ok | bool)
 
     #
     # a bad credential must be recognised as a DEFINITIVE outcome rather than
     # waited out, while the still-syncing app stays pending: pending is
     # ours - converged - errored, so settle ends once every app has either
-    # converged or errored. Here the syncing app keeps it alive.
+    # converged or errored. Here the syncing app keeps it alive - and a broken
+    # errored classification would wrongly let it exit early.
     #
     - name: ctlabs_argoapp.test.status.settle.errored_does_not_wait
       vars:
-        _ours    : "{{ [app_errored, app_syncing] }}"
-        _declared: ["platform-errored", "platform-syncing"]
-        _converged: "{{ expr_settle_converged }}"
-        _errored   : "{{ expr_settle_errored }}"
-        _pending   : "{{ expr_settle_pending }}"
+        res_settle : "{{ {'resources': [app_errored, app_syncing]} }}"
+        _declared  : ["platform-errored", "platform-syncing"]
+        _settle_ok : "{{ expr_settle_until }}"
       assert:
         that:
-          - (_errored | map(attribute='metadata') | map(attribute='name') | list) == ['platform-errored']
-          - (_converged | length) == 0
-          - (_pending | map(attribute='metadata') | map(attribute='name') | list) == ['platform-syncing']
+          # errored is definitive, but the syncing app is the one still pending
+          - not (_settle_ok | bool)
 
     #
     # the actual fast-fail path: every app has a definitive outcome, so settle
     # exits at once and the run can report the credential instead of stalling
-    # for the full wait_timeout
+    # for the full wait_timeout. If the errored classification were dropped
+    # entirely, the errored app would stay pending and this would go false.
     #
     - name: ctlabs_argoapp.test.status.settle.errored_short_circuits
       vars:
-        _ours    : "{{ [app_errored, app_healthy] }}"
-        _declared: ["platform-errored", "platform-healthy"]
-        _converged: "{{ expr_settle_converged }}"
-        _errored   : "{{ expr_settle_errored }}"
-        _pending   : "{{ expr_settle_pending }}"
+        res_settle : "{{ {'resources': [app_errored, app_healthy]} }}"
+        _declared  : ["platform-errored", "platform-healthy"]
+        _settle_ok : "{{ expr_settle_until }}"
       assert:
         that:
-          - (_pending | length) == 0
-          - (_errored | length) == 1
-          - (_converged | length) == 1
+          - (_settle_ok | bool)
 
     #
     # --- wait phase ---------------------------------------------------------
@@ -258,6 +251,7 @@
     - name: ctlabs_argoapp.test.status.wait
       vars:
         _ours    : "{{ payload }}"
+        res_wait : "{{ {'resources': payload} }}"
         _declared: "{{ payload_names }}"
         _converged: "{{ expr_report_converged }}"
         _stuck     : "{{ expr_report_stuck }}"
@@ -282,6 +276,7 @@
     - name: ctlabs_argoapp.test.status.wait.all_healthy_satisfied
       vars:
         _ours    : "{{ [app_healthy] }}"
+        res_wait : "{{ {'resources': [app_healthy]} }}"
         _declared: ["platform-healthy"]
         _converged: "{{ expr_report_converged }}"
         _stuck     : "{{ expr_report_stuck }}"
@@ -302,6 +297,7 @@
     - name: ctlabs_argoapp.test.status.wait.unreported_is_stuck
       vars:
         _ours    : "{{ [app_fresh] }}"
+        res_wait : "{{ {'resources': [app_fresh]} }}"
         _declared: ["cert-manager"]
         _converged: "{{ expr_report_converged }}"
         _stuck     : "{{ expr_report_stuck }}"
@@ -347,6 +343,8 @@
     - name: ctlabs_argoapp.test.status.wait.empty
       vars:
         _ours    : []
+        res_wait : "{{ {'resources': []} }}"
+        res_settle : "{{ {'resources': []} }}"
         _declared: []
         _converged: "{{ expr_report_converged }}"
         _stuck     : "{{ expr_report_stuck }}"
@@ -355,9 +353,8 @@
         # ones carry. Ansible does NOT recursively template, so it is handed over
         # already wrapped or it would sit there as dead text.
         _wait_ok   : "{{ expr_wait_until }}"
-        _errored   : "{{ expr_settle_errored }}"
-        _pending   : "{{ expr_settle_pending }}"
+        _settle_ok : "{{ expr_settle_until }}"
       assert:
         that:
-          - (_pending | length) == 0
+          - (_settle_ok | bool)
           - (_stuck | length) == 0

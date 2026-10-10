@@ -298,11 +298,13 @@ def _extract_status_expressions(role_dir):
     report = _find_task(block, ".wait.report")
     errors = _find_task(block, ".settle.errors")
 
-    converged = settle["vars"]["_converged"]
     return {
-        "expr_settle_converged": converged,
-        "expr_settle_errored": settle["vars"]["_errored"],
-        "expr_settle_pending": settle["vars"]["_pending"],
+        # The settle classification now lives INLINE in the settle task's
+        # `until:` - each retry re-evaluates the whole chain against the fresh
+        # register, so there is no isolated _converged/_errored/_pending to lift.
+        # Evaluate the real expression instead (test playbook hands over a
+        # `res_settle` register and asserts the boolean settle would act on).
+        "expr_settle_until": "{{ " + settle["until"].strip() + " }}",
         # `until:` is consumed as an expression, so its value carries no {{ }} -
         # Ansible evaluates it directly. Ansible does not recursively template,
         # so handing that string over as a var would leave it as dead text that
@@ -437,12 +439,31 @@ def test_wait_fails_fast_on_argocd_error_conditions(role_dir):
         block = yaml.safe_load(f)[0]["block"]
 
     settle = _find_task(block, ".settle")
-    # until exits on EITHER outcome; that is what makes it fast
-    assert settle["until"] == "_pending | length == 0"
-    # sync.status == 'Unknown' is the comparison-failure signal, and it must be
-    # one of the two ways out of 'pending'
-    assert "'Unknown'" in settle["vars"]["_errored"]
-    assert "difference(_converged)" in settle["vars"]["_pending"]
+    # until exits on EITHER outcome; that is what makes it fast. The whole
+    # classification (converged / errored / pending) is now INLINE in the
+    # `until:` so every retry re-evaluates it against the fresh register - and
+    # the expression must stay BARE: this ansible warns when a conditional
+    # carries {{ }} delimiters.
+    until_expr = settle["until"].strip()
+    assert "{{" not in until_expr and "}}" not in until_expr, (
+        "until must be a bare conditional; {{ }} produces the Ansible warning"
+    )
+    # sync.status == 'Unknown' is the comparison-failure (errored) signal, and
+    # only Synced+Healthy counts as converged - together they are the two ways
+    # out of 'pending'
+    assert "'equalto', 'Unknown'" in until_expr
+    assert "'equalto', 'Synced'" in until_expr
+    assert "'equalto', 'Healthy'" in until_expr
+    # pending = ours - converged - errored, so 'difference(' appears exactly
+    # twice (drop the converged, then drop the errored)
+    assert until_expr.count("difference(") == 2
+    # the 'defined' prefilters must sit ahead of every comparison: an
+    # unreported Application has no status, and comparing before guarding is
+    # the raise this whole shape exists to prevent
+    for path in ("status.sync.status", "status.health.status"):
+        assert until_expr.index(f"'{path}', 'defined'") < until_expr.index(
+            f"'{path}', 'equalto'"
+        ), f"compares '{path}' before its 'defined' prefilter"
     # exhausting the settle budget is not a failure - a rollout may be slow
     assert settle["failed_when"] is False
     # must be ONE read of all Applications, never a loop (aggregate register)
@@ -496,6 +517,17 @@ def test_wait_fails_fast_on_argocd_error_conditions(role_dir):
     waiting = next(t for t in pre if t.get("name", "").endswith(".precheck.waiting"))
     assert waiting["when"] == "_a['wait'] | default(_c) | bool"
     assert "ctlabs_argoapp_waiting" in waiting["set_fact"]
+
+    # The opt-in list is an accumulating host fact. It MUST be reset before
+    # being rebuilt: set_fact facts persist for the whole run and this role is
+    # applied by more than one play (argoapp + argoapp_certs), so without the
+    # reset the second run appends to the first's list. The wait phase compares
+    # `converged >= _declared | length`, which can then never hold and the run
+    # stalls for the full wait_timeout.
+    names = [t.get("name", "") for t in pre]
+    reset = next(t for t in pre if t.get("name", "").endswith(".precheck.waiting.reset"))
+    assert reset["set_fact"]["ctlabs_argoapp_waiting"] == []
+    assert names.index(reset["name"]) < names.index(waiting["name"])
 
     apps_text = open(os.path.join(role_dir, "tasks", "applications.yml")).read()
     assert "ctlabs_argoapp_waiting" in apps_text
