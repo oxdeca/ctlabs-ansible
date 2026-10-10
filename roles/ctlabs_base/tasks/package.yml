@@ -11,6 +11,7 @@
 
 - name: ctlabs_base_tasks.package.linux
   when: ctg_os_family in ['redhat', 'debian']
+  block:
     # RedHat
     - name: ctlabs_base.tasks.package.linux.redhat
       when: ctg_os_family == "redhat"
