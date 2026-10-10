@@ -1,0 +1,11 @@
+# -------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/templates/profile.ps1.j2
+# Description : posix prompt for powershell
+# -------------------------------------------------------------------------------------
+
+function prompt {
+  $user = [Environment]::UserName
+  $fqdn = "{{ ctg_host }}"
+
+  return "$user@$fqdn> "
+}

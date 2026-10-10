@@ -1,0 +1,32 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/precheck.yml
+# Description : pre-flight checks for Windows domain join
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.precheck
+  block:
+    - name: ctlabs_ad.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os in ctlabs_ad.os
+        fail_msg : "OS[{{ ctg_os }}] is not supported!"
+    - name: ctlabs_ad.tasks.precheck.vault_addr
+      when: CTLABS_AD_PROMPT_CREDS is undefined
+      assert:
+        that     : ctg_vault_addr is defined and ctg_vault_addr|length > 0
+        fail_msg : "VAULT_ADDR missing!"
+    - name: ctlabs_ad.tasks.precheck.vault_token
+      when: CTLABS_AD_PROMPT_CREDS is undefined
+      assert:
+        that     : ctg_vault_token is defined and ctg_vault_token|length > 0
+        fail_msg : "VAULT_TOKEN missing!"
+#    - name: ctlabs_ad.tasks.precheck.variables.defined
+#      assert:
+#        that:
+#          - ctlabs_ad.defaults.config.domain_name is defined
+#          - ctlabs_ad.defaults.config.domain_pass != ""
+#        fail_msg: "Required Oanda domain join credentials are missing."
+  rescue:
+    - name: ctlabs_ad.tasks.precheck.skip.unsupported
+      meta: end_host

@@ -50,9 +50,14 @@ ctlabs_base:
         - name: webrick
         - name: rackup
         - name: sinatra
+      windows:
+        - name: chocolatey
+    scripts:
+      windows:
+        - name: psoptimize.ps1
     config:
       gce_disk_prefix: /dev/disk/by-id/google-
-      local_fact:
+      local_facts:
         template: ctlabs_base_disks.fact.j2
         file    : /etc/ansible/facts.d/ctlabs_base_disks.fact
       profiled:
@@ -63,6 +68,13 @@ ctlabs_base:
       tmux:
         template: tmux.conf.j2
         file    : /etc/tmux.conf
+      windows:
+        local_facts:
+          - file    : "{{ ctg_facts_dir }}/ctlabs.ps1"
+            template: ctlabs.fact.ps1.j2
+        profile:
+          file    : C:/Windows/System32/WindowsPowerShell/v1.0/profile.ps1
+          template: profile.ps1.j2
     sysconfig:
     service:
   os:
@@ -74,6 +86,7 @@ ctlabs_base:
     - centos9
     - debian11
     - debian12
+    - microsoft windows server 2022 standard evaluation
   virtype:
     - kvm
     - vmware

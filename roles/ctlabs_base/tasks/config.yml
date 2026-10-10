@@ -5,41 +5,92 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
-# attached block disks
+#
+# Linux
+#
+- name: ctlabs_base.tasks.config.linux
+  when: ctg_os_family in ['redhat', 'debian']
+  block:
+    # /etc/profile.d
+    - name: ctlabs_base.tasks.config.linux.profiled
+      copy:
+        src  : bashrc.kali.sh
+        dest : /etc/profile.d/bashrc.kali.sh
 
-- name: ctlabs_base.tasks.config.disk.format
-  filesystem:
-    dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
-    fstype   : "{{ item.fstype }}"
-    resizefs : false
-  loop: "{{ ctlabs_base_disks }}"
+    # attached block disks
+    - name: ctlabs_base.tasks.config.disk.format
+      filesystem:
+        dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        fstype   : "{{ item.fstype }}"
+        resizefs : false
+      loop: "{{ ctlabs_base_disks }}"
+    
+    - name: ctlabs_base.tasks.config.disk.mount
+      mount:
+        src   : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        path  : "{{ item.path }}"
+        fstype: "{{ item.fstype }}"
+        opts  : "{{ item.opts | default('defaults') }}"
+        state : mounted
+      loop: "{{ ctlabs_base_disks }}"
+    
+    - name: ctlabs_base.tasks.config.disk.resize
+      filesystem:
+        dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        fstype   : "{{ item.fstype }}"
+        resizefs : true
+      loop: "{{ ctlabs_base_disks }}"
+    
+    
+    # system configs
+    
+    - name: ctlabs_base.tasks.config.tmux
+      template:
+        src  : "{{ ctlabs_base.defaults.config.tmux.template }}"
+        dest : "{{ ctlabs_base.defaults.config.tmux.file     }}"
+    
+    - name: ctlabs_base.tasks.config.profiled
+      template:
+        src  : "{{ item.template }}"
+        dest : "{{ item.file     }}"
+      loop: "{{ ctlabs_base.defaults.config.profiled }}"
+    
+# -----------------------------------------------------------------------------
 
-- name: ctlabs_base.tasks.config.disk.mount
-  mount:
-    src   : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
-    path  : "{{ item.path }}"
-    fstype: "{{ item.fstype }}"
-    opts  : "{{ item.opts | default('defaults') }}"
-    state : mounted
-  loop: "{{ ctlabs_base_disks }}"
+#
+# Windows
+#
+- name: ctlabs_base.tasks.config.windows
+  when: ctg_os_family == 'windows'
+  block:
+    - name: ctlabs_base.tasks.config.windows.profiled
+      win_template:
+        src  : "{{ ctlabs_base.defaults.config.windows.profile.template }}"
+        dest : "{{ ctlabs_base.defaults.config.windows.profile.file     }}"
 
-- name: ctlabs_base.tasks.config.disk.resize
-  filesystem:
-    dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
-    fstype   : "{{ item.fstype }}"
-    resizefs : true
-  loop: "{{ ctlabs_base_disks }}"
+    # attached block disks
+    - name: ctlabs_base.tasks.config.windows.disk
+      when: item.fstype in ['ntfs', 'refs']
+      block:
+        - name: ctlabs_base.tasks.config.windows.disk.initialize
+          community.windows.win_initialize_disk:
+            disk_number : "{{ item.disk_number }}"
+            style       : gpt
+          loop: "{{ ctlabs_base_disks }}"
 
+        # -1 means "Use 100% of available unallocated space"
+        - name: ctlabs_base.tasks.config.windows.disk.partition
+          community.windows.win_partition:
+            disk_number      : "{{ item.disk_number }}"
+            partition_number : 1
+            partition_size   : -1
+            drive_letter     : "{{ item.drive_letter | default(omit) }}"
+          loop: "{{ ctlabs_base_disks }}"
 
-# system configs
-
-- name: ctlabs_base.tasks.config.tmux
-  template:
-    src  : "{{ ctlabs_base.defaults.config.tmux.template }}"
-    dest : "{{ ctlabs_base.defaults.config.tmux.file     }}"
-
-- name: ctlabs_base.tasks.config.profiled
-  template:
-    src  : "{{ item.template }}"
-    dest : "{{ item.file     }}"
-  loop: "{{ ctlabs_base.defaults.config.profiled }}"
+        - name: ctlabs_base.tasks.config.windows.disk.format
+          community.windows.win_format:
+            drive_letter : "{{ item.drive_letter }}"
+            file_system  : "{{ item.fstype }}"
+            new_label    : "{{ item.name }}"
+            full         : false
+          loop: "{{ ctlabs_base_disks }}"

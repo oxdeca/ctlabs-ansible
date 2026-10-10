@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File: ctlabs_windows_explorer/templates/config.yml.j2
+# ------------------------------------------------------------------------------
+
+collectors:
+{% if ctg_virtype == 'vmware' %}
+  enabled: {{ ctlabs_windows_exporter.defaults.config.collectors.win + ctlabs_windows_exporter.defaults.config.collectors.vmware }}
+{% else %}
+  enabled: {{ ctlabs_windows_exporter.defaults.config.collectors.win }}
+{% endif %}
+
+collector:
+  service:
+    include: "^({{ ctlabs_windows_exporter.defaults.service.name }}|W32Time)$"
+  process:
+    include: "mtsrv"
+  textfile:
+    directories: ["C:/Program Files/windows_exporter/textfile_inputs"]
+
+log:
+  level: info
+  file: eventlog
+
+web:
+  listen-address: "{{ ctlabs_windows_exporter.defaults.service.listen }}"
+
+telemetry:
+  path: /metrics

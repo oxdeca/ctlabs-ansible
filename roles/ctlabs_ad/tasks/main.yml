@@ -1,0 +1,39 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/main.yml
+# Description : main entry point for the ctlabs_ad role
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.precheck
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.config
+
+- import_tasks: join.yml
+  when: CTLABS_AD_DOMAIN_LEAVE is undefined
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.join
+
+- import_tasks: service.yml
+  when: CTLABS_AD_DOMAIN_LEAVE is undefined
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.service
+
+- import_tasks: leave.yml
+  when: CTLABS_AD_DOMAIN_LEAVE is defined
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.leave

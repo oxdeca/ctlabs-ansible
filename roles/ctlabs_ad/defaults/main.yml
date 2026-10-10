@@ -1,0 +1,30 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/defaults/main.yml
+# Description : main defaults for joining Windows hosts to Active Directory
+# ------------------------------------------------------------------------------
+
+CTLABS_AD_DOMAIN      : ad.ctlabs.internal
+CTLABS_AD_DOMAIN_PATH : "dc={{ CTLABS_AD_DOMAIN.split('.') | join(',dc=') }}"
+
+ctlabs_ad:
+  defaults:
+    config:
+      dc:
+        realm : "{{ CTLABS_AD_DOMAIN|upper }}"
+        domain: "{{ CTLABS_AD_DOMAIN }}"
+        ou:
+          dev : "ou=dev,ou=servers,ou=ctlabs,{{ CTLABS_AD_DOMAIN_PATH }}"
+          uat : "ou=uat,ou=servers,ou=ctlabs,{{ CTLABS_AD_DOMAIN_PATH }}"
+          prod: "ou=prod,ou=servers,ou=ctlabs,{{ CTLABS_AD_DOMAIN_PATH }}"
+        hosts:
+          - dc1
+          - dc2
+    vault:
+      mount: kvv2
+      secrets:
+        dc_join:
+          path: kvv2/data/gcp/global/pleng/bootstrap
+  os:
+    - microsoft windows server 2022 standard evaluation

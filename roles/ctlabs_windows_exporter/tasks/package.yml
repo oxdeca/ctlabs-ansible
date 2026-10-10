@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/ctlabs_windows_exporter/tasks/package.yml
+# Description : install tasks file
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_windows_exporter.tasks.package.remote.tmp
+  win_file:
+    path: "{{ ctlabs_windows_exporter.defaults.pkgs.win.dst | win_dirname }}"
+    state: directory
+
+- name: ctlabs_windows_exporter.tasks.package.download
+  win_get_url:
+    url  : "{{ ctlabs_windows_exporter.defaults.pkgs.win.url }}"
+    dest : "{{ ctlabs_windows_exporter.defaults.pkgs.win.dst }}"
+
+- name: ctlabs_windows_exporter.tasks.install.package
+  win_package:
+    path: "{{ ctlabs_windows_exporter.defaults.pkgs.win.dst | replace('/', '\\\\') }}"
+#    arguments: >-
+#      /qn /norestart EXTRA_FLAGS="{{ ctlabs_windows_exporter.defaults.service.args }}"

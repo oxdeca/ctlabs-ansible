@@ -1,0 +1,53 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_exporter/tasks/service.yml
+# Description : install tasks file
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_windows_exporter.tasks.service.setup
+  ansible.windows.win_service:
+    name              : "{{ ctlabs_windows_exporter.defaults.service.name }}"
+    display_name      : "{{ ctlabs_windows_exporter.defaults.service.name }}"
+    path              : "{{ ctlabs_windows_exporter.defaults.service.bin }} {{ ctlabs_windows_exporter.defaults.service.args }}"
+    username          : LocalSystem
+    state             : started
+    start_mode        : delayed
+    desktop_interact  : false
+    failure_actions:
+      - type     : restart
+        delay_ms : 15000
+      - type     : restart
+        delay_ms : 30000
+      - type     : restart
+        delay_ms : 60000
+
+- name: ctlabs_windows_exporter.tasks.service.cpu.prio
+  when: (ansible_ctlabs_windows_exporter.cpu.prio | default(0)) > 32
+  community.windows.win_scheduled_task:
+    name            : WindowsExporterCustomPriority
+    username        : SYSTEM
+    update_password : false
+    actions:
+      - path      : cmd.exe
+        arguments : "/c wmic process where name={{ ctlabs_windows_exporter.defaults.pkgs.win.bin | win_basename }} CALL setpriority {{ ansible_ctlabs_windows_exporter.cpu.prio | default( ctlabs_windows_exporter.defaults.config.cpu.prio ) }} & exit"
+    triggers:
+      - type           : time
+        start_boundary : '2000-01-01T00:00:00'
+        repetition:
+          interval             : PT60M
+          stop_at_duration_end : false
+
+- name: ctlabs_windows_exporter.tasks.service.flush_handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: ctlabs_windows_exporter.tasks.service.verify
+  win_uri:
+    #url            : "http://{{ctlabs_windows_exporter.defaults.service.listen}}/metrics"
+    url            : "http://{{ctg_ipv4}}:9182/metrics"
+    method         : GET
+    return_content : true
+  register: exporter_check
+  retries: 5
+  delay  : 5
+  until  : exporter_check.status_code == 200

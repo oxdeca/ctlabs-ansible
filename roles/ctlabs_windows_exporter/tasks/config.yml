@@ -1,0 +1,23 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_exporter/tasks/config.yml
+# Description : configurations
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_windows_exporter.tasks.config.collectors
+  win_template:
+    src   : "{{ ctlabs_windows_exporter.defaults.config.template }}"
+    dest  : "{{ ctlabs_windows_exporter.defaults.config.file    }}"
+    backup: true
+  notify: ctlabs_windows_explorer.handlers.service.restart
+
+- name: ctlabs_windows_exporter.tasks.config.firewall
+  community.windows.win_firewall_rule:
+    name        : "Allow Prometheus Windows Exporter"
+    direction   : in
+    action      : allow
+    protocol    : tcp
+    localport   : "9182"
+    state       : present
+    enabled     : true

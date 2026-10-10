@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_exporter/tasks/main.yml
+# Description : main tasks file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_windows_exporter
+    - ctlabs_windows_exporter.precheck
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_windows_exporter
+    - ctlabs_windows_exporter.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_windows_exporter
+    - ctlabs_windows_exporter.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_windows_exporter
+    - ctlabs_windows_exporter.service

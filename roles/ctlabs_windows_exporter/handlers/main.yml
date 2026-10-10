@@ -1,0 +1,11 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_explorer/handlers/main.yml
+# Description : ctlabs_windows_explorer handlers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_windows_explorer.handlers.service.restart
+  win_service:
+    name: "{{ ctlabs_windows_exporter.defaults.service.name }}"
+    state: restarted

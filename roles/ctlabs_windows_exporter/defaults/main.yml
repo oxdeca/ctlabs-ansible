@@ -1,0 +1,33 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_exporter/defaults/main.yml
+# Description : main defaults file
+# ------------------------------------------------------------------------------
+
+versions:
+  windows_exporter: 0.31.8
+
+ctlabs_windows_exporter:
+  defaults:
+    pkgs:
+      win:
+        url : "https://github.com/prometheus-community/windows_exporter/releases/download/v{{ versions.windows_exporter }}/windows_exporter-{{ versions.windows_exporter }}-amd64.msi"
+        bin : C:/Program Files/windows_exporter/windows_exporter.exe
+        dst : C:/temp/windows_exporter_installer.msi
+    config:
+      template : config.yml.j2
+      file     : C:/Program Files/windows_exporter/config.yml
+      cpu:
+        prio: 32
+      collectors:
+        win   : cpu,cpu_info,net,service,logical_disk,memory,net,os,process,system,tcp,time,textfile
+        vmware: vmware
+    service:
+      name   : windows_exporter
+      bin    : C:/Program Files/windows_exporter/windows_exporter.exe
+      args   : --config.file="C:/Program Files/windows_exporter/config.yml"
+      listen : "{{ '0.0.0.0' }}:9182"
+      #listen : "{{ ctg_ipv4 | default('0.0.0.0') }}:9182"
+  os:
+    - microsoft windows server 2022 standard evaluation

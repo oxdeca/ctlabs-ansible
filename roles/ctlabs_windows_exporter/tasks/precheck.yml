@@ -1,0 +1,16 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_windows_exporter/tasks/precheck.yml
+# Description : prechecks
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_windows_exporter.tasks.precheck
+  block:
+    - name: ctlabs_windows_exporter.tasks.precheck.os.supported
+      assert:
+        that     : ctg_os is in ctlabs_windows_exporter.os
+        fail_msg : "OS[{{ctg_os}}] is not supported!"
+  rescue:
+    - name: ctlabs_windows_exporter.tasks.precheck.skip.unsupported
+      meta: end_host

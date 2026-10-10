@@ -5,42 +5,71 @@
 # Description : main ctlabs_base tasks file.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_base.tasks.package.redhat
-  when: ctg_os_family == "redhat"
-  block:
-    - name: ctlabs_base.tasks.package.redhat.repo.file
-      yum_repository:
+#
+# Linux
+#
+
+- name: ctlabs_base_tasks.package.linux
+  when: ctg_os_family in ['redhat', 'debian']
+    # RedHat
+    - name: ctlabs_base.tasks.package.linux.redhat
+      when: ctg_os_family == "redhat"
+      block:
+        - name: ctlabs_base.tasks.package.linux.redhat.repo.file
+          yum_repository:
+            name        : "{{ item.name }}"
+            description : "{{ item.desc | default(item.name) }}"
+            baseurl     : "{{ item.url  }}"
+            gpgkey      : "{{ item.key  }}"
+            gpgcheck    : true
+            sslverify   : true
+          loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
+
+    # Debian
+    - name: ctlabs_base.tasks.package.linux.debian
+      when: ctg_os_family == "debian"
+      block:
+        - name: ctlabs_base.tasks.package.linux.debian.repo.key
+          apt_key:
+            url: "{{ item.key }}"
+          loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
+    
+        - name: ctlabs_base.tasks.package.linux.debian.repo.file
+          apt_repository:
+            repo : "deb {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
+          loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
+
+    - name: ctlabs_base.tasks.package.linux.installed
+      package:
+        name    : "{{ item.name }}"
+        state : present
+      loop    : "{{ ctlabs_base.defaults.pkgs[ctg_os_family] }}"
+      register: result
+      until   : result is success
+    
+    - name: ctlabs_base.tasks.package.linux.gems.installed
+      gem:
         name        : "{{ item.name }}"
-        description : "{{ item.desc | default(item.name) }}"
-        baseurl     : "{{ item.url  }}"
-        gpgkey      : "{{ item.key  }}"
-        gpgcheck    : true
-        sslverify   : true
-      loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
+        user_install: false
+      loop: "{{ ctlabs_base.defaults.pkgs.gems }}"
 
-- name: ctlabs_base.tasks.package.debian
-  when: ctg_os_family == "debian"
+# -----------------------------------------------------------------------------
+
+#
+# windows
+#
+
+- name: ctlabs_base.tasks.package.windows
+  when: ctg_os_family == 'windows'
   block:
-    - name: ctlabs_base.tasks.package.debian.repo.key
-      apt_key:
-        url: "{{ item.key }}"
-      loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
+    - name: ctlabs_base.tasks.package.windows.installed
+      win_chocolatey:
+        name: "{{ item.name }}"
+        state: present
+        package_params: "{{ item.opts | default(omit) }}"
+      loop: "{{ ctlabs_base.defaults.pkgs.windows }}"
 
-    - name: ctlabs_base.tasks.package.debian.repo.file
-      apt_repository:
-        repo : "deb {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
-      loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
-
-- name: ctlabs_base.tasks.package.installed
-  package:
-    name    : "{{ item.name }}"
-    state : present
-  loop    : "{{ ctlabs_base.defaults.pkgs[ctg_os_family] }}"
-  register: result
-  until   : result is success
-
-- name: ctlabs_base.tasks.package.gems.installed
-  gem:
-    name        : "{{ item.name }}"
-    user_install: false
-  loop: "{{ ctlabs_base.defaults.pkgs.gems }}"
+    - name: ctlabs_base.tasks.package.windows.powershell
+      script:
+        cmd: "{{ item.name }}"
+      loop: "{{ ctlabs_base.defaults.scripts.windows }}"

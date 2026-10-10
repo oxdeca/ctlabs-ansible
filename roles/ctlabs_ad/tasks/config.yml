@@ -1,0 +1,26 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/config.yml
+# Description : configuration 
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.config.vault.dc.join.creds.user
+  when: CTLABS_AD_PROMPT_CREDS is undefined
+  set_fact:
+    ctlabs_ad_dc_join_user: "{{ lookup('hashi_vault', 'secret={{ ctlabs_ad.defaults.vault.secrets.dc_join.path }}:ctlabs_ad_dc_join_user') }}"
+  no_log: true
+
+- name: ctlabs_ad.tasks.config.vault.dc.join.creds.pass
+  when: CTLABS_AD_PROMPT_CREDS is undefined
+  set_fact:
+    ctlabs_ad_dc_join_pass: "{{ lookup('hashi_vault', 'secret={{ ctlabs_ad.defaults.vault.secrets.dc_join.path }}:ctlabs_ad_dc_join_pass') }}"
+  no_log: true
+
+- name: ctlabs_ad.tasks.config.dc.host
+  set_fact:
+    ctlabs_ad_domain_server: "{{ (ctlabs_ad.defaults.config.dc.hosts | shuffle)[0] }}.{{ ctlabs_ad.defaults.config.dc.domain }}"
+
+- name: ctlabs_ad.tasks.config.join.hostname
+  set_fact:
+    ctlabs_ad_join_hostname: "{{ (ctg_host.split('.')[0][:8] + '-' + ctg_env[:1] + ( ctg_host|hash('sha512') )[10:15])|upper }}"

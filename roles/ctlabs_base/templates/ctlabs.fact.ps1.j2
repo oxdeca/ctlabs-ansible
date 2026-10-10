@@ -1,0 +1,54 @@
+# -------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_base/templates/ctlabs.fact.ps1.j2
+# Description : dynamic local facts for ctlabs (Windows)
+# -------------------------------------------------------------------------------------
+
+# 1. Disable the progress bar to prevent stdout corruption in Ansible
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+$UrlInstance = "http://metadata.google.internal/computeMetadata/v1/instance/attributes/labels"
+$UrlProject  = "http://metadata.google.internal/computeMetadata/v1/project/project-id"
+$UrlHostname = "http://metadata.google.internal/computeMetadata/v1/instance/hostname"
+$Headers     = @{ "Metadata-Flavor" = "Google" }
+
+$Data = @{}
+
+try {
+    # 2. Fetch the raw responses using Invoke-RestMethod with IE-bypass
+    $RawLabels = Invoke-RestMethod -Uri $UrlInstance -Headers $Headers -UseBasicParsing
+    
+    # 3. Defensive parsing: Force JSON conversion if GCP returns plain text
+    if ($RawLabels -is [string]) {
+        $ParsedLabels = $RawLabels | ConvertFrom-Json
+    } else {
+        $ParsedLabels = $RawLabels
+    }
+
+    # 4. Loop through the parsed labels and inject them into our Hashtable safely
+    if ($ParsedLabels) {
+        foreach ($Prop in $ParsedLabels.psobject.properties) {
+            $Data[$Prop.Name] = $Prop.Value
+        }
+    }
+
+    # 5. Fetch and inject the project ID safely
+    $ProjectStr = Invoke-RestMethod -Uri $UrlProject -Headers $Headers -UseBasicParsing
+    if ($ProjectStr) {
+        $Data["project"] = $ProjectStr.ToString().Trim()
+    }
+
+    # 6. Fetch and inject the official GCP Hostname safely
+    $HostnameStr = Invoke-RestMethod -Uri $UrlHostname -Headers $Headers -UseBasicParsing
+    if ($HostnameStr) {
+        $Data["hostname"] = $HostnameStr.ToString().Trim()
+    }
+}
+catch {
+    # 6. Fallback to an empty dictionary, but log the exact error for Ansible debugging
+    $Data = @{}
+    $Data["error"] = $_.Exception.Message
+}
+
+# 7. Output the raw dictionary as a clean JSON string
+$Data | ConvertTo-Json -Depth 5 -Compress
