@@ -1,0 +1,78 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/dc.yml
+# Description : create / promote Windows domain controllers
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.dc
+  when: ctlabs_ad_role in ['master', 'slave']
+  block:
+    #
+    # master: create a new forest / first domain controller
+    #
+    - name: ctlabs_ad.tasks.dc.master.domain
+      when: ctlabs_ad_role == 'master'
+      microsoft.ad.domain:
+        dns_domain_name     : "{{ ctlabs_ad_domain }}"
+        domain_netbios_name : "{{ ctlabs_ad_netbios }}"
+        safe_mode_password  : "{{ ctlabs_ad_safe_mode_password }}"
+        database_path       : "{{ ctlabs_ad.defaults.config.dc.paths.database }}"
+        log_path            : "{{ ctlabs_ad.defaults.config.dc.paths.log }}"
+        sysvol_path         : "{{ ctlabs_ad.defaults.config.dc.paths.sysvol }}"
+        install_dns         : "{{ ctlabs_ad.defaults.config.dc.install_dns }}"
+        reboot              : true
+      register : ctlabs_ad_dc_master
+      no_log   : true
+
+    #
+    # slave: promote a replica domain controller into the existing domain
+    #
+    - name: ctlabs_ad.tasks.dc.slave.domain_controller
+      when: ctlabs_ad_role == 'slave'
+      microsoft.ad.domain_controller:
+        state                 : domain_controller
+        dns_domain_name       : "{{ ctlabs_ad_domain }}"
+        domain_admin_user     : "{{ ctlabs_ad_admin_user }}@{{ ctlabs_ad_realm }}"
+        domain_admin_password : "{{ ctlabs_ad_admin_pass }}"
+        safe_mode_password    : "{{ ctlabs_ad_safe_mode_password }}"
+        database_path         : "{{ ctlabs_ad.defaults.config.dc.paths.database }}"
+        domain_log_path       : "{{ ctlabs_ad.defaults.config.dc.paths.log }}"
+        sysvol_path           : "{{ ctlabs_ad.defaults.config.dc.paths.sysvol }}"
+        install_dns           : "{{ ctlabs_ad.defaults.config.dc.install_dns }}"
+        reboot                : true
+      register : ctlabs_ad_dc_slave
+      no_log   : true
+
+    #
+    # master: create the OU tree members are joined into
+    #
+    - name: ctlabs_ad.tasks.dc.ou.base
+      when: ctlabs_ad_role == 'master'
+      microsoft.ad.ou:
+        name            : "{{ item.name }}"
+        path            : "{{ item.path }}"
+        state           : present
+        domain_username : "{{ ctlabs_ad_admin_user }}@{{ ctlabs_ad_realm }}"
+        domain_password : "{{ ctlabs_ad_admin_pass }}"
+        domain_server   : "{{ ctlabs_ad_domain_server }}"
+      loop:
+        - name: "{{ ctlabs_ad.defaults.config.dc.ou.root }}"
+          path: "{{ ctlabs_ad_domain_path }}"
+        - name: "{{ ctlabs_ad.defaults.config.dc.ou.servers }}"
+          path: "OU={{ ctlabs_ad.defaults.config.dc.ou.root }},{{ ctlabs_ad_domain_path }}"
+      loop_control:
+        label: "{{ item.path }}"
+      no_log: true
+
+    - name: ctlabs_ad.tasks.dc.ou.env
+      when: ctlabs_ad_role == 'master'
+      microsoft.ad.ou:
+        name            : "{{ item }}"
+        path            : "OU={{ ctlabs_ad.defaults.config.dc.ou.servers }},OU={{ ctlabs_ad.defaults.config.dc.ou.root }},{{ ctlabs_ad_domain_path }}"
+        state           : present
+        domain_username : "{{ ctlabs_ad_admin_user }}@{{ ctlabs_ad_realm }}"
+        domain_password : "{{ ctlabs_ad_admin_pass }}"
+        domain_server   : "{{ ctlabs_ad_domain_server }}"
+      loop: "{{ ctlabs_ad.defaults.config.dc.ou.environments }}"
+      no_log: true

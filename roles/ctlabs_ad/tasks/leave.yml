@@ -11,7 +11,7 @@
       microsoft.ad.membership:
         state                  : workgroup
         workgroup_name         : WORKGROUP
-        domain_admin_user      : "{{ ctlabs_ad_dc_join_user }}@{{ ctlabs_ad.defaults.config.dc.realm }}"
+        domain_admin_user      : "{{ ctlabs_ad_dc_join_user }}@{{ ctlabs_ad_realm }}"
         domain_admin_password  : "{{ ctlabs_ad_dc_join_pass }}"
         domain_server          : "{{ ctlabs_ad_domain_server }}"
         hostname               : "{{ ctlabs_ad_join_hostname }}"
@@ -23,7 +23,7 @@
       microsoft.ad.computer:
         state           : absent
         identity        : "{{ ctlabs_ad_join_hostname }}"
-        domain_username : "{{ hostvars[inventory_hostname]['ctlabs_ad_dc_join_user'] }}@{{ ctlabs_ad.defaults.config.dc.realm }}"
+        domain_username : "{{ hostvars[inventory_hostname]['ctlabs_ad_dc_join_user'] }}@{{ ctlabs_ad_realm }}"
         domain_password : "{{ hostvars[inventory_hostname]['ctlabs_ad_dc_join_pass'] }}"
         domain_server   : "{{ ctlabs_ad_domain_server }}"
       delegate_to: "{{ ctlabs_ad_domain_server }}"

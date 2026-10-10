@@ -2,31 +2,94 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_ad/tasks/precheck.yml
-# Description : pre-flight checks for Windows domain join
+# Description : pre-flight checks for Windows domain members and DCs
+#
+# Configuration is per host, not global: every value resolves as
+#   role var (ctlabs_ad_*) -> ctlabs_ad local fact (ctg_facts.ctlabs_ad.*)
+#   -> role default
+# so one host can be a `master`, another a `slave`, another a plain `member`
+# (same shape as ctlabs_sssd's per-host backend/domain).
 # ------------------------------------------------------------------------------
 
+#
+# unsupported OS -> skip this host
+#
 - name: ctlabs_ad.tasks.precheck
   block:
     - name: ctlabs_ad.tasks.precheck.os.supported
       assert:
         that     : ctg_os in ctlabs_ad.os
         fail_msg : "OS[{{ ctg_os }}] is not supported!"
-    - name: ctlabs_ad.tasks.precheck.vault_addr
-      when: CTLABS_AD_PROMPT_CREDS is undefined
-      assert:
-        that     : ctg_vault_addr is defined and ctg_vault_addr|length > 0
-        fail_msg : "VAULT_ADDR missing!"
-    - name: ctlabs_ad.tasks.precheck.vault_token
-      when: CTLABS_AD_PROMPT_CREDS is undefined
-      assert:
-        that     : ctg_vault_token is defined and ctg_vault_token|length > 0
-        fail_msg : "VAULT_TOKEN missing!"
-#    - name: ctlabs_ad.tasks.precheck.variables.defined
-#      assert:
-#        that:
-#          - ctlabs_ad.defaults.config.domain_name is defined
-#          - ctlabs_ad.defaults.config.domain_pass != ""
-#        fail_msg: "Required Oanda domain join credentials are missing."
   rescue:
     - name: ctlabs_ad.tasks.precheck.skip.unsupported
       meta: end_host
+
+#
+# Windows local facts are not auto-gathered (ansible.windows.setup has no
+# default fact_path), so refresh them here. This makes ansible_ctlabs_ad
+# (written by tasks/facts.yml from the ctlabs `ad` setup profile) visible.
+#
+- name: ctlabs_ad.tasks.precheck.facts.gather
+  when: ansible_shell_type | default('sh') == 'powershell'
+  ansible.windows.setup:
+    fact_path: "{{ ctg_facts_dir }}"
+
+- name: ctlabs_ad.tasks.precheck.facts
+  set_fact:
+    ctlabs_ad_fact: "{{ (ctg_facts | default({}, true)).ctlabs_ad | default({}, true) }}"
+
+#
+# role: var -> local fact -> default
+#
+- name: ctlabs_ad.tasks.precheck.role.var
+  set_fact:
+    ctlabs_ad_role: "{{ ctlabs_ad_role | default(ctlabs_ad.defaults.config.dc.role) }}"
+
+- name: ctlabs_ad.tasks.precheck.role.local_fact
+  set_fact:
+    ctlabs_ad_role: "{{ ctlabs_ad_fact['role'] | default(ctlabs_ad_role) }}"
+
+- name: ctlabs_ad.tasks.precheck.role.valid
+  assert:
+    that     : ctlabs_ad_role in ['master', 'slave', 'member']
+    fail_msg : "Invalid ctlabs_ad role[{{ ctlabs_ad_role }}]; expected master/slave/member!"
+
+#
+# domain: var -> local fact -> default
+#
+- name: ctlabs_ad.tasks.precheck.domain.var
+  set_fact:
+    ctlabs_ad_domain: "{{ ctlabs_ad_domain | default(ctlabs_ad.defaults.config.dc.domain) }}"
+
+- name: ctlabs_ad.tasks.precheck.domain.local_fact
+  set_fact:
+    ctlabs_ad_domain: "{{ ctlabs_ad_fact['domain'] | default(ctlabs_ad_domain) }}"
+
+#
+# derived values
+#
+- name: ctlabs_ad.tasks.precheck.derived
+  set_fact:
+    ctlabs_ad_realm      : "{{ ctlabs_ad_fact['realm']   | default(ctlabs_ad_domain | upper) }}"
+    ctlabs_ad_netbios    : "{{ ctlabs_ad_fact['netbios'] | default(ctlabs_ad_domain.split('.')[0] | upper) }}"
+    ctlabs_ad_domain_path: "dc={{ ctlabs_ad_domain.split('.') | join(',dc=') }}"
+    ctlabs_ad_master     : "{{ ctlabs_ad_fact['master']  | default('dc1.' + ctlabs_ad_domain) }}"
+    ctlabs_ad_leave      : "{{ ctlabs_ad_fact['leave']   | default(ctlabs_ad_leave | default(false)) | bool }}"
+
+#
+# OU target for members of this host's environment
+#
+- name: ctlabs_ad.tasks.precheck.ou.target
+  set_fact:
+    ctlabs_ad_env: >-
+      {{
+        ctg_env
+        if (ctg_env | default('')) in ctlabs_ad.defaults.config.dc.ou.environments
+        else ctlabs_ad.defaults.config.dc.ou.environments | first
+      }}
+    ctlabs_ad_ou_path: >-
+      ou={{ ctg_env if (ctg_env | default('')) in ctlabs_ad.defaults.config.dc.ou.environments
+            else ctlabs_ad.defaults.config.dc.ou.environments | first
+          }},ou={{ ctlabs_ad.defaults.config.dc.ou.servers
+                }},ou={{ ctlabs_ad.defaults.config.dc.ou.root
+                }},{{ ctlabs_ad_domain_path }}

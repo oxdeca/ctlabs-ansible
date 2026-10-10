@@ -10,9 +10,9 @@
     - name: ctlabs_ad.tasks.join.domain.join
       microsoft.ad.membership:
         state                 : domain
-        dns_domain_name       : "{{ ctlabs_ad.defaults.config.dc.domain }}"
-        domain_ou_path        : "{{ ctlabs_ad.defaults.config.dc.ou[ctg_env] | default(ctlabs_ad.defaults.config.dc.ou.dev) }}"
-        domain_admin_user     : "{{ ctlabs_ad_dc_join_user }}@{{ ctlabs_ad.defaults.config.dc.realm }}"
+        dns_domain_name       : "{{ ctlabs_ad_domain }}"
+        domain_ou_path        : "{{ ctlabs_ad_ou_path }}"
+        domain_admin_user     : "{{ ctlabs_ad_dc_join_user }}@{{ ctlabs_ad_realm }}"
         domain_admin_password : "{{ ctlabs_ad_dc_join_pass }}"
         domain_server         : "{{ ctlabs_ad_domain_server }}"
         hostname              : "{{ ctlabs_ad_join_hostname }}"

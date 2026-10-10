@@ -71,7 +71,7 @@ ctlabs_base:
       windows:
         local_facts:
           - file    : "{{ ctg_facts_dir }}/ctlabs.ps1"
-            template: ctlabs.fact.ps1.j2
+            template: facts.ps1.j2
         profile:
           file    : C:/Windows/System32/WindowsPowerShell/v1.0/profile.ps1
           template: profile.ps1.j2

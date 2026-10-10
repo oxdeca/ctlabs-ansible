@@ -11,7 +11,7 @@
       assert:
         that     : ctg_os is in ctlabs_base.os
         fail_msg : "OS[{{ ctg_os }}] is not supported!"
-    
+
     - name: ctlabs_base.tasks.precheck.virtype
       assert:
         that     : ctg_virtype is in ctlabs_base.virtype
@@ -19,52 +19,3 @@
   rescue:
     - name: ctlabs_base.tasks.precheck.skip.unsupported
       meta: end_host
-
-#
-# Linux
-#
-- name: ctlabs_base.tasks.precheck.linux
-  when: ctg_os_family in ['redhat', 'debian']
-  block:
-    - name: ctlabs_base.tasks.precheck.local_facts
-      template:
-        src  : "{{ ctlabs_base.defaults.config.local_facts.template }}"
-        dest : "{{ ctlabs_base.defaults.config.local_facts.file     }}"
-        mode : '0750'
-        owner: root
-        group: root
-    
-    - name: ctlabs_base.tasks.precheck.reread_facts
-      setup:
-    
-    - name: ctlabs_base.tasks.precheck.disks
-      set_fact:
-        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base_disks if ctg_facts.ctlabs_base_disks is defined else [] }}"
-    
-
-# -----------------------------------------------------------------------------
-
-#
-# Windows
-#
-- name: ctlabs_base.tasks.precheck.windows
-  when: ctg_os_family == 'windows'
-  block:
-    - name: ctlabs_base.tasks.precheck.windows.create_facts_dir
-      win_file:
-        path  : "{{ ctg_facts_dir }}"
-        state : directory
-
-    - name: ctlabs_base.tasks.precheck.windows.local_facts
-      win_template:
-        src  : "{{ item.template }}"
-        dest : "{{ item.file     }}"
-      loop: "{{ ctlabs_base.defaults.config.windows.local_facts }}"
-
-    - name: ctlabs_base.tasks.precheck.windows.reread_facts
-      setup:
-        fact_path: "{{ ctg_facts_dir }}"
-
-    - name: ctlabs_base.tasks.precheck.windows.disks
-      set_fact:
-        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base_disks if ctg_facts.ctlabs_base_disks is defined else [] }}"

@@ -1,0 +1,28 @@
+# -------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/templates/facts.ps1.j2
+# Description : dynamic local facts for ctlabs_ad (Windows)
+# -------------------------------------------------------------------------------------
+{#
+ # ctlabs_role_facts comes from the ctlabs `ad` setup profile, e.g.
+ #   dc1: { role: master, domain: ad.ctlabs.internal }
+ #   h1 : { role: member, domain: ad.ctlabs.internal }
+ # Only non-secret config is forwarded here (the local fact file is not a
+ # secret store); credentials come from role vars / Vault in tasks/config.yml.
+ # Anything not supplied falls back to the role defaults, so a host stays a
+ # plain `member` (join/leave only) unless a profile promotes it to a DC.
+ #}
+{% set _f      = ctlabs_role_facts | default({}) %}
+{% set _domain = _f.domain | default('ad.ctlabs.internal') %}
+$f = @{
+    role    = "{{ _f.role    | default('member') }}"
+    domain  = "{{ _domain }}"
+    realm   = "{{ _f.realm   | default(_domain | upper) }}"
+    netbios = "{{ _f.netbios | default(_domain.split('.')[0] | upper) }}"
+}
+{% if _f.master is defined %}
+$f.master = "{{ _f.master }}"
+{% endif %}
+{% if _f.leave is defined %}
+$f.leave = ${{ 'true' if _f.leave | bool else 'false' }}
+{% endif %}
+$f | ConvertTo-Json -Compress

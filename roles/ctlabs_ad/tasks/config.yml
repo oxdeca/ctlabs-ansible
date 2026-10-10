@@ -2,25 +2,95 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_ad/tasks/config.yml
-# Description : configuration 
+# Description : role-aware credentials and parameters
+#
+# No global environment variables: per-host config comes from the ctlabs_ad
+# local fact (see precheck.yml); the credential knobs below are role-scoped
+# vars (ctlabs_ad_*), falling back to Vault, then to a role default.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ad.tasks.config.vault.dc.join.creds.user
-  when: CTLABS_AD_PROMPT_CREDS is undefined
+#
+# DSRM / safe-mode password, required to promote any domain controller.
+# source: role var (ctlabs_ad_safe_mode_password) -> Vault
+#
+- name: ctlabs_ad.tasks.config.safe_mode.vault
+  when:
+    - ctlabs_ad_role in ['master', 'slave']
+    - ctlabs_ad_safe_mode_password is not defined
+    - ctg_vault_token | default('') | length > 0
   set_fact:
-    ctlabs_ad_dc_join_user: "{{ lookup('hashi_vault', 'secret={{ ctlabs_ad.defaults.vault.secrets.dc_join.path }}:ctlabs_ad_dc_join_user') }}"
+    ctlabs_ad_safe_mode_password: "{{ lookup('hashi_vault', 'secret=' + ctlabs_ad.defaults.vault.secrets.dc_dsrm.path + ':ctlabs_ad_safe_mode_password') }}"
   no_log: true
 
-- name: ctlabs_ad.tasks.config.vault.dc.join.creds.pass
-  when: CTLABS_AD_PROMPT_CREDS is undefined
+- name: ctlabs_ad.tasks.config.safe_mode.required
+  when: ctlabs_ad_role in ['master', 'slave']
+  assert:
+    that     : ctlabs_ad_safe_mode_password is defined
+    fail_msg : "DC[{{ ctlabs_ad_role }}] needs ctlabs_ad_safe_mode_password or a Vault token!"
+
+#
+# domain-admin credentials: OU creation on a master, replica promotion +
+# join on a slave, domain join on a member.
+# source: role var (ctlabs_ad_admin_user / ctlabs_ad_admin_password)
+#         -> Vault (member/slave) -> image default Administrator (master)
+#
+- name: ctlabs_ad.tasks.config.admin.var
+  when: ctlabs_ad_admin_password is defined
   set_fact:
-    ctlabs_ad_dc_join_pass: "{{ lookup('hashi_vault', 'secret={{ ctlabs_ad.defaults.vault.secrets.dc_join.path }}:ctlabs_ad_dc_join_pass') }}"
+    ctlabs_ad_admin_user: "{{ ctlabs_ad_admin_user | default(ctlabs_ad.defaults.config.dc.admin_user) }}"
+    ctlabs_ad_admin_pass: "{{ ctlabs_ad_admin_password }}"
   no_log: true
 
-- name: ctlabs_ad.tasks.config.dc.host
+- name: ctlabs_ad.tasks.config.admin.vault
+  when:
+    - ctlabs_ad_admin_pass is not defined
+    - ctlabs_ad_role in ['member', 'slave']
+    - ctg_vault_token | default('') | length > 0
   set_fact:
-    ctlabs_ad_domain_server: "{{ (ctlabs_ad.defaults.config.dc.hosts | shuffle)[0] }}.{{ ctlabs_ad.defaults.config.dc.domain }}"
+    ctlabs_ad_admin_user: "{{ lookup('hashi_vault', 'secret=' + ctlabs_ad.defaults.vault.secrets.dc_join.path + ':ctlabs_ad_dc_join_user') }}"
+    ctlabs_ad_admin_pass: "{{ lookup('hashi_vault', 'secret=' + ctlabs_ad.defaults.vault.secrets.dc_join.path + ':ctlabs_ad_dc_join_pass') }}"
+  no_log: true
 
+- name: ctlabs_ad.tasks.config.admin.default
+  when:
+    - ctlabs_ad_admin_pass is not defined
+    - ctlabs_ad_role == 'master'
+  set_fact:
+    ctlabs_ad_admin_user: "{{ ctlabs_ad_admin_user | default(ctlabs_ad.defaults.config.dc.admin_user) }}"
+    ctlabs_ad_admin_pass: "{{ ctlabs_ad.defaults.config.dc.admin_password }}"
+  no_log: true
+
+- name: ctlabs_ad.tasks.config.admin.required
+  assert:
+    that     : ctlabs_ad_admin_pass is defined
+    fail_msg : "no domain-admin credentials (set ctlabs_ad_admin_password or a Vault token)!"
+
+#
+# which DC to talk to
+#
+- name: ctlabs_ad.tasks.config.dc.host.member
+  when: ctlabs_ad_role == 'member'
+  set_fact:
+    ctlabs_ad_domain_server: >-
+      {{
+        ctlabs_ad_fact['master']
+        | default((ctlabs_ad.defaults.config.dc.hosts | shuffle)[0] + '.' + ctlabs_ad_domain)
+      }}
+
+- name: ctlabs_ad.tasks.config.dc.host.master
+  when: ctlabs_ad_role == 'master'
+  set_fact:
+    ctlabs_ad_domain_server: "{{ ctlabs_ad_domain }}"
+
+- name: ctlabs_ad.tasks.config.dc.host.slave
+  when: ctlabs_ad_role == 'slave'
+  set_fact:
+    ctlabs_ad_domain_server: "{{ ctlabs_ad_master }}"
+
+#
+# member-only: hostname to rename the host to when joining
+#
 - name: ctlabs_ad.tasks.config.join.hostname
+  when: ctlabs_ad_role == 'member'
   set_fact:
     ctlabs_ad_join_hostname: "{{ (ctg_host.split('.')[0][:8] + '-' + ctg_env[:1] + ( ctg_host|hash('sha512') )[10:15])|upper }}"

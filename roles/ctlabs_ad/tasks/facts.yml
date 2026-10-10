@@ -1,0 +1,15 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/facts.yml
+# Description : write local facts (Windows powershell JSON)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.facts.write
+  when: query('ansible.builtin.fileglob', 'templates/facts.ps1.j2') | length > 0
+  tags:
+    - setup
+    - ctlabs_ad.facts
+  ansible.windows.win_template:
+    src  : facts.ps1.j2
+    dest : "{{ ctg_facts_dir }}/ctlabs_ad.ps1"

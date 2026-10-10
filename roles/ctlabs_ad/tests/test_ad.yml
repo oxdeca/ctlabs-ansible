@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tests/test_ad.yml
+# Description : test playbook for ctlabs_ad (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ctg_os          : "microsoft windows server 2022 standard evaluation"
+    ctg_os_family   : windows
+    ctg_env         : dev
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

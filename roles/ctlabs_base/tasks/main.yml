@@ -13,6 +13,12 @@
     - ctlabs_base.config
     - ctlabs_base.service
 
+- import_tasks: facts.yml
+  tags:
+    - ctlabs_base
+    - setup
+    - ctlabs_base.facts
+
 - import_tasks: package.yml
   tags:
     - ctlabs_base
