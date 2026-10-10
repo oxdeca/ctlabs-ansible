@@ -19,37 +19,42 @@ ctlabs_base:
           key : |-
             https://packages.cloud.google.com/yum/doc/yum-key.gpg
             https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-      debian:
+        - name : gcsfuse
+          desc : Cloud Storage FUSE
+          url  : "https://packages.cloud.google.com/yum/repos/gcsfuse-el7-x86_64"
+          key  : |-
+            https://packages.cloud.google.com/yum/doc/yum-key.gpg
+            https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      debian: []
+    keys:
+      redhat:
+        - url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ctg_os_version }}"
+      debian: []
     pkgs:
       redhat:
+        - name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+          when: "{{ ctg_vendor == 'google' and ctg_os == 'redhat9' }}"
+        - name: python3
+        - name: python3-pip
+        - name: python3-requests
         - name: "{{ ar_plugin_redhat }}"
-        - name: lvm2
-        - name: tmux
-        - name: vim
-        - name: graphviz
         - name: epel-release
         - name: htop
-        - name: ruby
-        - name: irb
+        - name: sysstat
+        - name: gcsfuse
         - name: podman-docker
-        - name: nc
-        - name: perf
+        - name: nfs-utils
         - name: bpftrace
-        - name: wireshark-cli
-        - name: tcpdump
-        - name: ipvsadm
-        - name: qemu-img
-        - name: cloud-utils-growpart
-        - name: make
-        - name: jq
-        - name: python3-requests
+          when: "{{ (ctg_os_version|int) > 7 }}"
+        - name: bpftool
+        - name: bcc-tools
+        - name: nmap-ncat
       debian:
-        - name : xfsprogs
-        - name : apt-transport-artifact-registry
-      gems:
-        - name: webrick
-        - name: rackup
-        - name: sinatra
+        - name: gpg
+        - name: htop
+        - name: xfsprogs
+        - name: apt-transport-artifact-registry
+        - name: netcat-openbsd
       windows:
         - name: chocolatey
     scripts:
