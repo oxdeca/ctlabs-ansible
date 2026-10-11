@@ -40,9 +40,9 @@
             repo : "deb {{ item.url }} {{ ctg_os_release }} {{ item.type }}"
           loop: "{{ ctlabs_base.defaults.repos[ctg_os_family] }}"
 
-        - name: ctlabs_base.tasks.package.linux.debian.cache.update
-          apt:
-            update_cache: true
+#        - name: ctlabs_base.tasks.package.linux.debian.cache.update
+#          apt:
+#            update_cache: true
 
     - name: ctlabs_base.tasks.package.linux.installed
       package:
