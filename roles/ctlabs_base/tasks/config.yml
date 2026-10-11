@@ -11,23 +11,19 @@
 - name: ctlabs_base.tasks.config.linux
   when: ctg_os_family in ['redhat', 'debian']
   block:
-    # /etc/profile.d
-    - name: ctlabs_base.tasks.config.linux.profiled
-      copy:
-        src  : bashrc.kali.sh
-        dest : /etc/profile.d/bashrc.kali.sh
+    # profile.d is handled by the `profiled` template loop below
 
-    # attached block disks
+    # attached block disks (declarative per host, see tasks/facts.yml)
     - name: ctlabs_base.tasks.config.disk.format
       filesystem:
-        dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        dev      : "{{ item.device }}"
         fstype   : "{{ item.fstype }}"
         resizefs : false
       loop: "{{ ctlabs_base_disks }}"
     
     - name: ctlabs_base.tasks.config.disk.mount
       mount:
-        src   : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        src   : "{{ item.device }}"
         path  : "{{ item.path }}"
         fstype: "{{ item.fstype }}"
         opts  : "{{ item.opts | default('defaults') }}"
@@ -36,7 +32,7 @@
     
     - name: ctlabs_base.tasks.config.disk.resize
       filesystem:
-        dev      : "{{ ctlabs_base.defaults.config.gce_disk_prefix }}{{ item.name }}"
+        dev      : "{{ item.device }}"
         fstype   : "{{ item.fstype }}"
         resizefs : true
       loop: "{{ ctlabs_base_disks }}"

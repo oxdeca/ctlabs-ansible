@@ -11,6 +11,7 @@ ctg_facts       : >-
                     if ctg_os_family in ['redhat', 'debian']
                     else {
                       'ctlabs': (ansible_ctlabs | from_json) if ansible_ctlabs is defined else {},
+                      'ctlabs_base': (ansible_ctlabs_base | from_json) if ansible_ctlabs_base is defined else {},
                       'ctlabs_ad': (ansible_ctlabs_ad | from_json) if ansible_ctlabs_ad is defined else {}
                     }
                   }}

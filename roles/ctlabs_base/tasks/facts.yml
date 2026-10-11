@@ -2,7 +2,7 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_base/tasks/facts.yml
-# Description : write local facts (Linux disks / Windows ctlabs.ps1)
+# Description : write local role facts (declarative per host, both OS)
 # ------------------------------------------------------------------------------
 
 #
@@ -11,20 +11,17 @@
 - name: ctlabs_base.tasks.facts.linux
   when: ctg_os_family in ['redhat', 'debian']
   block:
-    - name: ctlabs_base.tasks.facts.linux.disks
+    - name: ctlabs_base.tasks.facts.linux.write
       template:
-        src  : "{{ ctlabs_base.defaults.config.local_facts.template }}"
-        dest : "{{ ctlabs_base.defaults.config.local_facts.file     }}"
-        mode : '0750'
-        owner: root
-        group: root
+        src : facts.json.j2
+        dest: "{{ ctg_facts_dir }}/ctlabs_base.fact"
 
     - name: ctlabs_base.tasks.facts.linux.reread
       setup:
 
-    - name: ctlabs_base.tasks.facts.linux.disks.set_fact
+    - name: ctlabs_base.tasks.facts.linux.disks
       set_fact:
-        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base_disks if ctg_facts.ctlabs_base_disks is defined else [] }}"
+        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base.disks | default([]) }}"
 
 #
 # Windows
@@ -37,16 +34,15 @@
         path  : "{{ ctg_facts_dir }}"
         state : directory
 
-    - name: ctlabs_base.tasks.facts.windows.local_facts
+    - name: ctlabs_base.tasks.facts.windows.write
       win_template:
-        src  : "{{ item.template }}"
-        dest : "{{ item.file     }}"
-      loop: "{{ ctlabs_base.defaults.config.windows.local_facts }}"
+        src : facts.ps1.j2
+        dest: "{{ ctg_facts_dir }}/ctlabs_base.ps1"
 
     - name: ctlabs_base.tasks.facts.windows.reread
       setup:
         fact_path: "{{ ctg_facts_dir }}"
 
-    - name: ctlabs_base.tasks.facts.windows.disks.set_fact
+    - name: ctlabs_base.tasks.facts.windows.disks
       set_fact:
-        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base_disks if ctg_facts.ctlabs_base_disks is defined else [] }}"
+        ctlabs_base_disks: "{{ ctg_facts.ctlabs_base.disks | default([]) }}"

@@ -61,10 +61,6 @@ ctlabs_base:
       windows:
         - name: psoptimize.ps1
     config:
-      gce_disk_prefix: /dev/disk/by-id/google-
-      local_facts:
-        template: ctlabs_base_disks.fact.j2
-        file    : /etc/ansible/facts.d/ctlabs_base_disks.fact
       profiled:
         - template: bashrc_kali.sh.j2
           file    : /etc/profile.d/bashrc_kali.sh
@@ -74,9 +70,6 @@ ctlabs_base:
         template: tmux.conf.j2
         file    : /etc/tmux.conf
       windows:
-        local_facts:
-          - file    : "{{ ctg_facts_dir }}/ctlabs.ps1"
-            template: facts.ps1.j2
         profile:
           file    : C:/Windows/System32/WindowsPowerShell/v1.0/profile.ps1
           template: profile.ps1.j2

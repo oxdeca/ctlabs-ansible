@@ -46,25 +46,42 @@ def test_precheck_only_asserts(role_dir):
         assert module not in text, f"precheck.yml must not write facts ({module})"
 
 
-def test_facts_linux_writes_disks(role_dir):
+def test_facts_linux_writes_role_fact(role_dir):
     facts = _load(role_dir, "tasks", "facts.yml")
     linux = next(task for task in facts if "redhat" in str(task.get("when")))
     block = linux["block"]
-    assert any(
-        "template" in task and task["template"]["mode"] == "0750" for task in block
-    )
-    assert any("setup" in task for task in block)
+
+    write = next(task for task in block if "template" in task)
+    assert write["template"]["src"] == "facts.json.j2"
+    assert write["template"]["dest"].endswith("ctlabs_base.fact")
+
+    # disks are resolved from the declarative role fact, not metadata
+    disks = next(task for task in block if "disks" in task["name"])
+    assert "ctlabs_base_disks" in str(disks["set_fact"])
 
 
-def test_facts_windows_writes_global_ctlabs_fact(role_dir):
+def test_facts_windows_writes_role_fact(role_dir):
     facts = _load(role_dir, "tasks", "facts.yml")
     windows = next(
         task for task in facts if str(task.get("when")) == "ctg_os_family == 'windows'"
     )
     block = windows["block"]
+
     assert any("facts_dir" in task["name"] and "win_file" in task for task in block)
-    assert any("win_template" in task for task in block)
+
+    write = next(task for task in block if "win_template" in task)
+    assert write["win_template"]["src"] == "facts.ps1.j2"
+    assert write["win_template"]["dest"].endswith("ctlabs_base.ps1")
+
     assert any("setup" in task and task["setup"].get("fact_path") for task in block)
+
+
+def test_facts_json_template_has_disks(role_dir):
+    path = os.path.join(role_dir, "templates", "facts.json.j2")
+    with open(path) as fh:
+        content = fh.read()
+    assert "disks" in content
+    assert "to_json" in content
 
 
 def test_windows_fact_emits_json(role_dir):
@@ -74,7 +91,8 @@ def test_windows_fact_emits_json(role_dir):
     assert "ConvertTo-Json" in content
 
 
-def test_no_stale_template_name(role_dir):
+def test_no_metadata_or_legacy_refs(role_dir):
+    # facts for all: no GCP metadata lookups and no legacy global-fact/dest names
     offenders = []
     for root, _dirs, files in os.walk(role_dir):
         if "__pycache__" in root or os.sep + "tests" in root:
@@ -85,6 +103,25 @@ def test_no_stale_template_name(role_dir):
             path = os.path.join(root, name)
             with open(path) as fh:
                 for lineno, line in enumerate(fh, 1):
-                    if "ctlabs.fact.ps1" in line:
+                    if any(
+                        token in line
+                        for token in (
+                            "metadata.google",
+                            "ctlabs.fact.ps1",
+                            "ctlabs_base_disks.fact",
+                            "gce_disk_prefix",
+                            "bashrc.kali.sh",
+                        )
+                    ):
                         offenders.append(f"{path}:{lineno}")
-    assert not offenders, f"stale template name found: {offenders}"
+    assert not offenders, f"legacy/metadata refs found: {offenders}"
+
+
+def test_ctg_facts_maps_ctlabs_base(ansible_repo_root):
+    path = os.path.join(
+        ansible_repo_root, "inventories", "group_vars", "all", "ctlabs.yml"
+    )
+    with open(path) as fh:
+        content = fh.read()
+    assert "'ctlabs_base':" in content
+    assert "ansible_ctlabs_base" in content

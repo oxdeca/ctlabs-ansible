@@ -1,0 +1,22 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_base/templates/facts.json.j2
+ # Description : ctlabs_base role facts (Linux) - declarative per host
+ #
+ # Sourced from the ctlabs `ctlabs_base` setup profile, e.g.
+ #   ctlabs_base:
+ #     h1:
+ #       disks:
+ #         - device: /dev/disk/by-id/google-d1
+ #           path  : /srv/data
+ #           fstype: xfs
+ #         - device: /dev/vdb
+ #           path  : /srv/mirror
+ #           fstype: xfs
+ #           opts  : noatime
+ #
+ # Configuration is declarative per host (role var -> local fact) - there are
+ # no metadata-server lookups here, so it works the same on local and cloud VMs.
+ #}
+{% set _base = (play_setup | default({}))['base'] | default({}) %}
+{% set _f = ctlabs_role_facts | default(_base[inventory_hostname] | default(_base)) %}
+{{ { 'disks': (_f.disks | default([])) } | to_json }}
