@@ -19,3 +19,53 @@
         reboot                : true
         reboot_timeout        : 600
       register: ctlabs_ad_join_result
+
+#    - name: ctlabs_ad.tasks.join.domain.set_local_long_hostname
+#      ansible.windows.win_regedit:
+#        path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+#        name: "{{ item }}"
+#        data: "{{ ctg_host.split('.')[0] }}" # e.g., winhost-really-long-name-01
+#        type: string
+#      loop:
+#        - NV Hostname
+#        - Hostname
+#      register: reg_hostname
+#
+#    - name: ctlabs_ad.tasks.join.domain.set_local_disjoint_suffix
+#      ansible.windows.win_regedit:
+#        path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+#        name: NV Domain
+#        data: "{{ ctg_host.split('.')[1:] | join('.') }}" # e.g., vm.d.gcp.ctlabs.internal
+#        type: string
+#      register: reg_suffix
+#
+#    - name: ctlabs_ad.tasks.join.domain.disable_ad_suffix_sync
+#      ansible.windows.win_regedit:
+#        path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+#        name: SyncDomainWithMembership
+#        data: 0
+#        type: dword
+#      register: reg_sync
+#
+#    - name: ctlabs_ad.tasks.join.domain.reboot_for_registry
+#      ansible.windows.win_reboot:
+#        reboot_timeout: 600
+#      when: reg_hostname.changed or reg_suffix.changed or reg_sync.changed
+#
+#    - name: ctlabs_ad.tasks.join.domain.post_config
+#      microsoft.ad.computer:
+#        identity    : "{{ ctlabs_ad_join_hostname }}$"
+#        description : "{{ ctg_host }}"
+#        dns_hostname: "{{ ctg_host }}"
+#        spn:
+#          add:
+#            - "HOST/{{ ctg_host }}"
+#            - "TERMSRV/{{ ctg_host }}"
+#      delegate_to: "{{ ctlabs_ad_domain_server }}"
+#      vars:
+#        ansible_connection                   : winrm
+#        ansible_port                         : 5985
+#        ansible_user                         : "{{ hostvars[inventory_hostname]['ctlabs_ad_dc_join_user'] }}@{{ ctlabs_ad.defaults.config.dc.realm }}"
+#        ansible_password                     : "{{ hostvars[inventory_hostname]['ctlabs_ad_dc_join_pass'] }}"
+#        ansible_winrm_transport              : ntlm
+#        ansible_winrm_server_cert_validation : ignore
