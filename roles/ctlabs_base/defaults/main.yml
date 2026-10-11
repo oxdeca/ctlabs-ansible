@@ -37,7 +37,7 @@ ctlabs_base:
         - name: python3
         - name: python3-pip
         - name: python3-requests
-        - name: "{{ ar_plugin_redhat }}"
+        #- name: "{{ ar_plugin_redhat }}"
         - name: epel-release
         - name: htop
         - name: sysstat
@@ -53,7 +53,7 @@ ctlabs_base:
         - name: gpg
         - name: htop
         - name: xfsprogs
-        - name: apt-transport-artifact-registry
+        #- name: apt-transport-artifact-registry
         - name: netcat-openbsd
       windows:
         - name: chocolatey
