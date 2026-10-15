@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 versions : 
-  kafka: 3.9.2
+  kafka: 4.3.1
 
 ctlabs_kafka:
   defaults:
@@ -16,7 +16,7 @@ ctlabs_kafka:
       debian:
         - name: openjdk-17-jre-headless
       kafka:
-        url    : "https://downloads.apache.org/kafka/{{ versions.kafka }}/kafka_2.13-{{ versions.kafka }}.tgz"
+        url    : "https://www.apache.org/dyn/closer.lua/kafka/{{ versions.kafka }}/kafka_2.13-{{ versions.kafka }}.tgz?action=download"
         tmptar : /tmp/kafka.tar.gz
     install:
       dir      : /opt/
