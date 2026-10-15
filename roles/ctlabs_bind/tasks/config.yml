@@ -58,9 +58,9 @@
 - name: ctlabs_bind.tasks.config.debian
   when: ctg_os_family == 'debian'
   block:
-    - name: ctlabs_bind.tasks.service.debian.sysconfig
+    - name: ctlabs_bind.tasks.config.debian.sysconfig
       template:
         src  : "{{ ctlabs_bind.defaults.config.debian.sysconfig.template }}"
-        dest : "{{ ctlabs_bind.defaults.config.debian.sysconfig.file_deb }}"
+        dest : "{{ ctlabs_bind.defaults.config.debian.sysconfig.file }}"
       notify:
         - ctlabs_bind.handlers.named.service.restart

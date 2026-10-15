@@ -4,3 +4,6 @@
 # File        : ctlabs-ansible/roles/ctlabs_ad/tasks/service.yml
 # Description : main ctlabs_ad services
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.service
+  meta: noop

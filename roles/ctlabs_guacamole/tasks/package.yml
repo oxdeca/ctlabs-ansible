@@ -5,6 +5,13 @@
 # Description : main ctlabs_guacamole tasks file.
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_guacamole.tasks.package.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_guacamole.tasks.package.redhat.cache.update
+      dnf:
+        update_cache: true
+
 - name: ctlabs_guacamole.tasks.package.installed
   package:
     name    : "{{ item.name }}"

@@ -4,3 +4,6 @@
 # File        : ctlabs-ansible/roles/ctlabs_ad/tasks/package.yml
 # Description : main ctlabs_ad tasks file.
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.package
+  meta: noop
