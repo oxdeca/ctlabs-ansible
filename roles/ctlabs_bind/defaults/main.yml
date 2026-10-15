@@ -37,6 +37,9 @@ ctlabs_bind:
         keys_dir       : /var/cache/bind/dynamic
         zones_dir      : /var/cache/bind
         log_dir        : /var/log
+        sysconfig:
+          file    : /etc/default/named
+          template: default.named.j2
       redhat:
         file           : /etc/named.conf
         dir            : /var/named
@@ -48,6 +51,9 @@ ctlabs_bind:
         keys_dir       : /var/named/dynamic
         zones_dir      : /var/named/data
         log_dir        : /var/log
+        sysconfig:
+          file    : /etc/sysconfig/named
+          template: sysconfig.named.j2
       zones:
         - name: ctlabs.internal
         - name: svc.ctlabs.internal

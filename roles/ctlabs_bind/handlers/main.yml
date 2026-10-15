@@ -7,5 +7,10 @@
 
 - name: ctlabs_bind.handlers.named.service.reload
   service:
-    name  : "{{ ctlabs_bind.defaults.service[ctg_os_family].name }}"
-    state : reloaded
+    name : "{{ ctlabs_bind.defaults.service[ctg_os_family].name }}"
+    state: reloaded
+
+- name: ctlabs_bind.handlers.named.service.restart
+  service:
+    name : "{{ ctlabs_bind.defaults.service[ctg_os_family].name }}"
+    state: restarted

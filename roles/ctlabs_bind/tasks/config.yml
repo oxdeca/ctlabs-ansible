@@ -42,3 +42,25 @@
         src  : slave.named.conf.j2
         dest : "{{ ctlabs_bind.defaults.config[ctg_os_family].file }}"
       notify: ctlabs_bind.handlers.named.service.reload
+
+# RedHat
+- name: ctlabs_bind.tasks.config.redhat
+  when: ctg_os_family == 'redhat'
+  block:
+    - name: ctlabs_bind.tasks.config.redhat.sysconfig
+      template:
+        src  : "{{ ctlabs_bind.defaults.config.redhat.sysconfig.template }}"
+        dest : "{{ ctlabs_bind.defaults.config.redhat.sysconfig.file }}"
+      notify:
+        - ctlabs_bind.handlers.named.service.restart
+
+# Debian
+- name: ctlabs_bind.tasks.config.debian
+  when: ctg_os_family == 'debian'
+  block:
+    - name: ctlabs_bind.tasks.service.debian.sysconfig
+      template:
+        src  : "{{ ctlabs_bind.defaults.config.debian.sysconfig.template }}"
+        dest : "{{ ctlabs_bind.defaults.config.debian.sysconfig.file_deb }}"
+      notify:
+        - ctlabs_bind.handlers.named.service.restart

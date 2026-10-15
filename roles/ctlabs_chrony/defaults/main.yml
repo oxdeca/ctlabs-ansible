@@ -1,0 +1,54 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_chrony/defaults/main.yml
+# Description : main defaults
+# ------------------------------------------------------------------------------
+
+ctlabs_chrony:
+  defaults:
+    pkgs:
+      debian:
+        - name: chrony
+      redhat:
+        - name: chrony
+        - name: python3-prometheus_client
+    scripts:
+      dir: /opt/
+    config:
+      driftfile : /var/lib/chrony/drift
+      makestep  : 1.0 3
+      logdir    : /var/log/chrony
+      debian:
+        main:
+          file    : /etc/chrony/chrony.conf
+          template: chrony.conf.j2
+        systemd:
+          file    : /etc/default/chronyd
+          template: sysconfig.j2
+      redhat:
+        main:
+          file    : /etc/chrony.conf
+          template: chrony.conf.j2
+        sysconfig:
+          file    : /etc/sysconfig/chrony
+          template: sysconfig.j2
+    service:
+      name: chronyd.service
+    exporter:
+      script:
+        name  : chrony_exporter.py
+        dir   : /opt/chrony_exporter
+        user  : root
+        group : root
+        mode  : '0750'
+      service:
+        name     : chrony_exporter.service
+        template : chrony_exporter.service.j2
+  vendor:
+    - dell inc.
+    - kvm
+  os:
+    - redhat9
+    - centos9
+    - debian12
