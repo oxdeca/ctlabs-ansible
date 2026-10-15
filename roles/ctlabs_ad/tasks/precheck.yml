@@ -66,6 +66,17 @@
     ctlabs_ad_domain: "{{ ctlabs_ad_fact['domain'] | default(ctlabs_ad_domain) }}"
 
 #
+# dns_servers: var -> local fact -> default
+#
+- name: ctlabs_ad.tasks.precheck.dns_servers.var
+  set_fact:
+    ctlabs_ad_dns_servers: "{{ ctlabs_ad_dns_servers | default(ctlabs_ad.defaults.config.dc.dns_servers) }}"
+
+- name: ctlabs_ad.tasks.precheck.dns_servers.local_fact
+  set_fact:
+    ctlabs_ad_dns_servers: "{{ ctlabs_ad_fact['dns_servers'] | default(ctlabs_ad_dns_servers) }}"
+
+#
 # derived values
 #
 - name: ctlabs_ad.tasks.precheck.derived

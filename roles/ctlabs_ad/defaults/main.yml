@@ -20,6 +20,14 @@ ctlabs_ad:
         role           : member
         domain         : ad.ctlabs.internal
         install_dns    : true
+        # DNS resolvers for the production interface (eth1) - the lab's
+        # bind servers (ns1/ns2, which forward the ad.* zone) plus a public
+        # fallback. Fixed, lab-independent addresses (ns1/ns2 are the same
+        # in every lab's *_data.ini).
+        dns_servers:
+          - 192.168.10.11
+          - 192.168.20.11
+          - 8.8.8.8
         # domain Administrator of a freshly promoted master. The packer /
         # sysprep'd Windows image ships this well-known account password.
         # Override with ctlabs_ad_admin_user / ctlabs_ad_admin_password.
@@ -43,13 +51,13 @@ ctlabs_ad:
           - dc1
           - dc2
     vault:
-      mount: kvv2
+      mount: secrets
       secrets:
         # domain-admin credentials (member/slave join, replica promotion)
         dc_join:
           path: kvv2/data/gcp/global/pleng/bootstrap
         # DSRM ("safe mode") password of a promoted domain controller
         dc_dsrm:
-          path: kvv2/data/gcp/global/pleng/bootstrap
+          path: secrets/data/gcp/global/pleng/bootstrap
   os:
     - microsoft windows server 2022 standard evaluation

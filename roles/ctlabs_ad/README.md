@@ -34,14 +34,15 @@ Configuration is deliberately per host via local facts (never global
 
 Resolved per host as role var -> local fact -> default.
 
-| Fact                         | Description                         |
-|------------------------------|-------------------------------------|
-| `role`                       | `master` / `slave` / `member`       |
-| `domain`                     | AD DNS domain name                  |
-| `realm`                      | Kerberos realm (default upper of domain) |
-| `netbios`                    | NetBIOS name                        |
-| `master`                     | FQDN of the master DC (slave/member)|
+| Fact                         | Description                                    |
+|------------------------------|------------------------------------------------|
+| `role`                       | `master` / `slave` / `member`                  |
+| `domain`                     | AD DNS domain name                             |
+| `realm`                      | Kerberos realm (default upper of domain)       |
+| `netbios`                    | NetBIOS name                                   |
+| `master`                     | FQDN of the master DC (slave/member)           |
 | `leave`                      | `true` -> a `member` leaves instead of joining |
+| `dns_servers`                | DC-only: eth1 (production) DNS resolvers, default ns1/ns2/8.8.8.8 |
 
 Minimal setup profile:
 
@@ -56,14 +57,15 @@ ad:
 
 Role-scoped overrides (used when no local fact is present, e.g. ad-hoc runs):
 
-| VAR                          | Description                                                        |
-|------------------------------|--------------------------------------------------------------------|
-| `ctlabs_ad_role`             | `master` / `slave` / `member`                                      |
-| `ctlabs_ad_domain`           | AD DNS domain, default `ad.ctlabs.internal`                        |
-| `ctlabs_ad_leave`            | `true` -> a `member` leaves the domain instead of joining          |
-| `ctlabs_ad_safe_mode_password`   | DSRM / safe-mode password (DC only); else read from Vault      |
-| `ctlabs_ad_admin_user`           | domain-admin user; else Vault (member/slave)                   |
-| `ctlabs_ad_admin_password`       | domain-admin password; else Vault (member/slave)              |
+| VAR                            | Description                                                        |
+|--------------------------------|--------------------------------------------------------------------|
+| `ctlabs_ad_role`               | `master` / `slave` / `member`                                      |
+| `ctlabs_ad_domain`             | AD DNS domain, default `ad.ctlabs.internal`                        |
+| `ctlabs_ad_leave`              | `true` -> a `member` leaves the domain instead of joining          |
+| `ctlabs_ad_safe_mode_password` | DSRM / safe-mode password (DC only); else read from Vault          |
+| `ctlabs_ad_admin_user`         | domain-admin user; else Vault (member/slave)                       |
+| `ctlabs_ad_admin_password`     | domain-admin password; else Vault (member/slave)                   |
+| `ctlabs_ad_dns_servers`        | DC-only: eth1 DNS resolvers, default ns1/ns2/8.8.8.8               |
 
 ### Credentials
 

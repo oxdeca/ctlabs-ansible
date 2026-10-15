@@ -2,12 +2,64 @@
 
 # ------------------------------------------------------------------------------
 # File        : ctlabs-ansible/roles/ctlabs_ad/tasks/dc.yml
-# Description : create / promote Windows domain controllers
+# Description : Create / promote Windows domain controllers (Restricted to eth1)
 # ------------------------------------------------------------------------------
 
 - name: ctlabs_ad.tasks.dc
   when: ctlabs_ad_role in ['master', 'slave']
   block:
+
+    # ==========================================================================
+    # 1. PRE-PROMOTION: ISOLATE THE MANAGEMENT INTERFACE (ETH0) FROM AD DNS
+    #
+    # Native cmdlets only (DnsClient ships with every Windows install) - no
+    # PSGallery/DSC module install, since lab guests have no route to the
+    # internet. Must run BEFORE promotion: AD DS registers DNS records for
+    # every adapter that has dynamic registration enabled at promotion time.
+    # ==========================================================================
+
+    - name: ctlabs_ad.tasks.dc.eth0.dns_registration.disable
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $iface = "eth0"
+          if ((Get-DnsClient -InterfaceAlias $iface).RegisterThisConnectionsAddress) {
+            Set-DnsClient -InterfaceAlias $iface -RegisterThisConnectionsAddress $false
+            $Ansible.Changed = $true
+          }
+
+    - name: ctlabs_ad.tasks.dc.eth0.netbios.disable
+      community.windows.win_netbios:
+        adapter_names:
+          - eth0
+        state: disabled
+
+    - name: ctlabs_ad.tasks.dc.eth0.dns_servers.clear
+      ansible.windows.win_dns_client:
+        adapter_names:
+          - eth0
+        dns_servers: []
+
+    # Master's own eth1 resolvers don't depend on anything being promoted
+    # yet - set them before promotion (a prior broken session left dc1
+    # stuck pointing at 127.0.0.1, which this also fixes on rerun).
+    - name: ctlabs_ad.tasks.dc.eth1.dns_servers.set.master
+      when: ctlabs_ad_role == 'master'
+      ansible.windows.win_dns_client:
+        adapter_names:
+          - eth1
+        dns_servers: "{{ ctlabs_ad_dns_servers }}"
+
+    # ==========================================================================
+    # 2. DC PROMOTION: FOREST ROOT (MASTER) & REPLICA (SLAVE)
+    #
+    # reboot: true below makes the module handle the post-promotion reboot
+    # AND reconnect itself - no ansible.windows.win_wait_for or manual port
+    # check is needed here. A short reconnect buffer still follows (see
+    # below) since the freshly-up SSH service can reset the very next
+    # connection once more before it's fully settled.
+    # ==========================================================================
+
     #
     # master: create a new forest / first domain controller
     #
@@ -22,8 +74,52 @@
         sysvol_path         : "{{ ctlabs_ad.defaults.config.dc.paths.sysvol }}"
         install_dns         : "{{ ctlabs_ad.defaults.config.dc.install_dns }}"
         reboot              : true
-      register : ctlabs_ad_dc_master
-      no_log   : true
+      register: ctlabs_ad_dc_master
+      no_log: true
+
+    # A slave needs the master's SRV records (_ldap._tcp.dc._msdcs.<domain>)
+    # to locate a replication partner for promotion. ns1/ns2 forward
+    # ad.ctlabs.internal to the master, but the master's own pre-promotion
+    # DNS self-check can hit ns1/ns2 for that exact SRV name BEFORE the
+    # master's zone exists, NXDOMAIN, and ns1/ns2 then negative-cache it
+    # for up to an hour - poisoning the slave's own lookup a minute later
+    # even though the record is real by then (confirmed live 2026-10-14).
+    # Resolve the master's IP directly via ns1/ns2 (plain A records are
+    # NOT affected by this - only the _msdcs SRV name was ever poisoned)
+    # so the slave can query the master's DNS directly, bypassing the
+    # forwarder's cache entirely. Must run AFTER dc.master.domain (above):
+    # on a genuinely fresh forest, dc1 has no DNS zone at all until its own
+    # promotion finishes, and ns1/ns2 (which forward ad.ctlabs.internal to
+    # dc1) answer with SERVER FAILURE, not NXDOMAIN, until then - confirmed
+    # live 2026-10-14 when this task still ran pre-promotion.
+    - name: ctlabs_ad.tasks.dc.eth1.master_ip.resolve
+      when: ctlabs_ad_role == 'slave'
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $servers = @({% for s in (ctlabs_ad_dns_servers | reject('equalto', '8.8.8.8') | list) %}"{{ s }}"{% if not loop.last %},{% endif %}{% endfor %})
+          $answer  = Resolve-DnsName -Name "{{ ctlabs_ad_master }}" -Type A -Server $servers -ErrorAction Stop |
+                     Where-Object { $_.Type -eq 'A' } | Select-Object -First 1 -ExpandProperty IPAddress
+          Write-Output $answer
+      register: ctlabs_ad_master_resolve
+
+    - name: ctlabs_ad.tasks.dc.eth1.master_ip.fact
+      when: ctlabs_ad_role == 'slave'
+      set_fact:
+        ctlabs_ad_master_ip: "{{ [ctlabs_ad_master_resolve.output[0]] if (ctlabs_ad_master_resolve.output | default([]) | length > 0) else [] }}"
+
+    # eth1 (production) points at the master DC (resolved above) followed
+    # by the lab's own bind servers (ns1/ns2/8.8.8.8), not 127.0.0.1 - a
+    # slave has no DNS server of its own until AFTER promotion, so it must
+    # resolve the existing domain's records via an already-working
+    # resolver. Pointing eth1 at itself pre-promotion broke exactly that
+    # and failed dc2's join live.
+    - name: ctlabs_ad.tasks.dc.eth1.dns_servers.set.slave
+      when: ctlabs_ad_role == 'slave'
+      ansible.windows.win_dns_client:
+        adapter_names:
+          - eth1
+        dns_servers: "{{ (ctlabs_ad_master_ip | default([])) + ctlabs_ad_dns_servers }}"
 
     #
     # slave: promote a replica domain controller into the existing domain
@@ -41,12 +137,78 @@
         sysvol_path           : "{{ ctlabs_ad.defaults.config.dc.paths.sysvol }}"
         install_dns           : "{{ ctlabs_ad.defaults.config.dc.install_dns }}"
         reboot                : true
-      register : ctlabs_ad_dc_slave
-      no_log   : true
+      register: ctlabs_ad_dc_slave
+      no_log: true
 
+    # reboot: true above already waits for reconnection, but the SSH service
+    # on a freshly-rebooted DC can still reset the very next connection
+    # attempt (same "sshd still settling" race as this repo's known Windows
+    # first-boot issue) - confirmed live: dc2's join succeeded (changed) and
+    # the immediately-following task hit "Connection reset by ... port 22".
+    # A short controller-side reconnect buffer - ansible.builtin.wait_for_connection,
+    # the same mechanism playbooks/up.yml already uses, NOT the Windows-side
+    # win_wait_for this file used to carry - absorbs that gap.
+    - name: ctlabs_ad.tasks.dc.reboot.reconnect
+      when: (ctlabs_ad_dc_master.changed | default(false)) or (ctlabs_ad_dc_slave.changed | default(false))
+      ansible.builtin.wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    # ==========================================================================
+    # 3. POST-PROMOTION: DNS SCOPING, FORWARDERS & ZONE CLEANUP
     #
-    # master: create the OU tree members are joined into
-    #
+    # The DnsServer cmdlets below only exist once install_dns has installed
+    # the DNS Server role, so this section must stay after promotion.
+    # Zone cleanup is raw PowerShell, not ansible.windows.win_dns_record:
+    # that module's state=absent deletes the WHOLE recordset (rejects a
+    # 'value' filter outright), which would also wipe this DC's own eth1
+    # entry - Get-DnsServerResourceRecord + a value match is the only way to
+    # remove just the stray eth0 entry.
+    # ==========================================================================
+
+    - name: ctlabs_ad.tasks.dc.dns_server.listen_addresses
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $eth1_ip = (Get-NetIPAddress -InterfaceAlias "eth1" -AddressFamily IPv4).IPAddress | Select-Object -First 1
+          $target  = @($eth1_ip, "127.0.0.1")
+          $setting = Get-DnsServerSetting -All
+          if (Compare-Object -ReferenceObject @($setting.ListeningIPAddress) -DifferenceObject $target) {
+            $setting.ListeningIPAddress = $target
+            Set-DnsServerSetting -InputObject $setting
+            Restart-Service -Name DNS -Force
+            $Ansible.Changed = $true
+          }
+
+    - name: ctlabs_ad.tasks.dc.dns_server.forwarders
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $target  = @("8.8.8.8")
+          $current = @((Get-DnsServerForwarder).IPAddress.IPAddressToString)
+          if (Compare-Object -ReferenceObject $current -DifferenceObject $target) {
+            Set-DnsServerForwarder -IPAddress $target
+            $Ansible.Changed = $true
+          }
+
+    - name: ctlabs_ad.tasks.dc.dns_zone.eth0_records.cleanup
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $eth0_ip = (Get-NetIPAddress -InterfaceAlias "eth0" -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress | Select-Object -First 1
+          if ($eth0_ip) {
+            $records = Get-DnsServerResourceRecord -ZoneName "{{ ctlabs_ad_domain }}" -RRType A |
+              Where-Object { $_.RecordData.IPv4Address.IPAddressToString -eq $eth0_ip }
+            foreach ($record in $records) {
+              Remove-DnsServerResourceRecord -ZoneName "{{ ctlabs_ad_domain }}" -InputObject $record -Force
+              $Ansible.Changed = $true
+            }
+          }
+
+    # ==========================================================================
+    # 4. OU STRUCTURE (MASTER ONLY)
+    # ==========================================================================
+
     - name: ctlabs_ad.tasks.dc.ou.base
       when: ctlabs_ad_role == 'master'
       microsoft.ad.ou:
