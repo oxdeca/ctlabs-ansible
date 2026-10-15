@@ -3,13 +3,14 @@
 # Description : aliases and functions used by ctlabs
 # ------------------------------------------------------------------------------
 
-alias vi="/usr/bin/vim"
-alias pva=". ~/virtenv/bin/activate"
-alias pve="deactivate"
-alias kubectl="/usr/bin/k3s kubectl"
-alias crictl="/usr/bin/k3s crictl"
-alias ctr="/usr/bin/k3s ctr"
-alias kc=kubectl
+if [ -f "/usr/bin/vim" ];
+  alias vi="/usr/bin/vim"
+fi
+
+if [ -d "~/virtenv" ]; 
+  alias pva=". ~/virtenv/bin/activate"
+  alias pve="deactivate"
+fi
 
 function enter() {
   docker exec -it -w ~/ ${1} bash
