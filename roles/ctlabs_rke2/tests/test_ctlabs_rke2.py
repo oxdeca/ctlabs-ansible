@@ -32,6 +32,7 @@ def test_template_exists(role_dir):
         "defaults/main.yml",
         "handlers/main.yml",
         "templates/rke2-server.service.j2",
+        "templates/rke2-control.service.j2",
         "templates/rke2-agent.service.j2",
         "templates/rke2-agent.sysconfig.j2",
         "templates/rke2.profile.j2",
@@ -50,6 +51,59 @@ def test_playbook_syntax_check(role_dir):
         text=True,
     )
     assert result.returncode == 0, f"Syntax check failed:\n{result.stderr}"
+
+
+def _render_unit(template, **overrides):
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    tpl = env.get_template(template)
+    ctx = {
+        "ctlabs_rke2": {"defaults": {"pkgs": {"rke2": {"path": "/usr/bin/rke2"}}}},
+        "ctlabs_rke2_ingress_enabled": False,
+        "ctlabs_rke2_ingress_type": "nginx",
+        "ctlabs_rke2_servicelb_enabled": False,
+        "ctlabs_rke2_cni": "canal",
+    }
+    ctx.update(overrides)
+    return tpl.render(ctx).split("ExecStart=")[1].split("\n")[0].strip()
+
+
+def test_cni_default_is_canal():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_rke2"]["defaults"]["config"]
+    assert defaults["cni"] == "canal"
+    assert defaults["cni_supported"] == ["canal", "cilium", "multus", "none"]
+
+
+def test_cni_facts_forward_only_when_set():
+    env = _facts_env()
+    tpl = env.get_template("facts.json.j2")
+    opted_in = json.loads(tpl.render(ctlabs_role_facts={"cni": "cilium"}, CTLABS_HOST="rke21"))
+    assert opted_in["cni"] == "cilium"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}, CTLABS_HOST="rke21"))
+    assert "cni" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_cni_precheck_resolves_fact_and_validates():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cni")
+    expr = resolve["set_fact"]["ctlabs_rke2_cni"]
+    assert "ctg_facts.ctlabs_rke2.cni" in expr
+    assert "ctlabs_rke2.defaults.config.cni" in expr
+    supported = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cni.supported")
+    assert "ctlabs_rke2_cni in ctlabs_rke2.defaults.config.cni_supported" in supported["assert"]["that"]
+
+
+def test_server_unit_cni_flag_only_when_not_default():
+    assert _render_unit("rke2-server.service.j2") == "/usr/bin/rke2 server --disable=rke2-ingress-nginx"
+    assert _render_unit("rke2-server.service.j2", ctlabs_rke2_cni="cilium") == (
+        "/usr/bin/rke2 server --cni=cilium --disable=rke2-ingress-nginx"
+    )
+
+
+def test_control_unit_cni_flag_only_when_not_default():
+    assert _render_unit("rke2-control.service.j2") == "/usr/bin/rke2 server"
+    assert _render_unit("rke2-control.service.j2", ctlabs_rke2_cni="cilium") == "/usr/bin/rke2 server --cni=cilium"
 
 
 def test_ca_configmap_default_is_opt_out():

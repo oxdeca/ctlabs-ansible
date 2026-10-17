@@ -10,6 +10,7 @@
     name          : "{{ ctlabs_rke2.defaults.service.server.name }}" 
     enabled       : true
     daemon_reload : true
+    state         : restarted
 
 - name: ctlabs_rke2.handlers.service.server.started
   service:
@@ -18,12 +19,14 @@
 
 - name: ctlabs_rke2.handlers.control.systemd.reload
   systemd:
-    name          : "{{ ctlabs_rke2.defaults.service.control.name }}"
+    name          : "{{ ctlabs_rke2.defaults.service.control.name }}" 
     enabled       : true
     daemon_reload : true
+    state         : restarted
 
 - name: ctlabs_rke2.handlers.worker.systemd.reload
   systemd:
-    name          : "{{ ctlabs_rke2.defaults.service.worker.name }}"
+    name          : "{{ ctlabs_rke2.defaults.service.worker.name }}" 
     enabled       : true
     daemon_reload : true
+    state         : restarted

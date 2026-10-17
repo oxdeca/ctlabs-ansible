@@ -31,6 +31,7 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 | `versions.rke2`                                     | `1.33.3`                 | RKE2 version                                                   |
 | `versions.gateway_api`                              | `1.5.0`                  | Gateway API CRDs version                                       |
 | `versions.envoy`                                    | `1.0.1`                  | Envoy Gateway version                                          |
+| `ctlabs_rke2.defaults.config.cni`                   | `canal`                  | Container Network Interface (`canal`, `cilium`, `multus`, `none`). Passed to the server unit as `--cni=<value>` when not the RKE2 default. `cilium` deploys RKE2's bundled Cilium chart |
 | `ctlabs_rke2.defaults.config.ingress.enabled`       | `false`                  | Enable ingress controller                                      |
 | `ctlabs_rke2.defaults.config.ingress.type`          | `nginx`                  | Ingress type (`traefik`, `nginx`)                              |
 | `ctlabs_rke2.defaults.config.gateway_api.enabled`   | `true`                   | Enable Gateway API                                             |
@@ -143,6 +144,30 @@ rke2:
     gateway_api:
       enabled : false
 ```
+
+## CNI / Cilium
+
+RKE2 ships its CNI as a bundled chart, so replacing it is a single opt-in:
+set `cni` in the `setup_profiles.yml` `rke2:` profile for the **server** node
+(and each `control` node) and the role appends `--cni=<value>` to that node's
+`rke2 server` unit. `canal` is the RKE2 default and emits no flag, so labs that
+don't set `cni` are byte-for-byte unchanged.
+
+```yaml
+rke2:
+  rke21:
+    role: server
+    cni : cilium
+  rke22:
+    role: control
+    server_node: rke21
+    cni : cilium
+```
+
+`cilium` deploys RKE2's packaged `rke2-cilium` chart (no external manifests, no
+internet dependency beyond the RKE2 bundle). The value is validated against
+`ctlabs_rke2.defaults.config.cni_supported` (`canal`, `cilium`, `multus`,
+`none`); an unknown value fails the precheck.
 
 ## ServiceLB (LoadBalancer services)
 

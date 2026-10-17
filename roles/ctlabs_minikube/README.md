@@ -12,6 +12,22 @@ Setup a single-node minikube cluster using the podman driver.
 - OS: debian12
 - Virt: kvm
 
+## CNI / Cilium
+
+minikube can deploy Cilium natively, so `cni: cilium` in the
+`setup_profiles.yml` `minikube:` profile only adds `--cni=cilium` to the
+`minikube start` unit — no extra charts, no internet-dependent manifests. The
+default is `auto` (kindnet) and emits no flag, so existing labs are unchanged.
+
+```yaml
+minikube:
+  mkube01:
+    cni: cilium
+```
+
+The value is validated against `ctlabs_minikube.defaults.config.cni_supported`
+(`auto`, `cilium`); an unknown value fails the precheck.
+
 ## Helm charts
 
 App charts are data-driven from `ctlabs_minikube.repos` + `ctlabs_minikube.charts`

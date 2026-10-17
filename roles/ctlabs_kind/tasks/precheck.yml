@@ -56,6 +56,15 @@
   set_fact:
     ctlabs_kind_ca_configmaps: "{{ ctg_facts.ctlabs_kind.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_kind.defaults.config.ca_configmaps)) }}"
 
+- name: ctlabs_kind.tasks.precheck.cni
+  set_fact:
+    ctlabs_kind_cni: "{{ ctg_facts.ctlabs_kind.cni | default(ctlabs_kind.defaults.config.cni) }}"
+
+- name: ctlabs_kind.tasks.precheck.cni.supported
+  assert:
+    that    : ctlabs_kind_cni in ctlabs_kind.defaults.config.cni_supported
+    fail_msg: "CNI [{{ ctlabs_kind_cni }}] not supported! Valid: {{ ctlabs_kind.defaults.config.cni_supported | join(', ') }}"
+
 - name: ctlabs_kind.tasks.precheck.ingress_class
   set_fact:
     ctlabs_kind_ingress_class: "{{ ctlabs_kind_ingress_type if ctlabs_kind_ingress_enabled else ctlabs_kind_gateway_api_provider }}"

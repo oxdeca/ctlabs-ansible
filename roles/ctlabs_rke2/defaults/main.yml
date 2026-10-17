@@ -32,6 +32,12 @@ ctlabs_rke2:
         ns: traefik
     config:
       role     : server
+      # Container Network Interface. RKE2 bundles its CNI charts, so `cilium`
+      # deploys the packaged rke2-cilium chart (equivalent to the rke2 server
+      # flag `--cni=cilium`); any non-default value is passed through on the
+      # server unit. Default `canal` = stock RKE2 behaviour.
+      cni         : canal
+      cni_supported: ['canal', 'cilium', 'multus', 'none']
       servicelb:
         enabled: false
       ingress:

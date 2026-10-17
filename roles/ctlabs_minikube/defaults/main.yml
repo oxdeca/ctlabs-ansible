@@ -41,6 +41,12 @@ ctlabs_minikube:
       interface : "{{ ansible_default_ipv4.interface | default('') }}"
       kubeconfig: /home/minikube/.kube/config
     config:
+      # Container Network Interface. minikube can deploy Cilium itself, so
+      # `cilium` just adds `--cni=cilium` to `minikube start` (native, no extra
+      # charts). Default `auto` = minikube's own default (kindnet) and emits no
+      # flag, keeping existing labs unchanged.
+      cni          : auto
+      cni_supported: ['auto', 'cilium']
       # CA cert bundle(s) to publish as ConfigMaps once the cluster is up, so
       # charts (e.g. cert-vault-sync's ClusterSecretStores) can read Vault's
       # TLS CA. Each entry: {name, namespace, key, file?} where `file` defaults

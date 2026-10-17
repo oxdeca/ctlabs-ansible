@@ -9,6 +9,9 @@ Type=simple
 User=root
 
 {% set _flags = [] %}
+{% if ctlabs_rke2_cni | default('canal') != 'canal' %}
+{% set _ = _flags.append('--cni=' + ctlabs_rke2_cni) %}
+{% endif %}
 {% if not (ctlabs_rke2_ingress_enabled and ctlabs_rke2_ingress_type == "nginx") %}
 {% set _ = _flags.append('--disable=rke2-ingress-nginx') %}
 {% endif %}

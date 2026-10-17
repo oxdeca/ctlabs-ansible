@@ -59,6 +59,13 @@
   changed_when: false
 
 # ------------------------------------------------------------------------------
+# CNI: cilium (must be up before any other workload can schedule)
+# ------------------------------------------------------------------------------
+- name: ctlabs_kind.tasks.service.cilium
+  when: ctlabs_kind_cni == "cilium"
+  include_tasks: cilium.yml
+
+# ------------------------------------------------------------------------------
 # ingress: nginx (raw manifest, kind provider)
 # ------------------------------------------------------------------------------
 - name: ctlabs_kind.tasks.service.ingress

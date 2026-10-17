@@ -20,6 +20,9 @@
     "provider" : "{{ _facts.gateway_api.provider | default('traefik') }}"
   }
 {% endif %}
+{% if _facts.cni is defined %},
+  "cni" : "{{ _facts.cni }}"
+{% endif %}
 {% if _facts.repos is defined %},
   "repos" : {{ _facts.repos | to_json }}
 {% endif %}

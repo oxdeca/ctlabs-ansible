@@ -78,6 +78,7 @@ Ingress and Gateway API are independent, co-installable sections.
 | `gateway_api` | `provider` | `traefik`     | Default — uses k3s bundled Traefik     |
 | `gateway_api` | `provider` | `envoy-gateway` | Envoy Gateway CRDs + controller     |
 | `servicelb`   | `enabled`  | `true/false`  | k3s bundled klipper-lb (`true` default; `false` ⇒ `--disable=servicelb`) |
+| `cni`         |            | `flannel`, `cilium` | CNI plugin (`flannel` default). `cilium` ⇒ server gets `--flannel-backend=none --disable-network-policy` and the role drops a Cilium `HelmChart` CR |
 
 Full facts example (Traefik as Gateway API provider, no ingress, ServiceLB on):
 
@@ -120,6 +121,40 @@ journalctl -u k3s-server | grep -iE "servicelb|svclb" # k3s server process (runs
 ```
 
 Common causes: ServiceLB disabled via `--disable=servicelb`, or the flag missing from the `k3s-server.service` unit on the node. Unlike rke2, k3s runs the ServiceLB controller inside the `k3s-server` process itself (no `cloud-controller-manager` pod to check).
+
+## CNI / Cilium
+
+k3s bundles flannel, which can't be replaced by a bundled chart, so `cni: cilium`
+does two things on the **server** node:
+
+1. starts `k3s server` with `--flannel-backend=none --disable-network-policy`
+   (the built-in flannel CNI and kube-router network policy enforcer are off),
+2. writes a `HelmChart` CR to `/var/lib/rancher/k3s/server/manifests/k3s-cilium.yaml`,
+   which k3s' built-in helm-controller deploys from `https://helm.cilium.io/` — no
+   helm binary and no extra role needed.
+
+Agent nodes (`worker`) join with no extra flags — k3s propagates the flannel
+setting from the datastore. Additional `control` (server) nodes get the same
+`--flannel-backend=none --disable-network-policy` flags.
+
+```yaml
+k3s:
+  k3s1:
+    role: server
+    cni : cilium
+  k3s4:
+    role       : worker
+    server_node: k3s1
+    cni        : cilium
+```
+
+Cilium's cluster-pool IPAM is pinned to k3s' default pod CIDR
+(`ctlabs_k3s.defaults.config.cilium.cluster_cidr`, `10.42.0.0/16`) so it does not
+overlap the k3s service CIDR (`10.43.0.0/16`). Cilium version is
+`versions.cilium`. The value is validated against
+`ctlabs_k3s.defaults.config.cni_supported` (`flannel`, `cilium`); an unknown
+value fails the precheck. Default `flannel` emits nothing, so existing labs are
+unchanged.
 
 ## setup_profiles.yml Example
 

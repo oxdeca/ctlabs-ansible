@@ -131,7 +131,9 @@
 # -----------------------------------------------------------------------------
 
 - name: ctlabs_k8s.tasks.config.calico
-  when: ctlabs_k8s_role == 'master'
+  when:
+    - ctlabs_k8s_role == 'master'
+    - ctlabs_k8s_cni == 'calico'
   block:
     - name: ctlabs_k8s.tasks.config.calico.download-operator
       get_url:
@@ -156,6 +158,51 @@
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
       command: "/usr/bin/kubectl apply -f {{ ctlabs_k8s.defaults.config.dirs.components }}/custom-resources.yml"
+
+# -----------------------------------------------------------------------------
+# Cilium (master only)
+#
+# Installed via the official Helm chart. ipam.mode=kubernetes makes Cilium use
+# the per-node podCIDRs kubeadm allocates from ctlabs_k8s_pod_cidr, avoiding the
+# overlap Cilium's default cluster-pool IPAM (10.0.0.0/8) would have with the
+# kubeadm service CIDR. kube-proxy stays in place (no kube-proxy-free mode).
+# -----------------------------------------------------------------------------
+
+- name: ctlabs_k8s.tasks.config.cilium
+  when:
+    - ctlabs_k8s_role == 'master'
+    - ctlabs_k8s_cni == 'cilium'
+  block:
+    - name: ctlabs_k8s.tasks.config.cilium.repo
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      kubernetes.core.helm_repository:
+        name    : cilium
+        repo_url: https://helm.cilium.io/
+
+    - name: ctlabs_k8s.tasks.config.cilium.install
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      kubernetes.core.helm:
+        name             : cilium
+        chart_ref        : cilium/cilium
+        chart_version    : "{{ versions.cilium }}"
+        release_namespace: kube-system
+        create_namespace : true
+        wait             : true
+        timeout          : 10m0s
+        values:
+          ipam:
+            mode: kubernetes
+
+    - name: ctlabs_k8s.tasks.config.cilium.ready
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      command: "/usr/bin/kubectl -n kube-system rollout status daemonset/cilium --timeout=300s"
+      register: cilium_rollout
+      until   : cilium_rollout is success
+      retries : 10
+      delay   : 10
 
 # -----------------------------------------------------------------------------
 # Approve Certs (master only)

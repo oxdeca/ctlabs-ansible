@@ -68,6 +68,19 @@
     fail_msg: "Role [{{ ctlabs_k8s_role }}] not supported! Valid: master, control, worker"
 
 #
+# CNI (cluster-wide, decided by the master). `cni` is the knob; the older
+# `network` key is honored as a fallback if it ever shows up in the facts.
+#
+- name: ctlabs_k8s.tasks.precheck.cni
+  set_fact:
+    ctlabs_k8s_cni: "{{ ctg_facts.ctlabs_k8s.cni | default(ctg_facts.ctlabs_k8s.network | default(ctlabs_k8s.defaults.config.cni)) }}"
+
+- name: ctlabs_k8s.tasks.precheck.cni.supported
+  assert:
+    that    : ctlabs_k8s_cni in ctlabs_k8s.defaults.config.cni_supported
+    fail_msg: "CNI [{{ ctlabs_k8s_cni }}] not supported! Valid: {{ ctlabs_k8s.defaults.config.cni_supported | join(', ') }}"
+
+#
 # storage engine (cluster-wide, decided by the master only)
 #
 - name: ctlabs_k8s.tasks.precheck.storage.fact

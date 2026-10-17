@@ -179,9 +179,11 @@ profile. Note the TLS secret `slurp`s the CA cert/key **on the target host**
 | `versions.kind`                                     | `0.31.0`                 | kind version                                         |
 | `versions.k8s`                                      | `1.35.0`                 | Kindest node image k8s version                       |
 | `versions.helm`                                     | `4.1.4`                  | Helm binary version (installed by this role)         |
+| `versions.cilium`                                   | `1.20.3`                 | Cilium chart version (only used when `cni: cilium`)  |
 | `ctlabs_kind.defaults.repos`                        | `[]`                     | Helm repositories (`name`, `repo_url`)               |
 | `ctlabs_kind.defaults.charts`                       | `[]`                     | Helm charts to deploy (see above)                    |
 | `ctlabs_kind.defaults.config.plane`                 | `single`                 | Cluster plane (`single`, `multi`)                    |
+| `ctlabs_kind.defaults.config.cni`                   | `kindnet`                | CNI (`kindnet`, `cilium`)                            |
 | `ctlabs_kind.defaults.config.ingress.enabled`       | `false`                  | Enable ingress controller                            |
 | `ctlabs_kind.defaults.config.ingress.type`          | `nginx`                  | Ingress type (`traefik`, `nginx`)                    |
 | `ctlabs_kind.defaults.config.gateway_api.enabled`   | `true`                   | Enable Gateway API                                   |
@@ -192,6 +194,37 @@ profile. Note the TLS secret `slurp`s the CA cert/key **on the target host**
 > Gateway API CRDs + the `traefik-gateway` Gateway object (infrastructure), and
 > the app wiring (TLS secret, `ReferenceGrant`s, `HTTPRoute`) is applied in
 > `tasks/routing.yml` after the argocd chart lands in `tasks/charts.yml`.
+
+## CNI / Cilium
+
+kind ships kindnet. `cni: cilium` in the `kind:` profile makes the role:
+
+1. render the cluster config with `networking.disableDefaultCNI: true` (no
+   kindnet — nodes stay `NotReady` until Cilium is up, as expected),
+2. install the upstream Cilium chart (`versions.cilium`) into `kube-system` from
+   `https://helm.cilium.io/`, using `ipam.mode=kubernetes` (per-node podCIDRs
+   kind allocates) and `image.pullPolicy=IfNotPresent`.
+
+Because kind nodes often can't reach `quay.io`, the Cilium images are
+pre-pulled with podman and `kind load image-archive`-ed before `helm install` —
+the same prepull path the chart machinery uses. Cilium is installed in
+`tasks/service.yml` right after the cluster is ready (before ingress / app
+charts), since nothing else can schedule until the CNI exists.
+
+```yaml
+kind:
+  kind1:
+    cni: cilium
+```
+
+The value is validated against `ctlabs_kind.defaults.config.cni_supported`
+(`kindnet`, `cilium`); an unknown value fails the precheck. Default `kindnet`
+adds no `networking` block and installs nothing, so existing labs are unchanged.
+
+> Switching `cni` on an already-created cluster has no effect: `networking`
+> (like the node image) is fixed at `kind create cluster` time, and the role
+> only creates the cluster when `ctlabs_kind_name` is absent. Recreate the
+> cluster (`kind delete cluster --name <name>`) to change the CNI.
 
 ## Tests
 

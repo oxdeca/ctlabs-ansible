@@ -26,6 +26,9 @@
     "enabled" : {{ _facts.servicelb.enabled | default(false) | lower }}
   }
 {% endif %}
+{% if _facts.cni is defined %},
+  "cni" : "{{ _facts.cni }}"
+{% endif %}
 {% if _facts.coredns is defined %},
   "coredns" : {
     "resources" : {

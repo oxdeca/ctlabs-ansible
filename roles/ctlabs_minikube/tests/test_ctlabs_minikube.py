@@ -192,3 +192,46 @@ def test_ca_configmap_task_is_declarative_and_ordered():
     assert "when" not in imp, "single-node minikube: publish whenever the knob is non-empty"
     assert "ctlabs_minikube.service" in imp["tags"]
     assert "ctlabs_minikube.ca_configmap" in imp["tags"]
+
+
+def _render_start_unit(**overrides):
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    tpl = env.get_template("minikube.service.j2")
+    ctx = {
+        "ctlabs_minikube": {"defaults": {"pkgs": {"minikube": {"path": "/usr/bin/minikube"}}}},
+        "ctlabs_minikube_cni": "auto",
+    }
+    ctx.update(overrides)
+    rendered = tpl.render(ctx)
+    return rendered.split("ExecStart=")[1].split("\n")[0].strip()
+
+
+def test_cni_default_is_auto():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_minikube"]["defaults"]["config"]
+    assert defaults["cni"] == "auto"
+    assert defaults["cni_supported"] == ["auto", "cilium"]
+
+
+def test_cni_facts_forward_only_when_set():
+    tpl = _facts_env().get_template("facts.json.j2")
+    opted_in = json.loads(tpl.render(ctlabs_role_facts={"cni": "cilium"}))
+    assert opted_in["cni"] == "cilium"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}))
+    assert "cni" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_cni_precheck_resolves_fact_and_validates():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_minikube.tasks.precheck.cni")
+    expr = resolve["set_fact"]["ctlabs_minikube_cni"]
+    assert "ctg_facts.ctlabs_minikube.cni" in expr
+    assert "ctlabs_minikube.defaults.config.cni" in expr
+    supported = next(t for t in precheck if t.get("name") == "ctlabs_minikube.tasks.precheck.cni.supported")
+    assert "ctlabs_minikube_cni in ctlabs_minikube.defaults.config.cni_supported" in supported["assert"]["that"]
+
+
+def test_start_unit_cni_flag_only_when_not_default():
+    assert _render_start_unit() == "/usr/bin/minikube start --network minikube"
+    assert _render_start_unit(ctlabs_minikube_cni="cilium") == "/usr/bin/minikube start --network minikube --cni=cilium"

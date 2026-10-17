@@ -8,6 +8,9 @@
 {% if _facts.repos is defined %}{{ _comma() }}
   "repos" : {{ _facts.repos | to_json }}
 {% endif %}
+{% if _facts.cni is defined %}{{ _comma() }}
+  "cni" : "{{ _facts.cni }}"
+{% endif %}
 {% if _facts.charts is defined %}{{ _comma() }}
   "charts" : {{ _facts.charts | to_json }}
 {% endif %}

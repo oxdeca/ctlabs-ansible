@@ -39,6 +39,7 @@ def test_template_exists(role_dir):
         "tasks/ca_configmap.yml",
         "tasks/charts.yml",
         "tasks/prepull.yml",
+        "tasks/cilium.yml",
         "tasks/routing.yml",
         "tasks/proxy.yml",
         "defaults/main.yml",
@@ -192,3 +193,85 @@ def test_ca_configmap_task_is_declarative_and_ordered():
     assert "when" not in imp, "single-node kind: publish whenever the knob is non-empty"
     assert "ctlabs_kind.service" in imp["tags"]
     assert "ctlabs_kind.ca_configmap" in imp["tags"]
+
+
+def _task_named(data, name):
+    for entry in data:
+        if isinstance(entry, dict) and entry.get("name") == name:
+            return entry
+    raise AssertionError(f"task {name!r} not found")
+
+
+def test_cni_default_is_kindnet():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)
+    assert defaults["ctlabs_kind"]["defaults"]["config"]["cni"] == "kindnet"
+    assert defaults["ctlabs_kind"]["defaults"]["config"]["cni_supported"] == ["kindnet", "cilium"]
+    assert defaults["versions"]["cilium"] == "1.20.3"
+
+
+def test_cni_facts_forward_only_when_set():
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    env.filters["to_json"] = json.dumps
+    env.filters["lower"] = str.lower
+    tpl = env.get_template("facts.json.j2")
+    opted_in = json.loads(tpl.render(ctlabs_role_facts={"cni": "cilium"}, CTLABS_HOST="kind1"))
+    assert opted_in["cni"] == "cilium"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}, CTLABS_HOST="kind1"))
+    assert "cni" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_cni_precheck_resolves_fact_and_validates():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_kind.tasks.precheck.cni")
+    expr = resolve["set_fact"]["ctlabs_kind_cni"]
+    assert "ctg_facts.ctlabs_kind.cni" in expr
+    assert "ctlabs_kind.defaults.config.cni" in expr
+    supported = next(t for t in precheck if t.get("name") == "ctlabs_kind.tasks.precheck.cni.supported")
+    assert "ctlabs_kind_cni in ctlabs_kind.defaults.config.cni_supported" in supported["assert"]["that"]
+
+
+def test_cluster_config_disable_default_cni_only_for_cilium():
+    assert "networking" not in _render_cluster_config()
+    assert "disableDefaultCNI" not in _render_cluster_config()
+    cilium = _render_cluster_config(ctlabs_kind_cni="cilium")
+    assert "networking" in cilium
+    assert "disableDefaultCNI: true" in cilium
+
+
+def test_cilium_installs_chart_with_kubernetes_ipam():
+    with open(os.path.join(ROLE_TASKS, "cilium.yml")) as f:
+        tasks = yaml.safe_load(f)
+    install = _task_named(tasks, "ctlabs_kind.tasks.cilium.install")
+    helm = install["kubernetes.core.helm"]
+    assert helm["chart_ref"] == "cilium/cilium"
+    assert helm["chart_version"] == "{{ versions.cilium }}"
+    assert helm["release_namespace"] == "{{ ctlabs_kind.defaults.cilium.namespace }}"
+    assert helm["values"] == "{{ ctlabs_kind.defaults.cilium.values }}"
+    assert install["environment"]["KUBECONFIG"] == "/root/.kube/config"
+
+    repo = _task_named(tasks, "ctlabs_kind.tasks.cilium.repo")
+    assert repo["kubernetes.core.helm_repository"]["repo_url"] == "{{ ctlabs_kind.defaults.cilium.repo_url }}"
+
+    load = _task_named(tasks, "ctlabs_kind.tasks.cilium.load")
+    assert "kind load image-archive" in load["shell"]
+    assert "--name {{ ctlabs_kind_name }}" in load["shell"]
+
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        values = yaml.safe_load(f)["ctlabs_kind"]["defaults"]["cilium"]["values"]
+    assert values["ipam"]["mode"] == "kubernetes", (
+        "cluster-pool 10.0.0.0/8 overlaps kind's service subnet 10.96.0.0/12; use kubernetes IPAM"
+    )
+    assert values["image"]["pullPolicy"] == "IfNotPresent"
+
+
+def test_cilium_included_in_service_before_ingress():
+    with open(os.path.join(ROLE_TASKS, "service.yml")) as f:
+        tasks = yaml.safe_load(f)
+    names = [t.get("name") for t in tasks if isinstance(t, dict)]
+    cilium = _task_named(tasks, "ctlabs_kind.tasks.service.cilium")
+    assert cilium["when"] == 'ctlabs_kind_cni == "cilium"'
+    assert cilium["include_tasks"] == "cilium.yml"
+    assert names.index("ctlabs_kind.tasks.service.cilium") > names.index("ctlabs_kind.tasks.service.cluster.ready")
+    assert names.index("ctlabs_kind.tasks.service.cilium") < names.index("ctlabs_kind.tasks.service.ingress")

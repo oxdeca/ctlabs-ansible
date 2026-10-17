@@ -102,5 +102,6 @@ ctlabs_xrdp:
       groups : [sudo]
   os:
     - debian12
+    - debian13
   virtype:
     - kvm

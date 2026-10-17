@@ -31,3 +31,12 @@
 - name: ctlabs_minikube.tasks.precheck.ca_configmaps
   set_fact:
     ctlabs_minikube_ca_configmaps: "{{ ctg_facts.ctlabs_minikube.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_minikube.defaults.config.ca_configmaps)) }}"
+
+- name: ctlabs_minikube.tasks.precheck.cni
+  set_fact:
+    ctlabs_minikube_cni: "{{ ctg_facts.ctlabs_minikube.cni | default(ctlabs_minikube.defaults.config.cni) }}"
+
+- name: ctlabs_minikube.tasks.precheck.cni.supported
+  assert:
+    that    : ctlabs_minikube_cni in ctlabs_minikube.defaults.config.cni_supported
+    fail_msg: "CNI [{{ ctlabs_minikube_cni }}] not supported! Valid: {{ ctlabs_minikube.defaults.config.cni_supported | join(', ') }}"

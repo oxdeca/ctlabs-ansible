@@ -17,6 +17,10 @@ User=root
 {% if not (ctlabs_k3s_servicelb_enabled | default(true)) %}
 {% set _ = _flags.append('--disable=servicelb') %}
 {% endif %}
+{% if ctlabs_k3s_cni | default('flannel') == 'cilium' %}
+{% set _ = _flags.append('--flannel-backend=none') %}
+{% set _ = _flags.append('--disable-network-policy') %}
+{% endif %}
 ExecStart={{ ctlabs_k3s.defaults.pkgs.k3s.path }} server --cluster-init{{ ' ' ~ _flags | join(' ') if _flags }}
 
 Restart=always

@@ -8,8 +8,10 @@
 versions :
   k8s            : 1.36.4
   calico         : 3.32.2
+  cilium         : 1.20.3
   prometheus     : 0.10
   metrics_server : 0.7.0
+  helm           : 4.1.4
   gateway_api    : 1.5.1
 
 ctlabs_k8s_join_token: "{{ query('community.general.random_string', override_all='0123456789abcdef', length=6)[0] }}.{{ query('community.general.random_string', override_all='01234567890abcdef', length=16)[0] }}"
@@ -62,6 +64,13 @@ ctlabs_k8s:
         - name : kubectl
       python:
         pips: []
+      helm:
+        url    : "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
+        tmptar : /tmp/helm.tar.gz
+        tmpdir : /tmp
+        tardir : /tmp/linux-amd64
+        path   : /usr/bin/helm
+        mode   : '0755'
     scripts:
       versions:
         template: versions.sh.j2
@@ -159,6 +168,15 @@ ctlabs_k8s:
       lb              : kube-vip
       lb_supported    : ['kube-vip', 'metallb', 'none']
       schedule_master : false
+      # Container Network Interface (cluster-wide, decided by the master).
+      #   calico : tigera-operator + Installation CR (default, unchanged)
+      #   cilium : Cilium Helm chart in kube-system with ipam.mode=kubernetes
+      #            (uses the per-node podCIDRs kubeadm allocates from
+      #            ctlabs_k8s_pod_cidr, so it never overlaps the kubeadm service
+      #            CIDR the way Cilium's default cluster-pool 10.0.0.0/8 does).
+      cni             : calico
+      cni_supported   : ['calico', 'cilium']
+      # Deprecated alias predating the `cni` key; kept only as a fallback.
       network         : calico
       prometheus      : false
       pgsql_op        : none

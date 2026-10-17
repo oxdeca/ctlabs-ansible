@@ -26,6 +26,9 @@
     "enabled" : {{ _facts.servicelb.enabled | default(true) | lower }}
   }
 {% endif %}
+{% if _facts.cni is defined %},
+  "cni" : "{{ _facts.cni }}"
+{% endif %}
 {% if _facts.ca_configmaps is defined %},
   "ca_configmaps" : {{ _facts.ca_configmaps | to_json }}
 {% endif %}

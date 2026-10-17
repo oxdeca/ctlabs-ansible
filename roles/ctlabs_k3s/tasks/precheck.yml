@@ -48,6 +48,15 @@
   set_fact:
     ctlabs_k3s_servicelb_enabled: "{{ ctg_facts.ctlabs_k3s.servicelb.enabled | default(ctlabs_k3s.defaults.config.servicelb.enabled) }}"
 
+- name: ctlabs_k3s.tasks.precheck.cni
+  set_fact:
+    ctlabs_k3s_cni: "{{ ctg_facts.ctlabs_k3s.cni | default(ctlabs_k3s.defaults.config.cni) }}"
+
+- name: ctlabs_k3s.tasks.precheck.cni.supported
+  assert:
+    that    : ctlabs_k3s_cni in ctlabs_k3s.defaults.config.cni_supported
+    fail_msg: "CNI [{{ ctlabs_k3s_cni }}] not supported! Valid: {{ ctlabs_k3s.defaults.config.cni_supported | join(', ') }}"
+
 - name: ctlabs_k3s.tasks.precheck.ca_configmaps
   set_fact:
     ctlabs_k3s_ca_configmaps: "{{ ctg_facts.ctlabs_k3s.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_k3s.defaults.config.ca_configmaps)) }}"

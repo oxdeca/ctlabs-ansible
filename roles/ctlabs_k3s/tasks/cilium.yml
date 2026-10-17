@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_k3s/tasks/cilium.yml
+# Description : deploy cilium via a k3s HelmChart CR
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_k3s.tasks.cilium.manifests_dir
+  ansible.builtin.file:
+    path : "{{ ctlabs_k3s.defaults.config.cilium.manifests }}"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_k3s.tasks.cilium.helmchart
+  template:
+    src  : k3s-cilium.yml.j2
+    dest : "{{ ctlabs_k3s.defaults.config.cilium.manifests }}/k3s-cilium.yaml"

@@ -25,3 +25,7 @@ nodes:
   - role: worker
 {% endfor %}
 {% endif %}
+{% if ctlabs_kind_cni | default('kindnet') == 'cilium' %}
+networking:
+  disableDefaultCNI: true
+{% endif %}

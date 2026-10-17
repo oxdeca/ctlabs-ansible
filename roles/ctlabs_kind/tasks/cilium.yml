@@ -1,0 +1,55 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_kind/tasks/cilium.yml
+# Description : install Cilium as the cluster CNI. The cluster is created with
+#               networking.disableDefaultCNI=true, so Cilium must come up before
+#               any other workload (ingress, app charts) can schedule — hence this
+#               runs in service.yml, right after the cluster is ready. Images are
+#               pre-pulled with podman and `kind load`-ed because kind nodes often
+#               can't reach quay.io.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_kind.tasks.cilium.repo
+  kubernetes.core.helm_repository:
+    name    : cilium
+    repo_url: "{{ ctlabs_kind.defaults.cilium.repo_url }}"
+
+- name: ctlabs_kind.tasks.cilium.template
+  kubernetes.core.helm_template:
+    name             : cilium
+    chart_ref        : cilium/cilium
+    chart_version    : "{{ versions.cilium }}"
+    release_namespace: "{{ ctlabs_kind.defaults.cilium.namespace }}"
+    values           : "{{ ctlabs_kind.defaults.cilium.values }}"
+  register: ctlabs_kind_cilium_template
+
+- name: ctlabs_kind.tasks.cilium.images
+  set_fact:
+    ctlabs_kind_cilium_images: "{{ ctlabs_kind_cilium_template.stdout | regex_findall('image:\\s*(\\S+)') | map('regex_replace', '^\"(.*)\"$', '\\1') | unique | sort }}"
+
+- name: ctlabs_kind.tasks.cilium.pull
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop: "{{ ctlabs_kind_cilium_images }}"
+
+- name: ctlabs_kind.tasks.cilium.load
+  shell: >
+    rm -f /tmp/ctlabs-kind-cilium-image.tar &&
+    podman save {{ item }} -o /tmp/ctlabs-kind-cilium-image.tar &&
+    kind load image-archive /tmp/ctlabs-kind-cilium-image.tar
+    --name {{ ctlabs_kind_name }}
+  loop: "{{ ctlabs_kind_cilium_images }}"
+
+- name: ctlabs_kind.tasks.cilium.install
+  environment:
+    KUBECONFIG: /root/.kube/config
+  kubernetes.core.helm:
+    name             : cilium
+    chart_ref        : cilium/cilium
+    chart_version    : "{{ versions.cilium }}"
+    release_namespace: "{{ ctlabs_kind.defaults.cilium.namespace }}"
+    create_namespace : true
+    wait             : true
+    timeout          : 10m0s
+    values           : "{{ ctlabs_kind.defaults.cilium.values }}"

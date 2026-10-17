@@ -8,7 +8,11 @@ Type=simple
 
 User=root
 EnvironmentFile=/etc/sysconfig/rke2
-ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server
+{% set _flags = [] %}
+{% if ctlabs_rke2_cni | default('canal') != 'canal' %}
+{% set _ = _flags.append('--cni=' + ctlabs_rke2_cni) %}
+{% endif %}
+ExecStart={{ ctlabs_rke2.defaults.pkgs.rke2.path }} server{{ ' ' ~ _flags | join(' ') if _flags }}
 
 Restart=always
 RestartSec=5

@@ -14,6 +14,9 @@
 {%- if _facts.storage is defined %},
   "storage"    : "{{ _facts.storage }}"
 {% endif %}
+{%- if _facts.cni is defined %},
+  "cni"        : "{{ _facts.cni }}"
+{% endif %}
 {%- if _facts.gateway_api is defined %},
   "gateway_api": {
     "enabled" : "{{ 'true' if (_facts.gateway_api.enabled | default(true)) else 'false' }}",

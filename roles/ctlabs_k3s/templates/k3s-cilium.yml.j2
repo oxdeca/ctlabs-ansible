@@ -1,0 +1,20 @@
+---
+# HelmChart CR picked up by k3s' built-in helm-controller (no helm binary
+# needed). Equivalent to:
+#   cilium install {{ versions.cilium }} \
+#     --set=ipam.operator.clusterPoolIPv4PodCIDRList="{{ ctlabs_k3s.defaults.config.cilium.cluster_cidr }}"
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name      : cilium
+  namespace : {{ ctlabs_k3s.defaults.config.cilium.namespace }}
+spec:
+  repo            : https://helm.cilium.io/
+  chart           : cilium
+  version         : {{ versions.cilium }}
+  targetNamespace : {{ ctlabs_k3s.defaults.config.cilium.namespace }}
+  valuesContent   : |-
+    ipam:
+      operator:
+        clusterPoolIPv4PodCIDRList:
+          - {{ ctlabs_k3s.defaults.config.cilium.cluster_cidr }}

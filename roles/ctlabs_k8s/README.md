@@ -1,6 +1,6 @@
 # Ansible Role `ctlabs_k8s`
 
-Sets up a single- or multi-node Kubernetes cluster with `kubeadm`, including CNI (calico/flannel/weave) and kube-vip. The Kubernetes version is pinned in `versions.k8s` (default `1.36.4`).
+Sets up a single- or multi-node Kubernetes cluster with `kubeadm`, including CNI (calico or cilium) and kube-vip. The Kubernetes version is pinned in `versions.k8s` (default `1.36.4`).
 
 ## Node Roles
 
@@ -59,9 +59,33 @@ Use `local` for minimal footprint labs (a `2G` worker is fine — there is no pe
 | `ctlabs_k8s_role`                         | `master`    | Node role: `master`, `control`, or `worker`     |
 | `ctlabs_k8s_master_ip`                    | node IP     | Control plane advertise address                 |
 | `ctlabs_k8s_pod_cidr`                     | `10.8.0.0/16` | Pod network subnet (must fit one `/24` per node; `/16` for multi-node, `/24` is single-node only) |
-| `ctlabs_k8s.defaults.config.network`      | `calico`    | CNI (`calico`, `flannel`, `weave`)             |
+| `ctlabs_k8s.defaults.config.cni`          | `calico`    | CNI (`calico`, `cilium`), decided by the master. `network` is a deprecated fallback |
 | `ctlabs_k8s.defaults.config.lb`           | `kube-vip`  | Services LoadBalancer (one at a time): `kube-vip` (host IP), `metallb`, `none` |
 | `ctlabs_k8s.defaults.config.storage.engine` | `local`   | Storage engine: `local` (default), `longhorn`, `none` |
+
+## CNI / Cilium
+
+The CNI is a master-only, cluster-wide choice via the `cni` host fact (or key in
+the `ctlabs_k8s` profile). Default `calico` is unchanged — the tigera-operator
+manifest plus the `Installation` CR.
+
+`cni: cilium` installs the official Cilium Helm chart (`versions.cilium`,
+`1.20.3`) into `kube-system` from `https://helm.cilium.io/`, using
+`ipam.mode=kubernetes`. That mode makes Cilium consume the per-node `podCIDR`s
+kubeadm allocates from `ctlabs_k8s_pod_cidr`, instead of Cilium's default
+cluster-pool IPAM (`10.0.0.0/8`) which would overlap the kubeadm service CIDR.
+kube-proxy stays in place (no kube-proxy-free mode). Helm is installed on the
+master only when `cni == cilium`.
+
+```yaml
+ctlabs_k8s:
+  k8s1:
+    role: master
+    cni : cilium
+```
+
+The value is validated against `ctlabs_k8s.defaults.config.cni_supported`
+(`calico`, `cilium`); an unknown value fails the precheck.
 
 ## Tests
 

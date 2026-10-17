@@ -520,3 +520,78 @@ def test_ca_configmap_task_is_declarative_and_ordered():
     assert imp["when"] == "ctlabs_k8s_role == 'master'"
     assert "ctlabs_k8s.service" in imp["tags"]
     assert "ctlabs_k8s.ca_configmap" in imp["tags"]
+
+
+def _task_named(data, name):
+    for entry in data:
+        if isinstance(entry, dict) and entry.get("name") == name:
+            return entry
+    raise AssertionError(f"task {name!r} not found")
+
+
+def test_cni_default_is_calico():
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_k8s"]["defaults"]["config"]
+    assert defaults["cni"] == "calico"
+    assert defaults["cni_supported"] == ["calico", "cilium"]
+    assert defaults["network"] == "calico", "deprecated alias kept as a fallback"
+
+
+def test_cni_facts_forward_only_when_set():
+    tpl = _facts_env().get_template("facts.json.j2")
+    opted_in = json.loads(tpl.render(ctlabs_role_facts={"cni": "cilium"}))
+    assert opted_in["cni"] == "cilium"
+    silent = json.loads(tpl.render(ctlabs_role_facts={}))
+    assert "cni" not in silent, "a default written here would shadow precheck's fallback"
+
+
+def test_cni_precheck_resolves_fact_with_network_fallback_and_validates():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.cni")
+    expr = resolve["set_fact"]["ctlabs_k8s_cni"]
+    assert "ctg_facts.ctlabs_k8s.cni" in expr
+    assert "ctg_facts.ctlabs_k8s.network" in expr
+    assert "ctlabs_k8s.defaults.config.cni" in expr
+    supported = next(t for t in precheck if t.get("name") == "ctlabs_k8s.tasks.precheck.cni.supported")
+    assert "ctlabs_k8s_cni in ctlabs_k8s.defaults.config.cni_supported" in supported["assert"]["that"]
+
+
+def test_calico_block_gated_on_cni():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        calico = _task_named(yaml.safe_load(f), "ctlabs_k8s.tasks.config.calico")
+    assert "ctlabs_k8s_role == 'master'" in calico["when"]
+    assert "ctlabs_k8s_cni == 'calico'" in calico["when"]
+
+
+def test_cilium_block_installs_chart_with_kubernetes_ipam():
+    with open(os.path.join(ROLE_TASKS, "config.yml")) as f:
+        cilium = _task_named(yaml.safe_load(f), "ctlabs_k8s.tasks.config.cilium")
+    assert "ctlabs_k8s_role == 'master'" in cilium["when"]
+    assert "ctlabs_k8s_cni == 'cilium'" in cilium["when"]
+
+    repo = _task_named(cilium["block"], "ctlabs_k8s.tasks.config.cilium.repo")
+    assert repo["kubernetes.core.helm_repository"]["name"] == "cilium"
+    assert repo["kubernetes.core.helm_repository"]["repo_url"] == "https://helm.cilium.io/"
+
+    install = _task_named(cilium["block"], "ctlabs_k8s.tasks.config.cilium.install")
+    helm = install["kubernetes.core.helm"]
+    assert helm["chart_ref"] == "cilium/cilium"
+    assert helm["chart_version"] == "{{ versions.cilium }}"
+    assert helm["release_namespace"] == "kube-system"
+    assert install["environment"]["KUBECONFIG"] == "/etc/kubernetes/admin.conf"
+    assert helm["values"]["ipam"]["mode"] == "kubernetes", (
+        "cluster-pool 10.0.0.0/8 overlaps the kubeadm service CIDR; use kubernetes IPAM"
+    )
+
+
+def test_helm_installed_only_for_cilium():
+    with open(os.path.join(ROLE_TASKS, "package.yml")) as f:
+        helm = _task_named(yaml.safe_load(f), "ctlabs_k8s.tasks.package.helm")
+    assert helm["when"] == "ctlabs_k8s_cni == 'cilium'"
+    with open(os.path.join(ROLE_TASKS, os.pardir, "defaults", "main.yml")) as f:
+        defaults = yaml.safe_load(f)["ctlabs_k8s"]["defaults"]
+    assert defaults["pkgs"]["helm"]["path"] == "/usr/bin/helm"
+    assert defaults["pkgs"]["helm"]["url"] == (
+        "https://get.helm.sh/helm-v{{ versions.helm }}-linux-amd64.tar.gz"
+    )

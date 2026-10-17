@@ -11,7 +11,11 @@ RemainAfterExit=true
 User=minikube
 Group=minikube
 
-ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start --network minikube
+{% set _flags = [] %}
+{% if ctlabs_minikube_cni | default('auto') != 'auto' %}
+{% set _ = _flags.append('--cni=' + ctlabs_minikube_cni) %}
+{% endif %}
+ExecStart={{ ctlabs_minikube.defaults.pkgs.minikube.path }} start --network minikube{{ ' ' ~ _flags | join(' ') if _flags }}
 ExecStop={{ ctlabs_minikube.defaults.pkgs.minikube.path }} stop
 
 [Install]

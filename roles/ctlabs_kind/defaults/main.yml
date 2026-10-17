@@ -12,6 +12,7 @@ versions:
   helm        : 4.1.4
   nginx       : 1.15.0
   gateway_api : 1.5.0
+  cilium      : 1.20.3
 
 
 ctlabs_kind:
@@ -42,6 +43,13 @@ ctlabs_kind:
       plane   : "single"           # "single" or "multi"
       name    : "ctlabs"
       image   : "kindest/node:v{{ versions.k8s }}"
+      # Container Network Interface. kind ships kindnet (the default); for
+      # `cilium` the cluster is created with networking.disableDefaultCNI=true
+      # and the role installs the upstream Cilium chart (images pre-pulled and
+      # `kind load`-ed, like every other chart here). Default `kindnet` emits
+      # no networking block and installs nothing, so existing labs are unchanged.
+      cni          : kindnet
+      cni_supported: ['kindnet', 'cilium']
       # CA cert bundle(s) to publish as ConfigMaps once the cluster is up, so
       # charts (e.g. cert-vault-sync's ClusterSecretStores) can read Vault's
       # TLS CA. Each entry: {name, namespace, key, file?} where `file` defaults
@@ -68,6 +76,18 @@ ctlabs_kind:
       gateway_api:
         crds: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ versions.gateway_api }}/standard-install.yaml"
         file: /tmp/gateway-api-crds.yaml
+    cilium:
+      repo_url : https://helm.cilium.io/
+      namespace: kube-system
+      # ipam.mode=kubernetes uses the per-node podCIDRs kind allocates
+      # (kind's default pod subnet) instead of Cilium's cluster-pool default
+      # (10.0.0.0/8), which would overlap kind's service subnet 10.96.0.0/12.
+      # pullPolicy=IfNotPresent so the `kind load`-ed images are used as-is.
+      values:
+        ipam:
+          mode: kubernetes
+        image:
+          pullPolicy: IfNotPresent
     repos : []
     charts: []
     service:
