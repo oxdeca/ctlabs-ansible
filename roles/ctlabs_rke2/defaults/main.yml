@@ -48,10 +48,39 @@ ctlabs_rke2:
       cilium:
         kube_proxy_replacement: true
         operator_replicas     : 1
+        # Bootstrap apiserver address handed to Cilium when kube-proxy is
+        # disabled. Without this Cilium tries to reach the apiserver via the
+        # ClusterIP (10.43.0.1), which does not exist until Cilium is up
+        # (chicken-and-egg) -> the agent crash-loops on boot. Every RKE2 node
+        # (server *and* agent) answers 127.0.0.1:6443 (server = local
+        # apiserver, agent = rke2's own proxy to the server), so this is safe
+        # cluster-wide. See docs.rke2.io kube-proxy replacement.
+        k8s_service_host      : "127.0.0.1"
+        k8s_service_port       : "6443"
         manifests_dir : /var/lib/rancher/rke2/server/manifests
         helmchartconfig:
           template: cilium-helmchartconfig.yml.j2
           file    : /var/lib/rancher/rke2/server/manifests/rke2-cilium-config.yaml
+        # Native Cilium LoadBalancer — REQUIRED whenever kube-proxy replacement
+        # is on: rke2's servicelb (klipper-lb) DNATs LB traffic to the Service
+        # ClusterIP and needs kube-proxy's iptables to resolve it; under
+        # Cilium's eBPF that forwarded packet is black-holed (LB EXTERNAL-IP
+        # dead, even though ClusterIP/NodePort work). When active the role
+        # (a) enables cilium l2announcements on the chart, (b) writes a
+        # CiliumLoadBalancerIPPool + CiliumL2AnnouncementPolicy after the
+        # cluster is up and (c) suppresses rke2's servicelb. Inactive while
+        # ip_pool.cidrs is empty, so labs without a VIP are byte-for-byte
+        # unchanged.
+        lb:
+          ip_pool:
+            name : ctlabs
+            # CIDRs cilium may allocate to LoadBalancer Services. Use /32
+            # entries to hand out fixed VIPs, e.g. ["192.168.30.100/32"].
+            cidrs: []
+          l2:
+            # Interfaces cilium ARP-announces VIPs on (regex; e.g. ["enp0s2"]
+            # or ["eth+"]). Empty = cilium auto-selects.
+            interfaces: []
       servicelb:
         enabled: false
       ingress:

@@ -15,6 +15,12 @@ spec:
       replicas: {{ ctlabs_rke2_cilium_operator_replicas | default(1) }}
 {% if ctlabs_rke2_cilium_kube_proxy_replacement | default(false) %}
     kubeProxyReplacement: true
+    k8sServiceHost: "{{ ctlabs_rke2_cilium_k8s_service_host | default('127.0.0.1') }}"
+    k8sServicePort: "{{ ctlabs_rke2_cilium_k8s_service_port | default('6443') }}"
+{% if ctlabs_rke2_cilium_lb_active | default(false) %}
+    l2announcements:
+      enabled: true
+{% endif %}
 {% endif %}
 {% if ctlabs_rke2_gateway_api_enabled | default(false) and ctlabs_rke2_gateway_api_provider | default('traefik') == 'cilium' %}
     gatewayAPI:

@@ -68,6 +68,32 @@
   set_fact:
     ctlabs_rke2_cilium_operator_replicas: "{{ ctg_facts.ctlabs_rke2.cilium.operator_replicas | default(ctlabs_rke2.defaults.config.cilium.operator_replicas) }}"
 
+- name: ctlabs_rke2.tasks.precheck.cilium.k8s_service_host
+  set_fact:
+    ctlabs_rke2_cilium_k8s_service_host: "{{ ctg_facts.ctlabs_rke2.cilium.k8s_service_host | default(ctlabs_rke2.defaults.config.cilium.k8s_service_host) }}"
+
+- name: ctlabs_rke2.tasks.precheck.cilium.k8s_service_port
+  set_fact:
+    ctlabs_rke2_cilium_k8s_service_port: "{{ ctg_facts.ctlabs_rke2.cilium.k8s_service_port | default(ctlabs_rke2.defaults.config.cilium.k8s_service_port) }}"
+
+- name: ctlabs_rke2.tasks.precheck.cilium.lb
+  set_fact:
+    ctlabs_rke2_cilium_lb_ip_pool_name: "{{ ctg_facts.ctlabs_rke2.cilium.lb.ip_pool.name | default(ctlabs_rke2.defaults.config.cilium.lb.ip_pool.name) }}"
+    ctlabs_rke2_cilium_lb_ip_pool_cidrs: "{{ ctg_facts.ctlabs_rke2.cilium.lb.ip_pool.cidrs | default(ctlabs_rke2.defaults.config.cilium.lb.ip_pool.cidrs) }}"
+    ctlabs_rke2_cilium_lb_l2_interfaces: "{{ ctg_facts.ctlabs_rke2.cilium.lb.l2.interfaces | default(ctlabs_rke2.defaults.config.cilium.lb.l2.interfaces) }}"
+
+# Native Cilium LB only makes sense where Cilium owns services (cilium CNI +
+# kube-proxy replacement) and a VIP pool was actually supplied; otherwise the
+# role leaves rke2 servicelb / stock behaviour untouched.
+- name: ctlabs_rke2.tasks.precheck.cilium.lb.active
+  set_fact:
+    ctlabs_rke2_cilium_lb_active: >-
+      {{
+        (ctlabs_rke2_cilium_lb_ip_pool_cidrs | length > 0)
+        and ctlabs_rke2_cni | default('canal') == 'cilium'
+        and ctlabs_rke2_cilium_kube_proxy_replacement | bool
+      }}
+
 - name: ctlabs_rke2.tasks.precheck.ca_configmaps
   set_fact:
     ctlabs_rke2_ca_configmaps: "{{ ctg_facts.ctlabs_rke2.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_rke2.defaults.config.ca_configmaps)) }}"

@@ -1,0 +1,19 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rke2/templates/cilium-l2-announcement-policy.yml.j2
+ # Description : Cilium L2 announcement policy for native LoadBalancer VIPs.
+ #               ARP-announces the IPs handed out by the pool above so they are
+ #               reachable from outside the cluster. `interfaces` (regex) picks
+ #               the data-plane NIC; empty lets cilium auto-select.
+#}
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: {{ ctlabs_rke2_cilium_lb_ip_pool_name }}
+spec:
+{% if ctlabs_rke2_cilium_lb_l2_interfaces | length > 0 %}
+  interfaces:
+{% for iface in ctlabs_rke2_cilium_lb_l2_interfaces %}
+    - {{ iface }}
+{% endfor %}
+{% endif %}
+  loadBalancerIPs: true

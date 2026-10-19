@@ -1,0 +1,46 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_rke2/tasks/cilium_lb.yml
+# Description : native Cilium LoadBalancer (LB IPAM pool + L2 announcements)
+# ------------------------------------------------------------------------------
+#
+# Replaces rke2 servicelb when Cilium owns services (kube-proxy replacement).
+# klipper-lb DNATs LB traffic to the Service ClusterIP and relies on
+# kube-proxy's iptables to resolve it — under cilium's eBPF the forwarded
+# packet is black-holed, so the LoadBalancer EXTERNAL-IP is dead while
+# ClusterIP/NodePort keep working. Cilium's own LB (an IP pool + L2
+# announcements) needs no kube-proxy. The chart side (l2announcements.enabled,
+# servicelb suppression) is handled in config.yml/config.yaml; here we write
+# the two CRs once the cluster (and thus cilium's CRDs) is up.
+#
+# Server node only: agents have no kubeconfig. Declarative modules only.
+
+- name: ctlabs_rke2.tasks.cilium_lb
+  when: ctlabs_rke2_cilium_lb_active | bool
+  block:
+    - name: ctlabs_rke2.tasks.cilium_lb.ip_pool
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'cilium-lb-ip-pool.yml.j2') | from_yaml }}"
+      register: res_cilium_lb_pool
+      until   : res_cilium_lb_pool is success
+      retries : 30
+      delay   : 5
+
+    - name: ctlabs_rke2.tasks.cilium_lb.l2_policy
+      vars:
+        ansible_python_interpreter: /usr/sbin/ip vrf exec default /usr/bin/python3
+      environment:
+        KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'cilium-l2-announcement-policy.yml.j2') | from_yaml }}"
+      register: res_cilium_lb_l2
+      until   : res_cilium_lb_l2 is success
+      retries : 30
+      delay   : 5

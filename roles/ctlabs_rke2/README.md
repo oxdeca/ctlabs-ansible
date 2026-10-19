@@ -34,6 +34,11 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 | `ctlabs_rke2.defaults.config.cni`                   | `canal`                  | Container Network Interface (`canal`, `cilium`, `multus`, `none`). Written to `/etc/rancher/rke2/config.yaml` as `cni: <value>` when not the RKE2 default. `cilium` deploys RKE2's bundled Cilium chart |
 | `ctlabs_rke2.defaults.config.cilium.kube_proxy_replacement` | `true`          | Cilium only: disable kube-proxy (`disable-kube-proxy: true` in config.yaml) and set `kubeProxyReplacement: true` on the `rke2-cilium` chart via a `HelmChartConfig` |
 | `ctlabs_rke2.defaults.config.cilium.operator_replicas` | `1`                    | Cilium only: `operator.replicas` on the `rke2-cilium` chart |
+| `ctlabs_rke2.defaults.config.cilium.k8s_service_host` | `127.0.0.1`           | Cilium only (kube-proxy replacement): `k8sServiceHost` on the `rke2-cilium` chart — the apiserver address Cilium bootstraps against before its eBPF datapath is up |
+| `ctlabs_rke2.defaults.config.cilium.k8s_service_port` | `6443`               | Cilium only: `k8sServicePort` (pairs with `k8sServiceHost`) |
+| `ctlabs_rke2.defaults.config.cilium.lb.ip_pool.name` | `ctlabs`               | Cilium only: name of the `CiliumLoadBalancerIPPool` for native `LoadBalancer` VIPs |
+| `ctlabs_rke2.defaults.config.cilium.lb.ip_pool.cidrs` | `[]`                  | Cilium only: CIDRs the pool may allocate (e.g. `["192.168.30.100/32"]`). Non-empty **activates** Cilium's native LB (see below); empty = no-op |
+| `ctlabs_rke2.defaults.config.cilium.lb.l2.interfaces` | `[]`                 | Cilium only: interfaces (regex, e.g. `["enp0s2"]`) the `CiliumL2AnnouncementPolicy` ARP-announces VIPs on; empty = auto |
 | `ctlabs_rke2.defaults.config.ingress.enabled`       | `false`                  | Enable ingress controller                                      |
 | `ctlabs_rke2.defaults.config.ingress.type`          | `nginx`                  | Ingress type (`traefik`, `nginx`)                              |
 | `ctlabs_rke2.defaults.config.gateway_api.enabled`   | `true`                   | Enable Gateway API                                             |
@@ -197,6 +202,37 @@ back:
 { "cni": "cilium", "cilium": { "kube_proxy_replacement": false } }
 ```
 
+#### The `k8sServiceHost` bootstrap (do not remove)
+
+When `kubeProxyReplacement` is on, the chart **must** also carry
+`k8sServiceHost` / `k8sServicePort` pointing at the local apiserver:
+
+```yaml
+kubeProxyReplacement: true
+k8sServiceHost: "127.0.0.1"
+k8sServicePort: "6443"
+```
+
+Without it Cilium tries to reach the apiserver at the **ClusterIP**
+(`10.43.0.1:443`), which only exists *because* Cilium/kube-proxy program
+service NAT — a chicken-and-egg deadlock. In steady state the leftover kube-proxy
+iptables rules can mask it, but after a **reboot** (or `iptables` flush) the
+cilium agent crash-loops in `Init:CrashLoopBackOff` with:
+
+```
+Unable to contact k8s api-server ... Get "https://10.43.0.1:443/...": dial tcp 10.43.0.1:443: i/o timeout
+```
+
+`127.0.0.1:6443` is correct cluster-wide: control-plane nodes answer with the
+local `kube-apiserver`, worker nodes with RKE2's own `rke2` process which proxies
+to the server (see upstream Cilium "Installation using Rancher" / RKE2 "Kube-proxy
+replacement" docs). Override per-host only if a lab uses a load-balanced API
+endpoint:
+
+```json
+{ "cni": "cilium", "cilium": { "k8s_service_host": "192.168.30.41" } }
+```
+
 ### Gateway API provider `cilium`
 
 `gateway_api.provider` accepts a third value, `cilium`, which enables Cilium's
@@ -209,7 +245,67 @@ still applied by this role after cluster start (same as for the other
 providers); the cilium gateway controller tolerates the brief absence and
 picks them up once applied.
 
+### Native LoadBalancer (required with kube-proxy replacement)
+
+> **rke2 ServiceLB does not work under Cilium kube-proxy replacement.**
+> `svclb-*` (klipper-lb) DNATs LB traffic to the Service **ClusterIP** and relies
+> on kube-proxy's iptables to resolve it; Cilium's eBPF does not translate that
+> forwarded packet, so the `LoadBalancer` EXTERNAL-IP is black-holed (ClusterIP
+> and NodePort keep working). Leftover kube-proxy iptables rules mask this until
+> the next reboot — exactly like the `k8sServiceHost` deadlock above. Use
+> Cilium's native LB instead.
+
+Set a VIP pool on the **server** node's `cilium.lb` fact; the role then enables
+Cilium L2 announcements on the chart, writes a `CiliumLoadBalancerIPPool` +
+`CiliumL2AnnouncementPolicy` after the cluster is up, and suppresses rke2's
+servicelb:
+
+```yaml
+rke2:
+  rke21:
+    role: server
+    cni : cilium
+    cilium:
+      kube_proxy_replacement: true
+      lb:
+        ip_pool:
+          # /32 entries hand out fixed VIPs; a CIDR is a range.
+          # The node's OWN data-plane IP is a valid VIP (Cilium assigns it
+          # with no conflict) — this keeps the lab's "everything talks to the
+          # host IP" model with no extra address to track.
+          cidrs: ["192.168.30.41/32"]
+        l2:
+          # must sit on the client-reachable (data-plane) segment
+          interfaces: ["enp0s2"]
+```
+
+Cilium's built-in LB IPAM assigns the VIP to every `LoadBalancer` service
+(no `loadBalancerClass` needed once rke2 servicelb is off) and L2 announcements
+ARP it from the given interface. `servicelb.enabled` is ignored (and not
+written to config.yaml) while this is active — the two cannot coexist.
+
+Using the **node's own data-plane IP** as the `/32` VIP is supported (verified:
+Cilium allocates it, no `CiliumLoadBalancerIPPool` conflict, LB frontends get
+active backends). It's the right pick when the lab addresses services by the
+host IP, and needs no separate address. The trade-off is the usual one for a
+node-bound VIP: it is served by that node only (no L2 failover) — fine for the
+single-server labs.
+
+```sh
+kubectl get ciliumloadbalancerippools.cilium.io
+kubectl get ciliuml2announcementpolicies.cilium.io
+kubectl get svc -A | grep LoadBalancer     # EXTERNAL-IP comes from the pool
+```
+
+> The `interfaces` regex must match the NIC on the network clients can reach;
+> with a separate management/data split (e.g. `enp0s1` mgmt / `enp0s2` data)
+> the VIP is only reachable from the data segment.
+
 ## ServiceLB (LoadBalancer services)
+
+> **Incompatible with Cilium kube-proxy replacement** — see "Native
+> LoadBalancer" above. Keep ServiceLB only on `canal` labs (or cilium labs that
+> left `kube_proxy_replacement: false`).
 
 When `servicelb.enabled` is `true`, the server starts with `enable-servicelb: true` (config.yaml) and RKE2's built-in ServiceLB (klipper-lb) assigns an external IP to every `type: LoadBalancer` service. Verified on rke21: enabling ServiceLB gave the `traefik` cluster's `LoadBalancer` service an EXTERNAL-IP, which Traefik copies to the Gateway `status.address`.
 

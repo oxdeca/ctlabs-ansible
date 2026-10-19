@@ -28,6 +28,13 @@
     - ctlabs_rke2
     - ctlabs_rke2.service
 
+- import_tasks: cilium_lb.yml
+  when: ctlabs_rke2_role == 'server'
+  tags:
+    - ctlabs_rke2
+    - ctlabs_rke2.service
+    - ctlabs_rke2.cilium_lb
+
 - import_tasks: ca_configmap.yml
   when: ctlabs_rke2_role == 'server'
   tags:

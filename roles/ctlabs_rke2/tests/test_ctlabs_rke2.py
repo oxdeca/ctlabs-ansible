@@ -39,6 +39,9 @@ def test_template_exists(role_dir):
         "templates/rke2.config.yaml.j2",
         "templates/coredns-helmchartconfig.yml.j2",
         "templates/cilium-helmchartconfig.yml.j2",
+        "templates/cilium-lb-ip-pool.yml.j2",
+        "templates/cilium-l2-announcement-policy.yml.j2",
+        "tasks/cilium_lb.yml",
     ]
     for f in files:
         path = os.path.join(role_dir, f)
@@ -96,6 +99,13 @@ def test_cilium_defaults():
         defaults = yaml.safe_load(f)["ctlabs_rke2"]["defaults"]["config"]
     assert defaults["cilium"]["kube_proxy_replacement"] is True
     assert defaults["cilium"]["operator_replicas"] == 1
+    assert defaults["cilium"]["k8s_service_host"] == "127.0.0.1"
+    assert defaults["cilium"]["k8s_service_port"] == "6443"
+    assert defaults["cilium"]["lb"]["ip_pool"]["name"] == "ctlabs"
+    assert defaults["cilium"]["lb"]["ip_pool"]["cidrs"] == [], (
+        "empty pool must stay a no-op so labs without a VIP are unchanged"
+    )
+    assert defaults["cilium"]["lb"]["l2"]["interfaces"] == []
 
 
 def test_cni_facts_forward_only_when_set():
@@ -120,6 +130,18 @@ def test_cilium_facts_forward_when_set():
     assert opted_in["cilium"]["kube_proxy_replacement"] is True
     assert opted_in["cilium"]["operator_replicas"] == 1
 
+    with_host = json.loads(
+        tpl.render(
+            ctlabs_role_facts={"cni": "cilium", "cilium": {"k8s_service_host": "192.168.30.41"}},
+            CTLABS_HOST="rke21",
+        )
+    )
+    assert with_host["cilium"]["k8s_service_host"] == "192.168.30.41"
+    assert opted_in["cilium"].get("k8s_service_host") is None, "defaults must not be emitted (golden rule)"
+    assert opted_in["cilium"].get("k8s_service_port") is None
+    assert opted_in["cilium"]["kube_proxy_replacement"] is True
+
+
 
 def test_cni_precheck_resolves_fact_and_validates():
     with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
@@ -143,6 +165,14 @@ def test_cilium_precheck_resolves_facts():
     expr = replicas["set_fact"]["ctlabs_rke2_cilium_operator_replicas"]
     assert "ctg_facts.ctlabs_rke2.cilium.operator_replicas" in expr
     assert "ctlabs_rke2.defaults.config.cilium.operator_replicas" in expr
+    host = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cilium.k8s_service_host")
+    expr = host["set_fact"]["ctlabs_rke2_cilium_k8s_service_host"]
+    assert "ctg_facts.ctlabs_rke2.cilium.k8s_service_host" in expr
+    assert "ctlabs_rke2.defaults.config.cilium.k8s_service_host" in expr
+    port = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cilium.k8s_service_port")
+    expr = port["set_fact"]["ctlabs_rke2_cilium_k8s_service_port"]
+    assert "ctg_facts.ctlabs_rke2.cilium.k8s_service_port" in expr
+    assert "ctlabs_rke2.defaults.config.cilium.k8s_service_port" in expr
 
 
 def test_server_unit_is_flagless():
@@ -206,6 +236,8 @@ def test_cilium_helmchartconfig_render():
     assert "kubeProxyReplacement: true" in values
     assert "replicas: 1" in values
     assert "gatewayAPI:\n  enabled: true" in values
+    assert 'k8sServiceHost: "127.0.0.1"' in values
+    assert 'k8sServicePort: "6443"' in values
 
     without_kpr = yaml.safe_load(
         tpl.render(
@@ -217,7 +249,139 @@ def test_cilium_helmchartconfig_render():
     )
     values = without_kpr["spec"]["valuesContent"]
     assert "kubeProxyReplacement" not in values
+    assert "k8sServiceHost" not in values, "bootstrap hint only matters without kube-proxy"
     assert "gatewayAPI" not in values, "traefik labs must not get cilium's Gateway API"
+
+
+def test_cilium_helmchartconfig_k8s_service_overrides():
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    tpl = env.get_template("cilium-helmchartconfig.yml.j2")
+    rendered = tpl.render(
+        ctlabs_rke2_cilium_kube_proxy_replacement=True,
+        ctlabs_rke2_cilium_operator_replicas=1,
+        ctlabs_rke2_cilium_k8s_service_host="192.168.30.41",
+        ctlabs_rke2_cilium_k8s_service_port="6443",
+        ctlabs_rke2_gateway_api_enabled=False,
+        ctlabs_rke2_gateway_api_provider="traefik",
+    )
+    values = yaml.safe_load(rendered)["spec"]["valuesContent"]
+    assert 'k8sServiceHost: "192.168.30.41"' in values
+
+
+def test_cilium_lb_facts_forward_only_when_set():
+    env = _facts_env()
+    tpl = env.get_template("facts.json.j2")
+    silent = json.loads(tpl.render(ctlabs_role_facts={"cni": "cilium", "cilium": {}}, CTLABS_HOST="rke21"))
+    assert "lb" not in silent["cilium"], "defaults must not be emitted (golden rule)"
+
+    opted_in = json.loads(
+        tpl.render(
+            ctlabs_role_facts={
+                "cni": "cilium",
+                "cilium": {
+                    "lb": {
+                        "ip_pool": {"name": "vip", "cidrs": ["192.168.30.100/32"]},
+                        "l2": {"interfaces": ["enp0s2"]},
+                    }
+                },
+            },
+            CTLABS_HOST="rke21",
+        )
+    )
+    lb = opted_in["cilium"]["lb"]
+    assert lb["ip_pool"]["name"] == "vip"
+    assert lb["ip_pool"]["cidrs"] == ["192.168.30.100/32"]
+    assert lb["l2"]["interfaces"] == ["enp0s2"]
+
+
+def test_cilium_lb_precheck_resolves_and_gates_activity():
+    with open(os.path.join(ROLE_TASKS, "precheck.yml")) as f:
+        precheck = yaml.safe_load(f)
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cilium.lb")
+    facts = resolve["set_fact"]
+    assert "ctg_facts.ctlabs_rke2.cilium.lb.ip_pool.name" in facts["ctlabs_rke2_cilium_lb_ip_pool_name"]
+    assert "ctlabs_rke2.defaults.config.cilium.lb.ip_pool.name" in facts["ctlabs_rke2_cilium_lb_ip_pool_name"]
+    assert "ctg_facts.ctlabs_rke2.cilium.lb.ip_pool.cidrs" in facts["ctlabs_rke2_cilium_lb_ip_pool_cidrs"]
+    assert "ctg_facts.ctlabs_rke2.cilium.lb.l2.interfaces" in facts["ctlabs_rke2_cilium_lb_l2_interfaces"]
+
+    active = next(t for t in precheck if t.get("name") == "ctlabs_rke2.tasks.precheck.cilium.lb.active")
+    expr = active["set_fact"]["ctlabs_rke2_cilium_lb_active"]
+    assert "length > 0" in expr and "'cilium'" in expr and "kube_proxy_replacement" in expr
+
+
+def test_cilium_helmchartconfig_l2_announcements_when_active():
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    tpl = env.get_template("cilium-helmchartconfig.yml.j2")
+    base = {"ctlabs_rke2_cilium_kube_proxy_replacement": True, "ctlabs_rke2_cilium_operator_replicas": 1}
+
+    active = yaml.safe_load(tpl.render(**base, ctlabs_rke2_cilium_lb_active=True))["spec"]["valuesContent"]
+    assert "l2announcements:\n  enabled: true" in active
+
+    inactive = yaml.safe_load(tpl.render(**base, ctlabs_rke2_cilium_lb_active=False))["spec"]["valuesContent"]
+    assert "l2announcements" not in inactive
+
+
+def test_cilium_lb_templates_render():
+    env = Environment(loader=FileSystemLoader(ROLE_TEMPLATES))
+    pool = yaml.safe_load(
+        env.get_template("cilium-lb-ip-pool.yml.j2").render(
+            ctlabs_rke2_cilium_lb_ip_pool_name="vip",
+            ctlabs_rke2_cilium_lb_ip_pool_cidrs=["192.168.30.100/32", "192.168.30.101/32"],
+        )
+    )
+    assert pool["kind"] == "CiliumLoadBalancerIPPool"
+    assert pool["metadata"]["name"] == "vip"
+    assert pool["spec"]["blocks"] == [{"cidr": "192.168.30.100/32"}, {"cidr": "192.168.30.101/32"}]
+
+    policy = yaml.safe_load(
+        env.get_template("cilium-l2-announcement-policy.yml.j2").render(
+            ctlabs_rke2_cilium_lb_ip_pool_name="vip",
+            ctlabs_rke2_cilium_lb_l2_interfaces=["enp0s2"],
+        )
+    )
+    assert policy["kind"] == "CiliumL2AnnouncementPolicy"
+    assert policy["spec"]["interfaces"] == ["enp0s2"]
+    assert policy["spec"]["loadBalancerIPs"] is True
+
+    auto = yaml.safe_load(
+        env.get_template("cilium-l2-announcement-policy.yml.j2").render(
+            ctlabs_rke2_cilium_lb_ip_pool_name="vip",
+            ctlabs_rke2_cilium_lb_l2_interfaces=[],
+        )
+    )
+    assert "interfaces" not in auto["spec"], "empty list = let cilium auto-select"
+
+
+def test_config_yaml_servicelb_suppressed_by_cilium_lb():
+    rendered = _render_config_yaml(
+        ctlabs_rke2_cni="cilium", ctlabs_rke2_servicelb_enabled=True, ctlabs_rke2_cilium_lb_active=True
+    )
+    assert "enable-servicelb" not in rendered, "klipper-lb black-holes LB traffic under cilium KPR"
+
+    kept = _render_config_yaml(ctlabs_rke2_servicelb_enabled=True, ctlabs_rke2_cilium_lb_active=False)
+    assert "enable-servicelb: true" in kept
+
+
+def test_cilium_lb_task_is_declarative_and_ordered(role_dir):
+    with open(os.path.join(ROLE_TASKS, "cilium_lb.yml")) as f:
+        block = yaml.safe_load(f)[0]
+    assert block["when"] == "ctlabs_rke2_cilium_lb_active | bool"
+    pool, policy = block["block"]
+    for task in (pool, policy):
+        assert task["environment"]["KUBECONFIG"] == "/etc/rancher/rke2/rke2.yaml"
+        assert task["kubernetes.core.k8s"]["state"] == "present"
+        assert "command" not in task and "shell" not in task
+    assert "cilium-lb-ip-pool.yml.j2" in str(pool["kubernetes.core.k8s"]["definition"])
+    assert "cilium-l2-announcement-policy.yml.j2" in str(policy["kubernetes.core.k8s"]["definition"])
+
+    with open(os.path.join(ROLE_TASKS, "main.yml")) as f:
+        main = yaml.safe_load(f)
+    imports = [t["import_tasks"] for t in main if "import_tasks" in t]
+    assert imports.index("cilium_lb.yml") > imports.index("service.yml"), (
+        "cilium CRDs only exist once the cluster (and cilium) is up"
+    )
+    entry = next(t for t in main if t.get("import_tasks") == "cilium_lb.yml")
+    assert entry["when"] == "ctlabs_rke2_role == 'server'"
 
 
 def test_kube_proxy_stale_manifest_cleanup(role_dir):

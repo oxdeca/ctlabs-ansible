@@ -33,6 +33,23 @@
   "cilium" : {
     "kube_proxy_replacement" : {{ _facts.cilium.kube_proxy_replacement | default(true) | lower }},
     "operator_replicas" : {{ _facts.cilium.operator_replicas | default(1) }}
+{%- if _facts.cilium.k8s_service_host is defined %},
+    "k8s_service_host" : "{{ _facts.cilium.k8s_service_host }}"
+{%- endif %}
+{%- if _facts.cilium.k8s_service_port is defined %},
+    "k8s_service_port" : "{{ _facts.cilium.k8s_service_port }}"
+{%- endif %}
+{%- if _facts.cilium.lb is defined %},
+    "lb" : {
+      "ip_pool" : {
+        "name"  : "{{ (_facts.cilium.lb.ip_pool | default({})).name | default('ctlabs') }}",
+        "cidrs" : {{ (_facts.cilium.lb.ip_pool | default({})).cidrs | default([]) | to_json }}
+      },
+      "l2" : {
+        "interfaces" : {{ (_facts.cilium.lb.l2 | default({})).interfaces | default([]) | to_json }}
+      }
+    }
+{%- endif %}
   }
 {% endif %}
 {% if _facts.coredns is defined %},

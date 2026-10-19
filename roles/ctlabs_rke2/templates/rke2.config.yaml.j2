@@ -14,6 +14,8 @@ disable-kube-proxy: true
 disable:
   - rke2-ingress-nginx
 {% endif %}
-{% if ctlabs_rke2_servicelb_enabled | default(false) %}
+{# Native Cilium LB replaces servicelb (klipper-lb DNATs to the ClusterIP that
+   cilium's eBPF does not resolve) — never emit both. #}
+{% if ctlabs_rke2_servicelb_enabled | default(false) and not (ctlabs_rke2_cilium_lb_active | default(false)) %}
 enable-servicelb: true
 {% endif %}
