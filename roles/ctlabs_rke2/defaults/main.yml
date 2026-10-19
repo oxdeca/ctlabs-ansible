@@ -7,7 +7,7 @@
 
 versions:
   rke2        : 1.33.3
-  gateway_api : 1.5.0
+  gateway_api : 1.6.3
   envoy       : 1.0.1
 
 ctlabs_rke2:
@@ -34,18 +34,41 @@ ctlabs_rke2:
       role     : server
       # Container Network Interface. RKE2 bundles its CNI charts, so `cilium`
       # deploys the packaged rke2-cilium chart (equivalent to the rke2 server
-      # flag `--cni=cilium`); any non-default value is passed through on the
-      # server unit. Default `canal` = stock RKE2 behaviour.
+      # setting `cni: cilium`); any non-default value is written to the node's
+      # config.yaml. Default `canal` = stock RKE2 behaviour.
       cni         : canal
       cni_supported: ['canal', 'cilium', 'multus', 'none']
+      # Cilium tuning (only used when cni == 'cilium'). kube_proxy_replacement
+      # sets `disable-kube-proxy: true` in config.yaml AND the matching
+      # `kubeProxyReplacement` value on the bundled rke2-cilium chart via a
+      # HelmChartConfig — the two must move together or services keep flowing
+      # through kube-proxy. gateway_api is driven by gateway_api.provider:
+      # set provider to 'cilium' to use Cilium's embedded Gateway API
+      # implementation instead of traefik/envoy-gateway.
+      cilium:
+        kube_proxy_replacement: true
+        operator_replicas     : 1
+        manifests_dir : /var/lib/rancher/rke2/server/manifests
+        helmchartconfig:
+          template: cilium-helmchartconfig.yml.j2
+          file    : /var/lib/rancher/rke2/server/manifests/rke2-cilium-config.yaml
       servicelb:
         enabled: false
       ingress:
         enabled: false
         type   : "nginx"     # Options: 'traefik', 'nginx'
+      # Unified rke2 config — replaces the per-flag ExecStart arguments
+      # previously baked into the systemd units (cni, ingress disable,
+      # servicelb, kube-proxy). Server + control nodes only.
+      dir: /etc/rancher/rke2
+      config_yaml:
+        template: rke2.config.yaml.j2
+        file    : /etc/rancher/rke2/config.yaml
+      # Stale kube-proxy static pod manifest (upgrade path — see config.yml)
+      kube_proxy_manifest: /var/lib/rancher/rke2/agent/pod-manifests/kube-proxy.yaml
       gateway_api:
         enabled : true
-        provider: "traefik"  # Options: 'traefik', 'envoy-gateway'
+        provider: "traefik"  # Options: 'traefik', 'envoy-gateway', 'cilium'
       # CA cert bundle(s) to publish as ConfigMaps once the cluster is up, so
       # charts (e.g. cert-vault-sync's ClusterSecretStores) can read Vault's
       # TLS CA. Each entry: {name, namespace, key, file?} where `file` defaults

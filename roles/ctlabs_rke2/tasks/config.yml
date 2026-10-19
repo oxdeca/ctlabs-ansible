@@ -14,3 +14,45 @@
   file:
     path : "{{ ctlabs_rke2.defaults.sysconfig.dir }}"
     state: directory
+
+- name: ctlabs_rke2.tasks.config.rke2.dir
+  when: ctlabs_rke2_role in ["server", "control"]
+  file:
+    path : "{{ ctlabs_rke2.defaults.config.dir }}"
+    state: directory
+
+- name: ctlabs_rke2.tasks.config.rke2.config_yaml
+  when: ctlabs_rke2_role in ["server", "control"]
+  template:
+    src  : "{{ ctlabs_rke2.defaults.config.config_yaml.template }}"
+    dest : "{{ ctlabs_rke2.defaults.config.config_yaml.file     }}"
+  notify: "ctlabs_rke2.handlers.{{ ctlabs_rke2_role }}.systemd.reload"
+
+# RKE2 with disable-kube-proxy stops CREATING the kube-proxy static pod
+# manifest but never removes an already-existing one — on a cluster that ran
+# with kube-proxy before switching to cilium kube-proxy replacement the stale
+# manifest keeps the pod alive forever. Remove it explicitly.
+- name: ctlabs_rke2.tasks.config.kube_proxy.static_manifest.absent
+  when:
+    - ctlabs_rke2_role in ["server", "control"]
+    - ctlabs_rke2_cni == 'cilium'
+    - ctlabs_rke2_cilium_kube_proxy_replacement | bool
+  file:
+    path : "{{ ctlabs_rke2.defaults.config.kube_proxy_manifest }}"
+    state: absent
+
+- name: ctlabs_rke2.tasks.config.cilium.manifests.dir
+  when:
+    - ctlabs_rke2_role == "server"
+    - ctlabs_rke2_cni == 'cilium'
+  file:
+    path : "{{ ctlabs_rke2.defaults.config.cilium.manifests_dir }}"
+    state: directory
+
+- name: ctlabs_rke2.tasks.config.cilium.helmchartconfig
+  when:
+    - ctlabs_rke2_role == "server"
+    - ctlabs_rke2_cni == 'cilium'
+  template:
+    src  : "{{ ctlabs_rke2.defaults.config.cilium.helmchartconfig.template }}"
+    dest : "{{ ctlabs_rke2.defaults.config.cilium.helmchartconfig.file     }}"

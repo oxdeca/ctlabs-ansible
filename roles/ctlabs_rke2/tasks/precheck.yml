@@ -60,6 +60,14 @@
     that    : ctlabs_rke2_cni in ctlabs_rke2.defaults.config.cni_supported
     fail_msg: "CNI [{{ ctlabs_rke2_cni }}] not supported! Valid: {{ ctlabs_rke2.defaults.config.cni_supported | join(', ') }}"
 
+- name: ctlabs_rke2.tasks.precheck.cilium.kube_proxy_replacement
+  set_fact:
+    ctlabs_rke2_cilium_kube_proxy_replacement: "{{ ctg_facts.ctlabs_rke2.cilium.kube_proxy_replacement | default(ctlabs_rke2.defaults.config.cilium.kube_proxy_replacement) }}"
+
+- name: ctlabs_rke2.tasks.precheck.cilium.operator_replicas
+  set_fact:
+    ctlabs_rke2_cilium_operator_replicas: "{{ ctg_facts.ctlabs_rke2.cilium.operator_replicas | default(ctlabs_rke2.defaults.config.cilium.operator_replicas) }}"
+
 - name: ctlabs_rke2.tasks.precheck.ca_configmaps
   set_fact:
     ctlabs_rke2_ca_configmaps: "{{ ctg_facts.ctlabs_rke2.ca_configmaps | default(ctg_ca_configmaps | default(ctlabs_rke2.defaults.config.ca_configmaps)) }}"

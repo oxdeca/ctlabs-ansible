@@ -1,0 +1,22 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rke2/templates/cilium-helmchartconfig.yml.j2
+ # Description : HelmChartConfig override for the bundled rke2-cilium chart
+ #               Dropped into /var/lib/rancher/rke2/server/manifests/ so the
+ #               rke2 deploy controller applies it to the chart release.
+#}
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-cilium
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    operator:
+      replicas: {{ ctlabs_rke2_cilium_operator_replicas | default(1) }}
+{% if ctlabs_rke2_cilium_kube_proxy_replacement | default(false) %}
+    kubeProxyReplacement: true
+{% endif %}
+{% if ctlabs_rke2_gateway_api_enabled | default(false) and ctlabs_rke2_gateway_api_provider | default('traefik') == 'cilium' %}
+    gatewayAPI:
+      enabled: true
+{% endif %}

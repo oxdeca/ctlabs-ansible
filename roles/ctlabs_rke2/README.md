@@ -31,11 +31,13 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 | `versions.rke2`                                     | `1.33.3`                 | RKE2 version                                                   |
 | `versions.gateway_api`                              | `1.5.0`                  | Gateway API CRDs version                                       |
 | `versions.envoy`                                    | `1.0.1`                  | Envoy Gateway version                                          |
-| `ctlabs_rke2.defaults.config.cni`                   | `canal`                  | Container Network Interface (`canal`, `cilium`, `multus`, `none`). Passed to the server unit as `--cni=<value>` when not the RKE2 default. `cilium` deploys RKE2's bundled Cilium chart |
+| `ctlabs_rke2.defaults.config.cni`                   | `canal`                  | Container Network Interface (`canal`, `cilium`, `multus`, `none`). Written to `/etc/rancher/rke2/config.yaml` as `cni: <value>` when not the RKE2 default. `cilium` deploys RKE2's bundled Cilium chart |
+| `ctlabs_rke2.defaults.config.cilium.kube_proxy_replacement` | `true`          | Cilium only: disable kube-proxy (`disable-kube-proxy: true` in config.yaml) and set `kubeProxyReplacement: true` on the `rke2-cilium` chart via a `HelmChartConfig` |
+| `ctlabs_rke2.defaults.config.cilium.operator_replicas` | `1`                    | Cilium only: `operator.replicas` on the `rke2-cilium` chart |
 | `ctlabs_rke2.defaults.config.ingress.enabled`       | `false`                  | Enable ingress controller                                      |
 | `ctlabs_rke2.defaults.config.ingress.type`          | `nginx`                  | Ingress type (`traefik`, `nginx`)                              |
 | `ctlabs_rke2.defaults.config.gateway_api.enabled`   | `true`                   | Enable Gateway API                                             |
-| `ctlabs_rke2.defaults.config.gateway_api.provider`  | `traefik`                | Gateway provider (`traefik`, `envoy-gateway`)                  |
+| `ctlabs_rke2.defaults.config.gateway_api.provider`  | `traefik`                | Gateway provider (`traefik`, `envoy-gateway`, `cilium`) — `cilium` enables Cilium's embedded Gateway API implementation |
 | `ctlabs_rke2.defaults.config.servicelb.enabled`     | `false`                  | Enable RKE2 ServiceLB (klipper-lb) for `LoadBalancer` services |
 | `ctlabs_rke2.defaults.config.coredns.resources`     | `100m`/`128Mi` req+limit | CPU/memory for the bundled `rke2-coredns` chart, applied via a `HelmChartConfig` |
 | `ctlabs_rke2.defaults.config.coredns.split_dns.enabled` | `true`               | Dedicated CoreDNS forward zone for the lab domain, bypassing the public resolver fallback (see "CoreDNS" below) |
@@ -51,6 +53,11 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 {
   "role"       : "server",
   "server_url" : "https://rke21.ctlabs.internal:9345",
+  "cni"        : "cilium",
+  "cilium"     : {
+    "kube_proxy_replacement" : true,
+    "operator_replicas"      : 1
+  },
   "ingress"    : {
     "enabled": false,
     "type"   : "nginx"
@@ -100,7 +107,7 @@ Sets up a single- or multi-node RKE2 cluster. Cluster Apps (ArgoCD, Traefik, etc
 | `ingress`      | `nginx`         | rke2-ingress-nginx (bundled)                                                                                  |
 | `ingress`      | `traefik`       | Traefik chart (via `ctlabs_helm`) serving `Ingress` too — this role disables the bundled nginx and only waits |
 
-**Traefik (`ingress.type: traefik`)** uses the same Traefik chart installed by the `ctlabs_helm` role — its `kubernetesIngress` provider is enabled by default, so it serves `Ingress` resources in addition to `Gateway`/`HTTPRoute`. When configured, this role disables the bundled nginx controller (`--disable=rke2-ingress-nginx`) and waits for the Traefik deployment (if already present).
+**Traefik (`ingress.type: traefik`)** uses the same Traefik chart installed by the `ctlabs_helm` role — its `kubernetesIngress` provider is enabled by default, so it serves `Ingress` resources in addition to `Gateway`/`HTTPRoute`. When configured, this role disables the bundled nginx controller (`disable: [rke2-ingress-nginx]` in config.yaml) and waits for the Traefik deployment (if already present).
 
 **Traefik (gateway_api mode)** is installed by the `ctlabs_helm` role. Traefik values (hostNetwork, service type, ports, `providers.kubernetesGateway.enabled`) are configured per-host in `setup_profiles.yml` under the `helm:` profile. This role only provisions the supporting resources: Gateway API CRDs and the Traefik `Gateway`. The app wiring (App namespace, TLS secret, `ReferenceGrant`s, `HTTPRoute`) rides with the ArgoCD chart via the `ctlabs_helm` role's `routing.yml` (see the `gateway:` key on the `argocd` chart entry).
 
@@ -149,9 +156,9 @@ rke2:
 
 RKE2 ships its CNI as a bundled chart, so replacing it is a single opt-in:
 set `cni` in the `setup_profiles.yml` `rke2:` profile for the **server** node
-(and each `control` node) and the role appends `--cni=<value>` to that node's
-`rke2 server` unit. `canal` is the RKE2 default and emits no flag, so labs that
-don't set `cni` are byte-for-byte unchanged.
+(and each `control` node) and the role writes it to that node's
+`/etc/rancher/rke2/config.yaml`. `canal` is the RKE2 default and emits no key,
+so labs that don't set `cni` are byte-for-byte unchanged.
 
 ```yaml
 rke2:
@@ -169,9 +176,42 @@ internet dependency beyond the RKE2 bundle). The value is validated against
 `ctlabs_rke2.defaults.config.cni_supported` (`canal`, `cilium`, `multus`,
 `none`); an unknown value fails the precheck.
 
+### kube-proxy replacement
+
+With `cni: cilium`, kube-proxy is **disabled by default** — Cilium replaces it
+(eBPF service handling). This is applied through two coordinated mechanisms,
+both required:
+
+1. `disable-kube-proxy: true` in `/etc/rancher/rke2/config.yaml` (server +
+   control nodes) — stops RKE2 from deploying the kube-proxy static pods.
+2. A `HelmChartConfig/rke2-cilium` in `kube-system`, dropped into
+   `/var/lib/rancher/rke2/server/manifests/` **before** the server starts, with
+   `kubeProxyReplacement: true` (and `operator.replicas: 1` for single-node
+   labs) — RKE2's deploy controller merges it into the bundled chart release.
+
+Setting only one of the two leaves services still flowing through kube-proxy.
+Override per-host via the `cilium:` fact block if a lab ever needs kube-proxy
+back:
+
+```json
+{ "cni": "cilium", "cilium": { "kube_proxy_replacement": false } }
+```
+
+### Gateway API provider `cilium`
+
+`gateway_api.provider` accepts a third value, `cilium`, which enables Cilium's
+embedded Gateway API implementation on the chart (`gatewayAPI.enabled: true` in
+the same `HelmChartConfig`) — for labs that want Cilium as the gateway without
+traefik/envoy-gateway. The default `traefik` provider never emits the
+`gatewayAPI` key, so cilium's Gateway API controller stays off and traefik
+keeps serving `Gateway`/`HTTPRoute` as before. Note the Gateway API CRDs are
+still applied by this role after cluster start (same as for the other
+providers); the cilium gateway controller tolerates the brief absence and
+picks them up once applied.
+
 ## ServiceLB (LoadBalancer services)
 
-When `servicelb.enabled` is `true`, the server starts with `--enable-servicelb` and RKE2's built-in ServiceLB (klipper-lb) assigns an external IP to every `type: LoadBalancer` service. Verified on rke21: enabling ServiceLB gave the `traefik` cluster's `LoadBalancer` service an EXTERNAL-IP, which Traefik copies to the Gateway `status.address`.
+When `servicelb.enabled` is `true`, the server starts with `enable-servicelb: true` (config.yaml) and RKE2's built-in ServiceLB (klipper-lb) assigns an external IP to every `type: LoadBalancer` service. Verified on rke21: enabling ServiceLB gave the `traefik` cluster's `LoadBalancer` service an EXTERNAL-IP, which Traefik copies to the Gateway `status.address`.
 
 ### Is the controller running?
 

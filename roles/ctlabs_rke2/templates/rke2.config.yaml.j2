@@ -1,0 +1,19 @@
+{#
+ # File        : ctlabs-ansible/roles/ctlabs_rke2/templates/rke2.config.yaml.j2
+ # Description : /etc/rancher/rke2/config.yaml (server/control nodes)
+ #               Unified rke2 configuration — replaces the per-flag ExecStart
+ #               arguments previously baked into the systemd units.
+#}
+{% if ctlabs_rke2_cni | default('canal') != 'canal' %}
+cni: {{ ctlabs_rke2_cni }}
+{% endif %}
+{% if ctlabs_rke2_cni | default('canal') == 'cilium' and ctlabs_rke2_cilium_kube_proxy_replacement | default(false) %}
+disable-kube-proxy: true
+{% endif %}
+{% if not (ctlabs_rke2_ingress_enabled and ctlabs_rke2_ingress_type == "nginx") %}
+disable:
+  - rke2-ingress-nginx
+{% endif %}
+{% if ctlabs_rke2_servicelb_enabled | default(false) %}
+enable-servicelb: true
+{% endif %}
