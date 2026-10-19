@@ -4,3 +4,6 @@
 # File        : ctlabs-ansible/roles/ctlabs_opencode/tasks/service.yml
 # Description : services
 # ------------------------------------------------------------------------------
+
+- name: ctlabs_opencode.tasks.service
+  meta: noop
