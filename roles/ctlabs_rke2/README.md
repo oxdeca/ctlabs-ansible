@@ -437,7 +437,6 @@ The actual mechanism RKE2's bundled chart uses is a structured `servers:` list
 key is silently ignored by this chart version — confirmed by testing it directly
 against the live ConfigMap and seeing zero effect, don't reach for it from
 generic CoreDNS-on-Kubernetes advice).
-```
 
 Applied as `kubectl get helmchartconfig rke2-coredns -n kube-system` — RKE2's
 helm-controller re-merges it into the `rke2-coredns` HelmChart release. Defaults
