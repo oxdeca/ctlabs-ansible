@@ -68,6 +68,10 @@
       set_fact:
         ctlabs_vault_sealed: "{{ vault_seal_status.json.sealed }}"
     
+    # NOTE: body must be a dict here, not a folded JSON string — with
+    # body_format=json the uri module json.dumps()s a string body too, so the
+    # request arrives double-encoded (a JSON string, not an object) and Vault
+    # answers 400 "'key' must be specified in request body".
     - name: ctlabs_vault.tasks.init.unseal
       when: ctlabs_vault_sealed
       vars:
@@ -77,13 +81,73 @@
         method          : POST
         validate_certs  : false
         return_content  : true
-        headers         : 
+        headers         :
           Host: "{{ ansible_nodename }}"
         body_format     : json
-        body            : >
-          {
-            "key" : "{{ vault_init_result.json['keys_base64'][0] }}"
-          }
+        body            :
+          key: "{{ vault_init_result.json['keys_base64'][0] }}"
       register: vault_unseal_result
-    
+
     # - debug: "msg={{ vault_unseal_result }}"
+
+# ------------------------------------------------------------------------------
+# Standalone unseal. The block above only unseals as part of a fresh init
+# (when: not ctlabs_vault_initialized) — but Vault seals itself on every
+# restart, so an already-initialized server would otherwise stay sealed
+# forever and every bootstrap task fails with 503 "Vault is sealed".
+# This re-unseals on every run, using the unseal key saved by
+# copy_init_result on the Ansible controller.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_vault.tasks.unseal
+  when:
+    - ctlabs_vault_install_type == 'server'
+    - ctlabs_vault_initialized
+  block:
+    - name: ctlabs_vault.tasks.unseal.seal_status
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url            : "{{ ctlabs_vault.defaults.config.init.url }}/sys/seal-status"
+        validate_certs : false
+      register: vault_seal_status
+
+    - name: ctlabs_vault.tasks.unseal.init_output.slurp
+      slurp:
+        src: "{{ ctg_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml"
+      delegate_to: localhost
+      register: vault_unseal_init_slurp
+      failed_when: false
+
+    - name: ctlabs_vault.tasks.unseal.key.fact
+      when: vault_seal_status.json.sealed | default(false)
+      set_fact:
+        ctlabs_vault_unseal_key: >-
+          {{ (((vault_unseal_init_slurp['content'] | default('') | b64decode | from_yaml) or {})
+              )['vault_unseal_keys_b64'] | default(none) }}
+
+    - name: ctlabs_vault.tasks.unseal.request
+      when:
+        - vault_seal_status.json.sealed | default(false)
+        - ctlabs_vault_unseal_key | default(none) is not none
+      vars:
+        ansible_python_interpreter: "{{ CMD_IP_PATH }} vrf exec default /usr/bin/python3"
+      uri:
+        url            : "{{ ctlabs_vault.defaults.config.init.url }}/sys/unseal"
+        method         : POST
+        validate_certs : false
+        return_content : true
+        headers        :
+          Host: "{{ ansible_nodename }}"
+        body_format    : json
+        body           :
+          key: "{{ ctlabs_vault_unseal_key }}"
+
+    - name: ctlabs_vault.tasks.unseal.missing_key
+      when:
+        - vault_seal_status.json.sealed | default(false)
+        - ctlabs_vault_unseal_key | default(none) is none
+      debug:
+        msg: >-
+          Vault is sealed but no unseal key found at
+          {{ ctg_ansible_repo_dir }}/.ctlabs_vault_init_output_{{ ansible_nodename }}.yml
