@@ -5,9 +5,8 @@
 # Description : service
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_wireguard.tasks.service.vault.start
-  when: CTLABS_WIREGUARD_SERVICE == 'true'
-  service:
-    name    : "{{ ctlabs_wireguard.defaults.service.name }}"
+- name: ctlabs_wireguard.tasks.service.running
+  systemd:
+    name    : "wg-quick@{{ ctg_facts.ctlabs_wireguard.dev | default(ctlabs_wireguard.defaults.config.dev) }}.service"
     enabled : true
     state   : started

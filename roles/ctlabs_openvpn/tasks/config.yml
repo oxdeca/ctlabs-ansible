@@ -5,33 +5,118 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_openvpn.tasks.config.vars
+  set_fact:
+    ctlabs_openvpn_controller_key: >-
+      {{
+        ctlabs_openvpn.defaults.config.controller_key_dir ~ '/' ~
+        ((ctg_project + '_') if (ctg_project | default('')) else '') ~
+        (ctg_facts.ctlabs_openvpn.key_name | default(ctlabs_openvpn.defaults.config.key_name)) ~
+        '.key'
+      }}
+
+# ------------------------------------------------------------------------------
+# Controller shared secret generation (once across all plays / runs)
+# ------------------------------------------------------------------------------
+- name: ctlabs_openvpn.tasks.config.controller.dir
+  delegate_to: localhost
+  connection : local
+  run_once   : true
+  file:
+    path : "{{ ctlabs_openvpn.defaults.config.controller_key_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode : '0750'
+
+- name: ctlabs_openvpn.tasks.config.controller.key.stat
+  delegate_to: localhost
+  connection : local
+  run_once   : true
+  stat:
+    path: "{{ ctlabs_openvpn_controller_key }}"
+  register: ctlabs_openvpn_key_stat
+
+- name: ctlabs_openvpn.tasks.config.controller.key.create
+  delegate_to: localhost
+  connection : local
+  run_once   : true
+  when       : not ctlabs_openvpn_key_stat.stat.exists
+  command    : "openvpn --genkey secret {{ ctlabs_openvpn_controller_key }}"
+
+# ------------------------------------------------------------------------------
+# Target directories and configs
+# ------------------------------------------------------------------------------
+- name: ctlabs_openvpn.tasks.config.server.dir
+  when: ctg_facts.ctlabs_openvpn.type == "server"
+  file:
+    path : "{{ ctlabs_openvpn.defaults.config.server.dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode : '0750'
+
 - name: ctlabs_openvpn.tasks.config.server
   when: ctg_facts.ctlabs_openvpn.type == "server"
   template:
     src  : "{{ ctlabs_openvpn.defaults.config.server.template }}"
     dest : "{{ ctlabs_openvpn.defaults.config.server.file     }}"
+    owner: root
+    group: root
+    mode : '0640'
   notify: ctlabs_openvpn.handlers.server.service.restart
+
+- name: ctlabs_openvpn.tasks.config.client.dir
+  when: ctg_facts.ctlabs_openvpn.type == "client"
+  file:
+    path : "{{ ctlabs_openvpn.defaults.config.client.dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode : '0750'
 
 - name: ctlabs_openvpn.tasks.config.client
   when: ctg_facts.ctlabs_openvpn.type == "client"
   template:
     src  : "{{ ctlabs_openvpn.defaults.config.client.template }}"
     dest : "{{ ctlabs_openvpn.defaults.config.client.file     }}"
+    owner: root
+    group: root
+    mode : '0640'
   notify: ctlabs_openvpn.handlers.client.service.restart
 
-- name: ctlabs_openvpn.tasks.config.ovpn_key.create
-  delegate_to: localhost
-  connection : local 
-  run_once   : true
-  shell: openvpn --genkey secret /tmp/ovpn.key
-  register: "ovpn_key"
-
-- name: ctlabs_openvpn.tasks.config.ovpn_key.copy
+# ------------------------------------------------------------------------------
+# Shared secret copy to endpoint
+# ------------------------------------------------------------------------------
+- name: ctlabs_openvpn.tasks.config.server.ovpn_key.copy
+  when: ctg_facts.ctlabs_openvpn.type == "server"
   copy:
-    src  : '/tmp/ovpn.key'
-    dest : "{{ item }}"
-    #mode : '0640'
-    #owner:
-  loop:
-    - "{{ ctlabs_openvpn.defaults.config.server.key }}"
-    - "{{ ctlabs_openvpn.defaults.config.client.key }}"
+    src  : "{{ ctlabs_openvpn_controller_key }}"
+    dest : "{{ ctlabs_openvpn.defaults.config.server.key }}"
+    owner: root
+    group: root
+    mode : '0600'
+  notify: ctlabs_openvpn.handlers.server.service.restart
+
+- name: ctlabs_openvpn.tasks.config.client.ovpn_key.copy
+  when: ctg_facts.ctlabs_openvpn.type == "client"
+  copy:
+    src  : "{{ ctlabs_openvpn_controller_key }}"
+    dest : "{{ ctlabs_openvpn.defaults.config.client.key }}"
+    owner: root
+    group: root
+    mode : '0600'
+  notify: ctlabs_openvpn.handlers.client.service.restart
+
+# ------------------------------------------------------------------------------
+# IP forwarding (kernel)
+# ------------------------------------------------------------------------------
+- name: ctlabs_openvpn.tasks.config.sysctl.forwarding
+  when: ctg_facts.ctlabs_openvpn.forward | default(ctlabs_openvpn.defaults.config.forward) | bool
+  ansible.posix.sysctl:
+    name       : net.ipv4.ip_forward
+    value      : '1'
+    state      : present
+    reload     : true
+    sysctl_set : true
+  ignore_errors: true

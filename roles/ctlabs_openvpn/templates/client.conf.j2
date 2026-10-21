@@ -1,16 +1,17 @@
 #{# /etc/openvpn/client/client.conf #}
 
-dev          tun
+dev          {{ ctg_facts.ctlabs_openvpn.dev | default('tun0') }}
 persist-tun 
 
-proto        udp
+proto        {{ ctg_facts.ctlabs_openvpn.proto | default('udp') }}
+port         {{ ctg_facts.ctlabs_openvpn.port | default(1194) }}
 ifconfig     {{ ctg_facts.ctlabs_openvpn.client_ip }} {{ ctg_facts.ctlabs_openvpn.server_ip }}
-remote       {{ ctg_facts.ctlabs_openvpn.remote }}
+remote       {{ ctg_facts.ctlabs_openvpn.remote }} {{ ctg_facts.ctlabs_openvpn.port | default(1194) }}
 
 secret       ovpn.key
-auth         SHA512
+auth         {{ ctg_facts.ctlabs_openvpn.auth | default('SHA512') }}
 auth-nocache
 
-cipher       AES-256-CBC
+cipher       {{ ctg_facts.ctlabs_openvpn.cipher | default('AES-256-CBC') }}
 keepalive    10 60 
 verb         3

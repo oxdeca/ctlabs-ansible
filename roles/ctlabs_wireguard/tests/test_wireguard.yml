@@ -1,0 +1,22 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_wireguard/tests/test_wireguard.yml
+# Description : test playbook for ctlabs_wireguard (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_wireguard.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    ctg_os: debian12
+    ctg_os_family: debian
+    ctg_project: cloud02
+    ctg_facts:
+      ctlabs_wireguard:
+        type: server
+        server_ip: 10.8.15.1
+        client_ip: 10.8.15.2
+  roles:
+    - ctlabs_wireguard

@@ -5,12 +5,7 @@
 # Description : handlers
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_wireguard.handlers.service.vault.restart
+- name: ctlabs_wireguard.handlers.service.restart
   service:
-    name    : "{{ ctlabs_wireguard.defaults.service.name }}"
-    enabled : true
-    state   : restarted
-
-- name: ctlabs_wireguard.handlers.service.vault.reload
-  systemd:
-    daemon_reload: true
+    name  : "wg-quick@{{ ctg_facts.ctlabs_wireguard.dev | default(ctlabs_wireguard.defaults.config.dev) }}.service"
+    state : restarted

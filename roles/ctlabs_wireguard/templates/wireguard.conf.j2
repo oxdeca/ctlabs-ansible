@@ -1,0 +1,16 @@
+# /etc/wireguard/{{ ctlabs_wireguard_dev }}.conf
+[Interface]
+Address = {{ ctlabs_wireguard_address }}
+{% if ctg_facts.ctlabs_wireguard.type == 'server' %}
+ListenPort = {{ ctg_facts.ctlabs_wireguard.port | default(ctlabs_wireguard.defaults.config.port) }}
+{% endif %}
+PrivateKey = {{ ctlabs_wireguard_private_key }}
+Table = {{ ctg_facts.ctlabs_wireguard.table | default(ctlabs_wireguard.defaults.config.table) }}
+
+[Peer]
+PublicKey = {{ ctlabs_wireguard_peer_public_key }}
+{% if ctg_facts.ctlabs_wireguard.type == 'client' %}
+Endpoint = {{ ctg_facts.ctlabs_wireguard.remote }}:{{ ctg_facts.ctlabs_wireguard.port | default(ctlabs_wireguard.defaults.config.port) }}
+PersistentKeepalive = {{ ctg_facts.ctlabs_wireguard.persistent_keepalive | default(ctlabs_wireguard.defaults.config.persistent_keepalive) }}
+{% endif %}
+AllowedIPs = {{ ctg_facts.ctlabs_wireguard.allowed_ips | default(ctlabs_wireguard.defaults.config.allowed_ips) }}

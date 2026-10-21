@@ -24,13 +24,25 @@ ctlabs_openvpn:
         template : server.conf.j2
         file     : /etc/openvpn/server/server.conf
         key      : /etc/openvpn/server/ovpn.key
+        dir      : /etc/openvpn/server
       client:
         template : client.conf.j2
         file     : /etc/openvpn/client/client.conf
         key      : /etc/openvpn/client/ovpn.key
-      dir      : /etc/openvpn
+        dir      : /etc/openvpn/client
+      dir                : /etc/openvpn
+      controller_key_dir : /etc/openvpn
+      key_name           : ovpn
+      port               : 1194
+      proto              : udp
+      dev                : tun0
+      cipher             : AES-256-CBC
+      auth               : SHA512
+      forward            : true
       ca_ctlabs:
         certdir: /etc/ca-ctlabs
   os:
     - centos9
+    - redhat9
     - debian11
+    - debian12

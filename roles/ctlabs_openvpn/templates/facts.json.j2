@@ -7,7 +7,28 @@
   "type"      : "{{ _facts.type | default('server') }}",
   "server_ip" : "{{ _facts.server_ip | default('') }}",
   "client_ip" : "{{ _facts.client_ip | default('') }}"
-{%  if _facts.type | default('server') == 'client' %},
-  "remote"    : "{{ _facts.remote | default('') }}"
-{%  endif %}
+{% if _facts.remote is defined %},
+  "remote"    : "{{ _facts.remote }}"
+{% endif %}
+{% if _facts.dev is defined %},
+  "dev"       : "{{ _facts.dev }}"
+{% endif %}
+{% if _facts.port is defined %},
+  "port"      : {{ _facts.port | int }}
+{% endif %}
+{% if _facts.proto is defined %},
+  "proto"     : "{{ _facts.proto }}"
+{% endif %}
+{% if _facts.cipher is defined %},
+  "cipher"    : "{{ _facts.cipher }}"
+{% endif %}
+{% if _facts.auth is defined %},
+  "auth"      : "{{ _facts.auth }}"
+{% endif %}
+{% if _facts.forward is defined %},
+  "forward"   : {{ 'true' if _facts.forward else 'false' }}
+{% endif %}
+{% if _facts.key_name is defined %},
+  "key_name"  : "{{ _facts.key_name }}"
+{% endif %}
 }

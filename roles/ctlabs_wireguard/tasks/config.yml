@@ -5,28 +5,84 @@
 # Description : configurations
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_wireguard.tasks.config.vars
+  set_fact:
+    ctlabs_wireguard_dev: "{{ ctg_facts.ctlabs_wireguard.dev | default(ctlabs_wireguard.defaults.config.dev) }}"
+    ctlabs_wireguard_key_dir: >-
+      {{
+        ctlabs_wireguard.defaults.config.controller_key_dir ~ '/' ~
+        ((ctg_project + '_') if (ctg_project | default('')) else '') ~
+        (ctg_facts.ctlabs_wireguard.key_name | default(ctlabs_wireguard.defaults.config.key_name))
+      }}
+
+# ------------------------------------------------------------------------------
+# Controller keypair generation (once per tunnel across all plays/runs)
+# ------------------------------------------------------------------------------
+- name: ctlabs_wireguard.tasks.config.controller.dir
+  delegate_to: localhost
+  connection : local
+  run_once   : true
+  file:
+    path : "{{ ctlabs_wireguard_key_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode : '0700'
+
+- name: ctlabs_wireguard.tasks.config.controller.keys.create
+  delegate_to: localhost
+  connection : local
+  run_once   : true
+  command    : "python3 {{ role_path }}/files/create_wireguard_keys.py {{ ctlabs_wireguard_key_dir }}"
+
+# ------------------------------------------------------------------------------
+# Target key resolution
+# ------------------------------------------------------------------------------
+- name: ctlabs_wireguard.tasks.config.keys.resolve
+  set_fact:
+    ctlabs_wireguard_address: >-
+      {{
+        (ctg_facts.ctlabs_wireguard.server_ip if ctg_facts.ctlabs_wireguard.type == 'server' else ctg_facts.ctlabs_wireguard.client_ip) ~
+        ('/30' if '/' not in (ctg_facts.ctlabs_wireguard.server_ip if ctg_facts.ctlabs_wireguard.type == 'server' else ctg_facts.ctlabs_wireguard.client_ip) else '')
+      }}
+    ctlabs_wireguard_private_key: >-
+      {{
+        lookup('file', ctlabs_wireguard_key_dir ~ '/' ~ ('server.key' if ctg_facts.ctlabs_wireguard.type == 'server' else 'client.key')) | trim
+      }}
+    ctlabs_wireguard_peer_public_key: >-
+      {{
+        lookup('file', ctlabs_wireguard_key_dir ~ '/' ~ ('client.pub' if ctg_facts.ctlabs_wireguard.type == 'server' else 'server.pub')) | trim
+      }}
+
+# ------------------------------------------------------------------------------
+# Node config
+# ------------------------------------------------------------------------------
 - name: ctlabs_wireguard.tasks.config.dir
   file:
     path : "{{ ctlabs_wireguard.defaults.config.dir }}"
     state: directory
-    owner: "{{ ctlabs_wireguard.defaults.service.user  }}"
-    group: "{{ ctlabs_wireguard.defaults.service.group }}"
+    owner: root
+    group: root
+    mode : '0700'
 
-#
-# Server
-#
-- name: ctlabs_wireguard.tasks.config.server
-  when: CTLABS_WIREGUARD_SERVICE == 'true'
-  block:
-    - name: ctlabs_wireguard.tasks.config.server.vault.data.dir
-      file:
-        path : "{{ ctlabs_wireguard.defaults.config.server.data }}"
-        owner: "{{ ctlabs_wireguard.defaults.service.user  }}"
-        group: "{{ ctlabs_wireguard.defaults.service.group }}"
-        state: directory
+- name: ctlabs_wireguard.tasks.config.file
+  template:
+    src  : "{{ ctlabs_wireguard.defaults.config.template }}"
+    dest : "{{ ctlabs_wireguard.defaults.config.dir }}/{{ ctlabs_wireguard_dev }}.conf"
+    owner: root
+    group: root
+    mode : '0600'
+  notify: ctlabs_wireguard.handlers.service.restart
 
-    - name: ctlabs_wireguard.tasks.config.server.vault
-      template:
-        src  : "{{ ctlabs_wireguard.defaults.config.server.template }}"
-        dest : "{{ ctlabs_wireguard.defaults.config.dir }}/{{ ctlabs_wireguard.defaults.config.server.file }}"
-      notify: ctlabs_wireguard.handlers.service.vault.reload
+# ------------------------------------------------------------------------------
+# IP forwarding (kernel)
+# ------------------------------------------------------------------------------
+- name: ctlabs_wireguard.tasks.config.sysctl.forwarding
+  when: ctg_facts.ctlabs_wireguard.forward | default(ctlabs_wireguard.defaults.config.forward) | bool
+  ansible.posix.sysctl:
+    name       : net.ipv4.ip_forward
+    value      : '1'
+    state      : present
+    reload     : true
+    sysctl_set : true
+  ignore_errors: true

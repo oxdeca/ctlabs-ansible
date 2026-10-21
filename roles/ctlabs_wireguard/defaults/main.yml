@@ -5,30 +5,25 @@
 # Description : main defaults file
 # ------------------------------------------------------------------------------
 
-# env vars
-CTLABS_WIREGUARD_SERVICE: 'false'
-
-# role defaults
 ctlabs_wireguard:
   defaults:
-    repos:
-      redhat:
-      debian:
     pkgs:
       redhat:
         - name: wireguard-tools
       debian:
-        - name: wireguard
+        - name: wireguard-tools
     config:
-      dir      : /etc/wireguard
-      bin      : /usr/bin/wg
-      file     : wireguard.conf
-      template : wireguard.conf.j2
-      port     : 58200
-      keyprv   : /etc/wireguard/key.prv
-      keypub   : /etc/wireguard/key.pub
+      dir                 : /etc/wireguard
+      template            : wireguard.conf.j2
+      dev                 : wg0
+      port                : 51820
+      controller_key_dir  : /etc/wireguard
+      key_name            : wg0
+      allowed_ips         : 0.0.0.0/0
+      table               : "off"
+      persistent_keepalive: 25
+      forward             : true
     service:
-      name  : wireguard.service
       user  : root
       group : root
   os:

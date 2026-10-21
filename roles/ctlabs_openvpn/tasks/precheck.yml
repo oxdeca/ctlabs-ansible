@@ -11,11 +11,36 @@
       assert:
         that: ctg_os is in ctlabs_openvpn.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
-    
+
+    - name: ctlabs_openvpn.tasks.precheck.facts.defined
+      assert:
+        that:
+          - ctg_facts is defined
+          - ctg_facts.ctlabs_openvpn is defined
+        fail_msg: "Local facts for ctlabs_openvpn are missing on {{ inventory_hostname }}"
+
     - name: ctlabs_openvpn.tasks.precheck.type.check
       assert:
-        that: ctg_facts.ctlabs_openvpn.type in [ 'server', 'client' ]
-        fail_msg: "No type specified. ['server', 'client']"
+        that:
+          - ctg_facts.ctlabs_openvpn.type in [ 'server', 'client' ]
+        fail_msg: "No valid type specified for ctlabs_openvpn: '{{ ctg_facts.ctlabs_openvpn.type | default('') }}' (expected 'server' or 'client')"
+
+    - name: ctlabs_openvpn.tasks.precheck.tunnel_ips.check
+      assert:
+        that:
+          - ctg_facts.ctlabs_openvpn.server_ip is defined
+          - ctg_facts.ctlabs_openvpn.server_ip | length > 0
+          - ctg_facts.ctlabs_openvpn.client_ip is defined
+          - ctg_facts.ctlabs_openvpn.client_ip | length > 0
+        fail_msg: "server_ip and client_ip must both be defined for ctlabs_openvpn"
+
+    - name: ctlabs_openvpn.tasks.precheck.client.remote.check
+      when: ctg_facts.ctlabs_openvpn.type == 'client'
+      assert:
+        that:
+          - ctg_facts.ctlabs_openvpn.remote is defined
+          - ctg_facts.ctlabs_openvpn.remote | length > 0
+        fail_msg: "remote endpoint address must be defined for client type"
   rescue:
     - name: ctlabs_openvpn.tasks.precheck.skip.unsupported
       meta: end_host
