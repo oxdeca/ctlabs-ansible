@@ -5,10 +5,28 @@
 # Description : create new certs
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ca.tasks.certs.check
+# the linux and the windows task register different variables - a skipped
+# task registers an empty result and would clobber the other one.
+- name: ctlabs_ca.tasks.certs.check.linux
+  when: ctg_os_family != 'windows'
   stat:
-    path: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt"
-  register: ctlabs_ca_host_cert
+    path: "{{ ctlabs_ca_dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt"
+  register: ctlabs_ca_host_cert_linux
+
+- name: ctlabs_ca.tasks.certs.check.windows
+  when: ctg_os_family == 'windows'
+  ansible.windows.win_stat:
+    path: "{{ ctlabs_ca_dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt"
+  register: ctlabs_ca_host_cert_windows
+
+- name: ctlabs_ca.tasks.certs.check
+  set_fact:
+    ctlabs_ca_host_cert_exists: >-
+      {{
+        (ctlabs_ca_host_cert_windows.stat.exists | default(false) | bool)
+        if ctg_os_family == 'windows'
+        else (ctlabs_ca_host_cert_linux.stat.exists | default(false) | bool)
+      }}
 
 # 
 # Certificates
@@ -16,30 +34,38 @@
 - name: ctlabs_ca.tasks.certs.create
   when: 
     - inventory_hostname != 'localhost'
-    - not ctlabs_ca_host_cert.stat.exists
+    - not ctlabs_ca_host_cert_exists
   block:
     - name: ctlabs_ca.tasks.cert.create.config.prepare
-      delegate_to : localhost
+      delegate_to: localhost
       template    :
         src  : "{{ ctlabs_ca.defaults.config.certs.template }}"
         dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.cnf"
 
     - name: ctlabs_ca.tasks.certs.create.cert
-      delegate_to : localhost
+      delegate_to: localhost
       script      : 
         cmd   : "files/create_server_cert.sh {{ ansible_hostname }}.{{ ctlabs_ca_domain }}.cnf {{ ctlabs_ca.defaults.config.ca.name }}"
         chdir : "{{ ctlabs_ca.defaults.config.dir }}"
       register: "cert_create_output"
 
-    - name: ctlabs_ca.tasks.certs.create.copy
+    - name: ctlabs_ca.tasks.certs.create.copy.linux
+      when: ctg_os_family != 'windows'
       copy: 
         src   : "{{ item.name }}"
-        dest  : "{{ ctlabs_ca.defaults.config.dir   }}"
+        dest  : "{{ ctlabs_ca_dir }}"
         mode  : "{{ ctlabs_ca.defaults.config.perms }}"
         owner : "{{ ctlabs_ca.defaults.config.user  }}"
         group : "{{ ctlabs_ca.defaults.config.group }}"
-      loop:
-        -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt" }
-        -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt" }
-        -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.key" }
-        -  { name: "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.prv" }
+      loop: "{{ ctlabs_ca_cert_files }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: ctlabs_ca.tasks.certs.create.copy.windows
+      when: ctg_os_family == 'windows'
+      ansible.windows.win_copy:
+        src  : "{{ item.name }}"
+        dest : "{{ ctlabs_ca_dir }}/{{ item.name | basename }}"
+      loop: "{{ ctlabs_ca_cert_files }}"
+      loop_control:
+        label: "{{ item.name }}"

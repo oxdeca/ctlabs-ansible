@@ -5,8 +5,10 @@
 # Description : configuration
 # ------------------------------------------------------------------------------
 
+# windows has no posix groups - the certs are owned by the local administrators
+# group (see the acl of the ca directory in tasks/ca.yml).
 - name: ctlabs_ca.tasks.config.group.certs.exists
+  when: ctg_os_family != 'windows'
   group:
     name   : "{{ ctlabs_ca.defaults.config.group }}"
     system : true
-

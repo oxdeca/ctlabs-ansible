@@ -9,16 +9,70 @@
   block:
     - name: ctlabs_ca.tasks.precheck.supported_os
       assert:
-        that     : ctg_os is in ctlabs_ca.os
+        that     : ctg_os in ctlabs_ca.os or ctg_os_family == 'windows'
         fail_msg : "OS[{{ ctg_os }}] is not supported!"
   rescue:
     - name: ctlabs_ca.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_ca.tasks.precheck.ca.root_cert.exists
-  stat: 
-    path: "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
-  register: ctlabs_ca_root_cert
+#
+# target directory of the certs: linux keeps them in /etc/ca-ctlabs,
+# windows in C:/ProgramData/ca-ctlabs
+#
+- name: ctlabs_ca.tasks.precheck.dir
+  set_fact:
+    ctlabs_ca_dir: "{{ ctlabs_ca.defaults.config.windows.dir if ctg_os_family == 'windows' else ctlabs_ca.defaults.config.dir }}"
+
+#
+# windows local facts are not auto-gathered (ansible.windows.setup has no
+# default fact_path) - re-read them so ctg_facts.ctlabs_ca is available.
+#
+- name: ctlabs_ca.tasks.precheck.facts.gather
+  when: ansible_shell_type | default('sh') == 'powershell'
+  ansible.windows.setup:
+    fact_path: "{{ ctg_facts_dir }}"
+
+#
+# ca already delivered to this host? (the ca itself is created on the
+# controller - the host only receives a copy of the public ca cert)
+#
+# the linux and the windows task register different variables - a skipped
+# task registers an empty result and would clobber the other one.
+#
+- name: ctlabs_ca.tasks.precheck.ca.root_cert.exists.linux
+  when: ctg_os_family != 'windows'
+  stat:
+    path: "{{ ctlabs_ca_dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+  register: ctlabs_ca_root_cert_linux
+
+- name: ctlabs_ca.tasks.precheck.ca.root_cert.exists.windows
+  when: ctg_os_family == 'windows'
+  ansible.windows.win_stat:
+    path: "{{ ctlabs_ca_dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+  register: ctlabs_ca_root_cert_windows
+
+- name: ctlabs_ca.tasks.precheck.ca.root_cert
+  set_fact:
+    ctlabs_ca_root_cert_exists: >-
+      {{
+        (ctlabs_ca_root_cert_windows.stat.exists | default(false) | bool)
+        if ctg_os_family == 'windows'
+        else (ctlabs_ca_root_cert_linux.stat.exists | default(false) | bool)
+      }}
+
+#
+# ca already installed in the system trust store of this host?
+#
+- name: ctlabs_ca.tasks.precheck.ca.trust_cert.exists
+  when: ctg_os_family != 'windows'
+  stat:
+    path: "{{ ctlabs_ca.defaults.config[ctg_os_family].cacerts }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+  register: ctlabs_ca_trust_cert
+
+- name: ctlabs_ca.tasks.precheck.ca.trust_cert
+  set_fact:
+    ctlabs_ca_trust_cert_exists: >-
+      {{ (ctlabs_ca_trust_cert.stat.exists | default(false) | bool) if ctg_os_family != 'windows' else false }}
 
 - name: ctlabs_ca.tasks.precheck.ca.domain.var
   set_fact:
@@ -26,4 +80,20 @@
 
 - name: ctlabs_ca.tasks.precheck.ca.domain.local_fact
   set_fact:
-    ctlabs_ca_domain: "{{ ctg_facts.ctlabs_ca.domain | default(ctlabs_ca_domain) }}"
+    ctlabs_ca_domain: >-
+      {{
+        ctlabs_ca_domain
+        if (ctg_facts.ctlabs_ca.domain | default('')) | length == 0
+        else ctg_facts.ctlabs_ca.domain
+      }}
+
+#
+# files delivered to the managed host (generated on the controller)
+#
+- name: ctlabs_ca.tasks.precheck.cert_files
+  set_fact:
+    ctlabs_ca_cert_files:
+      - { name : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt" }
+      - { name : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.crt" }
+      - { name : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.key" }
+      - { name : "{{ ctlabs_ca.defaults.config.dir }}/{{ ansible_hostname }}.{{ ctlabs_ca_domain }}.prv" }

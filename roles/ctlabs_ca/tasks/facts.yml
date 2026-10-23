@@ -5,11 +5,26 @@
 # Description : write local facts
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ca.tasks.facts.write
-  when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
-  tags:
-    - setup
-    - ctlabs_ca.facts
-  template:
-    src : facts.json.j2
-    dest: "{{ ctg_facts_dir }}/ctlabs_ca.fact"
+- name: ctlabs_ca.tasks.facts.linux
+  when: ctg_os_family != 'windows'
+  block:
+    - name: ctlabs_ca.tasks.facts.linux.write
+      when: query('ansible.builtin.fileglob', 'templates/facts.json.j2') | length > 0
+      tags:
+        - setup
+        - ctlabs_ca.facts
+      template:
+        src : facts.json.j2
+        dest: "{{ ctg_facts_dir }}/ctlabs_ca.fact"
+
+- name: ctlabs_ca.tasks.facts.windows
+  when: ctg_os_family == 'windows'
+  block:
+    - name: ctlabs_ca.tasks.facts.windows.write
+      when: query('ansible.builtin.fileglob', 'templates/facts.ps1.j2') | length > 0
+      tags:
+        - setup
+        - ctlabs_ca.facts
+      ansible.windows.win_template:
+        src  : facts.ps1.j2
+        dest: "{{ ctg_facts_dir }}/ctlabs_ca.ps1"

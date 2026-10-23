@@ -1,0 +1,16 @@
+# -------------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ca/templates/facts.ps1.j2
+# Description : ctlabs_ca local facts template (Windows)
+# -------------------------------------------------------------------------------------
+{#
+ # ctlabs_role_facts comes from the ctlabs `ca` setup profile, e.g.
+ #   { domain : ctlabs.internal }
+ # The domain is used to build the certificate CN of the host.
+ #}
+{% set _facts      = ctlabs_role_facts | default({}) %}
+{% set _role_facts = (play_setup | default({}))['ca'] | default({}) %}
+{% set _domain     = _facts.domain | default(_role_facts.domain | default(ctlabs_ca.defaults.config.domain)) %}
+$ProgressPreference = 'SilentlyContinue'
+@{
+    domain = "{{ _domain }}"
+} | ConvertTo-Json -Compress

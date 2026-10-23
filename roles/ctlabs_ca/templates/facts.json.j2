@@ -1,9 +1,9 @@
 {#
  # File        : ctlabs-ansible/roles/ctlabs_ca/templates/facts.json.j2
  # Description : ctlabs_ca local facts template
-#}
-{% set _host_facts = ctlabs_fole_facts | default({}) %}
-{% set _role_facts = play_setup['ca']  | default({}) %}
+ #}
+{% set _host_facts = ctlabs_role_facts | default({}) %}
+{% set _role_facts = (play_setup | default({}))['ca'] | default({}) %}
 {
-  "domain" : "{{ _host_facts.domain | default(_role_facts.domain | default(CTLABS_DOMAIN)) }}"
+  "domain" : "{{ _host_facts.domain | default(_role_facts.domain | default(CTLABS_DOMAIN | default(ctlabs_ca.defaults.config.domain))) }}"
 }

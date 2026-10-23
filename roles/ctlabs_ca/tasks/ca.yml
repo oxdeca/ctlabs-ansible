@@ -5,24 +5,55 @@
 # Description : create new ca
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_ca.tasks.certs.cadir.exists
+- name: ctlabs_ca.tasks.certs.cadir.exists.linux
   #delegate_to : localhost
   #run_once    : true
+  when: ctg_os_family != 'windows'
   file        :
-    name : "{{ ctlabs_ca.defaults.config.dir }}"
+    name : "{{ ctlabs_ca_dir }}"
     state: directory
     owner: "{{ ctlabs_ca.defaults.config.user  }}"
     group: "{{ ctlabs_ca.defaults.config.group }}"
     mode : '0750'
 
+- name: ctlabs_ca.tasks.certs.cadir.exists.windows
+  when: ctg_os_family == 'windows'
+  ansible.windows.win_file:
+    path  : "{{ ctlabs_ca_dir }}"
+    state : directory
+
+#
+# the ca directory holds private keys - on windows the directory is
+# protected like /etc/ca-ctlabs (root:certs 0750) on linux: administrators
+# and system only, no ace's inherited from C:/ProgramData.
+#
+- name: ctlabs_ca.tasks.certs.cadir.acl.windows
+  when: ctg_os_family == 'windows'
+  block:
+    - name: ctlabs_ca.tasks.certs.cadir.acl.windows.inheritance
+      ansible.windows.win_acl_inheritance:
+        path  : "{{ ctlabs_ca_dir }}"
+        state : absent
+
+    - name: ctlabs_ca.tasks.certs.cadir.acl.windows.rights
+      ansible.windows.win_acl:
+        path   : "{{ ctlabs_ca_dir }}"
+        user   : "{{ item.user }}"
+        rights : "{{ item.rights }}"
+        type   : allow
+        state  : present
+      loop: "{{ ctlabs_ca.defaults.config.windows.acl }}"
+      loop_control:
+        label: "{{ item.user }}"
+
 #
 # CA
 #
 - name: ctlabs_ca.tasks.ca.create
-  when: ctlabs_ca_root_cert.stat.exists == false
+  when: not ctlabs_ca_root_cert_exists
   block:
     - name: ctlabs_ca.tasks.ca.config.prepare
-      delegate_to : localhost
+      delegate_to: localhost
       connection  : local
       run_once    : true
       template    :
@@ -30,7 +61,7 @@
         dest : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.cnf"
 
     - name: ctlabs_ca.tasks.ca.root.create
-      delegate_to : localhost
+      delegate_to: localhost
       connection  : local
       run_once    : true
       script      : 
@@ -38,6 +69,14 @@
         chdir : "{{ ctlabs_ca.defaults.config.dir }}"
       register: "ca_create_output"
 
+#
+# the ca cert is installed in the system trust store of the host (linux only)
+#
+- name: ctlabs_ca.tasks.ca.truststore.install
+  when:
+    - ctg_os_family != 'windows'
+    - not ctlabs_ca_trust_cert_exists
+  block:
     - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.install
       copy:
         src : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
@@ -46,3 +85,15 @@
 
     - name: ctlabs_ca.tasks.ca.{{ctg_os_family}}.update
       command: "{{ ctlabs_ca.defaults.config[ctg_os_family].rebuild }}"
+
+#
+# on windows the ca cert is only dumped into the ca directory - import it
+# into the system trust store where it is needed.
+#
+- name: ctlabs_ca.tasks.ca.windows.install
+  when:
+    - ctg_os_family == 'windows'
+    - not ctlabs_ca_root_cert_exists
+  ansible.windows.win_copy:
+    src  : "{{ ctlabs_ca.defaults.config.dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"
+    dest : "{{ ctlabs_ca_dir }}/{{ ctlabs_ca.defaults.config.ca.name }}.crt"

@@ -33,6 +33,13 @@ ctlabs_ca:
       alpine:
         cacerts: /usr/local/share/ca-certificates
         rebuild: update-ca-certificates
+      windows:
+        # windows has no system trust store integration here - the certs are
+        # dumped into the directory only, import them where they are needed.
+        dir : 'C:/ProgramData/ca-ctlabs'
+        acl :
+          - { user : 'BUILTIN\Administrators', rights : FullControl }
+          - { user : 'NT AUTHORITY\SYSTEM'   , rights : FullControl }
   os:
     - centos7
     - centos8
@@ -49,3 +56,4 @@ ctlabs_ca:
     - parrot6
     - parrot7
     - alpine3
+    - microsoft windows server 2022 standard evaluation
