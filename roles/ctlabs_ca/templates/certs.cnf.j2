@@ -20,8 +20,13 @@ L                  = Toronto
 O                  = oxdeca.com
 
 [ v3_req ]
+keyUsage           = critical, digitalSignature, keyEncipherment
+extendedKeyUsage   = serverAuth, clientAuth
 subjectAltName     = @alt_names
 
 [ alt_names ]
 DNS.1 = {{ ansible_hostname }}.{{ ctlabs_ca_domain }}
 IP.1 = {{ CTLABS_HOST }}
+{% for _san in ctlabs_ca_san | default([]) %}
+DNS.{{ loop.index + 1 }} = {{ _san }}
+{% endfor %}

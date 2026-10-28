@@ -26,6 +26,7 @@ Configuration is deliberately per host via local facts (never global
 - `ctlabs_ad.join`
 - `ctlabs_ad.service`
 - `ctlabs_ad.leave`
+- `ctlabs_ad.ldaps`
 - `ctlabs_ad.facts` (setup phase)
 
 ## Configuration
@@ -43,6 +44,7 @@ Resolved per host as role var -> local fact -> default.
 | `master`                     | FQDN of the master DC (slave/member)           |
 | `leave`                      | `true` -> a `member` leaves instead of joining |
 | `dns_servers`                | DC-only: eth1 (production) DNS resolvers, default ns1/ns2/8.8.8.8 |
+| `ldaps`                      | DC-only: `true` -> serve LDAPS with the `ctlabs_ca` host cert (default `false`) |
 
 Minimal setup profile:
 
@@ -66,6 +68,7 @@ Role-scoped overrides (used when no local fact is present, e.g. ad-hoc runs):
 | `ctlabs_ad_admin_user`         | domain-admin user; else Vault (member/slave)                       |
 | `ctlabs_ad_admin_password`     | domain-admin password; else Vault (member/slave)                   |
 | `ctlabs_ad_dns_servers`        | DC-only: eth1 DNS resolvers, default ns1/ns2/8.8.8.8               |
+| `ctlabs_ad_ldaps`              | DC-only: `true` -> LDAPS with the `ctlabs_ca` host cert            |
 
 ### Credentials
 
@@ -92,6 +95,31 @@ Secrets are intentionally **not** written to the local fact file.
 
 The OU tree is `ou=<env>,ou=servers,ou=ctlabs,<domain dn>` (env from the
 `ctlabs` local fact, default `dev`).
+
+## LDAPS (`tasks/ldaps.yml`, tag `ctlabs_ad.ldaps`)
+
+Opt-in per DC (`ldaps: true` in the `ad` setup profile or `-e ctlabs_ad_ldaps=true`).
+Uses the host certificate issued by `ctlabs_ca`
+(`C:/ProgramData/ca-ctlabs/<host>.<ca domain>.{crt,key,prv}`; `.key` is
+password protected, `.prv` is not). AD DS binds LDAPS on its own to a cert in
+`LocalMachine\My` that has a private key, the *Server Authentication* EKU and
+the DC's FQDN as subject/SAN, so the role:
+
+1. validates on the controller that the cert carries `DNS:<host>.<ad domain>`
+   and the serverAuth EKU (fails with a hint otherwise),
+2. builds a PFX on the controller from `.crt` + `.prv` + CA cert (random
+   password, never stored; PowerShell 5.1 on the DC cannot do this),
+3. imports it into `LocalMachine\My` unless that thumbprint is already there,
+   imports the lab CA into `LocalMachine\Root`, deletes the PFX again,
+4. triggers `renewServerCertificate` and verifies that port 636 presents
+   exactly that certificate.
+
+**The cert needs the AD FQDN as extra SAN.** `ctlabs_ca` names the cert
+`<host>.ctlabs.internal`, the DC is `<host>.ad.ctlabs.internal`. Add it via the
+`ctlabs_ca` fact (`san: [dc1.ad.ctlabs.internal]`) and re-issue the cert
+(`ctlabs_ca` never regenerates an existing one: remove
+`/etc/ca-ctlabs/<host>.ctlabs.internal.*` on the controller and the copies in
+`C:/ProgramData/ca-ctlabs` on the DC first).
 
 ## Network Requirements
 

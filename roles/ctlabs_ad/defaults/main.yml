@@ -45,6 +45,15 @@ ctlabs_ad:
             - dev
             - uat
             - prod
+        # LDAPS with the host certificate issued by ctlabs_ca (DC only, opt-in:
+        # per-host fact `ldaps`, or var ctlabs_ad_ldaps). ca_dir is on the
+        # controller; windows_dir is where ctlabs_ca delivers the cert to the DC.
+        ldaps:
+          enabled     : false
+          ca_dir      : /etc/ca-ctlabs
+          ca_name     : ca-ctlabs
+          ca_domain   : ctlabs.internal
+          windows_dir : 'C:/ProgramData/ca-ctlabs'
         # candidate domain controllers a member host may be joined against
         # (only used when the ctlabs_ad fact does not pin a specific `master`)
         hosts:

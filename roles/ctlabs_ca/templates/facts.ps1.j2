@@ -10,7 +10,13 @@
 {% set _facts      = ctlabs_role_facts | default({}) %}
 {% set _role_facts = (play_setup | default({}))['ca'] | default({}) %}
 {% set _domain     = _facts.domain | default(_role_facts.domain | default(ctlabs_ca.defaults.config.domain)) %}
+{% set _san = _facts.san | default(_role_facts.san | default([])) %}
+{% set _san = [_san] if _san is string else _san %}
 $ProgressPreference = 'SilentlyContinue'
-@{
+$f = @{
     domain = "{{ _domain }}"
-} | ConvertTo-Json -Compress
+}
+{% if _san | length > 0 %}
+$f.san = @({% for s in _san %}"{{ s }}"{% if not loop.last %}, {% endif %}{% endfor %})
+{% endif %}
+$f | ConvertTo-Json -Compress

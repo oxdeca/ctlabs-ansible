@@ -88,6 +88,20 @@
       }}
 
 #
+# extra subject alternative names: var -> local fact -> none
+# (e.g. the AD FQDN of a domain controller - AD DS only binds LDAPS to a
+# certificate that carries the DC's own FQDN)
+#
+- name: ctlabs_ca.tasks.precheck.ca.san
+  set_fact:
+    ctlabs_ca_san: >-
+      {{
+        [_san] if _san is string else _san
+      }}
+  vars:
+    _san: "{{ ctg_facts.ctlabs_ca.san | default(ctlabs_ca_san | default([]), true) }}"
+
+#
 # files delivered to the managed host (generated on the controller)
 #
 - name: ctlabs_ca.tasks.precheck.cert_files

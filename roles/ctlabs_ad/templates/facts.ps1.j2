@@ -22,6 +22,9 @@ $f = @{
 {% if _f.master is defined %}
 $f.master = "{{ _f.master }}"
 {% endif %}
+{% if _f.ldaps is defined %}
+$f.ldaps = ${{ 'true' if _f.ldaps | bool else 'false' }}
+{% endif %}
 {% if _f.leave is defined %}
 $f.leave = ${{ 'true' if _f.leave | bool else 'false' }}
 {% endif %}

@@ -36,6 +36,8 @@ Creates a lab-local self-signed root CA and per-host server certificates signed 
 }
 ```
 
+Optional extra SANs (e.g. the AD FQDN of a domain controller) go into the same fact: `"san": ["dc1.ad.ctlabs.internal"]` (or var `ctlabs_ca_san`). Server certs always carry `keyUsage = digitalSignature, keyEncipherment` and `extendedKeyUsage = serverAuth, clientAuth`; they only apply to newly issued certs.
+
 ## Behavior
 
 - **CA creation** (`tasks/ca.yml`): the CA is created once per controller. The create block runs when the *target* has no `ca-ctlabs.crt`; `files/create_ctlabs_ca.sh` itself never regenerates a CA as long as both `ca-ctlabs.crt` and `ca-ctlabs.key` exist, so a host that lost its copy cannot rotate the lab CA.

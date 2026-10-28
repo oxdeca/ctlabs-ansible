@@ -72,3 +72,26 @@ def test_dc_promotion_modules(role_dir):
     assert "microsoft.ad.domain" in used
     assert "microsoft.ad.domain_controller" in used
     assert "microsoft.ad.ou" in used
+
+
+def test_ldaps_wired_dc_only_and_opt_in(role_dir):
+    main = _load(role_dir, "tasks", "main.yml")
+    task = next(t for t in main if t.get("import_tasks") == "ldaps.yml")
+    when = str(task.get("when"))
+    assert "master" in when and "ctlabs_ad_ldaps_enabled" in when
+    defaults = _load(role_dir, "defaults", "main.yml")
+    assert defaults["ctlabs_ad"]["defaults"]["config"]["dc"]["ldaps"]["enabled"] is False
+
+
+def test_ldaps_never_leaks_the_pfx_password(role_dir):
+    tasks = _load(role_dir, "tasks", "ldaps.yml")[0]["block"]
+    flat = []
+    for t in tasks:
+        flat.extend(t.get("block", [t]))
+    for t in flat:
+        text = str(t)
+        if "pfx_pass" in text or "PFX_PASS" in text:
+            assert t.get("no_log") is True, t["name"]
+    # the PFX must be removed from the DC and the controller again
+    always = next(t for t in tasks if "always" in t)["always"]
+    assert len(always) == 2

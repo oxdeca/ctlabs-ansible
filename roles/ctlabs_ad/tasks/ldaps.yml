@@ -1,0 +1,232 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/ldaps.yml
+# Description : Serve LDAPS (636) on a domain controller with the host
+#               certificate issued by the ctlabs_ca role
+#
+# AD DS binds LDAPS automatically to a certificate in LocalMachine\My that has
+# a private key, the Server Authentication EKU and the DC's own FQDN as
+# subject/SAN - so this only has to get the right cert into that store.
+#
+# ctlabs_ca delivers <host>.<ca domain>.{crt,key,prv} to C:/ProgramData/ca-ctlabs
+# (.key = password protected, .prv = unprotected). Windows PowerShell 5.1 and
+# the DC have no openssl to turn PEM into a PFX, so the PFX is built on the
+# controller from the same files ctlabs_ca generated there, shipped over, and
+# removed again after the import.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.ldaps
+  when:
+    - ctlabs_ad_role in ['master', 'slave']
+    - ctlabs_ad_ldaps_enabled
+  block:
+
+    - name: ctlabs_ad.tasks.ldaps.vars
+      set_fact:
+        ctlabs_ad_ldaps_fqdn : "{{ (ansible_hostname ~ '.' ~ ctlabs_ad_domain) | lower }}"
+        ctlabs_ad_ldaps_base : "{{ ansible_hostname }}.{{ ctlabs_ad_ldaps_ca_domain }}"
+
+    - name: ctlabs_ad.tasks.ldaps.vars.paths
+      set_fact:
+        ctlabs_ad_ldaps_crt   : "{{ ctlabs_ad_ldaps_ca_dir }}/{{ ctlabs_ad_ldaps_base }}.crt"
+        ctlabs_ad_ldaps_prv   : "{{ ctlabs_ad_ldaps_ca_dir }}/{{ ctlabs_ad_ldaps_base }}.prv"
+        ctlabs_ad_ldaps_cacrt : "{{ ctlabs_ad_ldaps_ca_dir }}/{{ ctlabs_ad.defaults.config.dc.ldaps.ca_name }}.crt"
+
+    # ==========================================================================
+    # 1. CONTROLLER: VALIDATE THE CERTIFICATE
+    # ==========================================================================
+
+    - name: ctlabs_ad.tasks.ldaps.controller.files
+      delegate_to : localhost
+      become      : true
+      become_user : root
+      stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ ctlabs_ad_ldaps_crt }}"
+        - "{{ ctlabs_ad_ldaps_prv }}"
+        - "{{ ctlabs_ad_ldaps_cacrt }}"
+      register: ctlabs_ad_ldaps_files
+
+    - name: ctlabs_ad.tasks.ldaps.controller.files.exist
+      assert:
+        that     : ctlabs_ad_ldaps_files.results | map(attribute='stat.exists') | list is all
+        fail_msg : >-
+          ctlabs_ca certificate files are missing on the controller
+          ({{ ctlabs_ad_ldaps_crt }}, .prv, {{ ctlabs_ad_ldaps_cacrt }}) - run the ctlabs_ca role first
+
+    - name: ctlabs_ad.tasks.ldaps.controller.cert.thumbprint
+      delegate_to : localhost
+      become      : true
+      become_user : root
+      command: openssl x509 -in {{ ctlabs_ad_ldaps_crt | quote }} -noout -fingerprint -sha1
+      register: ctlabs_ad_ldaps_fp
+      changed_when: false
+
+    - name: ctlabs_ad.tasks.ldaps.controller.cert.names
+      delegate_to : localhost
+      become      : true
+      become_user : root
+      command: openssl x509 -in {{ ctlabs_ad_ldaps_crt | quote }} -noout -ext subjectAltName,extendedKeyUsage
+      register: ctlabs_ad_ldaps_ext
+      changed_when: false
+
+    - name: ctlabs_ad.tasks.ldaps.controller.cert.thumbprint.fact
+      set_fact:
+        ctlabs_ad_ldaps_thumbprint: "{{ ctlabs_ad_ldaps_fp.stdout.split('=')[1] | replace(':', '') | trim | upper }}"
+
+    - name: ctlabs_ad.tasks.ldaps.controller.cert.valid
+      assert:
+        that:
+          - "('dns:' ~ ctlabs_ad_ldaps_fqdn) in (ctlabs_ad_ldaps_ext.stdout | lower)"
+          - "'TLS Web Server Authentication' in ctlabs_ad_ldaps_ext.stdout"
+        fail_msg: >-
+          {{ ctlabs_ad_ldaps_crt }} cannot serve LDAPS for {{ ctlabs_ad_ldaps_fqdn }}: AD DS needs the DC FQDN
+          as SAN and the Server Authentication EKU. Add the SAN to the ctlabs_ca fact of this host
+          (san: [{{ ctlabs_ad_ldaps_fqdn }}]) and re-issue the certificate (remove the cert files on the
+          controller and the DC, then re-run ctlabs_ca).
+
+    # ==========================================================================
+    # 2. DC: IMPORT THE CERTIFICATE (ONLY WHEN NOT ALREADY THERE)
+    # ==========================================================================
+
+    - name: ctlabs_ad.tasks.ldaps.cert.present
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $false
+          $cert = Get-Item "Cert:\LocalMachine\My\{{ ctlabs_ad_ldaps_thumbprint }}" -ErrorAction SilentlyContinue
+          Write-Output ([bool]($cert -and $cert.HasPrivateKey))
+      register: ctlabs_ad_ldaps_present
+
+    - name: ctlabs_ad.tasks.ldaps.cert.import
+      when: not (ctlabs_ad_ldaps_present.output | first | default(false) | bool)
+      block:
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.tmpdir
+          delegate_to : localhost
+          become      : true
+          become_user : root
+          tempfile:
+            state: directory
+            prefix: ctlabs_ad_ldaps.
+          register: ctlabs_ad_ldaps_tmp
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.tmpdir.owner
+          delegate_to : localhost
+          become      : true
+          become_user : root
+          file:
+            path  : "{{ ctlabs_ad_ldaps_tmp.path }}"
+            owner : "{{ lookup('pipe', 'id -un') }}"
+            mode  : '0700'
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.password
+          set_fact:
+            ctlabs_ad_ldaps_pfx_pass: "{{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+          no_log: true
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.create
+          delegate_to : localhost
+          become      : true
+          become_user : root
+          command: >-
+            openssl pkcs12 -export
+            -inkey {{ ctlabs_ad_ldaps_prv | quote }}
+            -in {{ ctlabs_ad_ldaps_crt | quote }}
+            -certfile {{ ctlabs_ad_ldaps_cacrt | quote }}
+            -name {{ ctlabs_ad_ldaps_fqdn | quote }}
+            -passout env:PFX_PASS
+            -out {{ ctlabs_ad_ldaps_tmp.path }}/{{ ctlabs_ad_ldaps_base }}.pfx
+          environment:
+            PFX_PASS: "{{ ctlabs_ad_ldaps_pfx_pass }}"
+          no_log: true
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.owner
+          delegate_to : localhost
+          become      : true
+          become_user : root
+          file:
+            path  : "{{ ctlabs_ad_ldaps_tmp.path }}/{{ ctlabs_ad_ldaps_base }}.pfx"
+            owner : "{{ lookup('pipe', 'id -un') }}"
+            mode  : '0600'
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.copy
+          ansible.windows.win_copy:
+            src  : "{{ ctlabs_ad_ldaps_tmp.path }}/{{ ctlabs_ad_ldaps_base }}.pfx"
+            dest : "{{ ctlabs_ad_ldaps_windows_dir }}/{{ ctlabs_ad_ldaps_base }}.pfx"
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.import
+          ansible.windows.win_powershell:
+            parameters:
+              Pfx      : "{{ ctlabs_ad_ldaps_windows_dir }}/{{ ctlabs_ad_ldaps_base }}.pfx"
+              Password : "{{ ctlabs_ad_ldaps_pfx_pass }}"
+            script: |
+              param([string]$Pfx, [string]$Password)
+              $Ansible.Changed = $true
+              $secure = ConvertTo-SecureString -String $Password -AsPlainText -Force
+              Import-PfxCertificate -FilePath $Pfx -CertStoreLocation Cert:\LocalMachine\My -Password $secure | Out-Null
+          no_log: true
+
+      always:
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.cleanup.dc
+          ansible.windows.win_file:
+            path  : "{{ ctlabs_ad_ldaps_windows_dir }}/{{ ctlabs_ad_ldaps_base }}.pfx"
+            state : absent
+
+        - name: ctlabs_ad.tasks.ldaps.cert.pfx.cleanup.controller
+          delegate_to : localhost
+          become      : true
+          become_user : root
+          file:
+            path  : "{{ ctlabs_ad_ldaps_tmp.path }}"
+            state : absent
+          when: ctlabs_ad_ldaps_tmp.path is defined
+
+    # the lab CA must be trusted by the DC itself (chain validation of its own
+    # LDAPS endpoint and of ldp/ldapsearch run from it)
+    - name: ctlabs_ad.tasks.ldaps.ca.trust
+      ansible.windows.win_powershell:
+        parameters:
+          CaCert: "{{ ctlabs_ad_ldaps_windows_dir }}/{{ ctlabs_ad.defaults.config.dc.ldaps.ca_name }}.crt"
+        script: |
+          param([string]$CaCert)
+          $Ansible.Changed = $false
+          $ca = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 $CaCert
+          if (-not (Test-Path "Cert:\LocalMachine\Root\$($ca.Thumbprint)")) {
+            Import-Certificate -FilePath $CaCert -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+            $Ansible.Changed = $true
+          }
+
+    # ==========================================================================
+    # 3. DC: MAKE AD DS PICK IT UP AND PROVE IT
+    # ==========================================================================
+
+    - name: ctlabs_ad.tasks.ldaps.renew
+      when: not (ctlabs_ad_ldaps_present.output | first | default(false) | bool)
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Changed = $true
+          $dse = [ADSI]"LDAP://localhost/rootDSE"
+          $dse.Put("renewServerCertificate", 1)
+          $dse.SetInfo()
+
+    # the TLS handshake on 636 must present exactly our certificate
+    - name: ctlabs_ad.tasks.ldaps.verify
+      ansible.windows.win_powershell:
+        parameters:
+          Thumbprint: "{{ ctlabs_ad_ldaps_thumbprint }}"
+        script: |
+          param([string]$Thumbprint)
+          $Ansible.Changed = $false
+          $seen = $null
+          for ($i = 0; $i -lt 12 -and $seen -ne $Thumbprint; $i++) {
+            try {
+              $tcp = New-Object System.Net.Sockets.TcpClient("localhost", 636)
+              $ssl = New-Object System.Net.Security.SslStream($tcp.GetStream(), $false, ({ $true } -as [System.Net.Security.RemoteCertificateValidationCallback]))
+              $ssl.AuthenticateAsClient("localhost")
+              $seen = (New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 $ssl.RemoteCertificate).Thumbprint
+              $ssl.Dispose(); $tcp.Close()
+            } catch { $seen = $null }
+            if ($seen -ne $Thumbprint) { Start-Sleep -Seconds 5 }
+          }
+          if ($seen -ne $Thumbprint) { throw "LDAPS on 636 presents [$seen], expected [$Thumbprint]" }

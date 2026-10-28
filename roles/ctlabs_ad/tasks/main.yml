@@ -26,6 +26,14 @@
     - ctlabs_ad
     - ctlabs_ad.dc
 
+- import_tasks: ldaps.yml
+  when:
+    - ctlabs_ad_role in ['master', 'slave']
+    - ctlabs_ad_ldaps_enabled
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.ldaps
+
 - import_tasks: join.yml
   when:
     - ctlabs_ad_role == 'member'
