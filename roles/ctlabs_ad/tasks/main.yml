@@ -34,6 +34,14 @@
     - ctlabs_ad
     - ctlabs_ad.ldaps
 
+- import_tasks: keytab.yml
+  when:
+    - ctlabs_ad_role in ['master', 'slave']
+    - ctlabs_ad_keytabs | length > 0
+  tags:
+    - ctlabs_ad
+    - ctlabs_ad.keytab
+
 - import_tasks: join.yml
   when:
     - ctlabs_ad_role == 'member'

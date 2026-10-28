@@ -43,6 +43,31 @@
     dest : "{{ ctlabs_slapd.defaults.config.default.file     }}"
   notify: ctlabs_slapd.handlers.service.restart
 
+- name: ctlabs_slapd.tasks.config.krb5.install
+  when: ctlabs_slapd_krb5.manage | bool
+  template:
+    src : "{{ ctlabs_slapd_krb5.template }}"
+    dest: "{{ ctlabs_slapd_krb5.file     }}"
+
+- name: ctlabs_slapd.tasks.config.keytab.dir.exists
+  when: ctlabs_slapd_gssapi_enabled
+  file:
+    path : "{{ ctlabs_slapd.defaults.config.keytab.dest_dir }}"
+    state: directory
+    owner: "{{ ctlabs_slapd.defaults.service[ctg_os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
+    mode : '0750'
+
+- name: ctlabs_slapd.tasks.config.keytab.install
+  when: ctlabs_slapd_gssapi_enabled
+  copy:
+    src  : "{{ ctlabs_slapd.defaults.config.keytab.src_dir  }}/{{ ctlabs_slapd_gssapi_db.bind.keytab }}.keytab"
+    dest : "{{ ctlabs_slapd.defaults.config.keytab.dest_dir }}/{{ ctlabs_slapd_gssapi_db.bind.keytab }}.keytab"
+    owner: "{{ ctlabs_slapd.defaults.service[ctg_os_family].user  }}"
+    group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
+    mode : '0600'
+  notify: ctlabs_slapd.handlers.service.restart
+
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
   shell: |
     if [ -d "{{ ctlabs_slapd.defaults.config[ctg_os_family].slapd_dir }}" ]; then 

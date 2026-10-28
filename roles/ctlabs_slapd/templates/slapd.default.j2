@@ -41,5 +41,12 @@ SLAPD_SENTINEL_FILE=/etc/ldap/noslapd
 # uncomment this line and change the path.
 #export KRB5_KTNAME=/etc/krb5.keytab
 
+{% if ctlabs_slapd_gssapi_enabled %}
+# idassert-bind (bindmethod=sasl saslmech=gssapi) binds TO the AD DC as a
+# client - that needs a *client* keytab (KRB5_CLIENT_KTNAME), not the server
+# acceptor keytab (KRB5_KTNAME) the comment above refers to.
+export KRB5_CLIENT_KTNAME=FILE:{{ ctlabs_slapd.defaults.config.keytab.dest_dir }}/{{ ctlabs_slapd_gssapi_db.bind.keytab }}.keytab
+{% endif %}
+
 # Additional options to pass to slapd                                                                                                                                                                                                                                                                                                                                                    
-SLAPD_OPTIONS=""                                 
+SLAPD_OPTIONS=""

@@ -59,6 +59,26 @@ ctlabs_ad:
         hosts:
           - dc1
           - dc2
+        # Dedicated service-account Kerberos keytabs (DC only, opt-in: local
+        # fact `keytabs`, or var ctlabs_ad_keytabs - default []). One AD user
+        # per entry, a GSSAPI *client* identity (plain UPN, not a service
+        # SPN - nothing looks these accounts up via SPN); ktpass extracts the
+        # keytab with a random, never-stored password and the result is
+        # staged on the controller at `keytab.ca_dir` for a consuming role
+        # (e.g. ctlabs_slapd) to copy out - same controller-staging broker
+        # pattern ctlabs_ca uses for certificates.
+        #
+        # Idempotent by *staged file*, not by AD state: ktpass resets the
+        # account's password on every run, so once a keytab is staged for a
+        # name it is never regenerated - delete the staged file to rotate it.
+        #
+        # keytabs:
+        #   - name     : svc-slapd   # sAMAccountName + keytab basename
+        #     principal: ''          # UPN / ktpass -princ (without @REALM); defaults to `name`
+        #     ou_path  : ''          # defaults to this host's ctlabs_ad_ou_path
+        keytabs: []
+        keytab:
+          ca_dir: /etc/ca-ctlabs/keytabs
     vault:
       mount: secrets
       secrets:

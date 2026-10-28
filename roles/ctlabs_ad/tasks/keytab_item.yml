@@ -1,0 +1,117 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/keytab_item.yml
+# Description : create one AD service account and stage its keytab on the
+#               controller (one iteration of tasks/keytab.yml's loop,
+#               ctlabs_ad_keytab_item: {name, principal, ou_path})
+#
+# This account is a GSSAPI *client* identity (e.g. ctlabs_slapd binding out to
+# the AD DC) - nothing looks it up as a service via an SPN, so `principal`
+# is a plain Kerberos principal (UPN), not a service/host SPN.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.keytab_item.vars
+  set_fact:
+    ctlabs_ad_keytab_name     : "{{ ctlabs_ad_keytab_item.name }}"
+    ctlabs_ad_keytab_principal: "{{ ctlabs_ad_keytab_item.principal | default(ctlabs_ad_keytab_item.name, true) }}"
+    ctlabs_ad_keytab_ou_path  : "{{ ctlabs_ad_keytab_item.ou_path | default(ctlabs_ad_ou_path, true) }}"
+    ctlabs_ad_keytab_staged   : "{{ ctlabs_ad.defaults.config.dc.keytab.ca_dir }}/{{ ctlabs_ad_keytab_item.name }}.keytab"
+
+- name: ctlabs_ad.tasks.keytab_item.staged.check
+  delegate_to : localhost
+  become      : true
+  become_user : root
+  stat:
+    path: "{{ ctlabs_ad_keytab_staged }}"
+  register: ctlabs_ad_keytab_staged_stat
+
+- name: ctlabs_ad.tasks.keytab_item.create
+  when: not ctlabs_ad_keytab_staged_stat.stat.exists
+  block:
+
+    - name: ctlabs_ad.tasks.keytab_item.controller.dir
+      delegate_to : localhost
+      become      : true
+      become_user : root
+      file:
+        path : "{{ ctlabs_ad.defaults.config.dc.keytab.ca_dir }}"
+        state: directory
+        mode : '0750'
+
+    # ktpass.exe ships with the AD DS admin tools, not with AD DS itself -
+    # not guaranteed to already be installed depending on how the forest
+    # was promoted.
+    - name: ctlabs_ad.tasks.keytab_item.tools.present
+      ansible.windows.win_feature:
+        name : RSAT-AD-Tools
+        state: present
+
+    - name: ctlabs_ad.tasks.keytab_item.password
+      set_fact:
+        ctlabs_ad_keytab_pass: "{{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+      no_log: true
+
+    - name: ctlabs_ad.tasks.keytab_item.account.present
+      microsoft.ad.user:
+        name                        : "{{ ctlabs_ad_keytab_name }}"
+        state                       : present
+        path                        : "{{ ctlabs_ad_keytab_ou_path }}"
+        description                 : "ctlabs_ad keytab service account (managed) - no interactive logon"
+        password                    : "{{ ctlabs_ad_keytab_pass }}"
+        password_never_expires      : true
+        user_cannot_change_password : true
+        enabled                     : true
+        upn             : "{{ ctlabs_ad_keytab_principal }}@{{ ctlabs_ad_realm }}"
+        domain_username: "{{ ctlabs_ad_admin_user }}@{{ ctlabs_ad_realm }}"
+        domain_password: "{{ ctlabs_ad_admin_pass }}"
+        domain_server  : "{{ ctlabs_ad_domain_server }}"
+      no_log: true
+
+    - name: ctlabs_ad.tasks.keytab_item.remote.tempdir
+      ansible.windows.win_tempfile:
+        state : directory
+        prefix: ctlabs_ad_keytab.
+      register: ctlabs_ad_keytab_tmp
+
+    - name: ctlabs_ad.tasks.keytab_item.remote.vars
+      set_fact:
+        ctlabs_ad_keytab_remote: "{{ ctlabs_ad_keytab_tmp.path }}\\{{ ctlabs_ad_keytab_name }}.keytab"
+
+    # ktpass both (re)sets the account's password to match -pass and embeds
+    # the matching key version number in the keytab - doing those two steps
+    # separately (e.g. setting the password via the module above and then
+    # asking ktpass to only export) risks a kvno mismatch, so ktpass owns
+    # the final password-set here even though the account already has one.
+    - name: ctlabs_ad.tasks.keytab_item.ktpass
+      ansible.windows.win_command: >-
+        ktpass
+        -out {{ ctlabs_ad_keytab_remote }}
+        -princ {{ ctlabs_ad_keytab_principal }}@{{ ctlabs_ad_realm }}
+        -mapUser {{ ctlabs_ad_keytab_name }}
+        -mapOp set
+        -pass {{ ctlabs_ad_keytab_pass }}
+        -crypto AES256-SHA1
+        -ptype KRB5_NT_PRINCIPAL
+      no_log: true
+
+    - name: ctlabs_ad.tasks.keytab_item.fetch
+      ansible.builtin.fetch:
+        src : "{{ ctlabs_ad_keytab_remote }}"
+        dest: "{{ ctlabs_ad_keytab_staged  }}"
+        flat: true
+
+    - name: ctlabs_ad.tasks.keytab_item.staged.mode
+      delegate_to : localhost
+      become      : true
+      become_user : root
+      file:
+        path: "{{ ctlabs_ad_keytab_staged }}"
+        mode: '0640'
+
+  always:
+    - name: ctlabs_ad.tasks.keytab_item.remote.cleanup
+      when: ctlabs_ad_keytab_tmp.path is defined
+      ansible.windows.win_file:
+        path : "{{ ctlabs_ad_keytab_tmp.path }}"
+        state: absent

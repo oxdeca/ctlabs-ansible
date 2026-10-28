@@ -45,9 +45,15 @@ suffix                   "{{ db.suffix }}"
 uri                      "{{ db.uri    }}"
 norefs                   yes
 rebind-as-user           no
-idassert-bind            bindmethod={{ db.bind_method }}
-                         binddn={{ db.bind_user }}
-                         credentials={{ db.bind_pass }}
+idassert-bind            bindmethod={{ db.bind.method }}
+{%     if db.bind.method == 'simple' %}
+                         binddn={{ db.bind.user }}
+                         credentials={{ db.bind.pass }}
+{%     elif db.bind.method == 'sasl' %}
+                         saslmech={{ db.bind.saslmech }}
+                         authcid={{ db.bind.authcid }}
+                         realm={{ db.bind.realm }}
+{%     endif %}
                          mode=none
                          network-timeout=3
 

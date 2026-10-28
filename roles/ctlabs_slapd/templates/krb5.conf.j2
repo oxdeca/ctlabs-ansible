@@ -1,0 +1,25 @@
+# ------------------------------------------------------------------------------
+# File        : {{ ctlabs_slapd_krb5.file }}
+# Template    : ctlabs-ansible/roles/ctlabs_slapd/templates/{{ ctlabs_slapd_krb5.template }}
+# Description : minimal krb5.conf for GSSAPI idassert-bind against AD - not a
+#               full workstation/sssd krb5.conf, just enough for a keytab-only
+#               client bind (see ctlabs_sssd/templates/krb5.conf.j2 for that).
+# ------------------------------------------------------------------------------
+
+[libdefaults]
+  default_realm    = {{ ctlabs_slapd_krb5.realm }}
+  dns_lookup_realm = false
+  dns_lookup_kdc   = true
+  rdns             = false
+
+[realms]
+  {{ ctlabs_slapd_krb5.realm }} = {
+    default_domain = {{ ctlabs_slapd_krb5.domain }}
+{% for kdc in ctlabs_slapd_krb5.kdc %}
+    kdc            = {{ kdc }}
+{% endfor %}
+  }
+
+[domain_realm]
+  .{{ ctlabs_slapd_krb5.domain }} = {{ ctlabs_slapd_krb5.realm }}
+   {{ ctlabs_slapd_krb5.domain }} = {{ ctlabs_slapd_krb5.realm }}

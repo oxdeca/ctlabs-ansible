@@ -23,5 +23,32 @@
   set_fact:
     ctlabs_slapd_dbs: "{{ ctg_facts.ctlabs_slapd.dbs | default(ctlabs_slapd_dbs) }}"
 
+#
+# GSSAPI (bind.method: sasl): which db (if any) drives the client keytab /
+# krb5.conf. Only one GSSAPI identity is supported per host - the first db
+# configured for it wins.
+#
+- name: ctlabs_slapd.tasks.precheck.gssapi.dbs
+  set_fact:
+    ctlabs_slapd_gssapi_dbs: "{{ ctlabs_slapd_dbs | selectattr('bind.method', 'defined') | selectattr('bind.method', 'equalto', 'sasl') | list }}"
+
+- name: ctlabs_slapd.tasks.precheck.gssapi.fact
+  set_fact:
+    ctlabs_slapd_gssapi_enabled: "{{ ctlabs_slapd_gssapi_dbs | length > 0 }}"
+    ctlabs_slapd_gssapi_db     : "{{ ctlabs_slapd_gssapi_dbs | first | default(omit) }}"
+
+#
+# krb5.conf: var -> local fact -> default. `manage: false` (set via the
+# krb5 local fact) when ctlabs_sssd already owns /etc/krb5.conf (AD backend)
+# on this host.
+#
+- name: ctlabs_slapd.tasks.precheck.krb5.var
+  set_fact:
+    ctlabs_slapd_krb5: "{{ ctlabs_slapd_krb5 | default(ctlabs_slapd.defaults.config.krb5) }}"
+
+- name: ctlabs_slapd.tasks.precheck.krb5.local_fact
+  set_fact:
+    ctlabs_slapd_krb5: "{{ ctg_facts.ctlabs_slapd.krb5 | default(ctlabs_slapd_krb5) }}"
+
 # TODO
 #   - check which config format we should install slapd.conf or OLC

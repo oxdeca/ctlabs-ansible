@@ -1,0 +1,17 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_slapd/tests/test_slapd.yml
+# Description : test playbook for ctlabs_slapd (syntax-check target)
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_slapd.test.run
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ctg_os        : debian12
+    ctg_os_family : debian
+    ctg_env       : dev
+  roles:
+    - role: "{{ playbook_dir | dirname | dirname }}"

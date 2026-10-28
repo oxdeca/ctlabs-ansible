@@ -14,9 +14,13 @@ ctlabs_slapd:
       debian:
         - name : slapd
         - name : ldap-utils
+        - name : krb5-user
+        - name : libsasl2-modules-gssapi-mit
       redhat:
         - name : "openldap-servers-{{ versions.openldap }}"
         - name : "openldap-clients-{{ versions.openldap }}"
+        - name : krb5-workstation
+        - name : cyrus-sasl-gssapi
     files:
       - src: switch_slapd_config.sh
         dst: /root/switch_slapd_config.sh
@@ -55,10 +59,22 @@ ctlabs_slapd:
         ldap:
           suffix: dc=ctlabs,dc=internal
           uri   : ldaps://dc1.ctlabs.internal ldaps://dc2.ctlabs.internal
-          bind  : 
+          bind  :
             method: simple
             user  : cn=slapd,ou=services,dc=ctlabs,dc=internal
             pass  : secret123!
+          # Stronger alternative to `method: simple` - no credentials of any
+          # kind end up in slapd.conf, only a path to a keytab file:
+          #   bind:
+          #     method  : sasl
+          #     saslmech: gssapi
+          #     authcid : svc-slapd
+          #     realm   : AD.CTLABS.INTERNAL
+          #     keytab  : svc-slapd    # basename, see `keytab` below
+          # The keytab itself is produced by ctlabs_ad's dedicated
+          # service-keytab feature (ctlabs_ad.defaults.config.dc.keytabs) and
+          # staged on the controller at `keytab.src_dir` below - same
+          # controller-staging broker pattern ctlabs_ca uses for certificates.
 
       ca_ctlabs:
         certdir: /etc/ca-ctlabs
@@ -69,8 +85,29 @@ ctlabs_slapd:
         prv : "{{ ansible_nodename }}.prv"
         ca  : ca-ctlabs.crt
 
+      # GSSAPI keytab for `bind.method: sasl` (see `dbs.ldap.bind` above).
+      # `src_dir` is a controller-local path (same convention as ca_ctlabs),
+      # staged by ctlabs_ad; `dest_dir` is where it's copied to on this host.
+      keytab:
+        src_dir : /etc/ca-ctlabs/keytabs
+        dest_dir: /etc/ldap/keytabs
+
+      # Only needed for `bind.method: sasl`. `manage: false` skips rendering
+      # this file - set it (per host, via the `krb5` local fact below) when
+      # ctlabs_sssd already owns /etc/krb5.conf (AD backend) on this host, so
+      # the two roles don't fight over the same file. Standalone (no sssd),
+      # the default `manage: true` makes GSSAPI work without that dependency.
+      krb5:
+        manage  : true
+        file    : /etc/krb5.conf
+        template: krb5.conf.j2
+        realm   : AD.CTLABS.INTERNAL
+        domain  : ad.ctlabs.internal
+        kdc     :
+          - dc1.ad.ctlabs.internal
+          - dc2.ad.ctlabs.internal
+
   os:
     - debian11
     - debian12
     - centos9
-

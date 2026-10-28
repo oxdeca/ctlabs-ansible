@@ -4,5 +4,6 @@
 #}
 {% set _facts = ctlabs_role_facts | default({}) %}
 {
-  "dbs" : {{ _facts.dbs | default(ctlabs_slapd.defaults.config.dbs) | to_nice_json(indent=2) | indent(2) }}
+  "dbs"  : {{ _facts.dbs  | default(ctlabs_slapd.defaults.config.dbs)  | to_nice_json(indent=2) | indent(2) }},
+  "krb5" : {{ _facts.krb5 | default(ctlabs_slapd.defaults.config.krb5) | to_nice_json(indent=2) | indent(2) }}
 }

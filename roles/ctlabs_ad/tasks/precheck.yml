@@ -98,6 +98,13 @@
     ctlabs_ad_ldaps_windows_dir: "{{ ctlabs_ad.defaults.config.dc.ldaps.windows_dir }}"
 
 #
+# Dedicated service-account keytabs (DC only): var -> local fact -> default
+#
+- name: ctlabs_ad.tasks.precheck.keytabs
+  set_fact:
+    ctlabs_ad_keytabs: "{{ ctlabs_ad_fact['keytabs'] | default(ctlabs_ad_keytabs | default(ctlabs_ad.defaults.config.dc.keytabs | default([]))) }}"
+
+#
 # OU target for members of this host's environment
 #
 - name: ctlabs_ad.tasks.precheck.ou.target

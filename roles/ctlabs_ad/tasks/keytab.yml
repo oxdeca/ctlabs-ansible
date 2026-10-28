@@ -1,0 +1,19 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_ad/tasks/keytab.yml
+# Description : Dedicated service-account Kerberos keytabs for GSSAPI
+#               consumers (e.g. ctlabs_slapd's idassert-bind) - one AD user +
+#               SPN per entry, keytab extracted with ktpass and staged on the
+#               controller for the consuming role to copy out.
+# ------------------------------------------------------------------------------
+
+- name: ctlabs_ad.tasks.keytab
+  when:
+    - ctlabs_ad_role in ['master', 'slave']
+    - ctlabs_ad_keytabs | length > 0
+  include_tasks: keytab_item.yml
+  loop: "{{ ctlabs_ad_keytabs }}"
+  loop_control:
+    loop_var: ctlabs_ad_keytab_item
+    label: "{{ ctlabs_ad_keytab_item.name }}"

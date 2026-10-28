@@ -27,6 +27,7 @@ Configuration is deliberately per host via local facts (never global
 - `ctlabs_ad.service`
 - `ctlabs_ad.leave`
 - `ctlabs_ad.ldaps`
+- `ctlabs_ad.keytab`
 - `ctlabs_ad.facts` (setup phase)
 
 ## Configuration
@@ -120,6 +121,44 @@ the DC's FQDN as subject/SAN, so the role:
 (`ctlabs_ca` never regenerates an existing one: remove
 `/etc/ca-ctlabs/<host>.ctlabs.internal.*` on the controller and the copies in
 `C:/ProgramData/ca-ctlabs` on the DC first).
+
+## Dedicated service-account keytabs (`tasks/keytab.yml`, tag `ctlabs_ad.keytab`)
+
+Opt-in per DC (`keytabs: [...]` in the `ad` setup profile or `-e ctlabs_ad_keytabs=...`),
+for consumers that need GSSAPI/Kerberos auth against AD without a plaintext
+password anywhere in their own config - e.g. `ctlabs_slapd`'s `idassert-bind`.
+
+```yaml
+# ctlabs/labs/setup_profiles.yml
+ad:
+  dc1:
+    role: master
+    domain: ad.ctlabs.internal
+    keytabs:
+      - name: svc-slapd   # principal defaults to `name` if omitted
+```
+
+For each entry the role:
+
+1. creates (or updates) an AD user `name` with `password_never_expires` +
+   `user_cannot_change_password`, in `ou_path` (default: this DC's own
+   `ou=<env>,ou=servers,ou=ctlabs,<domain dn>`), with `principal` (default:
+   `name`) as its UPN - a plain Kerberos client identity, not a service SPN,
+2. runs `ktpass` on the DC with a random, never-stored password to reset the
+   account's password and extract a matching keytab (`-crypto AES256-SHA1
+   -ptype KRB5_NT_PRINCIPAL`),
+3. fetches the keytab to the controller at `/etc/ca-ctlabs/keytabs/<name>.keytab`
+   (`0640`) - same controller-staging broker pattern `ctlabs_ca` uses for
+   certificates - and deletes it from the DC.
+
+**Idempotent by staged file, not by AD state**: step 2 resets the account's
+password on every run, so once `<name>.keytab` exists on the controller it is
+never regenerated. To rotate a keytab, delete the staged file (this also
+causes the account's password to be reset the next run).
+
+Only the AD-side half lives here - a consumer (e.g. `ctlabs_slapd`) copies the
+staged keytab onto its own host and points its GSSAPI client config at it; see
+that role's README.
 
 ## Network Requirements
 

@@ -95,3 +95,39 @@ def test_ldaps_never_leaks_the_pfx_password(role_dir):
     # the PFX must be removed from the DC and the controller again
     always = next(t for t in tasks if "always" in t)["always"]
     assert len(always) == 2
+
+
+def test_keytab_wired_dc_only_and_opt_in(role_dir):
+    main = _load(role_dir, "tasks", "main.yml")
+    task = next(t for t in main if t.get("import_tasks") == "keytab.yml")
+    when = str(task.get("when"))
+    assert "master" in when and "ctlabs_ad_keytabs" in when
+    defaults = _load(role_dir, "defaults", "main.yml")
+    assert defaults["ctlabs_ad"]["defaults"]["config"]["dc"]["keytabs"] == []
+
+
+def test_keytab_item_never_leaks_the_password(role_dir):
+    tasks = _load(role_dir, "tasks", "keytab_item.yml")
+    create = next(t for t in tasks if "block" in t)
+    flat = []
+    for t in create["block"]:
+        flat.extend(t.get("block", [t]))
+    for t in flat:
+        text = str(t)
+        if "ctlabs_ad_keytab_pass" in text:
+            assert t.get("no_log") is True, t["name"]
+
+
+def test_keytab_staged_file_is_the_idempotency_guard(role_dir):
+    tasks = _load(role_dir, "tasks", "keytab_item.yml")
+    check = next(t for t in tasks if t["name"].endswith("staged.check"))
+    assert check["stat"]["path"] == "{{ ctlabs_ad_keytab_staged }}"
+    create = next(t for t in tasks if "block" in t)
+    assert "not ctlabs_ad_keytab_staged_stat.stat.exists" in str(create["when"])
+
+
+def test_keytab_item_cleans_up_the_dc_tempdir(role_dir):
+    tasks = _load(role_dir, "tasks", "keytab_item.yml")
+    create = next(t for t in tasks if "block" in t)
+    assert len(create["always"]) == 1
+    assert create["always"][0]["ansible.windows.win_file"]["state"] == "absent"
