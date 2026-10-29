@@ -16,7 +16,7 @@
     ctlabs_ad_keytab_name     : "{{ ctlabs_ad_keytab_item.name }}"
     ctlabs_ad_keytab_principal: "{{ ctlabs_ad_keytab_item.principal | default(ctlabs_ad_keytab_item.name, true) }}"
     ctlabs_ad_keytab_ou_path  : "{{ ctlabs_ad_keytab_item.ou_path | default(ctlabs_ad_ou_path, true) }}"
-    ctlabs_ad_keytab_staged   : "{{ ctlabs_ad.defaults.config.dc.keytab.ca_dir }}/{{ ctlabs_ad_keytab_item.name }}.keytab"
+    ctlabs_ad_keytab_staged   : "{{ ctlabs_ad.defaults.config.dc.keytab.dir }}/{{ ctlabs_ad_keytab_item.name }}.keytab"
 
 - name: ctlabs_ad.tasks.keytab_item.staged.check
   delegate_to : localhost
@@ -35,9 +35,14 @@
       become      : true
       become_user : root
       file:
-        path : "{{ ctlabs_ad.defaults.config.dc.keytab.ca_dir }}"
+        path : "{{ ctlabs_ad.defaults.config.dc.keytab.dir }}"
         state: directory
-        mode : '0750'
+        # owned by the controller user: the fetch below writes as that user
+        # (become only applies to the remote side), and the consuming role
+        # reads the keytab as that user as well
+        owner: "{{ lookup('ansible.builtin.pipe', 'id -un') }}"
+        group: "{{ lookup('ansible.builtin.pipe', 'id -gn') }}"
+        mode : '0700'
 
     # ktpass.exe ships with the AD DS admin tools, not with AD DS itself -
     # not guaranteed to already be installed depending on how the forest
@@ -83,17 +88,42 @@
     # separately (e.g. setting the password via the module above and then
     # asking ktpass to only export) risks a kvno mismatch, so ktpass owns
     # the final password-set here even though the account already has one.
+    # The password is only handed to the script as a parameter and scrubbed from
+    # the captured output, so the failure reason can be shown (no_log on this
+    # task alone would hide it as "censored").
     - name: ctlabs_ad.tasks.keytab_item.ktpass
-      ansible.windows.win_command: >-
-        ktpass
-        -out {{ ctlabs_ad_keytab_remote }}
-        -princ {{ ctlabs_ad_keytab_principal }}@{{ ctlabs_ad_realm }}
-        -mapUser {{ ctlabs_ad_keytab_name }}
-        -mapOp set
-        -pass {{ ctlabs_ad_keytab_pass }}
-        -crypto AES256-SHA1
-        -ptype KRB5_NT_PRINCIPAL
+      ansible.windows.win_powershell:
+        parameters:
+          Out   : "{{ ctlabs_ad_keytab_remote }}"
+          Princ : "{{ ctlabs_ad_keytab_principal }}@{{ ctlabs_ad_realm }}"
+          User  : "{{ ctlabs_ad_netbios }}\\{{ ctlabs_ad_keytab_name }}"
+          Pass  : "{{ ctlabs_ad_keytab_pass }}"
+        script: |
+          param($Out, $Princ, $User, $Pass)
+          $Ansible.Changed = $true
+          $cmd = Get-Command ktpass.exe -ErrorAction SilentlyContinue
+          if (-not $cmd) {
+            $Ansible.Result = @{ rc = 127; output = 'ktpass.exe not found in PATH' }
+            return
+          }
+          $text = & $cmd.Source -out $Out -princ $Princ -mapUser $User -mapOp set -pass $Pass `
+                    -crypto AES256-SHA1 -ptype KRB5_NT_PRINCIPAL 2>&1 | Out-String
+          $rc = $LASTEXITCODE
+          $Ansible.Result = @{
+            rc     = $rc
+            output = $text.Replace($Pass, '********')
+            exists = (Test-Path -LiteralPath $Out)
+          }
+      register: ctlabs_ad_keytab_ktpass
+      failed_when: false   # judged by the .result task below, which can show the reason
       no_log: true
+
+    - name: ctlabs_ad.tasks.keytab_item.ktpass.result
+      when: >-
+        ctlabs_ad_keytab_ktpass.result.rc | default(1) != 0
+        or not (ctlabs_ad_keytab_ktpass.result.exists | default(false))
+      fail:
+        msg: "ktpass failed (rc={{ ctlabs_ad_keytab_ktpass.result.rc | default('?') }}): {{ ctlabs_ad_keytab_ktpass.result.output | default(ctlabs_ad_keytab_ktpass.msg | default('no output')) }}"
 
     - name: ctlabs_ad.tasks.keytab_item.fetch
       ansible.builtin.fetch:
@@ -107,7 +137,7 @@
       become_user : root
       file:
         path: "{{ ctlabs_ad_keytab_staged }}"
-        mode: '0640'
+        mode: '0600'
 
   always:
     - name: ctlabs_ad.tasks.keytab_item.remote.cleanup

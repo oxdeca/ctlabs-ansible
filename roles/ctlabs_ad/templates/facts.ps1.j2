@@ -28,4 +28,19 @@ $f.ldaps = ${{ 'true' if _f.ldaps | bool else 'false' }}
 {% if _f.leave is defined %}
 $f.leave = ${{ 'true' if _f.leave | bool else 'false' }}
 {% endif %}
+{% if _f.keytabs | default([]) | length > 0 %}
+$f.keytabs = @(
+{%   for k in _f.keytabs %}
+    @{
+        name = "{{ k.name }}"
+{%     if k.principal is defined %}
+        principal = "{{ k.principal }}"
+{%     endif %}
+{%     if k.ou_path is defined %}
+        ou_path = "{{ k.ou_path }}"
+{%     endif %}
+    }{{ ',' if not loop.last }}
+{%   endfor %}
+)
+{% endif %}
 $f | ConvertTo-Json -Compress

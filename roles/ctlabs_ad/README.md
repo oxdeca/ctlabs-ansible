@@ -147,7 +147,7 @@ For each entry the role:
 2. runs `ktpass` on the DC with a random, never-stored password to reset the
    account's password and extract a matching keytab (`-crypto AES256-SHA1
    -ptype KRB5_NT_PRINCIPAL`),
-3. fetches the keytab to the controller at `/etc/ca-ctlabs/keytabs/<name>.keytab`
+3. fetches the keytab to the controller at `/etc/keytabs/<name>.keytab`
    (`0640`) - same controller-staging broker pattern `ctlabs_ca` uses for
    certificates - and deletes it from the DC.
 

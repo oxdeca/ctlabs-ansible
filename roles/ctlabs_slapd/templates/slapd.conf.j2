@@ -53,6 +53,7 @@ idassert-bind            bindmethod={{ db.bind.method }}
                          saslmech={{ db.bind.saslmech }}
                          authcid={{ db.bind.authcid }}
                          realm={{ db.bind.realm }}
+                         secprops={{ db.bind.secprops | default('maxssf=0') }}
 {%     endif %}
                          mode=none
                          network-timeout=3

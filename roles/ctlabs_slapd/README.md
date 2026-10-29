@@ -48,7 +48,7 @@ dbs:
 
 The keytab is produced by `ctlabs_ad`'s dedicated service-keytab feature
 (`ctlabs_ad.defaults.config.dc.keytabs`) and staged on the **controller** at
-`ctlabs_slapd.defaults.config.keytab.src_dir` (default `/etc/ca-ctlabs/keytabs`
+`ctlabs_slapd.defaults.config.keytab.src_dir` (default `/etc/keytabs`
 - same controller-staging broker pattern `ctlabs_ca` uses for certificates).
 This role copies it from there to `keytab.dest_dir` on the slapd host
 (`/etc/ldap/keytabs` by default, `0600`, owned by the slapd service user) and

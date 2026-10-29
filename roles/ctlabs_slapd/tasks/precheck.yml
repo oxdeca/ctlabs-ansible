@@ -24,6 +24,22 @@
     ctlabs_slapd_dbs: "{{ ctg_facts.ctlabs_slapd.dbs | default(ctlabs_slapd_dbs) }}"
 
 #
+# Lists append across profile levels (defaults + host), so the same db can show
+# up as several partial items. Merge items sharing a `suffix` (later wins, deep)
+# - that is the per-host override; a new suffix stays an additional db.
+# The role default is a dict keyed by name, accept that shape too.
+#
+- name: ctlabs_slapd.tasks.precheck.dbs.merge
+  set_fact:
+    ctlabs_slapd_dbs: >-
+      {%- set ns = namespace(m={}) -%}
+      {%- for db in (ctlabs_slapd_dbs.values() | list if ctlabs_slapd_dbs is mapping else ctlabs_slapd_dbs) -%}
+      {%-   set k = db.suffix | default('') -%}
+      {%-   set ns.m = ns.m | combine({k: (ns.m[k] | default({})) | combine(db, recursive=true)}) -%}
+      {%- endfor -%}
+      {{ ns.m.values() | list }}
+
+#
 # GSSAPI (bind.method: sasl): which db (if any) drives the client keytab /
 # krb5.conf. Only one GSSAPI identity is supported per host - the first db
 # configured for it wins.

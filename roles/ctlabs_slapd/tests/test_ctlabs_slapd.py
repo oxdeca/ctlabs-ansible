@@ -45,6 +45,7 @@ def test_gssapi_tasks_are_opt_in(role_dir):
     config = _load(role_dir, "tasks", "config.yml")
     krb5_task = next(t for t in config if t["name"].endswith("krb5.install"))
     assert "ctlabs_slapd_krb5.manage" in str(krb5_task["when"])
+    assert "ctlabs_slapd_gssapi_enabled" in str(krb5_task["when"])
     for name in ("keytab.dir.exists", "keytab.install"):
         task = next(t for t in config if t["name"].endswith(name))
         assert "ctlabs_slapd_gssapi_enabled" in str(task["when"])
@@ -56,3 +57,30 @@ def test_client_keytab_not_server_keytab(role_dir):
     with open(os.path.join(role_dir, "templates", "slapd.default.j2")) as fh:
         text = fh.read()
     assert "KRB5_CLIENT_KTNAME=" in text
+
+
+def test_dbs_merged_by_suffix_before_gssapi_detection(role_dir):
+    # lists append across profile levels (defaults + host), so partial items for
+    # the same suffix must be merged before anything reads db.uri / db.bind.
+    precheck = _load(role_dir, "tasks", "precheck.yml")
+    names = [t["name"] for t in precheck if "name" in t]
+    merge = next(n for n in names if n.endswith("dbs.merge"))
+    assert names.index(merge) < next(i for i, n in enumerate(names) if n.endswith("gssapi.dbs"))
+    task = next(t for t in precheck if t.get("name") == merge)
+    assert "suffix" in str(task["set_fact"]["ctlabs_slapd_dbs"])
+
+
+def test_client_keytab_reaches_the_daemon_via_systemd_dropin(role_dir):
+    # RedHat's slapd.service has no EnvironmentFile, so /etc/default/slapd alone
+    # leaves slapd without credentials ("No Kerberos credentials available").
+    config = _load(role_dir, "tasks", "config.yml")
+    task = next(t for t in config if t["name"].endswith("keytab.env"))
+    assert "ctlabs_slapd_gssapi_enabled" in str(task["when"])
+    assert "KRB5_CLIENT_KTNAME" in task["copy"]["content"]
+
+
+def test_gssapi_over_ldaps_disables_the_sasl_security_layer(role_dir):
+    # AD refuses SASL signing/sealing inside TLS; without maxssf=0 slapd fails
+    # with "encoded packet size too big".
+    with open(os.path.join(role_dir, "templates", "slapd.conf.j2")) as fh:
+        assert "maxssf=0" in fh.read()

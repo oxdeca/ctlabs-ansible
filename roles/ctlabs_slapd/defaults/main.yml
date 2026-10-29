@@ -89,7 +89,7 @@ ctlabs_slapd:
       # `src_dir` is a controller-local path (same convention as ca_ctlabs),
       # staged by ctlabs_ad; `dest_dir` is where it's copied to on this host.
       keytab:
-        src_dir : /etc/ca-ctlabs/keytabs
+        src_dir : /etc/keytabs
         dest_dir: /etc/ldap/keytabs
 
       # Only needed for `bind.method: sasl`. `manage: false` skips rendering

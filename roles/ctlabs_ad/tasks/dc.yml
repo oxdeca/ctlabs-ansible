@@ -170,14 +170,24 @@
       ansible.windows.win_powershell:
         script: |
           $Ansible.Changed = $false
+          $ErrorActionPreference = 'Stop'
           $eth1_ip = (Get-NetIPAddress -InterfaceAlias "eth1" -AddressFamily IPv4).IPAddress | Select-Object -First 1
-          $target  = @($eth1_ip, "127.0.0.1")
-          $setting = Get-DnsServerSetting -All
-          if (Compare-Object -ReferenceObject @($setting.ListeningIPAddress) -DifferenceObject $target) {
-            $setting.ListeningIPAddress = $target
-            Set-DnsServerSetting -InputObject $setting
+          $target  = [string[]]@($eth1_ip, "127.0.0.1")
+          $current = [string[]]@((Get-DnsServerSetting -All).ListeningIPAddress)
+          # a plain property assignment on the CIM object was silently ignored (the
+          # list stayed on eth0 while this task reported changed on every run) -
+          # use the cmdlet parameter, then read the result back and fail if it differs.
+          # DNS may not list 127.0.0.1 back, so compare on the non-loopback addresses only
+          $nonlo = { param($l) [string[]]@($l | Where-Object { $_ -ne '127.0.0.1' }) }
+          if (Compare-Object -ReferenceObject (& $nonlo $current) -DifferenceObject (& $nonlo $target)) {
+            Set-DnsServerSetting -ListeningIPAddress ([System.Net.IPAddress[]]$target)
             Restart-Service -Name DNS -Force
             $Ansible.Changed = $true
+            $after = [string[]]@((Get-DnsServerSetting -All).ListeningIPAddress)
+            $Ansible.Result = @{ before = $current; after = $after }
+            if (Compare-Object -ReferenceObject (& $nonlo $after) -DifferenceObject (& $nonlo $target)) {
+              throw "DNS listen addresses are [$($after -join ',')], expected [$($target -join ',')]"
+            }
           }
 
     - name: ctlabs_ad.tasks.dc.dns_server.forwarders
@@ -186,19 +196,28 @@
           $Ansible.Changed = $false
           $target  = @("8.8.8.8")
           $current = @((Get-DnsServerForwarder).IPAddress.IPAddressToString)
-          if (Compare-Object -ReferenceObject $current -DifferenceObject $target) {
+          # DNS may not list 127.0.0.1 back, so compare on the non-loopback addresses only
+          $nonlo = { param($l) [string[]]@($l | Where-Object { $_ -ne '127.0.0.1' }) }
+          if (Compare-Object -ReferenceObject (& $nonlo $current) -DifferenceObject (& $nonlo $target)) {
             Set-DnsServerForwarder -IPAddress $target
             $Ansible.Changed = $true
           }
 
+    # Remove every A record in the zone that points into the mgmt (eth0) subnet -
+    # not just this DC's own eth0 IP: the peer DC's record would otherwise stay
+    # forever if the peer never reaches this task (e.g. a failed promotion).
     - name: ctlabs_ad.tasks.dc.dns_zone.eth0_records.cleanup
       ansible.windows.win_powershell:
         script: |
           $Ansible.Changed = $false
-          $eth0_ip = (Get-NetIPAddress -InterfaceAlias "eth0" -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress | Select-Object -First 1
-          if ($eth0_ip) {
+          $nic = Get-NetIPAddress -InterfaceAlias "eth0" -AddressFamily IPv4 -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($nic) {
+            # uint64 math: [uint32] casts and -shl overflow into negatives on 192.x
+            $mask  = [uint64](([uint64]4294967295 -shl (32 - $nic.PrefixLength)) -band [uint64]4294967295)
+            $toInt = { param($ip) $b = [System.Net.IPAddress]::Parse($ip).GetAddressBytes(); [Array]::Reverse($b); [uint64][BitConverter]::ToUInt32($b, 0) }
+            $net   = (& $toInt $nic.IPAddress) -band $mask
             $records = Get-DnsServerResourceRecord -ZoneName "{{ ctlabs_ad_domain }}" -RRType A |
-              Where-Object { $_.RecordData.IPv4Address.IPAddressToString -eq $eth0_ip }
+              Where-Object { ((& $toInt $_.RecordData.IPv4Address.IPAddressToString) -band $mask) -eq $net }
             foreach ($record in $records) {
               Remove-DnsServerResourceRecord -ZoneName "{{ ctlabs_ad_domain }}" -InputObject $record -Force
               $Ansible.Changed = $true

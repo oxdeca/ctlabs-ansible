@@ -2,7 +2,9 @@
  # File        : ctlabs-ansible/roles/ctlabs_slapd/templates/facts.json.j2
  # Description : ctlabs_slapd local facts template
 #}
+{# profile may give the host's dbs as a bare list (slapd1: [ {...} ]) or as a map ({dbs: [...], krb5: {...}}) #}
 {% set _facts = ctlabs_role_facts | default({}) %}
+{% set _facts = {'dbs': _facts} if (_facts is sequence and _facts is not string and _facts is not mapping) else _facts %}
 {
   "dbs"  : {{ _facts.dbs  | default(ctlabs_slapd.defaults.config.dbs)  | to_nice_json(indent=2) | indent(2) }},
   "krb5" : {{ _facts.krb5 | default(ctlabs_slapd.defaults.config.krb5) | to_nice_json(indent=2) | indent(2) }}

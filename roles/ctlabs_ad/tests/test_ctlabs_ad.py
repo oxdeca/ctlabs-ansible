@@ -131,3 +131,10 @@ def test_keytab_item_cleans_up_the_dc_tempdir(role_dir):
     create = next(t for t in tasks if "block" in t)
     assert len(create["always"]) == 1
     assert create["always"][0]["ansible.windows.win_file"]["state"] == "absent"
+
+
+def test_keytabs_forwarded_into_windows_fact(role_dir):
+    # profile -> fact -> precheck reads ctlabs_ad_fact['keytabs']; a template that
+    # drops the key silently disables the keytab step (skipped hosts are not shown).
+    with open(os.path.join(role_dir, "templates", "facts.ps1.j2")) as fh:
+        assert "$f.keytabs" in fh.read()

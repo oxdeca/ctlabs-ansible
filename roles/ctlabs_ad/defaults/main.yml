@@ -64,7 +64,7 @@ ctlabs_ad:
         # per entry, a GSSAPI *client* identity (plain UPN, not a service
         # SPN - nothing looks these accounts up via SPN); ktpass extracts the
         # keytab with a random, never-stored password and the result is
-        # staged on the controller at `keytab.ca_dir` for a consuming role
+        # staged on the controller at `keytab.dir` for a consuming role
         # (e.g. ctlabs_slapd) to copy out - same controller-staging broker
         # pattern ctlabs_ca uses for certificates.
         #
@@ -78,7 +78,7 @@ ctlabs_ad:
         #     ou_path  : ''          # defaults to this host's ctlabs_ad_ou_path
         keytabs: []
         keytab:
-          ca_dir: /etc/ca-ctlabs/keytabs
+          dir: /etc/keytabs
     vault:
       mount: secrets
       secrets:

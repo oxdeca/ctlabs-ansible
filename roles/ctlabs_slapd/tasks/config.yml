@@ -44,7 +44,9 @@
   notify: ctlabs_slapd.handlers.service.restart
 
 - name: ctlabs_slapd.tasks.config.krb5.install
-  when: ctlabs_slapd_krb5.manage | bool
+  when:
+    - ctlabs_slapd_gssapi_enabled
+    - ctlabs_slapd_krb5.manage | bool
   template:
     src : "{{ ctlabs_slapd_krb5.template }}"
     dest: "{{ ctlabs_slapd_krb5.file     }}"
@@ -67,6 +69,32 @@
     group: "{{ ctlabs_slapd.defaults.service[ctg_os_family].group }}"
     mode : '0600'
   notify: ctlabs_slapd.handlers.service.restart
+
+# The RedHat slapd.service has no EnvironmentFile, so the export in
+# /etc/default/slapd (Debian) never reaches the daemon there - hand the client
+# keytab to slapd through a systemd drop-in instead (harmless on Debian too).
+- name: ctlabs_slapd.tasks.config.keytab.env.dir
+  when: ctlabs_slapd_gssapi_enabled
+  file:
+    path : "/etc/systemd/system/{{ ctlabs_slapd.defaults.service[ctg_os_family].name }}.d"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_slapd.tasks.config.keytab.env
+  when: ctlabs_slapd_gssapi_enabled
+  register: ctlabs_slapd_keytab_env
+  copy:
+    dest   : "/etc/systemd/system/{{ ctlabs_slapd.defaults.service[ctg_os_family].name }}.d/krb5.conf"
+    content: |
+      [Service]
+      Environment=KRB5_CLIENT_KTNAME=FILE:{{ ctlabs_slapd.defaults.config.keytab.dest_dir }}/{{ ctlabs_slapd_gssapi_db.bind.keytab }}.keytab
+    mode   : '0644'
+  notify: ctlabs_slapd.handlers.service.restart
+
+- name: ctlabs_slapd.tasks.config.keytab.env.reload
+  when: ctlabs_slapd_keytab_env is changed
+  systemd:
+    daemon_reload: true
 
 - name: ctlabs_slapd.tasks.config.dir.slapd.moved
   shell: |
