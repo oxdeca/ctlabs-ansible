@@ -172,15 +172,19 @@
           $Ansible.Changed = $false
           $ErrorActionPreference = 'Stop'
           $eth1_ip = (Get-NetIPAddress -InterfaceAlias "eth1" -AddressFamily IPv4).IPAddress | Select-Object -First 1
-          $target  = [string[]]@($eth1_ip, "127.0.0.1")
+          if (-not $eth1_ip) { throw "no IPv4 address found on eth1" }
+          # dnscmd rejects 127.0.0.1 (DNS_ERROR_INVALID_IP_ADDRESS, 9552), so list eth1 only
+          $target  = [string[]]@($eth1_ip)
           $current = [string[]]@((Get-DnsServerSetting -All).ListeningIPAddress)
           # a plain property assignment on the CIM object was silently ignored (the
-          # list stayed on eth0 while this task reported changed on every run) -
-          # use the cmdlet parameter, then read the result back and fail if it differs.
+          # list stayed on eth0 while this task reported changed on every run) and
+          # Set-DnsServerSetting has no -ListeningIPAddress parameter - use dnscmd,
+          # then read the result back and fail if it differs.
           # DNS may not list 127.0.0.1 back, so compare on the non-loopback addresses only
           $nonlo = { param($l) [string[]]@($l | Where-Object { $_ -ne '127.0.0.1' }) }
           if (Compare-Object -ReferenceObject (& $nonlo $current) -DifferenceObject (& $nonlo $target)) {
-            Set-DnsServerSetting -ListeningIPAddress ([System.Net.IPAddress[]]$target)
+            $out = & dnscmd.exe /ResetListenAddresses @target 2>&1
+            if ($LASTEXITCODE -ne 0) { throw "dnscmd /ResetListenAddresses failed: $($out -join ' ')" }
             Restart-Service -Name DNS -Force
             $Ansible.Changed = $true
             $after = [string[]]@((Get-DnsServerSetting -All).ListeningIPAddress)
