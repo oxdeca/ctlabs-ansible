@@ -19,6 +19,13 @@ options {
   notify                  yes;
   recursion               {{ ctlabs_bind.defaults.config.recursive }};
   dnssec-validation       auto;
+{% set vexcept = [] %}
+{% for z in ctlabs_bind_zones | unique if not z.dnssec_validation | default(ctlabs_bind.defaults.config.forward.dnssec_validation if z.type | default('') == 'forward' else true) %}
+{%   set _ = vexcept.append('"' ~ z.name ~ '"') %}
+{% endfor %}
+{% if vexcept %}
+  validate-except         { {{ vexcept | join('; ') }}; };
+{% endif %}
 
   managed-keys-directory  "{{ ctlabs_bind.defaults.config[ctg_os_family].keys_dir }}";
   geoip-directory         "/usr/share/GeoIP";
@@ -66,6 +73,7 @@ zone "{{ zone.name }}" IN {
 {%   endif %}
 {%   if zone.type == "forward" %}
   forwarders   { {{ zone.forwarders|join('; ') }}; };
+  forward      {{ zone.forward | default(ctlabs_bind.defaults.config.forward.mode) }};
 {%   endif %}
 {%   if zone.ddns is defined %}
   allow-update { {{ zone.ddns.allow|join('; ') }}; };
@@ -73,4 +81,3 @@ zone "{{ zone.name }}" IN {
 };
 
 {%  endfor %}
-

@@ -27,6 +27,18 @@ ___ns1: /etc/ansible/facts.d/ctlabs_bind.fact___
 }
 ```
 
+### Zone options
+
+| key                 | default | effect                                                                       |
+|---------------------|---------|------------------------------------------------------------------------------|
+| `forward`           | `only`  | forward zones: `only` or `first` (`first` falls back to recursion); default is `ctlabs_bind.defaults.config.forward.mode` |
+| `dnssec_validation` | `false` for forward zones, `true` otherwise | `false` adds the zone to `validate-except { ... };` (skips DNSSEC validation); forward default is `ctlabs_bind.defaults.config.forward.dnssec_validation` |
+
+```json
+{ "name" : "dev.oanda.internal", "type" : "forward", "forwarders" : [ "10.1.1.1" ], "forward" : "first" }
+```
+renders (forward zones skip validation by default; set `"dnssec_validation" : true` to validate) `validate-except { "dev.oanda.internal"; };` in `options` and `forward first;` in the zone.
+
 ## Zone Configuration
 
 Zones are configures with the prefix `zone_`. The dots in the domain name will be replaced with an underscore. E.g. the zone for the domain `ctlabs.internal` would be `zone_ctlabs_internal` and records are under it.
@@ -179,4 +191,3 @@ zone_ctlabs_internal:
   - type  : COMMENT
     value : this is a comment in the zone file
 ```
-
