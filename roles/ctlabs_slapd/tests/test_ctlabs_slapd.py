@@ -84,3 +84,14 @@ def test_gssapi_over_ldaps_disables_the_sasl_security_layer(role_dir):
     # with "encoded packet size too big".
     with open(os.path.join(role_dir, "templates", "slapd.conf.j2")) as fh:
         assert "maxssf=0" in fh.read()
+
+
+def test_krb5_realm_is_derived_from_gssapi_bind(role_dir):
+    # no hardcoded realm: an unset krb5.realm/domain must follow bind.realm
+    defaults = _load(role_dir, "defaults", "main.yml")
+    krb5 = defaults["ctlabs_slapd"]["defaults"]["config"]["krb5"]
+    assert not krb5["realm"] and not krb5["domain"]
+    precheck = _load(role_dir, "tasks", "precheck.yml")
+    task = next(t for t in precheck if t["name"].endswith("krb5.derive"))
+    assert "bind.realm" in str(task["set_fact"])
+    assert "uri" in str(task["set_fact"])

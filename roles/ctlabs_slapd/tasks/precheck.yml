@@ -66,5 +66,18 @@
   set_fact:
     ctlabs_slapd_krb5: "{{ ctg_facts.ctlabs_slapd.krb5 | default(ctlabs_slapd_krb5) }}"
 
+# Unset realm/domain follow the GSSAPI db's bind.realm, so krb5.conf never
+# disagrees with the realm slapd.conf binds with. Unset kdc = the DCs from the
+# db uri (no reliance on DNS SRV records).
+- name: ctlabs_slapd.tasks.precheck.krb5.derive
+  when: ctlabs_slapd_gssapi_enabled | bool
+  set_fact:
+    ctlabs_slapd_krb5: >-
+      {{ ctlabs_slapd_krb5 | combine({
+           'realm' : (ctlabs_slapd_krb5.realm  | default('') or (ctlabs_slapd_gssapi_db.bind.realm | upper)),
+           'domain': (ctlabs_slapd_krb5.domain | default('') or (ctlabs_slapd_gssapi_db.bind.realm | lower)),
+           'kdc'   : (ctlabs_slapd_krb5.kdc | default([]) or (ctlabs_slapd_gssapi_db.uri.split() | map('regex_replace', '^ldaps?://([^:/]+).*$', '\1') | list))
+         }) }}
+
 # TODO
 #   - check which config format we should install slapd.conf or OLC

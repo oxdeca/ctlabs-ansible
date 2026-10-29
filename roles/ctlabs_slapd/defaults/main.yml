@@ -101,11 +101,12 @@ ctlabs_slapd:
         manage  : true
         file    : /etc/krb5.conf
         template: krb5.conf.j2
-        realm   : AD.CTLABS.INTERNAL
-        domain  : ad.ctlabs.internal
-        kdc     :
-          - dc1.ad.ctlabs.internal
-          - dc2.ad.ctlabs.internal
+        # empty realm/domain = derived from the GSSAPI db's `bind.realm`
+        # (domain = lowercased realm); set them only to deviate from that.
+        # Empty kdc = the hosts of the db `uri` (DNS SRV stays enabled as fallback).
+        realm   : ''
+        domain  : ''
+        kdc     : []
 
   os:
     - debian11
