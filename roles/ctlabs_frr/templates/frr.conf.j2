@@ -18,8 +18,8 @@ router bgp {{ ctg_facts.ctlabs_frr.router.bgp.local_asn }}
 {%     for net in ctg_facts.ctlabs_frr.router.bgp.nets %}
   network {{ net }}
 {%     endfor %}
-{%   endif %}
  exit-address-family
+{%   endif %}
 {% endif %}
 
 {# OSPF -#}
