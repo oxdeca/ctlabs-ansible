@@ -12,6 +12,11 @@ def test_template_exists(role_dir):
     assert os.path.isfile(path)
 
 
+def test_facts_template_exists(role_dir):
+    path = os.path.join(role_dir, "templates", "facts.json.j2")
+    assert os.path.isfile(path)
+
+
 def test_playbook_syntax_check(role_dir):
     playbook = os.path.join(role_dir, "tests", "test_nginx.yml")
     result = subprocess.run(

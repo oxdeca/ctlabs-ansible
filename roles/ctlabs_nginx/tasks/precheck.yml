@@ -14,3 +14,20 @@
   rescue:
     - name: ctlabs_nginx.tasks.precheck.skip.unsupported
       meta: end_host
+
+- name: ctlabs_nginx.tasks.precheck.servers.var
+  set_fact:
+    ctlabs_nginx_servers: "{{ ctlabs_nginx_servers | default(ctlabs_nginx.defaults.config.servers) }}"
+
+- name: ctlabs_nginx.tasks.precheck.servers.local_fact
+  set_fact:
+    ctlabs_nginx_servers: "{{ (ctg_facts.get('ctlabs_nginx', {})).get('config', {}).get('servers', ctlabs_nginx_servers) }}"
+
+- name: ctlabs_nginx.tasks.precheck.servers.names
+  assert:
+    that     : item.key is match('^[A-Za-z0-9_.-]+\\.conf$')
+    fail_msg : "Invalid nginx server config name [{{ item.key }}]"
+  loop    : "{{ ctlabs_nginx_servers | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when    : ctlabs_nginx_servers | length > 0

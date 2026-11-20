@@ -23,6 +23,7 @@ ctlabs_nginx:
         group : nginx
     config:
       servername : "{{ ansible_hostname }}.ctlabs.internal"
+      servers    : {}
       debian:
         dir      : /etc/nginx
         conf_dir : /etc/nginx/conf.d

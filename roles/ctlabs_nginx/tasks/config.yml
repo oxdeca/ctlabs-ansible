@@ -15,3 +15,14 @@
   command: "openssl dhparam -out {{ ctlabs_nginx.defaults.config[ctg_os_family].dhparam }} 2048"
   args:
     creates: "{{ ctlabs_nginx.defaults.config[ctg_os_family].dhparam }}"
+
+- name: ctlabs_nginx.tasks.config.server
+  when    : ctlabs_nginx_servers | length > 0
+  loop    : "{{ ctlabs_nginx_servers | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  copy:
+    dest   : "{{ ctlabs_nginx.defaults.config[ctg_os_family].conf_dir }}/{{ item.key }}"
+    content: "{{ item.value }}"
+    mode   : '0644'
+  notify: ctlabs_nginx.handlers.service.reload
