@@ -1,20 +1,20 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/tasks/precheck.yml
 # Description : prechecks
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_antigravity_cli.tasks.precheck
+- name: ctlabs_antigravity.tasks.precheck
   block:
-    - name: ctlabs_antigravity_cli.tasks.precheck.supported_os
+    - name: ctlabs_antigravity.tasks.precheck.supported_os
       assert:
-        that: ctg_os is in ctlabs_antigravity_cli.os
+        that: ctg_os is in ctlabs_antigravity.os
         fail_msg: "OS [{{ ctg_os }}] is not supported!"
   rescue:
-    - name: ctlabs_antigravity_cli.tasks.precheck.skip.unsupported
+    - name: ctlabs_antigravity.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_antigravity_cli.tasks.precheck.platform.set
+- name: ctlabs_antigravity.tasks.precheck.platform.set
   set_fact:
     agy_platform: "{{ (ansible_system | lower) }}_{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64' }}"

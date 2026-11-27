@@ -1,0 +1,11 @@
+export COLORTERM=truecolor
+
+case ":$PATH:" in
+  *:{{ ctlabs_antigravity.defaults.install.bin | dirname }}:*) ;;
+  *) export PATH="$PATH:{{ ctlabs_antigravity.defaults.install.bin | dirname }}" ;;
+esac
+
+case ":$PATH:" in
+  *:{{ ctlabs_antigravity.defaults.install.dir }}:*) ;;
+  *) export PATH="$PATH:{{ ctlabs_antigravity.defaults.install.dir }}" ;;
+esac

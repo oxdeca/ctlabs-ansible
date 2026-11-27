@@ -1,0 +1,29 @@
+---
+
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/tasks/main.yml
+# Description : main task file
+# ------------------------------------------------------------------------------
+
+- import_tasks: precheck.yml
+  tags:
+    - ctlabs_antigravity
+    - ctlabs_antigravity.precheck
+    - ctlabs_antigravity.package
+    - ctlabs_antigravity.config
+    - ctlabs_antigravity.service
+
+- import_tasks: package.yml
+  tags:
+    - ctlabs_antigravity
+    - ctlabs_antigravity.package
+
+- import_tasks: config.yml
+  tags:
+    - ctlabs_antigravity
+    - ctlabs_antigravity.config
+
+- import_tasks: service.yml
+  tags:
+    - ctlabs_antigravity
+    - ctlabs_antigravity.service

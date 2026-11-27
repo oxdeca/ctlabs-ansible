@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/tests/test_ctlabs_antigravity.py
+# Description : pytest tests for ctlabs_antigravity role
+# ------------------------------------------------------------------------------
+
 import os
 import subprocess
 
@@ -19,7 +24,7 @@ def test_template_existence(role_dir):
 
 
 def test_syntax_check(role_dir):
-    playbook = os.path.join(role_dir, "tests", "test_antigravity_cli.yml")
+    playbook = os.path.join(role_dir, "tests", "test_antigravity.yml")
     result = subprocess.run(
         ["ansible-playbook", "--syntax-check", playbook],
         capture_output=True,

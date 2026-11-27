@@ -1,11 +1,11 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/defaults/main.yml
 # Description : main defaults
 # ------------------------------------------------------------------------------
 
-ctlabs_antigravity_cli:
+ctlabs_antigravity:
   defaults:
     pkgs:
       debian:
@@ -14,7 +14,8 @@ ctlabs_antigravity_cli:
     install:
       manifest_base: https://antigravity-cli-auto-updater-974169037036.us-central1.run.app
       dir : /usr/local/lib/antigravity
-      bin : /usr/local/bin/agy
+      bin : /usr/local/bin/antigravity
+      link: /usr/local/bin/agy
     config:
       dir     : /home/agy
       user    : agy

@@ -1,6 +1,6 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/tasks/service.yml
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/tasks/service.yml
 # Description : services
 # ------------------------------------------------------------------------------

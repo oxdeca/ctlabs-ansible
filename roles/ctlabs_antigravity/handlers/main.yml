@@ -1,6 +1,6 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_antigravity_cli/handlers/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_antigravity/handlers/main.yml
 # Description : handlers
 # ------------------------------------------------------------------------------
