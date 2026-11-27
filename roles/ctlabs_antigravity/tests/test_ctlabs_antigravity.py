@@ -17,6 +17,7 @@ def test_template_existence(role_dir):
         "defaults/main.yml",
         "handlers/main.yml",
         "templates/profile_agy.sh.j2",
+        "templates/settings.json.j2",
     ]
     for f in files:
         path = os.path.join(role_dir, f)

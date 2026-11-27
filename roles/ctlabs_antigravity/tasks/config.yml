@@ -31,6 +31,17 @@
     group: "{{ ctlabs_antigravity.defaults.config.group }}"
     mode : '0750'
 
+- name: ctlabs_antigravity.tasks.config.settings.dir
+  file:
+    path : "{{ ctlabs_antigravity.defaults.config.settings.dir }}"
+    state: directory
+    mode : '0755'
+
+- name: ctlabs_antigravity.tasks.config.settings.file
+  template:
+    src  : "{{ ctlabs_antigravity.defaults.config.settings.template }}"
+    dest : "{{ ctlabs_antigravity.defaults.config.settings.file     }}"
+
 - name: ctlabs_antigravity.tasks.config.profile.d
   template:
     src  : "{{ ctlabs_antigravity.defaults.config.profile.template }}"

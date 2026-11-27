@@ -21,6 +21,11 @@ ctlabs_antigravity:
       user    : agy
       group   : agy
       groups  : [certs]
+      settings:
+        dir     : ~/.gemini/antigravity-cli
+        template: settings.json.j2
+        file    : ~/.gemini/antigravity-cli/settings.json
+        enable_terminal_sandbox: false
       profile:
         template: profile_agy.sh.j2
         file    : /etc/profile.d/agy.sh

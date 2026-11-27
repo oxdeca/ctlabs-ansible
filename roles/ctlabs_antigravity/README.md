@@ -30,6 +30,8 @@ Downloads the binary from a remote manifest (supports both `tar.gz` archives and
 | `ctlabs_antigravity.defaults.config.user` | `agy` | System user |
 | `ctlabs_antigravity.defaults.config.group` | `agy` | System group |
 | `ctlabs_antigravity.defaults.config.dir` | `/home/agy` | User home directory |
+| `ctlabs_antigravity.defaults.config.settings.file` | `~/.gemini/antigravity-cli/settings.json` | Antigravity CLI settings file |
+| `ctlabs_antigravity.defaults.config.settings.enable_terminal_sandbox` | `false` | `enableTerminalSandbox` value in `settings.json` |
 
 ## Tests
 
