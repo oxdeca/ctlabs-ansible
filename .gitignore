@@ -16,7 +16,7 @@ playbooks/.play_setup*.json
 # generated runtime files & inventories
 dnsmasq.d/
 inventories/*.ini
-invnetories/controller
+inventories/controller
 
 # generated playbooks (all except static ones)
 playbooks/*.yml
