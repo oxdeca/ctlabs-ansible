@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/rollback.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tasks/rollback.yml
 # Description : undo repository credential changes when a sync fails
 #
 # WHY THIS EXISTS
@@ -23,7 +23,7 @@
 # are still in use by something outside this role's applications.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argoapp.tasks.repositories.rollback
+- name: ctlabs_argoapps.tasks.repositories.rollback
   when:
     # Only worth doing if this run actually altered a credential. Restoring
     # identical bytes is a no-op, and deleting a Secret that pre-existed us would
@@ -33,20 +33,20 @@
     # This file is imported from the fail-fast path in applications.yml, which
     # fails the task immediately afterwards - so the run stays honestly red
     # (`failed=1`) instead of a rescue's misleading `failed=0 rescued=1`.
-    - ctlabs_argoapp_repositories | length > 0
-    - ctlabs_argoapp_repo_before is defined
+    - ctlabs_argoapps_repositories | length > 0
+    - ctlabs_argoapps_repo_before is defined
     - res_repo is defined
     - res_repo is changed
   block:
 
-    - name: ctlabs_argoapp.tasks.repositories.rollback.existing
+    - name: ctlabs_argoapps.tasks.repositories.rollback.existing
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s_info:
         kind          : Secret
-        namespace     : "{{ ctlabs_argoapp_namespace }}"
+        namespace     : "{{ ctlabs_argoapps_namespace }}"
         label_selectors:
           - argocd.argoproj.io/secret-type=repository
       register       : res_repo_now
@@ -66,10 +66,10 @@
     # leaves a half-applied credential set behind, which is worse than either
     # extreme.)
     #
-    - name: ctlabs_argoapp.tasks.repositories.rollback.plan
+    - name: ctlabs_argoapps.tasks.repositories.rollback.plan
       vars:
-        _names: "{{ ctlabs_argoapp_repositories | map(attribute='name') | list }}"
-        _prior: "{{ ctlabs_argoapp_repo_before.resources | default([]) | map(attribute='metadata.name') | list }}"
+        _names: "{{ ctlabs_argoapps_repositories | map(attribute='name') | list }}"
+        _prior: "{{ ctlabs_argoapps_repo_before.resources | default([]) | map(attribute='metadata.name') | list }}"
       ansible.builtin.set_fact:
         # already existed -> this run may have modified it, so put back the
         # exact prior bytes
@@ -82,20 +82,20 @@
     # already base64 as the API returned it, so it is re-applied verbatim - no
     # re-encoding, no risk of mangling a PEM key.
     #
-    - name: ctlabs_argoapp.tasks.repositories.rollback.restore
+    - name: ctlabs_argoapps.tasks.repositories.rollback.restore
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
         _name: "{{ item }}"
         _had : >-
-          {{ ctlabs_argoapp_repo_before.resources | default([])
+          {{ ctlabs_argoapps_repo_before.resources | default([])
              | selectattr('metadata.name', 'equalto', _name) | list | first }}
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s:
         state     : present
         api_version: v1
         kind      : Secret
-        namespace : "{{ ctlabs_argoapp_namespace }}"
+        namespace : "{{ ctlabs_argoapps_namespace }}"
         name      : "{{ _name }}"
         definition: >-
           {{ {
@@ -117,22 +117,22 @@
     # would strand every application that used to fall back to an anonymous fetch
     # or a different credential.
     #
-    - name: ctlabs_argoapp.tasks.repositories.rollback.delete
+    - name: ctlabs_argoapps.tasks.repositories.rollback.delete
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s:
         state     : absent
         api_version: v1
         kind      : Secret
-        namespace : "{{ ctlabs_argoapp_namespace }}"
+        namespace : "{{ ctlabs_argoapps_namespace }}"
         name      : "{{ item }}"
       loop     : "{{ _rollback_delete | default([]) }}"
       no_log   : true
       register : res_rollback_delete
 
-    - name: ctlabs_argoapp.tasks.repositories.rollback.report
+    - name: ctlabs_argoapps.tasks.repositories.rollback.report
       ansible.builtin.debug:
         msg: >-
           Rolled back repository credentials after the sync failed

@@ -21,17 +21,17 @@ Downloads the binary from a remote manifest (supports both `tar.gz` archives and
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `ctlabs_antigravity.defaults.install.manifest_base` | `https://...run.app` | Base URL for platform manifests |
-| `ctlabs_antigravity.defaults.install.dir` | `/usr/local/lib/antigravity` | Download/extract directory |
-| `ctlabs_antigravity.defaults.install.bin` | `/usr/local/bin/antigravity` | Installed binary path |
-| `ctlabs_antigravity.defaults.install.link` | `/usr/local/bin/agy` | Symlink path for the `agy` command |
-| `ctlabs_antigravity.defaults.config.user` | `agy` | System user |
-| `ctlabs_antigravity.defaults.config.group` | `agy` | System group |
-| `ctlabs_antigravity.defaults.config.dir` | `/home/agy` | User home directory |
-| `ctlabs_antigravity.defaults.config.settings.file` | `~/.gemini/antigravity-cli/settings.json` | Antigravity CLI settings file |
-| `ctlabs_antigravity.defaults.config.settings.enable_terminal_sandbox` | `false` | `enableTerminalSandbox` value in `settings.json` |
+| Variable                                                              | Default                                   | Description                                      |
+|-----------------------------------------------------------------------|-------------------------------------------|--------------------------------------------------|
+| `ctlabs_antigravity.defaults.install.manifest_base`                   | `https://...run.app`                      | Base URL for platform manifests                  |
+| `ctlabs_antigravity.defaults.install.dir`                             | `/usr/local/lib/antigravity`              | Download/extract directory                       |
+| `ctlabs_antigravity.defaults.install.bin`                             | `/usr/local/bin/antigravity`              | Installed binary path                            |
+| `ctlabs_antigravity.defaults.install.link`                            | `/usr/local/bin/agy`                      | Symlink path for the `agy` command               |
+| `ctlabs_antigravity.defaults.config.user`                             | `agy`                                     | System user                                      |
+| `ctlabs_antigravity.defaults.config.group`                            | `agy`                                     | System group                                     |
+| `ctlabs_antigravity.defaults.config.dir`                              | `/home/agy`                               | User home directory                              |
+| `ctlabs_antigravity.defaults.config.settings.file`                    | `~/.gemini/antigravity-cli/settings.json` | Antigravity CLI settings file                    |
+| `ctlabs_antigravity.defaults.config.settings.enable_terminal_sandbox` | `false`                                   | `enableTerminalSandbox` value in `settings.json` |
 
 ## Tests
 

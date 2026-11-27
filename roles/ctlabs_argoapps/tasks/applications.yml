@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/applications.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tasks/applications.yml
 # Description : declare the ArgoCD Application objects
 #
 # ArgoCD itself is installed by ctlabs_helm (argo/argo-cd chart); this file
@@ -10,24 +10,24 @@
 # use it.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argoapp.tasks.applications
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.applications
+  when: ctlabs_argoapps_applications | length > 0
   block:
     #
     # The Application CRD only exists once the argo-cd chart is installed, so
     # the apply below can lose a race against it on a fresh cluster.
     #
-    - name: ctlabs_argoapp.tasks.applications.crd.available
+    - name: ctlabs_argoapps.tasks.applications.crd.available
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s_info:
         api_version  : v1
         kind         : CustomResourceDefinition
         name         : applications.argoproj.io
         wait         : true
-        wait_timeout : "{{ ctlabs_argoapp_crd_wait | int }}"
+        wait_timeout : "{{ ctlabs_argoapps_crd_wait | int }}"
         wait_condition:
           type   : Established
           status: "True"
@@ -70,37 +70,37 @@
     # application.yml.j2 only sets it when found, so a brand-new Application
     # (nothing to fetch) still goes through svc.create() untouched.
     #
-    - name: ctlabs_argoapp.tasks.applications.existing
+    - name: ctlabs_argoapps.tasks.applications.existing
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s_info:
         api_version: argoproj.io/v1alpha1
         kind       : Application
-        namespace  : "{{ ctlabs_argoapp_namespace }}"
+        namespace  : "{{ ctlabs_argoapps_namespace }}"
       register    : res_existing_apps
       failed_when : false
 
-    - name: ctlabs_argoapp.tasks.applications.existing.versions
+    - name: ctlabs_argoapps.tasks.applications.existing.versions
       set_fact:
-        ctlabs_argoapp_existing_app_versions: >-
+        ctlabs_argoapps_existing_app_versions: >-
           {{
             res_existing_apps.resources | default([])
               | map(attribute='metadata')
               | items2dict(key_name='name', value_name='resourceVersion')
           }}
 
-    - name: ctlabs_argoapp.tasks.applications.apply
+    - name: ctlabs_argoapps.tasks.applications.apply
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s:
         state     : present
         definition: "{{ lookup('template', 'application.yml.j2') | from_yaml }}"
         force     : true
-      loop: "{{ ctlabs_argoapp_applications }}"
+      loop: "{{ ctlabs_argoapps_applications }}"
       loop_control:
         loop_var: app
       register: res_apply
@@ -146,18 +146,18 @@
     # the until condition - until is evaluated per attempt, so the loop exits on
     # either outcome and the decision is made explicitly afterwards.
     #
-    - name: ctlabs_argoapp.tasks.applications.reconcile
+    - name: ctlabs_argoapps.tasks.applications.reconcile
       block:
-        - name: ctlabs_argoapp.tasks.applications.settle
+        - name: ctlabs_argoapps.tasks.applications.settle
           vars:
-            ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
-            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
+            _declared: "{{ ctlabs_argoapps_waiting | default(ctlabs_argoapps_applications | map(attribute='name') | list) }}"
           environment:
-            KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+            KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
           kubernetes.core.k8s_info:
             api_version: argoproj.io/v1alpha1
             kind       : Application
-            namespace  : "{{ ctlabs_argoapp_namespace }}"
+            namespace  : "{{ ctlabs_argoapps_namespace }}"
           register    : res_settle
           until       : >-
             (((res_settle.resources | default([]))
@@ -175,8 +175,8 @@
                         | selectattr('status.sync.status', 'defined')
                         | selectattr('status.sync.status', 'equalto', 'Unknown') | list))
                   | list) | length) == 0
-          retries     : "{{ ctlabs_argoapp_settle_retries | int }}"
-          delay       : "{{ ctlabs_argoapp_wait_delay | int }}"
+          retries     : "{{ ctlabs_argoapps_settle_retries | int }}"
+          delay       : "{{ ctlabs_argoapps_wait_delay | int }}"
           # exhausting the settle budget is NOT a failure: the app may simply be
           # rolling out, which is what the long wait below is for
           failed_when : false
@@ -211,9 +211,9 @@
         #   {lastTransitionTime, message, type: ComparisonError}
         # The presence of the error condition is itself the signal.
         #
-        - name: ctlabs_argoapp.tasks.applications.settle.errors
+        - name: ctlabs_argoapps.tasks.applications.settle.errors
           vars:
-            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            _declared: "{{ ctlabs_argoapps_waiting | default(ctlabs_argoapps_applications | map(attribute='name') | list) }}"
             # every condition message flattened into one searchable string, and
             # lowercased because the patterns are lowercase. 'default=""' because
             # a condition carrying no message must not raise here - this runs over
@@ -222,7 +222,7 @@
               {{ ((_e.status | default({})).get('conditions', []) | default([])
                   | map(attribute='message', default='') | join(' ')) | lower }}
             _transient: >-
-              {{ ctlabs_argoapp_transient_errors | select('in', _msgtxt) | list | length > 0 }}
+              {{ ctlabs_argoapps_transient_errors | select('in', _msgtxt) | list | length > 0 }}
           set_fact:
             # formatted here, while the resource is in hand: building the
             # message through a chain of intermediate vars (_errs/_first/_msgs)
@@ -236,7 +236,7 @@
                  ~ ', health=' ~ (((_e.status | default({})).get('health', {}) | default({})).get('status', 'Unknown'))
                  ~ '] '
                  ~ (((_e.status | default({})).get('conditions', []) | default([])
-                     | selectattr('type', 'in', ctlabs_argoapp.defaults.error_conditions)
+                     | selectattr('type', 'in', ctlabs_argoapps.defaults.error_conditions)
                      | map(attribute='message') | list | join(' | ')) or 'no condition reported') ] }}
           loop: "{{ res_settle.resources | default([]) }}"
           loop_control:
@@ -252,7 +252,7 @@
               (_e.status | default({})).get('sync', {}).get('status', '') == 'Unknown'
               or (
                    ((_e.status | default({})).get('conditions', []) | default([])
-                    | selectattr('type', 'in', ctlabs_argoapp.defaults.error_conditions)
+                    | selectattr('type', 'in', ctlabs_argoapps.defaults.error_conditions)
                     | list | length) > 0
                  )
 
@@ -270,42 +270,42 @@
         #     Rolling back on any unrelated failure (a precheck that needs facts
         #     a narrow tag skipped, say) reverts good credentials for nothing.
         #
-        - name: ctlabs_argoapp.tasks.applications.settle.report
+        - name: ctlabs_argoapps.tasks.applications.settle.report
           when: _argo_problems | default([]) | length > 0
           block:
 
             - import_tasks: rollback.yml
 
-            - name: ctlabs_argoapp.tasks.applications.settle.report
+            - name: ctlabs_argoapps.tasks.applications.settle.report
               ansible.builtin.fail:
                 msg: >-
                   ArgoCD cannot reconcile: {{ _argo_problems | default([]) | join('; ') }}.
                   ArgoCD had already given a definitive answer within the
-                  {{ ctlabs_argoapp_settle_retries | int * ctlabs_argoapp_wait_delay | int }}s
+                  {{ ctlabs_argoapps_settle_retries | int * ctlabs_argoapps_wait_delay | int }}s
                   settle budget, so this failed immediately instead of stalling for
-                  the full {{ ctlabs_argoapp_wait_timeout }}s wait_timeout.
+                  the full {{ ctlabs_argoapps_wait_timeout }}s wait_timeout.
                   Health commonly stays Healthy through a comparison failure: with no
                   target state there is nothing to diff against, so nothing is pruned
                   and running workloads are untouched - only reconciliation is blocked.
                   A repository credential is the usual cause: check the matching
                   `repositories` entry (url must equal the application's repoURL).
                   Inspect with:
-                  kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml
+                  kubectl get applications -n {{ ctlabs_argoapps_namespace }} -o yaml
 
         #
         # Nothing errored, so anything still pending is genuinely rolling out:
         # that gets the full wait_timeout.
         #
-        - name: ctlabs_argoapp.tasks.applications.wait
+        - name: ctlabs_argoapps.tasks.applications.wait
           vars:
-            ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
-            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
+            _declared: "{{ ctlabs_argoapps_waiting | default(ctlabs_argoapps_applications | map(attribute='name') | list) }}"
           environment:
-            KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+            KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
           kubernetes.core.k8s_info:
             api_version: argoproj.io/v1alpha1
             kind       : Application
-            namespace  : "{{ ctlabs_argoapp_namespace }}"
+            namespace  : "{{ ctlabs_argoapps_namespace }}"
           register    : res_wait
           until       : >-
             ((res_wait.resources | default([])
@@ -315,14 +315,14 @@
                 | selectattr('status.sync.status',   'equalto', 'Synced')
                 | selectattr('status.health.status', 'equalto', 'Healthy')
                 | list | length) >= (_declared | length))
-          retries     : "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
-          delay       : "{{ ctlabs_argoapp_wait_delay | int }}"
+          retries     : "{{ ctlabs_argoapps_wait_timeout | int // ctlabs_argoapps_wait_delay | int }}"
+          delay       : "{{ ctlabs_argoapps_wait_delay | int }}"
           failed_when : false
           changed_when: false
 
-        - name: ctlabs_argoapp.tasks.applications.wait.report
+        - name: ctlabs_argoapps.tasks.applications.wait.report
           vars:
-            _declared: "{{ ctlabs_argoapp_waiting | default(ctlabs_argoapp_applications | map(attribute='name') | list) }}"
+            _declared: "{{ ctlabs_argoapps_waiting | default(ctlabs_argoapps_applications | map(attribute='name') | list) }}"
             _ours    : "{{ res_wait.resources | default([]) | selectattr('metadata.name', 'in', _declared) | list }}"
             # "not converged" rather than "Synced but not Healthy": an
             # Application ArgoCD has never reported on belongs in this list too.
@@ -349,13 +349,13 @@
           ansible.builtin.fail:
             msg: >-
               Application[{{ _first.metadata.name }}] did not reach Synced+Healthy
-              within {{ ctlabs_argoapp_wait_timeout }}s:
+              within {{ ctlabs_argoapps_wait_timeout }}s:
               sync={{ (_first.status | default({})).get('sync', {}).get('status', 'Unknown') }}
               health={{ (_first.status | default({})).get('health', {}).get('status', 'Unknown') }}.
               ArgoCD said: {{ _errmsg }}.
               Affected: {{ _stuck | map(attribute='metadata.name') | map('string') | list | join(', ') }}.
               Inspect with:
-              kubectl get applications -n {{ ctlabs_argoapp_namespace }} -o yaml
+              kubectl get applications -n {{ ctlabs_argoapps_namespace }} -o yaml
           when:
             - (_ours | selectattr('status.sync.status',   'defined')
                       | selectattr('status.health.status', 'defined')

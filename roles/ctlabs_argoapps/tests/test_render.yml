@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tests/test_render.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tests/test_render.yml
 # Description : render the Application template for every source form and
 #               assert the result, without needing a cluster.
 #
@@ -11,23 +11,23 @@
 # application stays silent.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argoapp.test.render
+- name: ctlabs_argoapps.test.render
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    ctlabs_argoapp_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
-    ctlabs_argoapp_repo_template: "{{ playbook_dir | dirname }}/templates/repository.yml.j2"
-    ctlabs_argoapp_namespace : argo
-    ctlabs_argoapp_project   : default
-    ctlabs_argoapp_server    : https://kubernetes.default.svc
-    ctlabs_argoapp_sync_policy:
+    ctlabs_argoapps_template: "{{ playbook_dir | dirname }}/templates/application.yml.j2"
+    ctlabs_argoapps_repo_template: "{{ playbook_dir | dirname }}/templates/repository.yml.j2"
+    ctlabs_argoapps_namespace : argo
+    ctlabs_argoapps_project   : default
+    ctlabs_argoapps_server    : https://kubernetes.default.svc
+    ctlabs_argoapps_sync_policy:
       automated:
         prune    : true
         selfHeal : true
       syncOptions:
         - CreateNamespace=true
-    ctlabs_argoapp_finalizers:
+    ctlabs_argoapps_finalizers:
       - resources-finalizer.argocd.argoproj.io
 
     test_app_helm:
@@ -111,13 +111,13 @@
     #
     # helm chart source, application says nothing about sync/destination
     #
-    - name: ctlabs_argoapp.test.render.helm
+    - name: ctlabs_argoapps.test.render.helm
       vars:
         app: "{{ test_app_helm }}"
       set_fact:
-        rendered_helm: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
+        rendered_helm: "{{ lookup('template', ctlabs_argoapps_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.helm.assert
+    - name: ctlabs_argoapps.test.render.helm.assert
       assert:
         that:
           - rendered_helm['apiVersion'] == 'argoproj.io/v1alpha1'
@@ -146,13 +146,13 @@
     # synthetic 'sourceFormTheRoleHasNeverHeardOf' key is a passthrough probe,
     # not a suggested config - ArgoCD prunes fields outside its CRD schema.
     #
-    - name: ctlabs_argoapp.test.render.directory
+    - name: ctlabs_argoapps.test.render.directory
       vars:
         app: "{{ test_app_directory }}"
       set_fact:
-        rendered_directory: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
+        rendered_directory: "{{ lookup('template', ctlabs_argoapps_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.directory.assert
+    - name: ctlabs_argoapps.test.render.directory.assert
       assert:
         that:
           - "'chart' not in rendered_directory['spec']['source']"
@@ -169,14 +169,14 @@
     # finalizers opt-out + valuesObject type fidelity (int stays int, bool
     # stays bool - the Jinja True/False trap)
     #
-    - name: ctlabs_argoapp.test.render.values_object
+    - name: ctlabs_argoapps.test.render.values_object
       vars:
         app: "{{ test_app_no_finalizers }}"
-        ctlabs_argoapp_finalizers: []
+        ctlabs_argoapps_finalizers: []
       set_fact:
-        rendered_values: "{{ lookup('template', ctlabs_argoapp_template) | from_yaml }}"
+        rendered_values: "{{ lookup('template', ctlabs_argoapps_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.values_object.assert
+    - name: ctlabs_argoapps.test.render.values_object.assert
       assert:
         that:
           - "'finalizers' not in rendered_values['metadata']"
@@ -188,13 +188,13 @@
     #
     # repository credentials Secret
     #
-    - name: ctlabs_argoapp.test.render.repository
+    - name: ctlabs_argoapps.test.render.repository
       vars:
         repo: "{{ test_repo_full }}"
       set_fact:
-        rendered_repo: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+        rendered_repo: "{{ lookup('template', ctlabs_argoapps_repo_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.repository.assert
+    - name: ctlabs_argoapps.test.render.repository.assert
       assert:
         that:
           - rendered_repo['apiVersion'] == 'v1'
@@ -221,13 +221,13 @@
     #
     # minimal entry: type defaults to git, booleans omitted entirely
     #
-    - name: ctlabs_argoapp.test.render.repository.minimal
+    - name: ctlabs_argoapps.test.render.repository.minimal
       vars:
         repo: "{{ test_repo_minimal }}"
       set_fact:
-        rendered_repo_min: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+        rendered_repo_min: "{{ lookup('template', ctlabs_argoapps_repo_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.repository.minimal.assert
+    - name: ctlabs_argoapps.test.render.repository.minimal.assert
       assert:
         that:
           - rendered_repo_min['stringData']['type'] == 'git'
@@ -240,13 +240,13 @@
     # so an unfiltered splat would turn a typo into a mystery TLS failure rather
     # than an error. The allowlist must drop it.
     #
-    - name: ctlabs_argoapp.test.render.repository.allowlist
+    - name: ctlabs_argoapps.test.render.repository.allowlist
       vars:
         repo: "{{ test_repo_typo }}"
       set_fact:
-        rendered_repo_typo: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+        rendered_repo_typo: "{{ lookup('template', ctlabs_argoapps_repo_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.repository.allowlist.assert
+    - name: ctlabs_argoapps.test.render.repository.allowlist.assert
       assert:
         that:
           - "'insecure_ssl' not in rendered_repo_typo['stringData']"
@@ -258,13 +258,13 @@
     # into a literal block, which silently corrupts a PEM. The SSH key must come
     # back byte-identical or the repo simply fails to authenticate.
     #
-    - name: ctlabs_argoapp.test.render.repository.ssh
+    - name: ctlabs_argoapps.test.render.repository.ssh
       vars:
         repo: "{{ test_repo_ssh }}"
       set_fact:
-        rendered_repo_ssh: "{{ lookup('template', ctlabs_argoapp_repo_template) | from_yaml }}"
+        rendered_repo_ssh: "{{ lookup('template', ctlabs_argoapps_repo_template) | from_yaml }}"
 
-    - name: ctlabs_argoapp.test.render.repository.ssh.assert
+    - name: ctlabs_argoapps.test.render.repository.ssh.assert
       assert:
         that:
           - rendered_repo_ssh['stringData']['sshPrivateKey'] == test_repo_ssh['sshPrivateKey']

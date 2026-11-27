@@ -1,4 +1,4 @@
-# Ansible Role `ctlabs_argoapp`
+# Ansible Role `ctlabs_argoapps`
 
 Declares ArgoCD `Application` objects — cert-manager, external-secrets, and
 anything else you want reconciled by ArgoCD instead of by `helm`.
@@ -14,11 +14,11 @@ list on every cluster lab.
 
 | Tag                           | Targets                          |
 |-------------------------------|----------------------------------|
-| `ctlabs_argoapp`              | all role tasks                   |
-| `ctlabs_argoapp.precheck`     | prechecks only                   |
-| `ctlabs_argoapp.applications` | CRD wait + apply + health wait   |
-| `ctlabs_argoapp.repositories` | repository credential Secrets    |
-| `ctlabs_argoapp.facts`        | local facts write (setup play)   |
+| `ctlabs_argoapps`              | all role tasks                   |
+| `ctlabs_argoapps.precheck`     | prechecks only                   |
+| `ctlabs_argoapps.applications` | CRD wait + apply + health wait   |
+| `ctlabs_argoapps.repositories` | repository credential Secrets    |
+| `ctlabs_argoapps.facts`        | local facts write (setup play)   |
 
 ## Prechecks
 
@@ -56,22 +56,22 @@ list on every cluster lab.
 
 | Variable                                     | Default                                             | Description                                                                                  |
 |----------------------------------------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `ctlabs_argoapp.defaults.namespace`      | `argo`                                               | ArgoCD control-plane **namespace** (Application CRs go here). `ctlabs_helm` deploys release `argocd` into namespace `argo` (`helm list -A`: NAME=`argocd`, NAMESPACE=`argo`) — the release *name* is not the namespace |
-| `ctlabs_argoapp.defaults.kubeconfig`     | `""`                                                | `KUBECONFIG` path; empty = controller default                                                |
-| `ctlabs_argoapp.defaults.interpreter`    | `""`                                                | `ansible_python_interpreter` override, e.g. `/usr/sbin/ip vrf exec default /usr/bin/python3` |
-| `ctlabs_argoapp.defaults.project`        | `default`                                           | default ArgoCD AppProject                                                                    |
-| `ctlabs_argoapp.defaults.server`         | `https://kubernetes.default.svc`                    | default destination API server                                                               |
-| `ctlabs_argoapp.defaults.sync_policy`    | automated (prune, selfHeal, `CreateNamespace=true`) | default `spec.syncPolicy`                                                                    |
-| `ctlabs_argoapp.defaults.finalizers`     | `[resources-finalizer.argocd.argoproj.io]`          | cascade-delete resources on Application removal; `[]` keeps them                             |
-| `ctlabs_argoapp.defaults.wait`           | `true`                                              | wait for `Synced` + `Healthy` after apply                                                    |
-| `ctlabs_argoapp.defaults.wait_timeout`   | `600`                                               | wait budget for an app still rolling out (seconds)                                          |
-| `ctlabs_argoapp.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
-| `ctlabs_argoapp.defaults.settle_retries` | `6`                                                | polls before concluding an app is merely rolling out; see [Failing fast](#failing-fast-on-bad-credentials) |
-| `ctlabs_argoapp.defaults.error_conditions` | `[ComparisonError, SyncError, InvalidSpecError, DeletionError]` | ArgoCD condition types that mean "cannot reconcile", not "still working"   |
-| `ctlabs_argoapp.defaults.transient_errors` | connectivity substrings (see [Transient errors](#transient-errors-wait-dont-fail)) | error **messages** that mean "not ready yet", not "misconfigured" — these are waited out instead of failed |
-| `ctlabs_argoapp.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
-| `ctlabs_argoapp.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
-| `ctlabs_argoapp.defaults.repositories`   | `[]`                                                | git/helm repositories ArgoCD may fetch, with credentials (see below)                        |
+| `ctlabs_argoapps.defaults.namespace`      | `argo`                                               | ArgoCD control-plane **namespace** (Application CRs go here). `ctlabs_helm` deploys release `argocd` into namespace `argo` (`helm list -A`: NAME=`argocd`, NAMESPACE=`argo`) — the release *name* is not the namespace |
+| `ctlabs_argoapps.defaults.kubeconfig`     | `""`                                                | `KUBECONFIG` path; empty = controller default                                                |
+| `ctlabs_argoapps.defaults.interpreter`    | `""`                                                | `ansible_python_interpreter` override, e.g. `/usr/sbin/ip vrf exec default /usr/bin/python3` |
+| `ctlabs_argoapps.defaults.project`        | `default`                                           | default ArgoCD AppProject                                                                    |
+| `ctlabs_argoapps.defaults.server`         | `https://kubernetes.default.svc`                    | default destination API server                                                               |
+| `ctlabs_argoapps.defaults.sync_policy`    | automated (prune, selfHeal, `CreateNamespace=true`) | default `spec.syncPolicy`                                                                    |
+| `ctlabs_argoapps.defaults.finalizers`     | `[resources-finalizer.argocd.argoproj.io]`          | cascade-delete resources on Application removal; `[]` keeps them                             |
+| `ctlabs_argoapps.defaults.wait`           | `true`                                              | wait for `Synced` + `Healthy` after apply                                                    |
+| `ctlabs_argoapps.defaults.wait_timeout`   | `600`                                               | wait budget for an app still rolling out (seconds)                                          |
+| `ctlabs_argoapps.defaults.wait_delay`     | `10`                                                | poll interval while waiting                                                                  |
+| `ctlabs_argoapps.defaults.settle_retries` | `6`                                                | polls before concluding an app is merely rolling out; see [Failing fast](#failing-fast-on-bad-credentials) |
+| `ctlabs_argoapps.defaults.error_conditions` | `[ComparisonError, SyncError, InvalidSpecError, DeletionError]` | ArgoCD condition types that mean "cannot reconcile", not "still working"   |
+| `ctlabs_argoapps.defaults.transient_errors` | connectivity substrings (see [Transient errors](#transient-errors-wait-dont-fail)) | error **messages** that mean "not ready yet", not "misconfigured" — these are waited out instead of failed |
+| `ctlabs_argoapps.defaults.crd_wait`       | `300`                                               | wait for the `applications.argoproj.io` CRD                                                  |
+| `ctlabs_argoapps.defaults.applications`   | `[]`                                                | applications to declare (normally supplied per host as a local fact)                         |
+| `ctlabs_argoapps.defaults.repositories`   | `[]`                                                | git/helm repositories ArgoCD may fetch, with credentials (see below)                        |
 
 ### Application fields
 
@@ -324,7 +324,7 @@ Notes:
   server rejects a real YAML boolean.
 - **Applied before the applications.** The Secrets must exist before an
   application naming the repo is created, so `repositories` is also tagged
-  `ctlabs_argoapp.applications` — a `-t ctlabs_argoapp.applications` run still
+  `ctlabs_argoapps.applications` — a `-t ctlabs_argoapps.applications` run still
   creates the credentials its apps need.
 - **Empty list is a complete no-op**, like `applications`.
 - **Where the repo lives is out of scope.** ArgoCD's repo-server is a pod, so
@@ -336,7 +336,7 @@ Notes:
 ### Secrets policy
 
 Credentials are stored **in plaintext in the local fact file**
-(`/etc/ansible/facts.d/ctlabs_argoapp.fact`), the same way `ctlabs_gitea` keeps
+(`/etc/ansible/facts.d/ctlabs_argoapps.fact`), the same way `ctlabs_gitea` keeps
 its own. Acceptable for a lab; anything shared or long-lived should come from
 `ctlabs_vault` instead. A vault-backed variant (read the password at apply time
 so it never lands in a fact file) is a deliberate non-goal for now.
@@ -363,7 +363,7 @@ ca_configmaps:
 The chart reads it via `caProvider` / `secretStores.vault.ca.configMapName`
 (helm side creates it additively; the old `cert-vault-sync-vault-ca` ConfigMap
 is removed after sync). Deployment contract is unchanged from the former
-`ctlabs_argoapp.vault_ca`: declarative modules only (no kubectl/command), the
+`ctlabs_argoapps.vault_ca`: declarative modules only (no kubectl/command), the
 PEM is slurped on the node with `become: true`, and the namespace is created
 if absent.
 
@@ -476,7 +476,7 @@ sync (or a hard refresh, if ArgoCD is serving a cached manifest).
 
 ## Local Facts
 
-Written to `/etc/ansible/facts.d/ctlabs_argoapp.fact`:
+Written to `/etc/ansible/facts.d/ctlabs_argoapps.fact`:
 
 ```json
 {
@@ -506,7 +506,7 @@ Written to `/etc/ansible/facts.d/ctlabs_argoapp.fact`:
 }
 ```
 
-Per-host resolution via `ctg_facts.ctlabs_argoapp.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default. The forward list is `_knobs` in `templates/facts.json.j2` (`namespace`, `kubeconfig`, `interpreter`, `project`, `server`, `wait`, `wait_timeout`, `crd_wait`, `sync_policy`, `finalizers`, `repositories`, `transient_errors`) plus `applications`.
+Per-host resolution via `ctg_facts.ctlabs_argoapps.*` — fact is authoritative, falls back to role defaults. Only knobs actually set for a host are written to the fact file, so an absent key still reaches the role default. The forward list is `_knobs` in `templates/facts.json.j2` (`namespace`, `kubeconfig`, `interpreter`, `project`, `server`, `wait`, `wait_timeout`, `crd_wait`, `sync_policy`, `finalizers`, `repositories`, `transient_errors`) plus `applications`.
 
 ## ctlabs play.setup (install cert-manager and external-secrets)
 ```yml
@@ -558,7 +558,7 @@ profile name:
 ```yml
 # role_profiles.yml
 argoapp:
-  role: ctlabs_argoapp
+  role: ctlabs_argoapps
   tags: [argoapp]
   hosts: [rke21]
 
@@ -592,11 +592,11 @@ argoapp:
 ```
 
 **The block key in `setup_profiles.yml` MUST match the `role_profiles.yml`
-profile name (`argoapp`).** Keyed `ctlabs_argoapp` instead, `lab.rb`'s
+profile name (`argoapp`).** Keyed `ctlabs_argoapps` instead, `lab.rb`'s
 `build_play_setup` silently ignores it: no fact is written, the role runs on its
 defaults, and it no-ops while looking perfectly healthy. The fact file itself is
-still `/etc/ansible/facts.d/ctlabs_argoapp.fact` and precheck reads
-`ctg_facts.ctlabs_argoapp.*` — only the setup_profiles *block key* is the short
+still `/etc/ansible/facts.d/ctlabs_argoapps.fact` and precheck reads
+`ctg_facts.ctlabs_argoapps.*` — only the setup_profiles *block key* is the short
 name.
 
 Hosts in the profile need the lab's ansible play to carry the `argoapp` tag (add
@@ -613,5 +613,5 @@ the role only applies Applications.
 ## Tests
 
 ```sh
-pytest -sv roles/ctlabs_argoapp/tests
+pytest -sv roles/ctlabs_argoapps/tests
 ```

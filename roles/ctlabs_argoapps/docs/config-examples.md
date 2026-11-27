@@ -1,6 +1,6 @@
-# Configuring cert-manager / external-secrets with `ctlabs_argoapp`
+# Configuring cert-manager / external-secrets with `ctlabs_argoapps`
 
-`ctlabs_argoapp` **installs the operators**. 
+`ctlabs_argoapps` **installs the operators**. 
   Their configuration is not an ArgoCD Application and does not belong in the same `applications:` list 
     — an `Issuer` or a `ClusterSecretStore` is a plain custom resource that cert-manager / external-secrets each define and watch.
 
@@ -92,10 +92,10 @@ spec:
 ```yaml
 # in setup_profiles.yml — the block MUST be keyed by the role_profiles profile
 # name ('argoapp', matching role_profiles.yml's argoapp: entry). Keyed
-# 'ctlabs_argoapp' instead, lab.rb's build_play_setup silently ignores the block,
+# 'ctlabs_argoapps' instead, lab.rb's build_play_setup silently ignores the block,
 # no fact is written, and every knob here falls through to the role defaults.
-# (The on-host fact file is still /etc/ansible/facts.d/ctlabs_argoapp.fact and
-# precheck reads ctg_facts.ctlabs_argoapp.* — those names are correct and unchanged.)
+# (The on-host fact file is still /etc/ansible/facts.d/ctlabs_argoapps.fact and
+# precheck reads ctg_facts.ctlabs_argoapps.* — those names are correct and unchanged.)
 argoapp:
   role: argoapp
   defaults:

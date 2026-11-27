@@ -1,29 +1,29 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/main.yml
-# Description : main ctlabs_argoapp tasks file
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tasks/main.yml
+# Description : main ctlabs_argoapps tasks file
 # ------------------------------------------------------------------------------
 
 - import_tasks: precheck.yml
   tags:
-    - ctlabs_argoapp
-    - ctlabs_argoapp.precheck
+    - ctlabs_argoapps
+    - ctlabs_argoapps.precheck
     # 'applications' and 'repositories' are carried here because this file is
     # where both lists get resolved: whichever of the two task files a caller
     # selects on its own must still pull precheck in with it
-    - ctlabs_argoapp.applications
-    - ctlabs_argoapp.repositories
+    - ctlabs_argoapps.applications
+    - ctlabs_argoapps.repositories
 
 - import_tasks: repositories.yml
   tags:
-    - ctlabs_argoapp
-    - ctlabs_argoapp.repositories
-    # also tagged 'applications': limiting a run to -t ctlabs_argoapp.applications
+    - ctlabs_argoapps
+    - ctlabs_argoapps.repositories
+    # also tagged 'applications': limiting a run to -t ctlabs_argoapps.applications
     # must still create the credentials its git-backed apps need
-    - ctlabs_argoapp.applications
+    - ctlabs_argoapps.applications
 
 - import_tasks: applications.yml
   tags:
-    - ctlabs_argoapp
-    - ctlabs_argoapp.applications
+    - ctlabs_argoapps
+    - ctlabs_argoapps.applications

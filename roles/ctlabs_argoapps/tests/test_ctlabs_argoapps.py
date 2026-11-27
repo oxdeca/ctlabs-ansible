@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tests/test_ctlabs_argoapp.py
-# Description : pytest tests for ctlabs_argoapp role
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tests/test_ctlabs_argoapps.py
+# Description : pytest tests for ctlabs_argoapps role
 # ------------------------------------------------------------------------------
 
 import glob
@@ -42,7 +42,7 @@ def test_role_files_exist(role_dir):
 
 def test_playbook_syntax_check(role_dir):
     _, env = _repo_env()
-    playbook = os.path.join(role_dir, "tests", "test_argoapp.yml")
+    playbook = os.path.join(role_dir, "tests", "test_argoapps.yml")
     result = subprocess.run(
         ["ansible-playbook", "--syntax-check", playbook],
         env=env,
@@ -119,12 +119,12 @@ def test_helm_conflict_guard_fails_loudly(role_dir):
     with open(os.path.join(role_dir, "tasks", "precheck.yml")) as f:
         precheck = yaml.safe_load(f)
     names = [t.get("name") for t in precheck]
-    assert "ctlabs_argoapp.tasks.precheck.helm.charts" in names
-    guard = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.helm.conflict")
+    assert "ctlabs_argoapps.tasks.precheck.helm.charts" in names
+    guard = next(t for t in precheck if t.get("name") == "ctlabs_argoapps.tasks.precheck.helm.conflict")
     assert "assert" in guard, "the helm conflict guard must fail, not silently skip"
-    assert "ctlabs_argoapp_conflicts | length == 0" in guard["assert"]["that"][0]
-    charts = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.helm.charts")
-    assert ".ctlabs_helm" in charts["set_fact"]["ctlabs_argoapp_helm_charts"]
+    assert "ctlabs_argoapps_conflicts | length == 0" in guard["assert"]["that"][0]
+    charts = next(t for t in precheck if t.get("name") == "ctlabs_argoapps.tasks.precheck.helm.charts")
+    assert ".ctlabs_helm" in charts["set_fact"]["ctlabs_argoapps_helm_charts"]
 
 
 def test_role_is_noop_without_applications(role_dir):
@@ -133,7 +133,7 @@ def test_role_is_noop_without_applications(role_dir):
     with open(os.path.join(role_dir, "tasks", "applications.yml")) as f:
         tasks = yaml.safe_load(f)
     assert len(tasks) == 1, "applications.yml should be a single guarded block"
-    assert tasks[0]["when"] == "ctlabs_argoapp_applications | length > 0"
+    assert tasks[0]["when"] == "ctlabs_argoapps_applications | length > 0"
 
 
 def test_repositories_are_noop_and_created_before_applications(role_dir):
@@ -146,22 +146,22 @@ def test_repositories_are_noop_and_created_before_applications(role_dir):
     with open(os.path.join(role_dir, "tasks", "repositories.yml")) as f:
         tasks = yaml.safe_load(f)
     assert len(tasks) == 1, "repositories.yml should be a single guarded block"
-    assert tasks[0]["when"] == "ctlabs_argoapp_repositories | length > 0"
+    assert tasks[0]["when"] == "ctlabs_argoapps_repositories | length > 0"
     block = tasks[0]["block"]
 
     # the credential state has to be captured BEFORE it is overwritten, or there
     # is nothing to roll back to
     names = [t["name"] for t in block]
-    assert "ctlabs_argoapp.tasks.repositories.capture" in names
-    assert names.index("ctlabs_argoapp.tasks.repositories.capture") < names.index(
-        "ctlabs_argoapp.tasks.repositories.apply"
+    assert "ctlabs_argoapps.tasks.repositories.capture" in names
+    assert names.index("ctlabs_argoapps.tasks.repositories.capture") < names.index(
+        "ctlabs_argoapps.tasks.repositories.apply"
     ), "capture must precede apply"
-    capture = block[names.index("ctlabs_argoapp.tasks.repositories.capture")]
+    capture = block[names.index("ctlabs_argoapps.tasks.repositories.capture")]
     # a snapshot must never be the thing that fails the run
     assert capture["failed_when"] is False
     assert capture["no_log"] is True
     assert "repository.yml.j2" in block[
-        names.index("ctlabs_argoapp.tasks.repositories.apply")
+        names.index("ctlabs_argoapps.tasks.repositories.apply")
     ]["kubernetes.core.k8s"]["definition"]
 
     with open(os.path.join(role_dir, "tasks", "main.yml")) as f:
@@ -173,7 +173,7 @@ def test_repositories_are_noop_and_created_before_applications(role_dir):
 
 
 def test_repositories_tag_also_covers_applications_run(role_dir):
-    # -t ctlabs_argoapp.applications is how this role is normally limited. If
+    # -t ctlabs_argoapps.applications is how this role is normally limited. If
     # the repositories file were not also tagged, that run would skip the
     # credentials and every git-backed app would fail to sync.
     with open(os.path.join(role_dir, "tasks", "main.yml")) as f:
@@ -182,7 +182,7 @@ def test_repositories_tag_also_covers_applications_run(role_dir):
         t for t in main
         if t.get("import_tasks") == "repositories.yml"
     )
-    assert "ctlabs_argoapp.applications" in repos["tags"]
+    assert "ctlabs_argoapps.applications" in repos["tags"]
 
 
 def test_failed_run_rolls_back_credentials_it_changed(role_dir):
@@ -199,7 +199,7 @@ def test_failed_run_rolls_back_credentials_it_changed(role_dir):
 
     # only act on a run that actually changed credentials, and only when the
     # role manages any
-    assert "ctlabs_argoapp_repositories | length > 0" in tasks[0]["when"]
+    assert "ctlabs_argoapps_repositories | length > 0" in tasks[0]["when"]
     assert "res_repo is changed" in tasks[0]["when"]
 
     plan = _find_task(block, ".rollback.plan")
@@ -243,7 +243,7 @@ def test_repository_secret_carries_the_discovery_label(role_dir):
     assert "argocd.argoproj.io/secret-type" in template
     assert "stringData" in template
     # booleans must be stringified: stringData rejects real YAML booleans
-    assert "ctlabs_argoapp_namespace" in template
+    assert "ctlabs_argoapps_namespace" in template
 
 
 def test_repository_keys_are_allowlisted_not_splatted(role_dir):
@@ -261,19 +261,19 @@ def test_repositories_resolved_and_validated_in_precheck(role_dir):
         precheck = yaml.safe_load(f)
     names = [t.get("name") for t in precheck]
 
-    resolve = next(t for t in precheck if t.get("name") == "ctlabs_argoapp.tasks.precheck.resolve")
-    assert "ctlabs_argoapp_repositories" in resolve["set_fact"]
+    resolve = next(t for t in precheck if t.get("name") == "ctlabs_argoapps.tasks.precheck.resolve")
+    assert "ctlabs_argoapps_repositories" in resolve["set_fact"]
 
     for expected in (
-        "ctlabs_argoapp.tasks.precheck.repositories.spec",
-        "ctlabs_argoapp.tasks.precheck.repositories.names",
+        "ctlabs_argoapps.tasks.precheck.repositories.spec",
+        "ctlabs_argoapps.tasks.precheck.repositories.names",
     ):
         assert expected in names, f"precheck must validate {expected}"
     spec = next(
         t for t in precheck
-        if t.get("name") == "ctlabs_argoapp.tasks.precheck.repositories.spec"
+        if t.get("name") == "ctlabs_argoapps.tasks.precheck.repositories.spec"
     )
-    assert spec["loop"] == "{{ ctlabs_argoapp_repositories }}"
+    assert spec["loop"] == "{{ ctlabs_argoapps_repositories }}"
     # these run no cluster calls, so they must NOT be guarded on applications
     for task in precheck:
         if ".repositories." in task.get("name", ""):
@@ -283,7 +283,7 @@ def test_repositories_resolved_and_validated_in_precheck(role_dir):
 def test_defaults_document_repositories_as_optional(role_dir):
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)
-    assert defaults["ctlabs_argoapp"]["defaults"]["repositories"] == []
+    assert defaults["ctlabs_argoapps"]["defaults"]["repositories"] == []
 
 
 def _extract_status_expressions(role_dir):
@@ -335,7 +335,7 @@ def test_status_expressions_tolerate_unreported_applications(role_dir):
     # only correct if the shipped list covers the connectivity failures and none
     # of the credential ones. One JSON object - ansible will not parse two.
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
-        transient = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]["transient_errors"]
+        transient = yaml.safe_load(f)["ctlabs_argoapps"]["defaults"]["transient_errors"]
     extra = json.dumps(
         dict(
             _extract_status_expressions(role_dir),
@@ -402,14 +402,14 @@ def test_numeric_wait_knobs_are_cast_at_point_of_use(role_dir):
         block = yaml.safe_load(f)[0]["block"]
     wait = _find_task(block, ".wait")
     assert wait["retries"] == (
-        "{{ ctlabs_argoapp_wait_timeout | int // ctlabs_argoapp_wait_delay | int }}"
+        "{{ ctlabs_argoapps_wait_timeout | int // ctlabs_argoapps_wait_delay | int }}"
     )
-    assert wait["delay"] == "{{ ctlabs_argoapp_wait_delay | int }}"
+    assert wait["delay"] == "{{ ctlabs_argoapps_wait_delay | int }}"
     # the wait is now set-level (one read of all Applications), so there is no
     # per-app `when` on it - the settle phase is what honours per-app opt-out
     assert "when" not in wait
     crd = _find_task(block, ".crd.available")
-    assert crd["kubernetes.core.k8s_info"]["wait_timeout"] == "{{ ctlabs_argoapp_crd_wait | int }}"
+    assert crd["kubernetes.core.k8s_info"]["wait_timeout"] == "{{ ctlabs_argoapps_crd_wait | int }}"
 
     for path in glob.glob(os.path.join(role_dir, "tasks", "*.yml")):
         with open(path) as f2:
@@ -516,7 +516,7 @@ def test_wait_fails_fast_on_argocd_error_conditions(role_dir):
         pre = yaml.safe_load(f)
     waiting = next(t for t in pre if t.get("name", "").endswith(".precheck.waiting"))
     assert waiting["when"] == "_a['wait'] | default(_c) | bool"
-    assert "ctlabs_argoapp_waiting" in waiting["set_fact"]
+    assert "ctlabs_argoapps_waiting" in waiting["set_fact"]
 
     # The opt-in list is an accumulating host fact. It MUST be reset before
     # being rebuilt: set_fact facts persist for the whole run and this role is
@@ -526,16 +526,16 @@ def test_wait_fails_fast_on_argocd_error_conditions(role_dir):
     # stalls for the full wait_timeout.
     names = [t.get("name", "") for t in pre]
     reset = next(t for t in pre if t.get("name", "").endswith(".precheck.waiting.reset"))
-    assert reset["set_fact"]["ctlabs_argoapp_waiting"] == []
+    assert reset["set_fact"]["ctlabs_argoapps_waiting"] == []
     assert names.index(reset["name"]) < names.index(waiting["name"])
 
     apps_text = open(os.path.join(role_dir, "tasks", "applications.yml")).read()
-    assert "ctlabs_argoapp_waiting" in apps_text
+    assert "ctlabs_argoapps_waiting" in apps_text
     # both the settle and the long wait must select against it
-    assert apps_text.count("ctlabs_argoapp_waiting") >= 4
+    assert apps_text.count("ctlabs_argoapps_waiting") >= 4
 
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
-        defaults = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]
+        defaults = yaml.safe_load(f)["ctlabs_argoapps"]["defaults"]
     assert defaults["error_conditions"] == [
         "ComparisonError",
         "SyncError",
@@ -576,7 +576,7 @@ def test_connectivity_failures_are_not_treated_as_bad_credentials(role_dir):
     assert "select('in', _msgtxt)" in errors["vars"]["_transient"]
 
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
-        defaults = yaml.safe_load(f)["ctlabs_argoapp"]["defaults"]
+        defaults = yaml.safe_load(f)["ctlabs_argoapps"]["defaults"]
     transient = defaults["transient_errors"]
     assert transient, "the list exists to be non-empty"
     # lowercasing is the mechanism, so an uppercase pattern can never match
@@ -603,9 +603,9 @@ def test_connectivity_failures_are_not_treated_as_bad_credentials(role_dir):
     resolve = next(
         t for t in precheck if t.get("name", "").endswith(".precheck.resolve")
     )
-    assert resolve["set_fact"]["ctlabs_argoapp_transient_errors"] == (
-        "{{ ctlabs_argoapp_fact['transient_errors'] "
-        "| default(ctlabs_argoapp.defaults.transient_errors) }}"
+    assert resolve["set_fact"]["ctlabs_argoapps_transient_errors"] == (
+        "{{ ctlabs_argoapps_fact['transient_errors'] "
+        "| default(ctlabs_argoapps.defaults.transient_errors) }}"
     )
     with open(os.path.join(role_dir, "templates", "facts.json.j2")) as f:
         assert "'transient_errors'" in f.read()
@@ -648,7 +648,7 @@ def test_precheck_verifies_argocd_instance_exists(role_dir):
     kinds = {t["kubernetes.core.k8s_info"]["kind"] for t in probe}
     assert kinds == {"Deployment", "StatefulSet"}, f"controller probes cover {kinds}"
     for task in probe:
-        assert task["kubernetes.core.k8s_info"]["namespace"] == "{{ ctlabs_argoapp_namespace }}"
+        assert task["kubernetes.core.k8s_info"]["namespace"] == "{{ ctlabs_argoapps_namespace }}"
         assert task["kubernetes.core.k8s_info"]["label_selectors"] == [
             "app.kubernetes.io/component=application-controller"
         ]
@@ -675,7 +675,7 @@ def test_argocd_precheck_is_guarded_and_safe_on_empty(role_dir):
         name = task.get("name", "")
         if ".argocd." not in name:
             continue
-        assert task.get("when") == "ctlabs_argoapp_applications | length > 0", (
+        assert task.get("when") == "ctlabs_argoapps_applications | length > 0", (
             f"{name} contacts the cluster and must be guarded by applications>0"
         )
 
@@ -694,4 +694,4 @@ def test_default_namespace_is_the_chart_release_namespace(role_dir):
     # every Application would land nowhere.
     with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
         defaults = yaml.safe_load(f)
-    assert defaults["ctlabs_argoapp"]["defaults"]["namespace"] == "argo"
+    assert defaults["ctlabs_argoapps"]["defaults"]["namespace"] == "argo"

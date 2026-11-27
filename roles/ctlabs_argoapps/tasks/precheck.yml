@@ -1,26 +1,26 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/precheck.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tasks/precheck.yml
 # Description : tasks prechecks
 #
-# Resolves the per-host local fact (ctg_facts.ctlabs_argoapp) against the
+# Resolves the per-host local fact (ctg_facts.ctlabs_argoapps) against the
 # role defaults, then validates the application list.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argoapp.tasks.precheck
+- name: ctlabs_argoapps.tasks.precheck
   block:
-    - name: ctlabs_argoapp.tasks.precheck.os.supported
+    - name: ctlabs_argoapps.tasks.precheck.os.supported
       assert:
-        that: ctg_os is in ctlabs_argoapp.os
+        that: ctg_os is in ctlabs_argoapps.os
         fail_msg: "OS[{{ctg_os}}] is not supported!"
   rescue:
-    - name: ctlabs_argoapp.tasks.precheck.skip.unsupported
+    - name: ctlabs_argoapps.tasks.precheck.skip.unsupported
       meta: end_host
 
-- name: ctlabs_argoapp.tasks.precheck.fact
+- name: ctlabs_argoapps.tasks.precheck.fact
   set_fact:
-    ctlabs_argoapp_fact: "{{ (ctg_facts | default({}, true)).ctlabs_argoapp | default({}, true) }}"
+    ctlabs_argoapps_fact: "{{ (ctg_facts | default({}, true)).ctlabs_argoapps | default({}, true) }}"
 
 #
 # resolution chain: local fact -> role default
@@ -30,33 +30,33 @@
 # override the documented opt-outs (finalizers: [], wait: false) with the
 # defaults. Only an absent key may fall through.
 #
-- name: ctlabs_argoapp.tasks.precheck.resolve
+- name: ctlabs_argoapps.tasks.precheck.resolve
   set_fact:
-    ctlabs_argoapp_applications : "{{ ctlabs_argoapp_fact['applications'] | default(ctlabs_argoapp.defaults.applications) }}"
-    ctlabs_argoapp_repositories: "{{ ctlabs_argoapp_fact['repositories'] | default(ctlabs_argoapp.defaults.repositories) }}"
-    ctlabs_argoapp_kubeconfig   : "{{ ctlabs_argoapp_fact['kubeconfig']   | default(ctlabs_argoapp.defaults.kubeconfig) }}"
-    ctlabs_argoapp_interpreter  : "{{ ctlabs_argoapp_fact['interpreter']  | default(ctlabs_argoapp.defaults.interpreter) }}"
-    ctlabs_argoapp_namespace    : "{{ ctlabs_argoapp_fact['namespace']    | default(ctlabs_argoapp.defaults.namespace) }}"
-    ctlabs_argoapp_project      : "{{ ctlabs_argoapp_fact['project']      | default(ctlabs_argoapp.defaults.project) }}"
-    ctlabs_argoapp_server       : "{{ ctlabs_argoapp_fact['server']       | default(ctlabs_argoapp.defaults.server) }}"
-    ctlabs_argoapp_sync_policy  : "{{ ctlabs_argoapp_fact['sync_policy']  | default(ctlabs_argoapp.defaults.sync_policy) }}"
-    ctlabs_argoapp_finalizers   : "{{ ctlabs_argoapp_fact['finalizers']   | default(ctlabs_argoapp.defaults.finalizers) }}"
-    ctlabs_argoapp_crd_wait     : "{{ ctlabs_argoapp_fact['crd_wait']     | default(ctlabs_argoapp.defaults.crd_wait) | int }}"
-    ctlabs_argoapp_wait         : "{{ ctlabs_argoapp_fact['wait']         | default(ctlabs_argoapp.defaults.wait) }}"
-    ctlabs_argoapp_settle_retries: "{{ ctlabs_argoapp_fact['settle_retries'] | default(ctlabs_argoapp.defaults.settle_retries) | int }}"
-    ctlabs_argoapp_transient_errors: "{{ ctlabs_argoapp_fact['transient_errors'] | default(ctlabs_argoapp.defaults.transient_errors) }}"
-    ctlabs_argoapp_wait_timeout : "{{ ctlabs_argoapp_fact['wait_timeout'] | default(ctlabs_argoapp.defaults.wait_timeout) | int }}"
+    ctlabs_argoapps_applications : "{{ ctlabs_argoapps_fact['applications'] | default(ctlabs_argoapps.defaults.applications) }}"
+    ctlabs_argoapps_repositories: "{{ ctlabs_argoapps_fact['repositories'] | default(ctlabs_argoapps.defaults.repositories) }}"
+    ctlabs_argoapps_kubeconfig   : "{{ ctlabs_argoapps_fact['kubeconfig']   | default(ctlabs_argoapps.defaults.kubeconfig) }}"
+    ctlabs_argoapps_interpreter  : "{{ ctlabs_argoapps_fact['interpreter']  | default(ctlabs_argoapps.defaults.interpreter) }}"
+    ctlabs_argoapps_namespace    : "{{ ctlabs_argoapps_fact['namespace']    | default(ctlabs_argoapps.defaults.namespace) }}"
+    ctlabs_argoapps_project      : "{{ ctlabs_argoapps_fact['project']      | default(ctlabs_argoapps.defaults.project) }}"
+    ctlabs_argoapps_server       : "{{ ctlabs_argoapps_fact['server']       | default(ctlabs_argoapps.defaults.server) }}"
+    ctlabs_argoapps_sync_policy  : "{{ ctlabs_argoapps_fact['sync_policy']  | default(ctlabs_argoapps.defaults.sync_policy) }}"
+    ctlabs_argoapps_finalizers   : "{{ ctlabs_argoapps_fact['finalizers']   | default(ctlabs_argoapps.defaults.finalizers) }}"
+    ctlabs_argoapps_crd_wait     : "{{ ctlabs_argoapps_fact['crd_wait']     | default(ctlabs_argoapps.defaults.crd_wait) | int }}"
+    ctlabs_argoapps_wait         : "{{ ctlabs_argoapps_fact['wait']         | default(ctlabs_argoapps.defaults.wait) }}"
+    ctlabs_argoapps_settle_retries: "{{ ctlabs_argoapps_fact['settle_retries'] | default(ctlabs_argoapps.defaults.settle_retries) | int }}"
+    ctlabs_argoapps_transient_errors: "{{ ctlabs_argoapps_fact['transient_errors'] | default(ctlabs_argoapps.defaults.transient_errors) }}"
+    ctlabs_argoapps_wait_timeout : "{{ ctlabs_argoapps_fact['wait_timeout'] | default(ctlabs_argoapps.defaults.wait_timeout) | int }}"
 
-- name: ctlabs_argoapp.tasks.precheck.wait_delay
+- name: ctlabs_argoapps.tasks.precheck.wait_delay
   set_fact:
-    ctlabs_argoapp_wait_delay: "{{ [ctlabs_argoapp.defaults.wait_delay, ctlabs_argoapp_wait_timeout | int] | min | int }}"
+    ctlabs_argoapps_wait_delay: "{{ [ctlabs_argoapps.defaults.wait_delay, ctlabs_argoapps_wait_timeout | int] | min | int }}"
 
 #
 # 'source' is opaque to this role, but these three fields are required by
 # ArgoCD itself for any application, so catching them here beats a cryptic
 # 'InvalidApplicationSpec' from the API server later.
 #
-- name: ctlabs_argoapp.tasks.precheck.waiting.reset
+- name: ctlabs_argoapps.tasks.precheck.waiting.reset
   set_fact:
     # Reset before rebuilding. `set_fact` facts persist for the whole run and
     # this role is applied by more than one play (argoapp + argoapp_certs), so
@@ -64,24 +64,24 @@
     # wait phase then compares `converged >= _declared | length`, which can
     # never hold once duplicates inflate the length, and the run stalls for the
     # full wait_timeout.
-    ctlabs_argoapp_waiting: []
+    ctlabs_argoapps_waiting: []
 
-- name: ctlabs_argoapp.tasks.precheck.waiting
+- name: ctlabs_argoapps.tasks.precheck.waiting
   vars:
-    _c: "{{ ctlabs_argoapp_wait }}"
+    _c: "{{ ctlabs_argoapps_wait }}"
   set_fact:
     # Which applications opted in to being waited on. Precomputed ONCE here
     # because the settle/wait phases read every Application in a single pass and
     # so cannot re-evaluate a per-item `when`. Without this the per-app
     # `wait: false` opt-out silently stops working - an un-waited app would be
     # waited on, and could fail the run.
-    ctlabs_argoapp_waiting: "{{ ctlabs_argoapp_waiting + [ _a.name ] }}"
-  loop: "{{ ctlabs_argoapp_applications }}"
+    ctlabs_argoapps_waiting: "{{ ctlabs_argoapps_waiting + [ _a.name ] }}"
+  loop: "{{ ctlabs_argoapps_applications }}"
   loop_control:
     loop_var: _a
   when: _a['wait'] | default(_c) | bool
 
-- name: ctlabs_argoapp.tasks.precheck.applications.spec
+- name: ctlabs_argoapps.tasks.precheck.applications.spec
   assert:
     that:
       - "'name' in app"
@@ -92,11 +92,11 @@
       Application[{{ app | to_json }}] needs 'name' and a 'source' mapping
       containing at least 'repoURL' (plus exactly one of chart/path/directory/
       kustomize/plugin, per ArgoCD's spec.source).
-  loop: "{{ ctlabs_argoapp_applications }}"
+  loop: "{{ ctlabs_argoapps_applications }}"
   loop_control:
     loop_var: app
 
-- name: ctlabs_argoapp.tasks.precheck.repositories.spec
+- name: ctlabs_argoapps.tasks.precheck.repositories.spec
   assert:
     that:
       - "'name' in r"
@@ -105,7 +105,7 @@
       Repository[{{ r | to_json }}] needs 'name' (the Secret name ArgoCD will
       discover it under) and 'url' (which must match the source.repoURL of the
       application that uses it).
-  loop: "{{ ctlabs_argoapp_repositories }}"
+  loop: "{{ ctlabs_argoapps_repositories }}"
   loop_control:
     loop_var: r
 
@@ -125,7 +125,7 @@
 # that and warn. Never fail on it: a future ArgoCD field must not become a hard
 # blocker. List taken from the applications.argoproj.io CRD schema (v3.5.3).
 #
-- name: ctlabs_argoapp.tasks.precheck.applications.source.keys
+- name: ctlabs_argoapps.tasks.precheck.applications.source.keys
   vars:
     _source_keys_known:
       - chart
@@ -140,7 +140,7 @@
       - tagPrefix
       - targetRevision
     _source_keys_unknown: "{{ app['source'].keys() | difference(_source_keys_known) }}"
-  loop: "{{ ctlabs_argoapp_applications }}"
+  loop: "{{ ctlabs_argoapps_applications }}"
   loop_control:
     loop_var: app
   when: _source_keys_unknown | length > 0
@@ -158,18 +158,18 @@
 # the first, so one of the repositories ends up with the other's credentials and
 # the failure only shows up as an auth error at sync time.
 #
-- name: ctlabs_argoapp.tasks.precheck.repositories.names
+- name: ctlabs_argoapps.tasks.precheck.repositories.names
   assert:
     that:
-      - (ctlabs_argoapp_repositories | map(attribute='name') | list | unique | length) == (ctlabs_argoapp_repositories | length)
+      - (ctlabs_argoapps_repositories | map(attribute='name') | list | unique | length) == (ctlabs_argoapps_repositories | length)
     fail_msg: >-
-      Repository names must be unique: [{{ ctlabs_argoapp_repositories | map(attribute='name') | list | join(', ') }}].
+      Repository names must be unique: [{{ ctlabs_argoapps_repositories | map(attribute='name') | list | join(', ') }}].
       Two entries with the same name are the same Secret, so one repository ends
       up silently using the other's credentials.
 
-- name: ctlabs_argoapp.tasks.precheck.helm.charts
+- name: ctlabs_argoapps.tasks.precheck.helm.charts
   set_fact:
-    ctlabs_argoapp_helm_charts: "{{ ((ctg_facts | default({}, true)).ctlabs_helm | default({}, true)).charts | default([], true) }}"
+    ctlabs_argoapps_helm_charts: "{{ ((ctg_facts | default({}, true)).ctlabs_helm | default({}, true)).charts | default([], true) }}"
 
 #
 # Helm and ArgoCD must never manage the same release: both would keep
@@ -177,23 +177,23 @@
 # cause. This is a config error on both sides, so fail loudly rather than
 # silently dropping one of them.
 #
-- name: ctlabs_argoapp.tasks.precheck.helm.conflict.fact
+- name: ctlabs_argoapps.tasks.precheck.helm.conflict.fact
   set_fact:
-    ctlabs_argoapp_conflicts: >-
+    ctlabs_argoapps_conflicts: >-
       {{
-        (ctlabs_argoapp_helm_charts    | map(attribute='name') | map('lower') | list)
+        (ctlabs_argoapps_helm_charts    | map(attribute='name') | map('lower') | list)
         | intersect(
-            ctlabs_argoapp_applications | map(attribute='name') | map('lower') | list
+            ctlabs_argoapps_applications | map(attribute='name') | map('lower') | list
           )
       }}
 
-- name: ctlabs_argoapp.tasks.precheck.helm.conflict
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.helm.conflict
+  when: ctlabs_argoapps_applications | length > 0
   assert:
     that:
-      - ctlabs_argoapp_conflicts | length == 0
+      - ctlabs_argoapps_conflicts | length == 0
     fail_msg: >-
-      [{{ ctlabs_argoapp_conflicts | join(', ') }}] is declared BOTH as a
+      [{{ ctlabs_argoapps_conflicts | join(', ') }}] is declared BOTH as a
       ctlabs_helm chart and as an ArgoCD application. Helm and ArgoCD would
       fight over the same resources forever. Keep it in one place only.
 
@@ -207,12 +207,12 @@
 # message in seconds instead of a timeout or a mystery NoMatches later.
 # Guarded so the applications=[] path stays a complete no-op.
 #
-- name: ctlabs_argoapp.tasks.precheck.argocd.crd
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.crd
+  when: ctlabs_argoapps_applications | length > 0
   vars:
-    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+    ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
   environment:
-    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+    KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
   kubernetes.core.k8s_info:
     api_version  : v1
     kind         : CustomResourceDefinition
@@ -237,53 +237,53 @@
 # 'apps' covers both shapes: the helm chart runs it as a Deployment, the
 # operator as a StatefulSet, and this role must not care which.
 #
-- name: ctlabs_argoapp.tasks.precheck.argocd.controller
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.controller
+  when: ctlabs_argoapps_applications | length > 0
   vars:
-    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+    ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
   environment:
-    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+    KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
   kubernetes.core.k8s_info:
     api_version    : apps/v1
     kind           : Deployment
-    namespace      : "{{ ctlabs_argoapp_namespace }}"
+    namespace      : "{{ ctlabs_argoapps_namespace }}"
     label_selectors:
       - app.kubernetes.io/component=application-controller
   register: _argoapp_ctrl_deploy
   failed_when: false
 
-- name: ctlabs_argoapp.tasks.precheck.argocd.controller.statefulset
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.controller.statefulset
+  when: ctlabs_argoapps_applications | length > 0
   vars:
-    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+    ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
   environment:
-    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+    KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
   kubernetes.core.k8s_info:
     api_version    : apps/v1
     kind           : StatefulSet
-    namespace      : "{{ ctlabs_argoapp_namespace }}"
+    namespace      : "{{ ctlabs_argoapps_namespace }}"
     label_selectors:
       - app.kubernetes.io/component=application-controller
   register: _argoapp_ctrl_sts
   failed_when: false
 
-- name: ctlabs_argoapp.tasks.precheck.argocd.controller.collect
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.controller.collect
+  when: ctlabs_argoapps_applications | length > 0
   vars:
-    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+    ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
   environment:
-    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+    KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
   set_fact:
     _argoapp_ctrl_resources: >-
       {{ (_argoapp_ctrl_deploy.resources | default([]))
          + (_argoapp_ctrl_sts.resources | default([])) }}
 
-- name: ctlabs_argoapp.tasks.precheck.argocd.controller.ready
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.controller.ready
+  when: ctlabs_argoapps_applications | length > 0
   vars:
-    ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+    ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
   environment:
-    KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+    KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
   set_fact:
     # readyReplicas summed, and missing/absent -> 0. Kept as a single scalar so
     # the assert below never calls max() on an empty list (which would raise
@@ -294,17 +294,17 @@
          | map(attribute='readyReplicas', default=0)
          | map('int') | list | sum }}
 
-- name: ctlabs_argoapp.tasks.precheck.argocd.controller.assert
-  when: ctlabs_argoapp_applications | length > 0
+- name: ctlabs_argoapps.tasks.precheck.argocd.controller.assert
+  when: ctlabs_argoapps_applications | length > 0
   assert:
     that:
       - _argoapp_ctrl_resources | length > 0
       - _argoapp_ctrl_ready | int >= 1
     fail_msg: >-
       No ready ArgoCD application controller found in namespace
-      '{{ ctlabs_argoapp_namespace }}'. The applications.argoproj.io CRD is
+      '{{ ctlabs_argoapps_namespace }}'. The applications.argoproj.io CRD is
       present, but nothing is running to reconcile Application objects - this
       role would create them and they would sit OutOfSync forever. ArgoCD is
       installed by ctlabs_helm (argo/argo-cd) and must run BEFORE this role.
       Set defaults.namespace to the namespace ArgoCD actually runs in if it is
-      not '{{ ctlabs_argoapp_namespace }}'.
+      not '{{ ctlabs_argoapps_namespace }}'.

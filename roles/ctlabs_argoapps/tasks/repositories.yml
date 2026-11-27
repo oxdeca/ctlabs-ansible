@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/tasks/repositories.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/tasks/repositories.yml
 # Description : repository credential Secrets
 #
 # ArgoCD does not accept credentials on the Application - it discovers them from
@@ -18,8 +18,8 @@
 # An empty list is a complete no-op, exactly like applications.
 # ------------------------------------------------------------------------------
 
-- name: ctlabs_argoapp.tasks.repositories
-  when: ctlabs_argoapp_repositories | length > 0
+- name: ctlabs_argoapps.tasks.repositories
+  when: ctlabs_argoapps_repositories | length > 0
   block:
 
     #
@@ -27,17 +27,17 @@
     # undone. This must never itself fail the run: it exists only to make rollback
     # possible, and a snapshot that breaks the run defeats its own purpose.
     #
-    - name: ctlabs_argoapp.tasks.repositories.capture
+    - name: ctlabs_argoapps.tasks.repositories.capture
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s_info:
         kind          : Secret
-        namespace     : "{{ ctlabs_argoapp_namespace }}"
+        namespace     : "{{ ctlabs_argoapps_namespace }}"
         label_selectors:
           - argocd.argoproj.io/secret-type=repository
-      register       : ctlabs_argoapp_repo_before
+      register       : ctlabs_argoapps_repo_before
       failed_when    : false
       changed_when   : false
       # holds live credentials
@@ -56,25 +56,25 @@
     # task above instead of a second lookup, it already fetched every
     # repository-type Secret in this namespace.
     #
-    - name: ctlabs_argoapp.tasks.repositories.existing.versions
+    - name: ctlabs_argoapps.tasks.repositories.existing.versions
       set_fact:
-        ctlabs_argoapp_existing_repo_versions: >-
+        ctlabs_argoapps_existing_repo_versions: >-
           {{
-            ctlabs_argoapp_repo_before.resources | default([])
+            ctlabs_argoapps_repo_before.resources | default([])
               | map(attribute='metadata')
               | items2dict(key_name='name', value_name='resourceVersion')
           }}
 
-    - name: ctlabs_argoapp.tasks.repositories.apply
+    - name: ctlabs_argoapps.tasks.repositories.apply
       vars:
-        ansible_python_interpreter: "{{ ctlabs_argoapp_interpreter | default(omit, true) }}"
+        ansible_python_interpreter: "{{ ctlabs_argoapps_interpreter | default(omit, true) }}"
       environment:
-        KUBECONFIG: "{{ ctlabs_argoapp_kubeconfig | default(omit, true) }}"
+        KUBECONFIG: "{{ ctlabs_argoapps_kubeconfig | default(omit, true) }}"
       kubernetes.core.k8s:
         state     : present
         definition: "{{ lookup('template', 'repository.yml.j2') | from_yaml }}"
         force     : true
-      loop: "{{ ctlabs_argoapp_repositories }}"
+      loop: "{{ ctlabs_argoapps_repositories }}"
       loop_control:
         loop_var: repo
       register: res_repo

@@ -1,7 +1,7 @@
 ---
 
 # ------------------------------------------------------------------------------
-# File        : ctlabs-ansible/roles/ctlabs_argoapp/defaults/main.yml
+# File        : ctlabs-ansible/roles/ctlabs_argoapps/defaults/main.yml
 # Description : main defaults
 #
 # This role does NOT install ArgoCD itself - that is ctlabs_helm's job (the
@@ -9,7 +9,7 @@
 # that ArgoCD then manages (cert-manager, external-secrets, ...).
 # ------------------------------------------------------------------------------
 
-ctlabs_argoapp:
+ctlabs_argoapps:
   defaults:
     #
     # namespace holding the ArgoCD control plane, i.e. where the Application
@@ -173,7 +173,7 @@ ctlabs_argoapp:
 
     #
     # The applications to declare. Per-cluster inventory - normally supplied
-    # per host as the ctlabs_argoapp local fact, not edited here.
+    # per host as the ctlabs_argoapps local fact, not edited here.
     #
     # 'source' is ArgoCD's own spec.source, passed through verbatim, so any
     # source form ArgoCD supports (chart / directory / kustomize / plugin /
