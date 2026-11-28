@@ -38,7 +38,6 @@ ctlabs_openvpn:
       dev                : tun0
       cipher             : AES-256-CBC
       auth               : SHA512
-      forward            : true
       ca_ctlabs:
         certdir: /etc/ca-ctlabs
   os:

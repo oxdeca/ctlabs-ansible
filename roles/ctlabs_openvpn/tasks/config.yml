@@ -107,16 +107,3 @@
     group: root
     mode : '0600'
   notify: ctlabs_openvpn.handlers.client.service.restart
-
-# ------------------------------------------------------------------------------
-# IP forwarding (kernel)
-# ------------------------------------------------------------------------------
-- name: ctlabs_openvpn.tasks.config.sysctl.forwarding
-  when: ctg_facts.ctlabs_openvpn.forward | default(ctlabs_openvpn.defaults.config.forward) | bool
-  ansible.posix.sysctl:
-    name       : net.ipv4.ip_forward
-    value      : '1'
-    state      : present
-    reload     : true
-    sysctl_set : true
-  ignore_errors: true

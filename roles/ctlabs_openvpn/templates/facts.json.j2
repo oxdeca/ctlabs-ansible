@@ -25,9 +25,6 @@
 {% if _facts.auth is defined %},
   "auth"      : "{{ _facts.auth }}"
 {% endif %}
-{% if _facts.forward is defined %},
-  "forward"   : {{ 'true' if _facts.forward else 'false' }}
-{% endif %}
 {% if _facts.key_name is defined %},
   "key_name"  : "{{ _facts.key_name }}"
 {% endif %}

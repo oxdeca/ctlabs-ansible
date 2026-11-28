@@ -109,7 +109,6 @@ def test_facts_template_rendering_server(role_dir):
             "server_ip": "10.8.15.1",
             "client_ip": "10.8.15.2",
             "dev": "tun0",
-            "forward": True,
         }
     }
     rendered = tmpl.render(ctx)
@@ -118,7 +117,6 @@ def test_facts_template_rendering_server(role_dir):
     assert data["server_ip"] == "10.8.15.1"
     assert data["client_ip"] == "10.8.15.2"
     assert data["dev"] == "tun0"
-    assert data["forward"] is True
     assert "remote" not in data
 
 

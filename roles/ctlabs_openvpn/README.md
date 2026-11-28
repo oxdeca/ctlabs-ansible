@@ -37,7 +37,6 @@ The shared static secret is generated once on the **ansible controller** (`deleg
 | `ctlabs_openvpn.defaults.config.dev`          | `tun0`             | Tun device name                                         |
 | `ctlabs_openvpn.defaults.config.cipher`       | `AES-256-CBC`      | Encryption cipher                                       |
 | `ctlabs_openvpn.defaults.config.auth`         | `SHA512`           | Message authentication digest                           |
-| `ctlabs_openvpn.defaults.config.forward`      | `true`             | Enable IPv4 packet forwarding (`net.ipv4.ip_forward=1`) |
 
 ## Local Facts
 
@@ -72,8 +71,6 @@ For client nodes, `remote` specifies the remote public or reachable endpoint:
   - The shared key is generated once on the controller (`openvpn --genkey secret <path>`) under `/etc/openvpn/<project>_<key_name>.key`.
   - Guarded by `stat`: if the key file already exists, it is reused. This prevents re-generating mismatched keys when endpoints run in separate plays or during partial playbook reruns.
   - The key is copied to `/etc/openvpn/server/ovpn.key` on server nodes and `/etc/openvpn/client/ovpn.key` on client nodes with mode `0600`.
-- **IP Forwarding**:
-  - Sets `net.ipv4.ip_forward = 1` via `ansible.posix.sysctl` when `forward: true`.
 - **Services**:
   - Manages `openvpn-server@server.service` or `openvpn-client@client.service` via systemd.
 
