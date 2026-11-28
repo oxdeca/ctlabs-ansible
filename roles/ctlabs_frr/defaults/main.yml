@@ -9,6 +9,7 @@ ctlabs_frr:
   defaults:
     pkgs:
       debian:
+        - name: frr
       redhat:
         - name: frr
     service:
@@ -29,3 +30,4 @@ ctlabs_frr:
         certdir: /etc/ca-ctlabs
   os:
     - centos9
+    - debian12

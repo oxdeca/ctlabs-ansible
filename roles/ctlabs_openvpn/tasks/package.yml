@@ -5,6 +5,11 @@
 # Description : packages
 # ------------------------------------------------------------------------------
 
+- name: ctlabs_openvpn.tasks.package.debian.cache.update
+  when: ctg_os_family == 'debian'
+  apt:
+    update_cache: true
+
 - name: ctlabs_openvpn.tasks.package.installed
   package:
     name  : "{{ item.name }}"

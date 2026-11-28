@@ -4,6 +4,7 @@
 # ------------------------------------------------------------------------------
 
 import os
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -43,3 +44,12 @@ def test_ospf_only_has_no_bgp(role_dir):
     assert "router bgp" not in out
     assert "address-family" not in out
     assert "  network 192.168.10.0/24 area 0" in out
+
+
+def test_defaults_pkgs_defined_for_supported_families(role_dir):
+    with open(os.path.join(role_dir, "defaults", "main.yml")) as f:
+        data = yaml.safe_load(f)
+    pkgs = data["ctlabs_frr"]["defaults"]["pkgs"]
+    for family in ("debian", "redhat"):
+        assert isinstance(pkgs[family], list) and len(pkgs[family]) > 0
+        assert any(p.get("name") == "frr" for p in pkgs[family])
