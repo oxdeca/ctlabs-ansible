@@ -12,6 +12,9 @@ no ipv6 forwarding
 {% if ctg_facts.ctlabs_frr.router.bgp is defined %}
 router bgp {{ ctg_facts.ctlabs_frr.router.bgp.local_asn }}
   bgp router-id {{ ctg_facts.ctlabs_frr.router.bgp.local_ip }}
+{%   if not (ctg_facts.ctlabs_frr.router.bgp.network_import_check | default(false)) %}
+  no bgp network import-check
+{%   endif %}
   neighbor {{ ctg_facts.ctlabs_frr.router.bgp.remote_ip }} remote-as {{ ctg_facts.ctlabs_frr.router.bgp.remote_asn }}
 {%   if ctg_facts.ctlabs_frr.router.bgp.nets %}
   address-family ipv4 unicast

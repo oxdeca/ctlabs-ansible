@@ -53,3 +53,14 @@ def test_defaults_pkgs_defined_for_supported_families(role_dir):
     for family in ("debian", "redhat"):
         assert isinstance(pkgs[family], list) and len(pkgs[family]) > 0
         assert any(p.get("name") == "frr" for p in pkgs[family])
+
+
+def test_bgp_disables_network_import_check_by_default(role_dir):
+    out = render(role_dir, bgp(nets=["192.168.45.0/24"]))
+    assert "  no bgp network import-check" in out
+    assert out.index("  no bgp network import-check") < out.index("  address-family ipv4 unicast")
+
+
+def test_bgp_network_import_check_can_be_enabled(role_dir):
+    out = render(role_dir, bgp(nets=["192.168.45.0/24"], network_import_check=True))
+    assert "no bgp network import-check" not in out
